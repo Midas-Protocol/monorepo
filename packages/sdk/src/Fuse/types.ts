@@ -50,17 +50,6 @@ export interface InterestRateModel {
   getSupplyRate(utilizationRate: BigNumber): BigNumber;
 }
 
-export type FoundryArtifact = {
-  contractName?: string;
-  sourceName?: string;
-  abi: any;
-  bytecode: {
-    object: string;
-  };
-  deployedBytecode: {
-    object: string;
-  };
-};
 export type Artifact = {
   contractName?: string;
   sourceName?: string;
