@@ -13,26 +13,26 @@ import DAIInterestRateModelV2 from "./irm/DAIInterestRateModelV2";
 import WhitePaperInterestRateModel from "./irm/WhitePaperInterestRateModel";
 
 import Deployments from "../../deployments.json";
-import ComptrollerArtifact from "../../artifacts/contracts/compound/Comptroller.sol/Comptroller.json";
-import UnitrollerArtifact from "../../artifacts/contracts/compound/Unitroller.sol/Unitroller.json";
-import CEtherDelegateArtifact from "../../artifacts/contracts/compound/CEtherDelegate.sol/CEtherDelegate.json";
-import CEtherDelegatorArtifact from "../../artifacts/contracts/compound/CEtherDelegator.sol/CEtherDelegator.json";
-import CErc20DelegateArtifact from "../../artifacts/contracts/compound/CErc20Delegate.sol/CErc20Delegate.json";
-import CErc20DelegatorArtifact from "../../artifacts/contracts/compound/CErc20Delegator.sol/CErc20Delegator.json";
-import CTokenInterfacesArtifact from "../../artifacts/contracts/compound/CTokenInterfaces.sol/CTokenInterface.json";
-import EIP20InterfaceArtifact from "../../artifacts/contracts/compound/EIP20Interface.sol/EIP20Interface.json";
-import RewardsDistributorDelegatorArtifact from "../../artifacts/contracts/compound/RewardsDistributorDelegator.sol/RewardsDistributorDelegator.json";
-import PreferredPriceOracleArtifact from "../../artifacts/contracts/oracles/default/PreferredPriceOracle.sol/PreferredPriceOracle.json";
+import ComptrollerArtifact from "@midas-capital/contracts/out/Comptroller.sol/Comptroller.json";
+import UnitrollerArtifact from "@midas-capital/contracts/out/Unitroller.sol/Unitroller.json";
+import CEtherDelegateArtifact from "@midas-capital/contracts/out/CEtherDelegate.sol/CEtherDelegate.json";
+import CEtherDelegatorArtifact from "@midas-capital/contracts/out/CEtherDelegator.sol/CEtherDelegator.json";
+import CErc20DelegateArtifact from "@midas-capital/contracts/out/CErc20Delegate.sol/CErc20Delegate.json";
+import CErc20DelegatorArtifact from "@midas-capital/contracts/out/CErc20Delegator.sol/CErc20Delegator.json";
+import CTokenInterfacesArtifact from "@midas-capital/contracts/out/CTokenInterfaces.sol/CTokenInterface.json";
+import EIP20InterfaceArtifact from "@midas-capital/contracts/out/EIP20Interface.sol/EIP20Interface.json";
+import RewardsDistributorDelegatorArtifact from "@midas-capital/contracts/out/RewardsDistributorDelegator.sol/RewardsDistributorDelegator.json";
+import PreferredPriceOracleArtifact from "@midas-capital/contracts/out//PreferredPriceOracle.sol/PreferredPriceOracle.json";
 
 // Oracle Artifacts
-import MasterPriceOracleArtifact from "../../artifacts/contracts/oracles/MasterPriceOracle.sol/MasterPriceOracle.json";
-import SimplePriceOracleArtifact from "../../artifacts/contracts/oracles/1337/SimplePriceOracle.sol/SimplePriceOracle.json";
-import ChainlinkPriceOracleV2Artifact from "../../artifacts/contracts/oracles/default/ChainlinkPriceOracleV2.sol/ChainlinkPriceOracleV2.json";
+import MasterPriceOracleArtifact from "@midas-capital/contracts/out/MasterPriceOracle.sol/MasterPriceOracle.json";
+import SimplePriceOracleArtifact from "@midas-capital/contracts/out/SimplePriceOracle.sol/SimplePriceOracle.json";
+import ChainlinkPriceOracleV2Artifact from "@midas-capital/contracts/out/ChainlinkPriceOracleV2.sol/ChainlinkPriceOracleV2.json";
 
 // IRM Artifacts
-import JumpRateModelArtifact from "../../artifacts/contracts/compound/JumpRateModel.sol/JumpRateModel.json";
-import DAIInterestRateModelV2Artifact from "../../artifacts/contracts/compound/DAIInterestRateModelV2.sol/DAIInterestRateModelV2.json";
-import WhitePaperInterestRateModelArtifact from "../../artifacts/contracts/compound/WhitePaperInterestRateModel.sol/WhitePaperInterestRateModel.json";
+import JumpRateModelArtifact from "@midas-capital/contracts/out/JumpRateModel.sol/JumpRateModel.json";
+import DAIInterestRateModelV2Artifact from "@midas-capital/contracts/out/DAIInterestRateModelV2.sol/DAIInterestRateModelV2.json";
+import WhitePaperInterestRateModelArtifact from "@midas-capital/contracts/out/WhitePaperInterestRateModel.sol/WhitePaperInterestRateModel.json";
 
 // Types
 import {
@@ -186,7 +186,7 @@ export default class Fuse {
     if (!implementationAddress) {
       const comptrollerContract = new ContractFactory(
         this.artifacts.Comptroller.abi,
-        this.artifacts.Comptroller.bytecode,
+        this.artifacts.Comptroller.bytecode.object,
         this.provider.getSigner(options.from)
       );
       const deployedComptroller = await comptrollerContract.deploy();
@@ -215,7 +215,7 @@ export default class Fuse {
       ["address", "string", "uint"],
       [options.from, poolName, receipt.blockNumber]
     );
-    const byteCodeHash = utils.keccak256(this.artifacts.Unitroller.bytecode);
+    const byteCodeHash = utils.keccak256(this.artifacts.Unitroller.bytecode.object);
 
     const poolAddress = utils.getCreate2Address(
       this.chainDeployment.FusePoolDirectory.address,
@@ -261,7 +261,7 @@ export default class Fuse {
       default:
         throw Error(`Oracle contract ${contractName} not found`);
     }
-    return new ContractFactory(oracleArtifact.abi, oracleArtifact.bytecode, this.provider.getSigner(signer));
+    return new ContractFactory(oracleArtifact.abi, oracleArtifact.bytecode.object, this.provider.getSigner(signer));
   }
 
   async deployAsset(
@@ -346,7 +346,7 @@ export default class Fuse {
     // Deploy InterestRateModel
     const interestRateModelContract = new ContractFactory(
       modelArtifact.abi,
-      modelArtifact.bytecode,
+      modelArtifact.bytecode.object,
       this.provider.getSigner(options.from)
     );
 
@@ -410,7 +410,7 @@ export default class Fuse {
     if (!implementationAddress) {
       const cEtherDelegateFactory = new ContractFactory(
         this.artifacts.CEtherDelegate.abi,
-        this.artifacts.CEtherDelegate.bytecode,
+        this.artifacts.CEtherDelegate.bytecode.object,
         this.provider.getSigner(options.from)
       );
 
@@ -466,7 +466,7 @@ export default class Fuse {
       [conf.comptroller, "0x0000000000000000000000000000000000000000", receipt.blockNumber]
     );
 
-    const byteCodeHash = utils.keccak256(this.artifacts.CEtherDelegator.bytecode + constructorData.substring(2));
+    const byteCodeHash = utils.keccak256(this.artifacts.CEtherDelegator.bytecode.object + constructorData.substring(2));
 
     const cEtherDelegatorAddress = utils.getCreate2Address(
       this.chainDeployment.FuseFeeDistributor.address,
@@ -508,7 +508,7 @@ export default class Fuse {
       }
       const cErc20Delegate = new ContractFactory(
         delegateContractArtifact.abi,
-        delegateContractArtifact.bytecode,
+        delegateContractArtifact.bytecode.object,
         this.provider.getSigner(options.from)
       );
       const cErc20DelegateDeployed = await cErc20Delegate.deploy();
@@ -550,7 +550,7 @@ export default class Fuse {
       ["address", "address", "uint"],
       [conf.comptroller, conf.underlying, receipt.blockNumber]
     );
-    const byteCodeHash = utils.keccak256(this.artifacts.CErc20Delegator.bytecode + constructorData.substring(2));
+    const byteCodeHash = utils.keccak256(this.artifacts.CErc20Delegator.bytecode.object + constructorData.substring(2));
 
     const cErc20DelegatorAddress = utils.getCreate2Address(
       this.chainDeployment.FuseFeeDistributor.address,
@@ -567,7 +567,7 @@ export default class Fuse {
     const runtimeBytecodeHash = utils.keccak256(await this.provider.getCode(priceOracleAddress));
 
     for (const [name, oracle] of Object.entries(this.oracles)) {
-      const value = utils.keccak256(oracle.artifact.bytecode);
+      const value = utils.keccak256(oracle.artifact.bytecode.object);
       if (runtimeBytecodeHash == value) return name;
     }
     return null;
@@ -967,7 +967,7 @@ export default class Fuse {
     // Get price oracle contract name from runtime bytecode hash
     const runtimeBytecodeHash = utils.keccak256(await this.provider.getCode(oracleAddress));
     for (const [name, oracle] of Object.entries(this.oracles)) {
-      const value = utils.keccak256(oracle.artifact.deployedBytecode);
+      const value = utils.keccak256(oracle.artifact.deployedBytecode.object);
       if (runtimeBytecodeHash === value) return name;
     }
     return null;
@@ -976,7 +976,7 @@ export default class Fuse {
   async deployRewardsDistributor(rewardToken: any, options: { from: any }) {
     const distributor = new ContractFactory(
       this.artifacts.RewardsDistributorDelegator.abi,
-      this.artifacts.RewardsDistributorDelegator.bytecode,
+      this.artifacts.RewardsDistributorDelegator.bytecode.object,
       this.provider.getSigner()
     );
     return await distributor.deploy(options.from, rewardToken, this.chainDeployment.RewardsDistributorDelegate.address);
