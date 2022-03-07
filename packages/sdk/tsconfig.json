@@ -1,10 +1,16 @@
 {
-  "extends": "../../tsconfig.json",
+  // TODO: test code is not yet typed well enough.
+  // "extends": "../../tsconfig.json",
   "compilerOptions": {
     "rootDirs": ["./deploy", "./scripts", "./test"],
-    "composite": true
+    "composite": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "allowJs": true
   },
-  "references": [{
-    "path": "../contracts"
-  }]
+  "references": [
+    {
+      "path": "../contracts"
+    }
+  ]
 }
