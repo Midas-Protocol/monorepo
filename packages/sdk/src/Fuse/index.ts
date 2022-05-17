@@ -25,33 +25,7 @@ import SimplePriceOracleArtifact from "../../lib/contracts/out/SimplePriceOracle
 import UniswapTwapPriceOracleV2Artifact from "../../lib/contracts/out/UniswapTwapPriceOracleV2.sol/UniswapTwapPriceOracleV2.json";
 import UnitrollerArtifact from "../../lib/contracts/out/Unitroller.sol/Unitroller.json";
 import WhitePaperInterestRateModelArtifact from "../../lib/contracts/out/WhitePaperInterestRateModel.sol/WhitePaperInterestRateModel.json";
-import { Comptroller } from "../../lib/contracts/typechain/Comptroller";
-import { FuseFeeDistributor } from "../../lib/contracts/typechain/FuseFeeDistributor";
-import { FuseFlywheelLensRouter } from "../../lib/contracts/typechain/FuseFlywheelLensRouter.sol";
-import { FusePoolDirectory } from "../../lib/contracts/typechain/FusePoolDirectory";
-import { FusePoolLens } from "../../lib/contracts/typechain/FusePoolLens";
-import { FusePoolLensSecondary } from "../../lib/contracts/typechain/FusePoolLensSecondary";
-import { FuseSafeLiquidator } from "../../lib/contracts/typechain/FuseSafeLiquidator";
-import {
-  chainLiquidationDefaults,
-  chainOracles,
-  chainPluginConfig,
-  chainRedemptionStrategies,
-  chainSpecificAddresses,
-  chainSupportedAssets,
-  irmConfig,
-  oracleConfig,
-} from "../chainConfig";
 import { RedemptionStrategy, SupportedChains } from "../enums";
-import { withAsset } from "../modules/Asset";
-import { withCreateContracts } from "../modules/CreateContracts";
-import { withFlywheel } from "../modules/Flywheel";
-import { withFundOperations } from "../modules/FundOperations";
-import { withFusePoolLens } from "../modules/FusePoolLens";
-import { withFusePools } from "../modules/FusePools";
-import { ChainLiquidationConfig } from "../modules/liquidation/config";
-import { withSafeLiquidator } from "../modules/liquidation/SafeLiquidator";
-import { withRewardsDistributor } from "../modules/RewardsDistributor";
 import {
   Artifact,
   Artifacts,
@@ -70,6 +44,38 @@ import { CTOKEN_ERROR_CODES, JUMP_RATE_MODEL_CONF, WHITE_PAPER_RATE_MODEL_CONF }
 import DAIInterestRateModelV2 from "./irm/DAIInterestRateModelV2";
 import JumpRateModel from "./irm/JumpRateModel";
 import WhitePaperInterestRateModel from "./irm/WhitePaperInterestRateModel";
+
+import {
+  chainOracles,
+  chainSpecificAddresses,
+  irmConfig,
+  oracleConfig,
+  chainPluginConfig,
+  chainLiquidationDefaults,
+  chainSupportedAssets,
+  chainRedemptionStrategies,
+} from "../chainConfig";
+
+// SDK modules
+import { withRewardsDistributor } from "../modules/RewardsDistributor";
+import { withFundOperations } from "../modules/FundOperations";
+import { withFusePoolLens } from "../modules/FusePoolLens";
+import { withFlywheel } from "../modules/Flywheel";
+import { withFusePools } from "../modules/FusePools";
+import { withAsset } from "../modules/Asset";
+import { withCreateContracts } from "../modules/CreateContracts";
+
+// Typechain
+import { FusePoolDirectory } from "../../lib/contracts/typechain/FusePoolDirectory";
+import { FusePoolLens } from "../../lib/contracts/typechain/FusePoolLens";
+import { FusePoolLensSecondary } from "../../lib/contracts/typechain/FusePoolLensSecondary";
+import { FuseSafeLiquidator } from "../../lib/contracts/typechain/FuseSafeLiquidator";
+import { FuseFeeDistributor } from "../../lib/contracts/typechain/FuseFeeDistributor";
+import { withSafeLiquidator } from "../modules/liquidation/SafeLiquidator";
+import { Comptroller } from "../../lib/contracts/typechain/Comptroller";
+import { FuseFlywheelLensRouter } from "../../lib/contracts/typechain/FuseFlywheelLensRouter.sol";
+import { ChainLiquidationConfig } from "../modules/liquidation/config";
+import { getComptrollerFactory, getPoolAddress, getPoolComptroller, getPoolUnitroller } from "./utils";
 
 type OracleConfig = {
   [contractName: string]: {
@@ -218,12 +224,8 @@ export class FuseBase {
       let implementationAddress = this.chainDeployment.Comptroller.address;
 
       if (!implementationAddress) {
-        const comptrollerContract = new ContractFactory(
-          this.artifacts.Comptroller.abi,
-          this.artifacts.Comptroller.bytecode.object,
-          this.provider.getSigner(options.from)
-        );
-        const deployedComptroller = await comptrollerContract.deploy();
+        const comptrollerFactory = getComptrollerFactory(this.provider.getSigner(options.from));
+        const deployedComptroller = await comptrollerFactory.deploy();
         implementationAddress = deployedComptroller.address;
       }
 
@@ -254,27 +256,16 @@ export class FuseBase {
       }
 
       // Compute Unitroller address
-      const saltsHash = utils.solidityKeccak256(
-        ["address", "string", "uint"],
-        [options.from, poolName, deployReceipt.blockNumber]
-      );
-      const byteCodeHash = utils.keccak256(
-        this.artifacts.Unitroller.bytecode.object +
-          new utils.AbiCoder().encode(["address"], [this.chainDeployment.FuseFeeDistributor.address]).slice(2)
-      );
-
-      const poolAddress = utils.getCreate2Address(
-        this.chainDeployment.FusePoolDirectory.address,
-        saltsHash,
-        byteCodeHash
+      const poolAddress = getPoolAddress(
+        options.from,
+        poolName,
+        deployReceipt.blockNumber,
+        this.chainDeployment.FuseFeeDistributor.address,
+        this.chainDeployment.FusePoolDirectory.address
       );
 
       // Accept admin status via Unitroller
-      const unitroller = new Contract(
-        poolAddress,
-        this.artifacts.Unitroller.abi,
-        this.provider.getSigner(options.from)
-      );
+      const unitroller = getPoolUnitroller(poolAddress, this.provider.getSigner(options.from));
       const acceptTx = await unitroller._acceptAdmin();
       const acceptReceipt = await acceptTx.wait();
       console.log("Accepted admin status for admin:", acceptReceipt.status);
