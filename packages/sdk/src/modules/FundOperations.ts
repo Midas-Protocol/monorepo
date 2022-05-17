@@ -113,20 +113,6 @@ export function withFundOperations<TBase extends FuseBaseConstructor>(Base: TBas
       let tx: ContractTransaction;
       const max = BigNumber.from(2).pow(BigNumber.from(256)).sub(constants.One);
 
-      if (!isNativeToken) {
-        const token = new Contract(
-          underlyingTokenAddress,
-          this.artifacts.EIP20Interface.abi,
-          this.provider.getSigner(options.from)
-        );
-
-        const hasApprovedEnough = (await token.callStatic.allowance(options.from, cTokenAddress)).gte(amount);
-        if (!hasApprovedEnough) {
-          const approveTx = await token.approve(cTokenAddress, max);
-          await approveTx.wait();
-        }
-      }
-
       if (isNativeToken) {
         const cToken = new Contract(
           cTokenAddress,
@@ -149,6 +135,18 @@ export function withFundOperations<TBase extends FuseBaseConstructor>(Base: TBas
           tx = await call({ from: options.from, value: amount });
         }
       } else {
+        const token = new Contract(
+          underlyingTokenAddress,
+          this.artifacts.EIP20Interface.abi,
+          this.provider.getSigner(options.from)
+        );
+
+        const hasApprovedEnough = (await token.callStatic.allowance(options.from, cTokenAddress)).gte(amount);
+        if (!hasApprovedEnough) {
+          const approveTx = await token.approve(cTokenAddress, max);
+          await approveTx.wait();
+        }
+
         const cToken = new Contract(
           cTokenAddress,
           this.artifacts.CErc20Delegate.abi,

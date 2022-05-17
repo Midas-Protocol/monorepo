@@ -166,9 +166,19 @@ const AmountSelect = ({
       const isRepayingMax =
         amount.eq(asset.borrowBalance) && !isNativeToken && mode === FundOperationMode.REPAY;
       let tx: ContractTransaction;
+      let resp:
+        | {
+            errorCode: number;
+            tx?: undefined;
+          }
+        | {
+            tx: ContractTransaction;
+            errorCode: null;
+          }
+        | undefined = undefined;
 
       if (mode === FundOperationMode.SUPPLY) {
-        const resp = await fuse.supply(
+        resp = await fuse.supply(
           asset.cToken,
           asset.underlyingToken,
           comptrollerAddress,
@@ -178,14 +188,9 @@ const AmountSelect = ({
           { from: address }
         );
 
-        if (resp.errorCode !== null) {
-          fundOperationError(resp.errorCode);
-        } else {
-          tx = resp.tx;
-          setPendingTxHash(tx.hash);
-        }
+        LogRocket.track('Fuse-Supply');
       } else if (mode === FundOperationMode.REPAY) {
-        const resp = await fuse.repay(
+        resp = await fuse.repay(
           asset.cToken,
           asset.underlyingToken,
           isNativeToken,
@@ -196,37 +201,30 @@ const AmountSelect = ({
           }
         );
 
-        if (resp.errorCode !== null) {
-          fundOperationError(resp.errorCode);
-        } else {
-          tx = resp.tx;
-          setPendingTxHash(tx.hash);
-        }
+        LogRocket.track('Fuse-Repay');
       } else if (mode === FundOperationMode.BORROW) {
-        const resp = await fuse.borrow(asset.cToken, amount, {
+        resp = await fuse.borrow(asset.cToken, amount, {
           from: address,
         });
 
-        if (resp.errorCode !== null) {
-          fundOperationError(resp.errorCode);
-        } else {
-          tx = resp.tx;
-          setPendingTxHash(tx.hash);
-        }
+        LogRocket.track('Fuse-Borrow');
       } else if (mode === FundOperationMode.WITHDRAW) {
-        const resp = await fuse.withdraw(asset.cToken, amount, {
+        resp = await fuse.withdraw(asset.cToken, amount, {
           from: address,
         });
-
-        if (resp.errorCode !== null) {
-          fundOperationError(resp.errorCode);
-        } else {
-          tx = resp.tx;
-          setPendingTxHash(tx.hash);
-        }
 
         LogRocket.track('Fuse-Withdraw');
       }
+
+      if (resp) {
+        if (resp.errorCode !== null) {
+          fundOperationError(resp.errorCode);
+        } else {
+          tx = resp.tx;
+          setPendingTxHash(tx.hash);
+        }
+      }
+
       onClose();
     } catch (e) {
       handleGenericError(e, toast);
