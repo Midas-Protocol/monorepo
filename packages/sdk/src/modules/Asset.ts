@@ -248,6 +248,7 @@ export function withAsset<TBase extends FuseBaseConstructor>(Base: TBase) {
       options: any,
       rewardsDistributorConfig: RewardsDistributorConfig[]
     ): Promise<void> {
+      console.log(`Approving rewards distributors`);
       const cTokenWithSigner = new Contract(
         cToken,
         this.chainDeployment.CErc20PluginRewardsDelegate.abi,
