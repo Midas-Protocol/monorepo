@@ -1,9 +1,12 @@
 describe('User can load page', () => {
   let id;
-
   before(() => {
-    cy.setupMetamask();
-    cy.changeMetamaskNetwork('localhost');
+    // process.env = Cypress.env();
+    const secretWords = Cypress.env().SECRET_WORDS;
+    const network = Cypress.env().NETWORK_NAME;
+    const password = Cypress.env().PASSWORD;
+    cy.setupMetamask({ secretWords, network, password });
+    // cy.changeMetamaskNetwork('localhost');
     cy.visit('/');
     cy.url().should('include', '/en');
   });
