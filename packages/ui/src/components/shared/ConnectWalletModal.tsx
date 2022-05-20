@@ -38,7 +38,14 @@ const ConnectWalletModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () 
   }, [connectError, toast]);
 
   return (
-    <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose} isCentered size={'xl'}>
+    <Modal
+      id="select_wallet_modal"
+      closeOnOverlayClick={false}
+      isOpen={isOpen}
+      onClose={onClose}
+      isCentered
+      size={'xl'}
+    >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>{t('Select a Wallet')}</ModalHeader>
@@ -51,6 +58,7 @@ const ConnectWalletModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () 
           >
             {connectors.map((connector) => (
               <Button
+                id={connector.name}
                 variant="ghost"
                 height="100%"
                 key={connector.id}

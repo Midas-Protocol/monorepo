@@ -21,7 +21,7 @@ const FuseNavbar = () => {
           py={2}
           gap={2}
         >
-          <Link href={`/`}>
+          <Link id="logo" href={`/`}>
             <chakra.img
               style={{
                 position: 'absolute',

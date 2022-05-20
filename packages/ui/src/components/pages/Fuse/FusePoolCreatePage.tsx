@@ -150,6 +150,7 @@ export const CreatePoolConfiguration = () => {
               Name
             </Text>
             <Input
+              id="pool_name"
               width="60%"
               placeholder="Type Pool name"
               value={name}
@@ -164,6 +165,7 @@ export const CreatePoolConfiguration = () => {
               Oracle
             </Text>
             <Select
+              id="oracle_select"
               width="60%"
               value={oracle}
               onChange={(event) => setOracle(event.target.value)}
@@ -289,6 +291,7 @@ export const CreatePoolConfiguration = () => {
       </DashboardBox>
       <Center>
         <Button
+          id="pool_creation_btn"
           width={'100%'}
           height="60px"
           mt={4}

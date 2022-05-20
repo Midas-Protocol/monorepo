@@ -31,7 +31,7 @@ const PoolCard = ({ data: pool }: { data: FusePoolData }) => {
   const { setLoading, currentChain } = useRari();
 
   return (
-    <motion.div whileHover={{ scale: 1.05 }}>
+    <motion.div className="pool_row" whileHover={{ scale: 1.05 }}>
       <Flex
         w="100%"
         key={pool.id}

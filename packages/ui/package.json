@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "lint-fix": "eslint ./src/** -c .eslintrc.json --fix --ext ts,tsx,json",
-    "postinstall": "chakra-cli tokens ./src/theme/index.ts"
+    "postinstall": "chakra-cli tokens ./src/theme/index.ts",
+    "cypress": "CYPRESS_REMOTE_DEBUGGING_PORT=9222 cypress open",
+    "cypress:headless": "CYPRESS_REMOTE_DEBUGGING_PORT=9222 cypress run"
   },
   "dependencies": {
     "@ajna/pagination": "^1.4.17",

@@ -63,6 +63,7 @@ const PoolRow = ({
   const { scanUrl, setLoading, currentChain } = useRari();
   return (
     <VStack
+      className="pool_row"
       borderWidth={4}
       borderRadius={12}
       borderColor={
