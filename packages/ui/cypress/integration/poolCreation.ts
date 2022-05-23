@@ -1,14 +1,10 @@
-describe('User can load page', () => {
+describe('Pool Creation', () => {
   let id;
+
   before(() => {
-    // process.env = Cypress.env();
-    const secretWords = Cypress.env().SECRET_WORDS;
-    const network = Cypress.env().NETWORK_NAME;
-    const password = Cypress.env().PASSWORD;
-    cy.setupMetamask({ secretWords, network, password });
+    cy.setupMetamask();
     // cy.changeMetamaskNetwork('localhost');
     cy.visit('/');
-    cy.url().should('include', '/en');
   });
 
   it('wallet modal should appear', () => {
@@ -17,6 +13,7 @@ describe('User can load page', () => {
 
   it('local network should be connected', () => {
     cy.get('[id=MetaMask').click();
+    cy.acceptMetamaskAccess();
     cy.url().should('include', '/en/1337?sortBy=supply');
   });
 
