@@ -1,4 +1,4 @@
-const axios = require('axios')
+const axios = require('axios');
 const puppeteer = require('puppeteer-core');
 
 let puppeteerBrowser;
@@ -17,7 +17,7 @@ module.exports = {
   },
   async init() {
     const debuggerDetails = await axios.get('http://localhost:9222/json/version'); //DevSkim: ignore DS137138
-    const debuggerDetailsConfig = debuggerDetails.data
+    const debuggerDetailsConfig = debuggerDetails.data;
     const webSocketDebuggerUrl = debuggerDetailsConfig.webSocketDebuggerUrl;
 
     puppeteerBrowser = await puppeteer.connect({
@@ -28,7 +28,7 @@ module.exports = {
     return puppeteerBrowser.isConnected();
   },
   async assignWindows() {
-    let pages = await puppeteerBrowser.pages();
+    const pages = await puppeteerBrowser.pages();
     for (const page of pages) {
       if (page.url().includes('integration')) {
         mainWindow = page;
@@ -43,7 +43,7 @@ module.exports = {
     return true;
   },
   async switchToMetamaskNotification() {
-    let pages = await puppeteerBrowser.pages();
+    const pages = await puppeteerBrowser.pages();
     for (const page of pages) {
       if (page.url().includes('notification')) {
         await page.bringToFront();
@@ -54,7 +54,7 @@ module.exports = {
   async waitFor(selector, page = metamaskWindow) {
     await page.waitForFunction(
       `document.querySelector('${selector}') && document.querySelector('${selector}')?.clientHeight != 0`,
-      { visible: true },
+      { visible: true }
     );
     // puppeteer going too fast breaks metamask in corner cases
     await page.waitForTimeout(300);
@@ -62,14 +62,15 @@ module.exports = {
 
   async waitAndClick(selector, page = metamaskWindow) {
     if (page === 'main') {
-        page = mainWindow
+      page = mainWindow;
     }
     await module.exports.waitFor(selector, page);
-    console.log('here')
-    await page.evaluate(
-      selector => document.querySelector(selector).click(),
-      selector,
-    );
+    await page.click(selector);
+    // const element = await page.$(selector);
+    // console.log(element);
+    // await element.click();
+    // console.log('here');
+    // await page.evaluate((selector) => document.querySelector(selector).click(), selector);
   },
   async waitAndType(selector, value, page = metamaskWindow) {
     await module.exports.waitFor(selector, page);
@@ -79,7 +80,7 @@ module.exports = {
   async waitForText(selector, text, page = metamaskWindow) {
     await module.exports.waitFor(selector, page);
     await page.waitForFunction(
-      `document.querySelector('${selector}').innerText.toLowerCase().includes('${text}')`,
+      `document.querySelector('${selector}').innerText.toLowerCase().includes('${text}')`
     );
   },
 };

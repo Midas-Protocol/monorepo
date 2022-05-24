@@ -1,7 +1,8 @@
-const axios = require('axios');
 const fs = require('fs');
-const zip = require('cross-zip');
 const path = require('path');
+
+const axios = require('axios');
+const zip = require('cross-zip');
 
 let networkName = 'mainnet';
 let networkId = 1;
@@ -29,6 +30,10 @@ module.exports = {
       networkName = 'goerli';
       networkId = 5;
       isTestnet = true;
+    } else if (network === 'localhost') {
+      networkName = 'localhost';
+      networkId = 1337;
+      isTestnet = true;
     } else if (typeof network === 'object') {
       networkName = network.networkName;
       networkId = network.chainId;
@@ -41,7 +46,7 @@ module.exports = {
     let downloadUrl;
 
     const response = await axios.get(
-      'https://api.github.com/repos/metamask/metamask-extension/releases',
+      'https://api.github.com/repos/metamask/metamask-extension/releases'
     );
 
     if (version === 'latest' || !version) {
@@ -64,9 +69,7 @@ module.exports = {
       method: 'GET',
       responseType: 'stream',
     });
-    await new Promise(resolve =>
-      result.data.pipe(writer).on('finish', resolve),
-    );
+    await new Promise((resolve) => result.data.pipe(writer).on('finish', resolve));
   },
   async extract(file, destination) {
     await zip.unzip(file, destination);

@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
-const helpers = require('../support/helpers')
-const puppeteer = require('../support/puppeteer');
+const helpers = require('../support/helpers');
 const metamask = require('../support/metamask');
+const puppeteer = require('../support/puppeteer');
 /**
  * @type {Cypress.PluginConfig}
  */
@@ -28,18 +28,15 @@ module.exports = (on, config) => {
         '--remote-debugging-port=9222',
         '--disable-background-timer-throttling',
         '--disable-backgrounding-occluded-windows',
-        '--disable-renderer-backgrounding',
+        '--disable-renderer-backgrounding'
       );
     }
 
     // NOTE: extensions cannot be loaded in headless Chrome
-    const metamaskPath = await helpers.prepareMetamask(
-      'latest' || '9.4.0',
-    );
+    const metamaskPath = await helpers.prepareMetamask('latest' || '9.4.0');
     arguments_.extensions.push(metamaskPath);
     return arguments_;
   });
-
 
   on('task', {
     error(message) {
@@ -65,7 +62,7 @@ module.exports = (on, config) => {
     async setupMetamask() {
       if (puppeteer.metamaskWindow()) {
         await puppeteer.switchToCypressWindow();
-        return true
+        return true;
       } else {
         await metamask.initialSetup();
         return true;
@@ -74,4 +71,4 @@ module.exports = (on, config) => {
   });
 
   return config;
-}
+};

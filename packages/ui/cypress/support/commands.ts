@@ -10,9 +10,6 @@ Cypress.Commands.add('goodGhostingTransaction', () => {
   return cy.task('goodGhostingTransaction');
 });
 
-Cypress.Commands.add(
-  'setupMetamask',
-  (secretWords, network, password) => {
-    return cy.task('setupMetamask', { secretWords, network, password });
-  },
-);
+Cypress.Commands.add('setupMetamask', (secretWords, network, password) => {
+  return cy.task('setupMetamask', { secretWords, network, password });
+});
