@@ -56,6 +56,8 @@
     "@typescript-eslint/parser": "^5.17.0",
     "cross-zip": "^4.0.0",
     "cypress": "^9.6.1",
+    "cypress-dotenv": "^2.0.0",
+    "dotenv": "^16.0.1",
     "eslint": "8.16.0",
     "eslint-config-next": "12.1.6",
     "eslint-config-prettier": "^8.5.0",

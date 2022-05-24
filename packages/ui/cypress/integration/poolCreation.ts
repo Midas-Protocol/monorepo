@@ -3,7 +3,6 @@ describe('Pool Creation', () => {
 
   before(() => {
     cy.setupMetamask();
-    // cy.changeMetamaskNetwork('localhost');
     cy.visit('/');
   });
 

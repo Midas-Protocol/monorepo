@@ -60,15 +60,15 @@ module.exports = {
     await page.waitForTimeout(300);
   },
 
-  async waitAndClick(selector, page = metamaskWindow) {
+  async waitAndClick(selector, index = 0, page = metamaskWindow) {
     if (page === 'main') {
       page = mainWindow;
     }
     await module.exports.waitFor(selector, page);
-    await page.click(selector);
-    // const element = await page.$(selector);
+    // await page.click(selector);
+    const elements = await page.$$(selector);
     // console.log(element);
-    // await element.click();
+    await elements[index].click();
     // console.log('here');
     // await page.evaluate((selector) => document.querySelector(selector).click(), selector);
   },
@@ -82,5 +82,11 @@ module.exports = {
     await page.waitForFunction(
       `document.querySelector('${selector}').innerText.toLowerCase().includes('${text}')`
     );
+  },
+  async waitCompareText(selector, text, page = metamaskWindow) {
+    await module.exports.waitFor(selector, page);
+    const element = await page.$(selector);
+    const value = await page.evaluate((el) => el.textContent, element);
+    return value === text;
   },
 };

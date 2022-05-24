@@ -1,4 +1,6 @@
 /// <reference types="cypress" />
+const dotenvPlugin = require('cypress-dotenv');
+
 const helpers = require('../support/helpers');
 const metamask = require('../support/metamask');
 const puppeteer = require('../support/puppeteer');
@@ -7,6 +9,10 @@ const puppeteer = require('../support/puppeteer');
  */
 // eslint-disable-next-line no-unused-vars
 module.exports = (on, config) => {
+  // console.log(process.env.SECRET_WORDS);
+  // console.log(config.env);
+  // console.log('ddddd');
+  config = dotenvPlugin(config);
   on('before:browser:launch', async (browser = {}, arguments_) => {
     if (browser.name === 'chrome' && browser.isHeadless) {
       console.log('TRUE'); // required by cypress ¯\_(ツ)_/¯

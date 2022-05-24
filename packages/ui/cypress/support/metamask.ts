@@ -57,69 +57,49 @@ module.exports = {
   },
   async changeNetwork() {
     // setNetwork('localhost');
-    // await puppeteer.waitAndClick('.app-header__account-menu-container .network-display');
-    // await puppeteer.waitAndClick(
-    //   '.network-dropdown-header .network-dropdown-content .network-dropdown-content--link'
-    // );
-
-    await puppeteer.waitAndClick('.account-menu__icon');
-
-    await puppeteer.waitAndClick('.account-menu__item.account-menu__item--clickable:nth-child(4)');
-    await puppeteer.waitAndClick('.tab-bar__tab.pointer:nth-child(1)');
-    if (
-      (await puppeteer
-        .metamaskWindow()
-        .$('.settings-page__content-row:nth-child(6)')
-        .$('.toggle-button--off')) !== null
-    ) {
-      await puppeteer.waitAndClick('.settings-page__content-row:nth-child(6) .toggle-button--off');
+    if (!(await puppeteer.waitCompareText('.network-display .typography', 'Localhost 8545'))) {
+      await puppeteer.waitAndClick('.account-menu__icon');
+      await puppeteer.waitAndClick('.account-menu__item.account-menu__item--clickable', 4);
+      await puppeteer.waitAndClick('.tab-bar__tab.pointer', 1);
+      const els = await puppeteer.metamaskWindow().$$('.settings-page__content-row');
+      if ((await els[6].$('.toggle-button--off')) !== null) {
+        await puppeteer.waitAndClick('.toggle-button', 3);
+      }
+      await puppeteer.waitAndClick('.settings-page__header__title-container__close-button');
+      await puppeteer.waitAndClick('.app-header__account-menu-container .network-display');
+      await puppeteer.waitAndClick('.dropdown-menu-item', 5);
+      // await puppeteer.waitForText('.network-display .typography', 'Localhost 8545');
     }
-    await puppeteer.waitAndClick('.settings-page__header__title-container__close-button');
-    await puppeteer.waitAndClick('.app-header__account-menu-container .network-display');
-    await puppeteer.waitAndClick('.dropdown-menu-item:nth-child(5)');
-    await puppeteer.waitForText('.typography', 'Localhost:8545');
 
     return true;
   },
   async acceptAccess() {
-    await puppeteer.metamaskWindow().waitForTimeout(3000);
+    await puppeteer.metamaskWindow().waitForTimeout(1000);
     const notificationPage = await puppeteer.switchToMetamaskNotification();
     await puppeteer.waitAndClick(
-      '.notification .permissions-connect-choose-account__bottom-buttons button:nth-child(2)',
+      '.notification .permissions-connect-choose-account__bottom-buttons button',
+      1,
       notificationPage
     );
     await puppeteer.waitAndClick(
-      '.permissions-connect .permission-approval-container__footers button:nth-child(2)',
+      '.permissions-connect .permission-approval-container__footers button',
+      1,
       notificationPage
     );
-    await puppeteer.metamaskWindow().waitForTimeout(3000);
+    await puppeteer.metamaskWindow().waitForTimeout(1000);
     return true;
   },
   async confirmTransaction() {
-    await puppeteer.metamaskWindow().waitForTimeout(3000);
+    await puppeteer.metamaskWindow().waitForTimeout(1000);
     const notificationPage = await puppeteer.switchToMetamaskNotification();
-    await puppeteer.metamaskWindow().waitForTimeout(3000);
-    await puppeteer.waitAndClick('button.btn-primary', notificationPage);
+    await notificationPage.waitForSelector('button.btn-primary');
+    await puppeteer.waitAndClick('button.btn-primary', 0, notificationPage);
     await puppeteer.metamaskWindow().waitForTimeout(22000);
     return true;
   },
   async initialSetup() {
-    // do not put real money on this account
-    const secretWords = [
-      'ill',
-      'satoshi',
-      'net',
-      'solar',
-      'quantum',
-      'rally',
-      'above',
-      'lawsuit',
-      'say',
-      'decline',
-      'modify',
-      'burger',
-    ];
-    const password = 'uyDCA2U3MfPm2wk';
+    const secretWords = process.env.SECRET_WORDS.split(' ');
+    const password = process.env.PASSWORD;
 
     await puppeteer.init();
     await puppeteer.assignWindows();

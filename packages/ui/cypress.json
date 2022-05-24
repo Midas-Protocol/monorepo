@@ -1,13 +1,3 @@
 {
-  "baseUrl": "http://localhost:3000",
-  "retries": { "runMode": 0, "openMode": 0 },
-  "chromeWebSecurity": true,
-  "viewportWidth": 1366,
-  "viewportHeight": 768,
-  "env": {
-    "coverage": false
-  },
-  "defaultCommandTimeout": 30000,
-  "pageLoadTimeout": 30000,
-  "requestTimeout": 30000
+  "baseUrl": "http://localhost:3000"
 }
