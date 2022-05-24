@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "lint-fix": "eslint ./src/** -c .eslintrc.json --fix --ext ts,tsx,json",
-    "postinstall": "chakra-cli tokens ./theme/index.ts"
+    "postinstall": "chakra-cli tokens ./theme/index.ts",
+    "cypress": "CYPRESS_REMOTE_DEBUGGING_PORT=9222 cypress open",
+    "cypress:headless": "CYPRESS_REMOTE_DEBUGGING_PORT=9222 cypress run"
   },
   "dependencies": {
     "@ajna/pagination": "^1.4.17",
@@ -52,8 +54,10 @@
     "@types/react-dom": "^17.0.17",
     "@typescript-eslint/eslint-plugin": "^5.17.0",
     "@typescript-eslint/parser": "^5.17.0",
+    "cross-zip": "^4.0.0",
     "cypress": "^9.6.1",
-    "cypress-metamask": "^1.0.5-development",
+    "cypress-dotenv": "^2.0.0",
+    "dotenv": "^16.0.1",
     "eslint": "8.16.0",
     "eslint-config-next": "12.1.6",
     "eslint-config-prettier": "^8.5.0",
@@ -62,6 +66,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.29.4",
     "prettier": "2.6.2",
+    "puppeteer-core": "^14.1.1",
     "typescript": "4.6.4"
   }
 }

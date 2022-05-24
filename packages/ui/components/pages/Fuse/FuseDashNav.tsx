@@ -268,6 +268,7 @@ const PoolButtons = ({
         </Grid>
       )}
       <Button
+        id="create_pool_btn"
         mt={2}
         onClick={() => {
           setLoading(true);
