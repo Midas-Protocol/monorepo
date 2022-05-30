@@ -56,11 +56,16 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
         console.log("borrowGuardianPaused: ", await comptrollerContract.callStatic.borrowGuardianPaused(mkts[i]));
         const erc20 = new Contract(t, ERC20Abi, signer);
         const cErc20 = new Contract(mkts[i], this.chainDeployment.CErc20Delegate.abi, signer) as CErc20Delegate;
-
+        const underlyingAddress = await erc20.callStatic.underlying();
+        console.log("underlyingAddress: ", underlyingAddress);
+        console.log(await erc20.decimals());
+        console.log(await erc20.balanceOf(signrerAddr));
         console.log(await erc20.callStatic.name());
         console.log(await erc20.callStatic.symbol());
+        console.log(await erc20.callStatic.isCEther());
         console.log(await erc20.callStatic.decimals());
         console.log(await erc20.callStatic.balanceOf(signrerAddr));
+        console.log(await cErc20.callStatic.supplyRatePerBlock());
         console.log(await cErc20.callStatic.borrowRatePerBlock());
         console.log(await cErc20.callStatic.getCash());
         console.log(await cErc20.callStatic.totalBorrowsCurrent());
@@ -69,6 +74,7 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
         console.log(await cErc20.callStatic.totalFuseFees());
         console.log(await cErc20.callStatic.balanceOfUnderlying(signrerAddr));
         console.log(await cErc20.callStatic.borrowBalanceStored(signrerAddr));
+        console.log(await cErc20.callStatic.exchangeRateStored());
         console.log(await cErc20.callStatic.exchangeRateStored());
         console.log(await cErc20.callStatic.reserveFactorMantissa());
         console.log(await cErc20.callStatic.adminFeeMantissa());
