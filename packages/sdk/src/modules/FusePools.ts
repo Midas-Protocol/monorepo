@@ -5,6 +5,7 @@ import { CErc20PluginDelegate } from "../../lib/contracts/typechain/CErc20Plugin
 import { CErc20PluginRewardsDelegate } from "../../lib/contracts/typechain/CErc20PluginRewardsDelegate";
 import { FusePoolDirectory } from "../../lib/contracts/typechain/FusePoolDirectory";
 import { FusePoolLens } from "../../lib/contracts/typechain/FusePoolLens";
+import { ERC20Abi } from "../../src";
 import { filterOnlyObjectProperties, filterPoolName } from "../Fuse/utils";
 import { FuseBaseConstructor, FusePoolData, NativePricedFuseAsset } from "../types";
 
@@ -25,12 +26,56 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
         blockPosted,
         timestampPosted,
       } = await this.contracts.FusePoolDirectory.pools(Number(poolId));
+      const signer = this.provider.getSigner();
+
+      const signrerAddr = await signer.getAddress();
+      console.log(comptroller);
+
+      const comptrollerContract = new Contract(comptroller, this.chainDeployment.Comptroller.abi, signer);
+
+      const mpo = new Contract(
+        await comptrollerContract.callStatic.oracle(),
+        this.chainDeployment.MasterPriceOracle.abi,
+        signer
+      );
 
       const rawData = await this.contracts.FusePoolLens.callStatic.getPoolSummary(comptroller);
+      console.log(rawData);
+      const mkts = await comptrollerContract.callStatic.getAllMarkets();
 
       const underlyingTokens = rawData[2];
       const underlyingSymbols = rawData[3];
       const whitelistedAdmin = rawData[4];
+
+      console.log(underlyingTokens, "underlyingTokens");
+      for (const [i, t] of underlyingTokens.entries()) {
+        console.log("using ", t, "ctoken", mkts[i]);
+        console.log("Oracle price: ", utils.formatEther(await mpo.callStatic.getUnderlyingPrice(mkts[i])));
+        console.log("Is Listed: ", await comptrollerContract.callStatic.markets(mkts[i]));
+        console.log("Is Member: ", await comptrollerContract.callStatic.checkMembership(signrerAddr, mkts[i]));
+        console.log("borrowGuardianPaused: ", await comptrollerContract.callStatic.borrowGuardianPaused(mkts[i]));
+        const erc20 = new Contract(t, ERC20Abi, signer);
+        const cErc20 = new Contract(mkts[i], this.chainDeployment.CErc20Delegate.abi, signer) as CErc20Delegate;
+
+        console.log(await erc20.callStatic.name());
+        console.log(await erc20.callStatic.symbol());
+        console.log(await erc20.callStatic.decimals());
+        console.log(await erc20.callStatic.balanceOf(signrerAddr));
+        console.log(await cErc20.callStatic.borrowRatePerBlock());
+        console.log(await cErc20.callStatic.getCash());
+        console.log(await cErc20.callStatic.totalBorrowsCurrent());
+        console.log(await cErc20.callStatic.totalReserves());
+        console.log(await cErc20.callStatic.totalAdminFees());
+        console.log(await cErc20.callStatic.totalFuseFees());
+        console.log(await cErc20.callStatic.balanceOfUnderlying(signrerAddr));
+        console.log(await cErc20.callStatic.borrowBalanceStored(signrerAddr));
+        console.log(await cErc20.callStatic.exchangeRateStored());
+        console.log(await cErc20.callStatic.reserveFactorMantissa());
+        console.log(await cErc20.callStatic.adminFeeMantissa());
+        console.log(await cErc20.callStatic.fuseFeeMantissa());
+
+        console.log(await mpo.callStatic.oracles(t));
+      }
 
       const name = filterPoolName(_unfiliteredName);
 
@@ -40,6 +85,7 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
         })
       ).map(filterOnlyObjectProperties);
 
+      console.log("HERE???????????");
       let totalLiquidityNative = 0;
       let totalSupplyBalanceNative = 0;
       let totalBorrowBalanceNative = 0;
@@ -48,11 +94,6 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
 
       const promises: Promise<any>[] = [];
 
-      const comptrollerContract = new Contract(
-        comptroller,
-        this.chainDeployment.Comptroller.abi,
-        this.provider.getSigner()
-      );
       for (let i = 0; i < assets.length; i++) {
         const asset = assets[i];
 
