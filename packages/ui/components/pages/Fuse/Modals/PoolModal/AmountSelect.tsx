@@ -699,6 +699,7 @@ const TokenNameAndMaxButton = ({
 
       <Button height={8} onClick={setToMax} isLoading={isMaxLoading}>
         MAX
+        {mode === FundOperationMode.BORROW && ' (75%)'}
       </Button>
     </Row>
   );
