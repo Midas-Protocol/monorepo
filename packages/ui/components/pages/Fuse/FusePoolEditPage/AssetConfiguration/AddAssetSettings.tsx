@@ -123,7 +123,7 @@ export const AddAssetSettings = ({
       plugin: plugin?.strategyAddress,
       delegateContractName: !plugin
         ? DelegateContractName.CErc20Delegate
-        : plugin.dynamicFlywheels
+        : plugin.dynamicFlywheels && plugin.dynamicFlywheels.length > 0
         ? DelegateContractName.CErc20PluginRewardsDelegate
         : DelegateContractName.CErc20PluginDelegate,
       rewardsDistributorConfig: rdConfig,
