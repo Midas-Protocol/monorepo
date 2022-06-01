@@ -4,6 +4,8 @@ import { Comptroller } from "../../lib/contracts/typechain/Comptroller";
 import { ERC20 } from "../../lib/contracts/typechain/ERC20";
 import { FuseFlywheelCore } from "../../lib/contracts/typechain/FuseFlywheelCore";
 import { RewardsDistributorDelegate } from "../../lib/contracts/typechain/RewardsDistributorDelegate";
+import { bytecode } from "../bytecode";
+import ERC20Abi from "../Fuse/abi/ERC20.json";
 import { FuseBaseConstructor } from "../types";
 
 export interface ClaimableReward {
@@ -28,7 +30,7 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
     async deployRewardsDistributor(rewardTokenAddress: string, options: { from: string }) {
       const rewardsDistributorFactory = new ContractFactory(
         this.artifacts.RewardsDistributorDelegator.abi,
-        this.artifacts.RewardsDistributorDelegator.bytecode.object,
+        bytecode.RewardsDistributorDelegator,
         this.provider.getSigner()
       );
       return (await rewardsDistributorFactory.deploy(
@@ -45,7 +47,7 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
     ) {
       const comptrollerInstance = new Contract(
         poolAddress,
-        this.artifacts.Comptroller.abi,
+        this.chainDeployment.Comptroller.abi,
         this.provider.getSigner(options.from)
       ) as Comptroller;
       return await comptrollerInstance.functions._addRewardsDistributor(rewardsDistributorAddress);
@@ -56,11 +58,7 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
 
       const rewardTokenAddress = await rewardsDistributorInstance.rewardToken();
 
-      const tokenInstance = new Contract(
-        rewardTokenAddress,
-        this.artifacts.ERC20.abi,
-        this.provider.getSigner(options.from)
-      ) as ERC20;
+      const tokenInstance = new Contract(rewardTokenAddress, ERC20Abi, this.provider.getSigner(options.from)) as ERC20;
 
       return tokenInstance.functions.transfer(rewardsDistributorAddress, amount);
     }
@@ -158,14 +156,14 @@ export function withRewardsDistributor<TBase extends FuseBaseConstructor>(Base: 
     }
 
     async getRewardsDistributorClaimableRewards(account: string, options: { from: string }) {
-      const [comptrollerIndexes, comptrollers, rewardsDistributors] =
+      const [, , rewardsDistributors] =
         await this.contracts.FusePoolLensSecondary.callStatic.getRewardsDistributorsBySupplier(account, options);
 
       const uniqueRewardsDistributors = rewardsDistributors
         .reduce((acc, curr) => [...acc, ...curr], []) // Flatten Array
         .filter((value, index, self) => self.indexOf(value) === index); // Unique Array
 
-      const [rewardTokens, compUnclaimedTotal, allMarkets, rewardsUnaccrued, distributorFunds] =
+      const [rewardTokens, compUnclaimedTotal] =
         await this.contracts.FusePoolLensSecondary.callStatic.getUnclaimedRewardsByDistributors(
           account,
           uniqueRewardsDistributors,

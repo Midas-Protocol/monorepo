@@ -1,14 +1,9 @@
 import { Web3Provider } from "@ethersproject/providers";
-import { BigNumber, BigNumberish, Contract, utils } from "ethers";
-
-import CTokenInterfacesArtifact from "../../../lib/contracts/out/CTokenInterfaces.sol/CTokenInterface.json";
-import DAIInterestRateModelV2Artifact from "../../../lib/contracts/out/DAIInterestRateModelV2.sol/DAIInterestRateModelV2.json";
+import { BigNumber, BigNumberish, Contract } from "ethers";
 
 import JumpRateModel from "./JumpRateModel";
 
 export default class DAIInterestRateModelV2 extends JumpRateModel {
-  static RUNTIME_BYTECODE_HASH = utils.keccak256(DAIInterestRateModelV2Artifact.deployedBytecode.object);
-
   initialized: boolean | undefined;
   dsrPerBlock: BigNumber | undefined;
   cash: BigNumber | undefined;
@@ -16,14 +11,24 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
   reserves: BigNumber | undefined;
   reserveFactorMantissa: BigNumber | undefined;
 
-  async init(interestRateModelAddress: string, assetAddress: string, provider: any) {
-    await super.init(interestRateModelAddress, assetAddress, provider);
+  name(): string {
+    return "DAIInterestRateModelV2Artifact";
+  }
 
-    const interestRateContract = new Contract(interestRateModelAddress, DAIInterestRateModelV2Artifact.abi, provider);
+  async init(
+    interestRateModelAddress: string,
+    assetAddress: string,
+    daiModelAbi: any,
+    ctokenInterfacesAbi: any,
+    provider: any
+  ) {
+    await super.init(interestRateModelAddress, assetAddress, daiModelAbi, ctokenInterfacesAbi, provider);
+
+    const interestRateContract = new Contract(interestRateModelAddress, daiModelAbi, provider);
 
     this.dsrPerBlock = BigNumber.from(await interestRateContract.callStatic.dsrPerBlock());
 
-    const cTokenContract = new Contract(assetAddress, CTokenInterfacesArtifact.abi, provider);
+    const cTokenContract = new Contract(assetAddress, ctokenInterfacesAbi, provider);
 
     this.cash = BigNumber.from(await cTokenContract.callStatic.getCash());
     this.borrows = BigNumber.from(await cTokenContract.callStatic.totalBorrowsCurrent());
@@ -35,11 +40,19 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
     reserveFactorMantissa: BigNumberish,
     adminFeeMantissa: BigNumberish,
     fuseFeeMantissa: BigNumberish,
+    daiModelAbi: any,
     provider: Web3Provider
   ) {
-    await super._init(interestRateModelAddress, reserveFactorMantissa, adminFeeMantissa, fuseFeeMantissa, provider);
+    await super._init(
+      interestRateModelAddress,
+      reserveFactorMantissa,
+      adminFeeMantissa,
+      fuseFeeMantissa,
+      daiModelAbi,
+      provider
+    );
 
-    const interestRateContract = new Contract(interestRateModelAddress, DAIInterestRateModelV2Artifact.abi, provider);
+    const interestRateContract = new Contract(interestRateModelAddress, daiModelAbi, provider);
     this.dsrPerBlock = BigNumber.from(await interestRateContract.callStatic.dsrPerBlock());
     this.cash = BigNumber.from(0);
     this.borrows = BigNumber.from(0);
