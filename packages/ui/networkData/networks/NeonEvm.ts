@@ -10,7 +10,7 @@ const mainnet: ChainMetadata = {
   img: '/images/neon.svg',
   enabled: process.env.NEON_EVM_MAINNET === 'true',
   supported: process.env.NEON_EVM_MAINNET === 'true',
-  blocksPerMin: 20,
+  blocksPerMin: 20, //TODO: check blocks per min
   blockExplorerUrls: { default: { name: 'NeonScan', url: 'https://neonscan.org/' } },
   rpcUrls: { default: 'https://proxy.mainnet.neonlabs.org/solana' },
   nativeCurrency: {
@@ -19,13 +19,13 @@ const mainnet: ChainMetadata = {
   },
   wrappedNativeCurrency: {
     symbol: 'WNEON',
-    address: '',
+    address: '', //TODO: address should be added
     name: 'Neon EVM Mainnet',
     decimals: 18,
     color: '#627EEA',
     overlayTextColor: '#fff',
     logoURL: '/images/neon.svg',
-    coingeckoId: '',
+    coingeckoId: '', // TODO: coingeckoid couldn't find right now
   },
 };
 
@@ -39,7 +39,7 @@ const testnet: ChainMetadata = {
   enabled: true,
   supported:
     process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_SHOW_TESTNETS === 'true',
-  blocksPerMin: 20,
+  blocksPerMin: 20, //TODO: check blocks per min
   blockExplorerUrls: { default: { name: 'NeonScan', url: 'https://neonscan.org/' } },
   nativeCurrency: {
     symbol: 'NEON',
@@ -47,13 +47,13 @@ const testnet: ChainMetadata = {
   },
   wrappedNativeCurrency: {
     symbol: 'NEON',
-    address: '',
+    address: '', //TODO: address should be added
     name: 'Neon EVM Devnet',
     decimals: 18,
     color: '#627EEA',
     overlayTextColor: '#fff',
     logoURL: '/images/neon.svg',
-    coingeckoId: '',
+    coingeckoId: '', // TODO: coingeckoid couldn't find right now
   },
   testnet: true,
 };
