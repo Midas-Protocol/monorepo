@@ -90,6 +90,14 @@ export const deployConfig: ChainDeployConfig = {
       flywheelIndices: [0, 1],
       name: "2brl",
     },
+    {
+      // 0x
+      strategy: "DotDotLpERC4626",
+      underlying: assets.find((a) => a.symbol === assetSymbols.maiVal3EPS)!.underlying, // maiVal3EPS
+      otherParams: ["0x8189F0afdBf8fE6a9e13c69bA35528ac6abeB1af"], // lpDepositor
+      flywheelIndices: [0, 1],
+      name: "mai3EPS",
+    },
     // All of these vaults are depricated
     /*{
       // 0x
@@ -291,6 +299,24 @@ const curvePools: CurvePoolConfig[] = [
       assets.find((a) => a.symbol === assetSymbols.BRZ)!.underlying,
     ],
   },
+  {
+    // maiVal3EPS metapool
+    lpToken: assets.find((a) => a.symbol === assetSymbols["maiVal3EPS"])!.underlying,
+    pool: "0x68354c6E8Bbd020F9dE81EAf57ea5424ba9ef322",
+    underlyings: [
+      assets.find((a) => a.symbol === assetSymbols.MAI)!.underlying,
+      assets.find((a) => a.symbol === assetSymbols["val3EPS"])!.underlying,
+    ],
+  },
+  // {
+  //   // UST metapool
+  //   lpToken: assets.find((a) => a.symbol === assetSymbols.ust3EPS)!.underlying,
+  //   pool: "0x780de1A0E4613da6b65ceF7F5FB63d14CbDcfB72",
+  //   underlyings: [
+  //     assets.find((a) => a.symbol === assetSymbols.UST)!.underlying,
+  //     assets.find((a) => a.symbol === assetSymbols["3EPS"])!.underlying,
+  //   ],
+  // },
 ];
 
 export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: ChainDeployFnParams): Promise<void> => {
