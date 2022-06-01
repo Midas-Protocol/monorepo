@@ -15,3 +15,7 @@ export { default as moonbaseAlphaAssets } from "./moonbaseAlpha";
 export { default as auroraAssets } from "./aurora";
 
 export { default as ganacheAssets } from "./ganache";
+
+export { default as neonEvmDevnetAssets } from "./neonEvmDevnet";
+
+export { default as neonEvmMainnetAssets } from "./neonEvmMainnet";

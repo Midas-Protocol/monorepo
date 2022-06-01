@@ -29,6 +29,14 @@ const chainSpecificParams: ChainSpecificParams = {
   [SupportedChains.aurora]: {
     blocksPerYear: BigNumber.from((50 * 24 * 365 * 60).toString()),
   },
+  // need to check blocks per min
+  [SupportedChains.neon_evm_devnet]: {
+    blocksPerYear: BigNumber.from((50 * 24 * 365 * 60).toString()),
+  },
+  // need to check blocks per min
+  [SupportedChains.neon_evm_mainnet]: {
+    blocksPerYear: BigNumber.from((50 * 24 * 365 * 60).toString()),
+  },
 };
 
 export default chainSpecificParams;

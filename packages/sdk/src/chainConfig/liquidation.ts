@@ -13,6 +13,8 @@ import {
   ganacheAssets,
   moonbaseAlphaAssets,
   moonbeamAssets,
+  neonEvmDevnetAssets,
+  neonEvmMainnetAssets,
 } from "./assets";
 
 const liquidationDefaults: ChainLiquidationDefaults = {
@@ -114,6 +116,32 @@ const liquidationDefaults: ChainLiquidationDefaults = {
       ganacheAssets.find((a: SupportedAsset) => a.symbol === assetSymbols.WETH)!.underlying,
     ],
     LIQUIDATION_STRATEGY: LiquidationStrategy.DEFAULT,
+    MINIMUM_PROFIT_NATIVE: BigNumber.from(0),
+  },
+  //TODO: need to be refactored
+  [SupportedChains.neon_evm_devnet]: {
+    SUPPORTED_OUTPUT_CURRENCIES: [
+      constants.AddressZero,
+      neonEvmDevnetAssets.find((a: SupportedAsset) => a.symbol === assetSymbols.WNEON)!.underlying,
+    ],
+    SUPPORTED_INPUT_CURRENCIES: [
+      constants.AddressZero,
+      neonEvmDevnetAssets.find((a: SupportedAsset) => a.symbol === assetSymbols.WNEON)!.underlying,
+    ],
+    LIQUIDATION_STRATEGY: LiquidationStrategy.UNISWAP,
+    MINIMUM_PROFIT_NATIVE: BigNumber.from(0),
+  },
+  //TODO: need to be refactored
+  [SupportedChains.neon_evm_mainnet]: {
+    SUPPORTED_OUTPUT_CURRENCIES: [
+      constants.AddressZero,
+      neonEvmMainnetAssets.find((a: SupportedAsset) => a.symbol === assetSymbols.NEON)!.underlying,
+    ],
+    SUPPORTED_INPUT_CURRENCIES: [
+      constants.AddressZero,
+      neonEvmMainnetAssets.find((a: SupportedAsset) => a.symbol === assetSymbols.NEON)!.underlying,
+    ],
+    LIQUIDATION_STRATEGY: LiquidationStrategy.UNISWAP,
     MINIMUM_PROFIT_NATIVE: BigNumber.from(0),
   },
 };

@@ -20,6 +20,8 @@ const oracles: ChainOracles = {
   [SupportedChains.aurora]: [OracleTypes.MasterPriceOracle],
   [SupportedChains.moonbeam]: [OracleTypes.MasterPriceOracle],
   [SupportedChains.moonbase_alpha]: [OracleTypes.MasterPriceOracle],
+  [SupportedChains.neon_evm_devnet]: [OracleTypes.MasterPriceOracle],
+  [SupportedChains.neon_evm_mainnet]: [OracleTypes.MasterPriceOracle],
 };
 
 export default oracles;

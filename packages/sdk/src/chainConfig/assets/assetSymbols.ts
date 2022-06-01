@@ -55,6 +55,11 @@ enum assetSymbols {
 
   // aurora
   WNEAR = "WNEAR",
+
+  // neon_evm_devnet
+  WNEON = "WNEON",
+  //neon_evm_mainnet
+  NEON = "NEON",
 }
 
 export default assetSymbols;
