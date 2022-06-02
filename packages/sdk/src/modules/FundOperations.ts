@@ -4,6 +4,7 @@ import { BigNumber, constants, Contract, ContractTransaction, utils } from "ethe
 import { CErc20Delegate } from "../../lib/contracts/typechain/CErc20Delegate";
 import { CEtherDelegate } from "../../lib/contracts/typechain/CEtherDelegate";
 import { Comptroller } from "../../lib/contracts/typechain/Comptroller";
+import ERC20Abi from "../Fuse/abi/ERC20.json";
 import { FuseBaseConstructor } from "../types";
 
 export function withFundOperations<TBase extends FuseBaseConstructor>(Base: TBase) {
@@ -40,11 +41,7 @@ export function withFundOperations<TBase extends FuseBaseConstructor>(Base: TBas
       let tx: ContractTransaction;
 
       if (!isNativeToken) {
-        const token = new Contract(
-          underlyingTokenAddress,
-          this.artifacts.EIP20Interface.abi,
-          this.provider.getSigner(options.from)
-        );
+        const token = new Contract(underlyingTokenAddress, ERC20Abi, this.provider.getSigner(options.from));
 
         const hasApprovedEnough = (await token.callStatic.allowance(options.from, cTokenAddress)).gte(amount);
         if (!hasApprovedEnough) {
@@ -56,7 +53,7 @@ export function withFundOperations<TBase extends FuseBaseConstructor>(Base: TBas
       if (enableAsCollateral) {
         const comptrollerInstance = new Contract(
           comptrollerAddress,
-          this.artifacts.Comptroller.abi,
+          this.chainDeployment.Comptroller.abi,
           this.provider.getSigner(options.from)
         ) as Comptroller;
 
@@ -66,7 +63,7 @@ export function withFundOperations<TBase extends FuseBaseConstructor>(Base: TBas
       if (isNativeToken) {
         const cToken = new Contract(
           cTokenAddress,
-          this.artifacts.CEtherDelegate.abi,
+          this.chainDeployment.CEtherDelegate.abi,
           this.provider.getSigner(options.from)
         ) as CEtherDelegate;
         const call = cToken.mint;
@@ -86,7 +83,7 @@ export function withFundOperations<TBase extends FuseBaseConstructor>(Base: TBas
       } else {
         const cToken = new Contract(
           cTokenAddress,
-          this.artifacts.CErc20Delegate.abi,
+          this.chainDeployment.CErc20Delegate.abi,
           this.provider.getSigner(options.from)
         ) as CErc20Delegate;
 
@@ -115,11 +112,7 @@ export function withFundOperations<TBase extends FuseBaseConstructor>(Base: TBas
       const max = BigNumber.from(2).pow(BigNumber.from(256)).sub(constants.One);
 
       if (!isNativeToken) {
-        const token = new Contract(
-          underlyingTokenAddress,
-          this.artifacts.EIP20Interface.abi,
-          this.provider.getSigner(options.from)
-        );
+        const token = new Contract(underlyingTokenAddress, ERC20Abi, this.provider.getSigner(options.from));
 
         const hasApprovedEnough = (await token.callStatic.allowance(options.from, cTokenAddress)).gte(amount);
         if (!hasApprovedEnough) {
@@ -131,7 +124,7 @@ export function withFundOperations<TBase extends FuseBaseConstructor>(Base: TBas
       if (isNativeToken) {
         const cToken = new Contract(
           cTokenAddress,
-          this.artifacts.CEtherDelegate.abi,
+          this.chainDeployment.CEtherDelegate.abi,
           this.provider.getSigner(options.from)
         ) as CEtherDelegate;
 
@@ -152,7 +145,7 @@ export function withFundOperations<TBase extends FuseBaseConstructor>(Base: TBas
       } else {
         const cToken = new Contract(
           cTokenAddress,
-          this.artifacts.CErc20Delegate.abi,
+          this.chainDeployment.CErc20Delegate.abi,
           this.provider.getSigner(options.from)
         ) as CErc20Delegate;
 
@@ -172,7 +165,7 @@ export function withFundOperations<TBase extends FuseBaseConstructor>(Base: TBas
     async borrow(cTokenAddress: string, amount: BigNumber, options: { from: string }) {
       const cToken = new Contract(
         cTokenAddress,
-        this.artifacts.CErc20Delegate.abi,
+        this.chainDeployment.CErc20Delegate.abi,
         this.provider.getSigner(options.from)
       ) as CErc20Delegate;
 
@@ -190,7 +183,7 @@ export function withFundOperations<TBase extends FuseBaseConstructor>(Base: TBas
     async withdraw(cTokenAddress: string, amount: BigNumber, options: { from: string }) {
       const cToken = new Contract(
         cTokenAddress,
-        this.artifacts.CErc20Delegate.abi,
+        this.chainDeployment.CErc20Delegate.abi,
         this.provider.getSigner(options.from)
       ) as CErc20Delegate;
 

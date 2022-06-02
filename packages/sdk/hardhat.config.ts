@@ -63,6 +63,12 @@ const config: HardhatUserConfig = {
     sources: "./none",
     tests: "./tests",
   },
+  abiExporter: {
+    path: "./src/abi",
+    clear: true,
+    spacing: 2,
+    pretty: true,
+  },
   defaultNetwork: "hardhat",
   namedAccounts: {
     deployer: { default: 0 },

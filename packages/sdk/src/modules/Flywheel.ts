@@ -6,6 +6,7 @@ import { FlywheelCore } from "../../lib/contracts/typechain/FlywheelCore";
 import { FlywheelStaticRewards } from "../../lib/contracts/typechain/FlywheelStaticRewards";
 import { FuseFlywheelCore } from "../../lib/contracts/typechain/FuseFlywheelCore";
 import { FuseFlywheelLensRouter } from "../../lib/contracts/typechain/FuseFlywheelLensRouter.sol";
+import { bytecode } from "../bytecode";
 import { FuseBaseConstructor } from "../types";
 
 export interface FlywheelClaimableRewards {
@@ -43,7 +44,7 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
     ) {
       const flywheelCoreFactory = new ContractFactory(
         this.artifacts.FuseFlywheelCore.abi,
-        this.artifacts.FuseFlywheelCore.bytecode,
+        bytecode.FuseFlywheelCore,
         this.provider.getSigner()
       ) as FuseFlywheelCore__factory;
       return (await flywheelCoreFactory.deploy(
@@ -66,7 +67,7 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
     ) {
       const fwStaticRewardsFactory = new ContractFactory(
         this.artifacts.FlywheelStaticRewards.abi,
-        this.artifacts.FlywheelStaticRewards.bytecode,
+        bytecode.FlywheelStaticRewards,
         this.provider.getSigner()
       ) as FlywheelStaticRewards__factory;
 
@@ -146,8 +147,10 @@ export function withFlywheel<TBase extends FuseBaseConstructor>(Base: TBase) {
     }
 
     async getFlywheelClaimableRewards(account: string, options: { from: string }) {
-      const [comptrollerIndexes, comptrollers, flywheels] =
-        await this.contracts.FusePoolLensSecondary.callStatic.getRewardsDistributorsBySupplier(account, options);
+      const [, comptrollers] = await this.contracts.FusePoolLensSecondary.callStatic.getRewardsDistributorsBySupplier(
+        account,
+        options
+      );
 
       return (
         await Promise.all(comptrollers.map((comp) => this.getFlywheelClaimableRewardsForPool(comp, account, options)))

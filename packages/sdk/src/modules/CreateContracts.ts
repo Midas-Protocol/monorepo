@@ -19,8 +19,8 @@ export function withCreateContracts<TBase extends FuseBaseConstructor>(Base: TBa
       ) as Comptroller;
     }
 
-    createUnitroller(comptrollerAddress: string) {
-      return new Contract(comptrollerAddress, this.artifacts.Unitroller.abi, this.provider.getSigner()) as Unitroller;
+    createUnitroller(comptrollerAddress: string, unitrollerAbi: any) {
+      return new Contract(comptrollerAddress, unitrollerAbi, this.provider.getSigner()) as Unitroller;
     }
 
     createRewardsDistributor(distributorAddress: string) {
@@ -31,17 +31,13 @@ export function withCreateContracts<TBase extends FuseBaseConstructor>(Base: TBa
       ) as RewardsDistributorDelegate;
     }
 
-    createFuseFlywheelCore(flywheelCoreAddress: string) {
-      return new Contract(
-        flywheelCoreAddress,
-        this.artifacts.FuseFlywheelCore.abi,
-        this.provider.getSigner()
-      ) as FuseFlywheelCore;
+    createFuseFlywheelCore(flywheelCoreAddress: string, flywheelCoreAbi: any) {
+      return new Contract(flywheelCoreAddress, flywheelCoreAbi, this.provider.getSigner()) as FuseFlywheelCore;
     }
-    createFlywheelStaticRewards(staticRewardsAddress: string) {
+    createFlywheelStaticRewards(staticRewardsAddress: string, flywheelStaticRewardsAbi: string) {
       return new Contract(
         staticRewardsAddress,
-        this.artifacts.FlywheelStaticRewards.abi,
+        flywheelStaticRewardsAbi,
         this.provider.getSigner()
       ) as FlywheelStaticRewards;
     }
@@ -60,7 +56,7 @@ export function withCreateContracts<TBase extends FuseBaseConstructor>(Base: TBa
 
     createMasterPriceOracle() {
       return new Contract(
-        this.chainDeployment.MasterPriceOracle.address!,
+        this.chainDeployment.MasterPriceOracle.address,
         this.chainDeployment.MasterPriceOracle.abi,
         this.provider.getSigner()
       ) as MasterPriceOracle;

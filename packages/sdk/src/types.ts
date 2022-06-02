@@ -27,8 +27,10 @@ export type MinifiedOraclesContracts = MinifiedCompoundContracts;
 
 export interface InterestRateModel {
   init(
-    interestRateModelAddress: string,
+    iinterestRateModelAddress: string,
     assetAddress: string,
+    irmAbi: any,
+    ctokenInterfacesAbi: any,
     provider: providers.Web3Provider | providers.JsonRpcProvider
   ): Promise<void>;
 
@@ -37,6 +39,7 @@ export interface InterestRateModel {
     reserveFactorMantissa: BigNumberish,
     adminFeeMantissa: BigNumberish,
     fuseFeeMantissa: BigNumberish,
+    irmAbi: any,
     provider: providers.Web3Provider | providers.JsonRpcProvider
   ): Promise<void>;
 
@@ -53,19 +56,12 @@ export interface InterestRateModel {
   getBorrowRate(utilizationRate: BigNumber): BigNumber;
 
   getSupplyRate(utilizationRate: BigNumber): BigNumber;
+
+  name(): string;
 }
 export type Artifact = {
   abi: any;
-  bytecode: {
-    object: string;
-    sourceMap: string;
-    linkReferences: any;
-  };
-  deployedBytecode: {
-    object: string;
-    sourceMap: string;
-    linkReferences: any;
-  };
+  bytecode: string;
 };
 
 export type Artifacts = {
