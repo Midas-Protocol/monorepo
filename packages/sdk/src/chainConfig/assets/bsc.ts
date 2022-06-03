@@ -115,6 +115,12 @@ export const assets: SupportedAsset[] = [
     name: "Wrapped TrueUSD",
     decimals: 18,
   },
+  {
+    symbol: assetSymbols.MAI,
+    underlying: "0x3F56e0c36d275367b8C502090EDF38289b3dEa0d",
+    name: "Mai Stablecoin",
+    decimals: 18,
+  },
   // Ellipsis
   {
     symbol: assetSymbols["3EPS"],
@@ -132,6 +138,18 @@ export const assets: SupportedAsset[] = [
     symbol: assetSymbols["2brl"],
     underlying: "0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9",
     name: "Ellipsis.finance 2BRL",
+    decimals: 18,
+  },
+  {
+    symbol: assetSymbols.val3EPS,
+    underlying: "0x5b5bD8913D766D005859CE002533D4838B0Ebbb5",
+    name: "Ellipsis valBUSD/valUSDC/valUSDT",
+    decimals: 18,
+  },
+  {
+    symbol: assetSymbols.maiVal3EPS,
+    underlying: "0x80D00D2c8d920a9253c3D65BA901250a55011b37",
+    name: "MAI+val3EPS",
     decimals: 18,
   },
   // Bomb

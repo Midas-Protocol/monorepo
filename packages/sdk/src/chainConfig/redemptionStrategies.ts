@@ -11,6 +11,9 @@ const chainRedemptionStrategies: ChainRedemptionStrategy = {
     // 3EPS
     [bscAssets.find((a: SupportedAsset) => a.symbol === assetSymbols["3EPS"])!.underlying]:
       RedemptionStrategy.CurveLpTokenLiquidatorNoRegistry,
+    // MAIval3EPS
+    [bscAssets.find((a: SupportedAsset) => a.symbol === assetSymbols.maiVal3EPS)!.underlying]:
+      RedemptionStrategy.CurveLpTokenLiquidatorNoRegistry,
     // ust3EPS
     // "0x151F1611b2E304DEd36661f65506f9D7D172beba": RedemptionStrategy.CurveLpTokenLiquidatorNoRegistry,
     // xBOMB

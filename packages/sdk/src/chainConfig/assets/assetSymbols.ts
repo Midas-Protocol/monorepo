@@ -26,9 +26,11 @@ enum assetSymbols {
   CAKE = "CAKE",
   ALPACA = "ALPACA",
   "3EPS" = "3EPS",
+  val3EPS = "3EPS",
   dai3EPS = "dai3EPS",
   ust3EPS = "ust3EPS",
   "2brl" = "2brl",
+  maiVal3EPS = "maiVal3EPS",
   jBRL = "jBRL",
   BRZ = "BRZ",
   BOMB = "BOMB",
@@ -38,6 +40,7 @@ enum assetSymbols {
   "WBNB-DAI" = "WBNB-DAI",
   "WBNB-BUSD" = "WBNB-BUSD",
   "BUSD-USDT" = "BUSD-USDT",
+  MAI = "MAI",
 
   // evmos
   saddleOptFraxUSD = "saddleOptFraxUSD",
