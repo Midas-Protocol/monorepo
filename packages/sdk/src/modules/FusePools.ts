@@ -70,7 +70,6 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
         promises.push(
           this.getAssetInstance<CErc20PluginDelegate>(asset.cToken, "CErc20PluginDelegate")
             .callStatic.plugin()
-            .then((plugin) => (asset.plugin = plugin))
             .catch(() =>
               // @ts-ignore
               this.getAssetInstance<CErc20PluginRewardsDelegate>(
@@ -78,7 +77,9 @@ export function withFusePools<TBase extends FuseBaseConstructor>(Base: TBase) {
                 "CErc20PluginRewardsDelegate"
               ).callStatic.plugin()
             )
-            .then((plugin) => (asset.plugin = plugin))
+            .then((pluginAddress) => {
+              asset.plugin = this.chainPlugins[asset.underlyingToken].find((p) => p.strategyAddress === pluginAddress);
+            })
             .catch(() => {})
         );
 
