@@ -1,6 +1,7 @@
 import proxyquire from "proxyquire";
 import { SinonSpy, SinonStub, spy, stub } from "sinon";
 
+import ComptrollerArtifact from "../../../lib/contracts/out/Comptroller.sol/Comptroller.json";
 import { expect } from "../globalTestHook";
 import { mkAddress } from "../helpers";
 
@@ -21,10 +22,10 @@ describe("Fuse utils", () => {
           solidityKeccak256: solidityKeccak256Spy,
           keccak256: keccak256Spy,
           getCreate2Address: getCreate2AddressSpy,
+          AbiCoder: AbiCoderStub,
         },
         ContractFactory: ContractFactoryStub,
         Contract: ContractStub,
-        AbiCoder: AbiCoderStub,
       },
     });
   });
@@ -53,8 +54,13 @@ describe("Fuse utils", () => {
   describe("getComptrollerFactory", () => {
     ContractFactoryStub = stub();
     it("ContractFactory should be called", () => {
-      utilsFns.getComptrollerFactory();
+      utilsFns.getComptrollerFactory(mkAddress("0xa"));
       expect(ContractFactoryStub).to.be.calledOnce;
+      expect(ContractFactoryStub).have.been.calledWith(
+        ComptrollerArtifact.abi,
+        ComptrollerArtifact.bytecode.object,
+        mkAddress("0xa")
+      );
     });
   });
 
@@ -69,7 +75,7 @@ describe("Fuse utils", () => {
   describe("getBytecodeHash", () => {
     keccak256Spy = spy();
     AbiCoderStub = stub().returns({
-      encode: () => "0x1231",
+      encode: () => "",
     });
     it("Get KECCAK256 encoded value", () => {
       utilsFns.getBytecodeHash(mkAddress("0xa"));
@@ -79,7 +85,7 @@ describe("Fuse utils", () => {
 
   describe("getPoolAddress", () => {
     getCreate2AddressSpy = spy();
-    it("Get pool address", () => {
+    it("Get pool address should be called without issue", () => {
       utilsFns.getPoolAddress(mkAddress("0xabc"), "Test", 1, mkAddress("0xfcc"), mkAddress("0xacc"));
       expect(getCreate2AddressSpy).to.be.calledOnce;
     });
