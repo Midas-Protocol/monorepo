@@ -1,5 +1,5 @@
 {
-  "extends": "@tsconfig/recommended/tsconfig.json",
+  // "extends": "@tsconfig/recommended/tsconfig.json",
   "compilerOptions": {
     "resolveJsonModule": true,
     "baseUrl": "./packages",
@@ -15,10 +15,13 @@
       "@ui/networkData/*": ["ui/networkData/*"],
       "@ui/styles/*": ["ui/styles/*"],
       "@ui/images/*": ["ui/public/images/*"],
-      "@ui/icons/*": ["ui/public/icons/*"]
+      "@ui/icons/*": ["ui/public/icons/*"],
     }
   },
   "references": [
+    {
+      "path": "./packages/networks"
+    },
     {
       "path": "./packages/sdk"
     },

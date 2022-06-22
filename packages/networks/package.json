@@ -1,0 +1,13 @@
+{
+  "name": "@midas-capital/networks",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.lib.json"
+  },
+  "dependencies": {
+    "typescript": "^4.7.4"
+  }
+}

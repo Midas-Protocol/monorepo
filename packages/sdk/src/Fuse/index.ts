@@ -1,4 +1,5 @@
 import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
+import { philip } from "@midas-capital/networks";
 import { BigNumber, constants, Contract, ContractFactory, utils } from "ethers";
 
 import Deployments from "../../deployments.json";
@@ -91,6 +92,7 @@ export class FuseBase {
     chainId: SupportedChains,
     chainDeployment?: ChainDeployment
   ) {
+    philip();
     this.provider = web3Provider;
     this.chainId = chainId;
     this.chainDeployment =
