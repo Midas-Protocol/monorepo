@@ -559,6 +559,22 @@ const StatsColumn = ({ mode, assets, index, amount, enableAsCollateral }: StatsC
     ? utils.commify(utils.formatUnits(updatedAsset.supplyBalance, updatedAsset.underlyingDecimals))
     : '';
 
+  useEffect(() => {
+    const func = async () => {
+      console.log('asset.borrowRatePerBlock: ', asset.borrowRatePerBlock);
+
+      const irm = await fuse.getInterestRateModel(asset.cToken);
+
+      const borrowRatePerBlockByIrm = irm.getBorrowRate(
+        utils.parseUnits((asset.utilization / 100).toFixed(18))
+      ); // this borrowRatePerBlockByIrm should be the same as asset.borrowRatePerBlock but different
+
+      console.log('borrowRatePerBlockByIrm: ', borrowRatePerBlockByIrm);
+    };
+
+    func();
+  });
+
   return (
     <DashboardBox width="100%" height="190px" mt={4}>
       {updatedAsset ? (
