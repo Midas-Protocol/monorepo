@@ -644,6 +644,52 @@ export const AssetSettings = ({
             </Button>
           )}
       </Flex>
+      <ModalDivider />
+      {/* <Flex
+        as="form"
+        py={4}
+        px={8}
+        w="100%"
+        direction={{ base: 'column', md: 'row' }}
+        onSubmit={handleSubmit(updateInterestRateModel)}
+      >
+        <FormControl isInvalid={!!errors.interestRateModel}>
+          <HStack w="100%" justifyContent={'space-between'}>
+            <FormLabel htmlFor="interestRateModel">
+              <SimpleTooltip
+                label={
+                  'The interest rate model chosen for an asset defines the rates of interest for borrowers and suppliers at different utilization levels.'
+                }
+              >
+                <Text fontWeight="bold">
+                  CToken Upgrade availability{' '}
+                  <QuestionIcon
+                    color={cCard.txtColor}
+                    bg={cCard.bgColor}
+                    borderRadius={'50%'}
+                    ml={1}
+                    mb="4px"
+                  />
+                </Text>
+              </SimpleTooltip>
+            </FormLabel>
+            <Column maxW="270px" mainAxisAlignment="flex-start" crossAxisAlignment="flex-start">
+              <Button
+                type="submit"
+                ml={{ base: 'auto', md: 4 }}
+                mt={{ base: 2, md: 0 }}
+                disabled={isUpdating}
+              >
+                Upgrade
+              </Button>
+              <FormErrorMessage marginBottom="-10px">
+                {errors.interestRateModel && errors.interestRateModel.message}
+              </FormErrorMessage>
+            </Column>
+          </HStack>
+        </FormControl>
+      </Flex>
+      <ModalDivider /> */}
       <IRMChart
         adminFee={watchAdminFee}
         reserveFactor={watchReserveFactor}
