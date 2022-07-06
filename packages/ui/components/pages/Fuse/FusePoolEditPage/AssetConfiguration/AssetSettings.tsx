@@ -14,8 +14,9 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react';
+import { TransactionReceipt } from '@ethersproject/providers';
 import { ComptrollerErrorCodes, CTokenErrorCodes } from '@midas-capital/sdk';
-import { BigNumber, ContractFunction, utils } from 'ethers';
+import { BigNumber, constants, Contract, ContractFunction, utils } from 'ethers';
 import LogRocket from 'logrocket';
 import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
@@ -94,6 +95,7 @@ export const AssetSettings = ({
   const queryClient = useQueryClient();
   const { cCard, cSelect, cSwitch } = useColors();
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [isCTokenUpgradeAvailable, setIsCTokenUpgradeAvailable] = useState<boolean>(false);
 
   const {
     control,
@@ -144,6 +146,27 @@ export const AssetSettings = ({
       setValue('interestRateModel', cTokenData.interestRateModelAddress);
     }
   }, [cTokenData, setValue]);
+
+  useEffect(() => {
+    const func = async () => {
+      const FuseFeeDistributor = new Contract(
+        fuse.chainDeployment.FuseFeeDistributor.address,
+        fuse.chainDeployment.FuseFeeDistributor.abi,
+        fuse.provider.getSigner()
+      );
+
+      const res = await FuseFeeDistributor.callStatic.latestCErc20Delegate(cTokenAddress);
+
+      setIsCTokenUpgradeAvailable(res[0] !== cTokenAddress);
+    };
+
+    func();
+  }, [
+    cTokenAddress,
+    fuse.chainDeployment.FuseFeeDistributor.abi,
+    fuse.chainDeployment.FuseFeeDistributor.address,
+    fuse.provider,
+  ]);
 
   const updateCollateralFactor = async ({ collateralFactor }: { collateralFactor: number }) => {
     if (!cTokenAddress) return;
@@ -239,6 +262,35 @@ export const AssetSettings = ({
         cToken._setInterestRateModel,
         ''
       );
+
+      LogRocket.track('Fuse-UpdateInterestRateModel');
+
+      queryClient.refetchQueries();
+    } catch (e) {
+      handleGenericError(e, toast);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const updateCTokenImplementation = async () => {
+    setIsUpdating(true);
+    const FuseFeeDistributor = new Contract(
+      fuse.chainDeployment.FuseFeeDistributor.address,
+      fuse.chainDeployment.FuseFeeDistributor.abi,
+      fuse.provider.getSigner()
+    );
+
+    const cToken = fuse.createCToken(cTokenAddress || '');
+
+    try {
+      const res = await FuseFeeDistributor.callStatic.latestCErc20Delegate(cTokenAddress);
+
+      const setImplementationTx = await cToken._setImplementationSafe(res[0], false, res[2]);
+      const receipt: TransactionReceipt = await setImplementationTx.wait();
+      if (receipt.status != constants.One.toNumber()) {
+        throw `Failed set implementation to ${cTokenAddress}`;
+      }
 
       LogRocket.track('Fuse-UpdateInterestRateModel');
 
@@ -645,51 +697,53 @@ export const AssetSettings = ({
           )}
       </Flex>
       <ModalDivider />
-      {/* <Flex
-        as="form"
-        py={4}
-        px={8}
-        w="100%"
-        direction={{ base: 'column', md: 'row' }}
-        onSubmit={handleSubmit(updateInterestRateModel)}
-      >
-        <FormControl isInvalid={!!errors.interestRateModel}>
-          <HStack w="100%" justifyContent={'space-between'}>
-            <FormLabel htmlFor="interestRateModel">
-              <SimpleTooltip
-                label={
-                  'The interest rate model chosen for an asset defines the rates of interest for borrowers and suppliers at different utilization levels.'
-                }
-              >
-                <Text fontWeight="bold">
-                  CToken Upgrade availability{' '}
-                  <QuestionIcon
-                    color={cCard.txtColor}
-                    bg={cCard.bgColor}
-                    borderRadius={'50%'}
-                    ml={1}
-                    mb="4px"
-                  />
-                </Text>
-              </SimpleTooltip>
-            </FormLabel>
-            <Column maxW="270px" mainAxisAlignment="flex-start" crossAxisAlignment="flex-start">
-              <Button
-                type="submit"
-                ml={{ base: 'auto', md: 4 }}
-                mt={{ base: 2, md: 0 }}
-                disabled={isUpdating}
-              >
-                Upgrade
-              </Button>
-              <FormErrorMessage marginBottom="-10px">
-                {errors.interestRateModel && errors.interestRateModel.message}
-              </FormErrorMessage>
-            </Column>
-          </HStack>
-        </FormControl>
-      </Flex>
-      <ModalDivider /> */}
+      {isCTokenUpgradeAvailable && (
+        <>
+          <Flex
+            as="form"
+            py={4}
+            px={8}
+            w="100%"
+            direction={{ base: 'column', md: 'row' }}
+            onSubmit={handleSubmit(updateCTokenImplementation)}
+          >
+            <FormControl>
+              <HStack w="100%" justifyContent={'space-between'}>
+                <FormLabel htmlFor="upgradeBtn">
+                  <SimpleTooltip
+                    label={
+                      'The latest implementation of the market may include bugfixes and new features, like better ERC4626 plugins support or automated rewards claiming.'
+                    }
+                  >
+                    <Text fontWeight="bold">
+                      CToken Upgrade Available{' '}
+                      <QuestionIcon
+                        color={cCard.txtColor}
+                        bg={cCard.bgColor}
+                        borderRadius={'50%'}
+                        ml={1}
+                        mb="4px"
+                      />
+                    </Text>
+                  </SimpleTooltip>
+                </FormLabel>
+                <Column maxW="270px" mainAxisAlignment="flex-start" crossAxisAlignment="flex-start">
+                  <Button
+                    type="submit"
+                    ml={{ base: 'auto', md: 4 }}
+                    mt={{ base: 2, md: 0 }}
+                    disabled={isUpdating}
+                  >
+                    Upgrade
+                  </Button>
+                </Column>
+              </HStack>
+            </FormControl>
+          </Flex>
+          <ModalDivider />
+        </>
+      )}
+
       <IRMChart
         adminFee={watchAdminFee}
         reserveFactor={watchReserveFactor}
