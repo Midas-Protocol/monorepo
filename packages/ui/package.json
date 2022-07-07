@@ -9,7 +9,7 @@
     "lint": "next lint",
     "lint-fix": "eslint ./** -c .eslintrc.json --fix --ext ts,tsx,json",
     "postinstall": "chakra-cli tokens ./theme/index.ts",
-    "test:e2e": "synpress run"
+    "test:e2e": "synpress run --configFile ./tests/e2e/config.json"
   },
   "dependencies": {
     "@ajna/pagination": "^1.4.19",
@@ -53,7 +53,7 @@
     "@types/react-dom": "^18.0.5",
     "@typescript-eslint/eslint-plugin": "^5.30.0",
     "@typescript-eslint/parser": "^5.30.0",
-    "cypress": "^9.2.0",
+    "cypress": "9.7.0",
     "eslint": "8.18.0",
     "eslint-config-next": "12.1.6",
     "eslint-config-prettier": "^8.5.0",
