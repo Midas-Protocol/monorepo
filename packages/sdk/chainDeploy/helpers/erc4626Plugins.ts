@@ -2,6 +2,7 @@ import { constants } from "ethers";
 
 import { Erc4626PluginDeployFnParams, FuseFlywheelDeployFnParams, PluginConfig } from "..";
 import { FuseFlywheelCore } from "../../lib/contracts/typechain/FuseFlywheelCore";
+import {FuseFeeDistributor} from "../../lib/contracts/typechain";
 
 export const deployFlywheelWithDynamicRewards = async ({
   ethers,
@@ -62,15 +63,21 @@ function getFlywheelAddresses(pluginConfig: PluginConfig, dynamicFlywheels: stri
 }
 
 export const deployERC4626Plugin = async ({
+  ethers,
   getNamedAccounts,
   deployments,
   deployConfig,
   dynamicFlywheels,
 }: Erc4626PluginDeployFnParams): Promise<void> => {
   const { deployer } = await getNamedAccounts();
+  const oldImplementations = [];
+  const newImplementations = [];
+  const arrayOfTrue = [];
 
   for (const pluginConfig of deployConfig.plugins) {
     if (pluginConfig) {
+      const oldPluginImplementation = await ethers.getContractOrNull(`${pluginConfig.strategy}_${pluginConfig.name}`);
+
       const hasFlywheel = pluginConfig.flywheelIndices || pluginConfig.flywheelAddresses;
       const args = hasFlywheel
         ? [
@@ -89,8 +96,23 @@ export const deployERC4626Plugin = async ({
         waitConfirmations: 1,
       });
       console.log(`${pluginConfig.strategy}_${pluginConfig.name}: `, erc4626.address);
+
+      if (oldPluginImplementation) {
+        oldImplementations.push(oldPluginImplementation.address);
+        newImplementations.push(erc4626.address);
+        arrayOfTrue.push(true);
+      }
     }
   }
+
+  const fuseFeeDistributor = (await ethers.getContract("FuseFeeDistributor", deployer)) as FuseFeeDistributor;
+  const tx = await fuseFeeDistributor._editPluginImplementationWhitelist(
+    oldImplementations,
+    newImplementations,
+    arrayOfTrue
+  );
+  const receipt = await tx.wait();
+  console.log("Set whitelist for plugins with status:", receipt.status);
 };
 
 // 1. Deploy Flywheel
