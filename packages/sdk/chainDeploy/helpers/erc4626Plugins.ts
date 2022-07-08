@@ -1,8 +1,8 @@
 import { constants } from "ethers";
 
 import { Erc4626PluginDeployFnParams, FuseFlywheelDeployFnParams, PluginConfig } from "..";
+import { FuseFeeDistributor } from "../../lib/contracts/typechain";
 import { FuseFlywheelCore } from "../../lib/contracts/typechain/FuseFlywheelCore";
-import {FuseFeeDistributor} from "../../lib/contracts/typechain";
 
 export const deployFlywheelWithDynamicRewards = async ({
   ethers,
@@ -74,6 +74,7 @@ export const deployERC4626Plugin = async ({
   const newImplementations = [];
   const arrayOfTrue = [];
 
+  const fuseFeeDistributor = (await ethers.getContract("FuseFeeDistributor", deployer)) as FuseFeeDistributor;
   for (const pluginConfig of deployConfig.plugins) {
     if (pluginConfig) {
       const oldPluginImplementation = await ethers.getContractOrNull(`${pluginConfig.strategy}_${pluginConfig.name}`);
@@ -101,11 +102,12 @@ export const deployERC4626Plugin = async ({
         oldImplementations.push(oldPluginImplementation.address);
         newImplementations.push(erc4626.address);
         arrayOfTrue.push(true);
+
+        await fuseFeeDistributor._setLatestPluginImplementation(oldPluginImplementation.address, erc4626.address);
       }
     }
   }
 
-  const fuseFeeDistributor = (await ethers.getContract("FuseFeeDistributor", deployer)) as FuseFeeDistributor;
   const tx = await fuseFeeDistributor._editPluginImplementationWhitelist(
     oldImplementations,
     newImplementations,
