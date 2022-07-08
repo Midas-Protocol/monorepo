@@ -130,9 +130,9 @@ const AmountSelect = ({
   const updateMaxBNAmount = (bNAmount: BigNumber) => {
     const str = utils.formatUnits(bNAmount, asset.underlyingDecimals);
     _setUserEnteredAmount(str);
-    _setAmount(bNAmount)
+    _setAmount(bNAmount);
     setUserAction(UserAction.NO_ACTION);
-  }
+  };
 
   const { data: amountIsValid } = useQuery(['ValidAmount', mode, amount], async () => {
     if (amount === null || amount.isZero()) {
@@ -325,7 +325,11 @@ const AmountSelect = ({
                     disabled={isBorrowPaused}
                     autoFocus
                   />
-                  <TokenNameAndMaxButton mode={mode} asset={asset} updateMaxBNAmount={updateMaxBNAmount} />
+                  <TokenNameAndMaxButton
+                    mode={mode}
+                    asset={asset}
+                    updateMaxBNAmount={updateMaxBNAmount}
+                  />
                 </Row>
               </DashboardBox>
               {mode === FundOperationMode.BORROW && borrowableAmount + borrowedAmount !== 0 && (
