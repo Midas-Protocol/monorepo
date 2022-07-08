@@ -127,6 +127,13 @@ const AmountSelect = ({
     setUserAction(UserAction.NO_ACTION);
   };
 
+  const updateMaxBNAmount = (bNAmount: BigNumber) => {
+    const str = utils.formatUnits(bNAmount, asset.underlyingDecimals);
+    _setUserEnteredAmount(str);
+    _setAmount(bNAmount)
+    setUserAction(UserAction.NO_ACTION);
+  }
+
   const { data: amountIsValid } = useQuery(['ValidAmount', mode, amount], async () => {
     if (amount === null || amount.isZero()) {
       return false;
@@ -318,7 +325,7 @@ const AmountSelect = ({
                     disabled={isBorrowPaused}
                     autoFocus
                   />
-                  <TokenNameAndMaxButton mode={mode} asset={asset} updateAmount={updateAmount} />
+                  <TokenNameAndMaxButton mode={mode} asset={asset} updateMaxBNAmount={updateMaxBNAmount} />
                 </Row>
               </DashboardBox>
               {mode === FundOperationMode.BORROW && borrowableAmount + borrowedAmount !== 0 && (
@@ -657,13 +664,13 @@ const StatsColumn = ({ mode, assets, index, amount, enableAsCollateral }: StatsC
 };
 
 const TokenNameAndMaxButton = ({
-  updateAmount,
+  updateMaxBNAmount,
   asset,
   mode,
 }: {
   asset: NativePricedFuseAsset;
   mode: FundOperationMode;
-  updateAmount: (newAmount: string) => void;
+  updateMaxBNAmount: (newAmount: BigNumber) => void;
 }) => {
   const { fuse, address } = useRari();
 
@@ -678,10 +685,9 @@ const TokenNameAndMaxButton = ({
       const maxBN = (await fetchMaxAmount(mode, fuse, address, asset)) as BigNumber;
 
       if (maxBN.lt(constants.Zero) || maxBN.isZero()) {
-        updateAmount('');
+        updateMaxBNAmount(constants.Zero);
       } else {
-        const str = utils.formatUnits(maxBN, asset.underlyingDecimals);
-        updateAmount(str);
+        updateMaxBNAmount(maxBN);
       }
 
       setIsMaxLoading(false);
