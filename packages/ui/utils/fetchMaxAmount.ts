@@ -38,10 +38,15 @@ export const fetchMaxAmount = async (
   }
 
   if (mode === FundOperationMode.WITHDRAW) {
+    // 0,063000093541371865
+    // 0,063000106846185953
+    console.log(asset.cToken);
     const maxRedeem = await fuse.contracts.FusePoolLensSecondary.callStatic.getMaxRedeem(
       address,
-      asset.cToken
+      asset.cToken,
+      { from: address }
     );
+    console.log(maxRedeem, maxRedeem.toString(), 'maxRedeemmaxRedeemmaxRedeemmaxRedeemmaxRedeem');
 
     if (maxRedeem) {
       return BigNumber.from(maxRedeem);

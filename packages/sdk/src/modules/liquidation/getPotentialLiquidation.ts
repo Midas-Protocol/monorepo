@@ -86,6 +86,7 @@ export default async function getPotentialLiquidation(
     liquidationValueWei = seizeAmountWei.div(liquidationIncentive);
     liquidationAmount = liquidationValueWei.mul(SCALE_FACTOR_ONE_18_WEI).div(underlyingDebtPrice);
   }
+  console.log(liquidationAmount);
 
   if (liquidationAmount.lte(BigNumber.from(0))) {
     console.log("Liquidation amount is zero, doing nothing");
@@ -93,11 +94,15 @@ export default async function getPotentialLiquidation(
   }
   // Depending on liquidation strategy
   const strategyAndData = await getStrategyAndData(fuse, borrower.collateral[0].underlyingToken);
+  console.log(strategyAndData, "strategyAndData");
   const liquidationKind = getLiquidationKind(
     chainLiquidationConfig.LIQUIDATION_STRATEGY,
     borrower.debt[0].underlyingToken
   );
+  console.log("HWREE22222");
 
+  console.log(liquidationKind);
+  console.log(strategyAndData);
   let expectedGasAmount: BigNumber;
   try {
     expectedGasAmount = await estimateGas(

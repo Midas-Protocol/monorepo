@@ -52,7 +52,6 @@ async function getFusePoolUsers(
 
     const { totalBorrow, totalCollateral } = getUserTotals(assets);
     const health = getPositionHealth(totalBorrow, totalCollateral);
-
     if (maxHealth.gt(health)) {
       poolUsers.push({ account: user, totalBorrow, totalCollateral, health });
     }

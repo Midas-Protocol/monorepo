@@ -22,6 +22,7 @@ async function getLiquidatableUsers(
   const users: Array<EncodedLiquidationTx> = [];
   for (const user of poolUsers) {
     const userAssets = await fuse.contracts.FusePoolLens.callStatic.getPoolAssetsByUser(pool.comptroller, user.account);
+    console.log("HWREEE111111");
     const userWithAssets: FusePoolUserWithAssets = {
       ...user,
       debt: [],
