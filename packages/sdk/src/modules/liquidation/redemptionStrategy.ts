@@ -2,6 +2,7 @@ import { BytesLike, Contract, ethers } from "ethers";
 
 import { RedemptionStrategy } from "../../enums";
 import { FuseBase } from "../../Fuse";
+import { CurveLpTokenPriceOracleNoRegistry } from "../../../lib/contracts/typechain/CurveLpTokenPriceOracleNoRegistry";
 
 export type StrategyAndData = {
   strategyAddress: string[];
@@ -38,15 +39,14 @@ export const getStrategyAndData = async (fuse: FuseBase, token: string): Promise
         curveLpOracleAddress,
         fuse.chainDeployment.CurveLpTokenPriceOracleNoRegistry.abi,
         fuse.provider
-      );
-      console.log(token);
+      ) as CurveLpTokenPriceOracleNoRegistry;
 
-      // const tokens = await curveLpOracle.callStatic.underlyingTokens(token);
-      // console.log(tokens, "tokens");
+      const underlying = await curveLpOracle.callStatic.underlyingTokens(token, 0);
+
       return {
         ...strategyAndData,
         strategyData: [
-          new ethers.utils.AbiCoder().encode(["uint256", "address"], [1, "0x316622977073BBC3dF32E7d2A9B3c77596a0a603"]),
+          new ethers.utils.AbiCoder().encode(["uint256", "address"], [1, underlying]),
           "0x",
         ],
       };
