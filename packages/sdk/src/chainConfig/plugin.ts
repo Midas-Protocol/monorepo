@@ -6,7 +6,7 @@ import { assetSymbols, bscAssets, chapelAssets, moonbeamAssets } from "./assets"
 const chainPluginConfig: ChainPlugins = {
   [SupportedChains.ganache]: {
     // TRIBE
-    "0xf9a089C918ad9c484201E7d328C0d29019997117": [
+    "0xc876AaE0CFC5DfEa18D2333Cad600C909b9228cC": [
       {
         cTokenContract: DelegateContractName.CErc20PluginRewardsDelegate,
         strategyName: "Mock Tribe Strategy With TOUCH Rewards",
@@ -21,7 +21,7 @@ const chainPluginConfig: ChainPlugins = {
       },
     ],
     // TOUCH
-    "0x02Ec29Fd9f0bB212eD2C4926ACe1aeab732ed620": [
+    "0x2A28662cCE2a1ddc00bC09c85672f6cA273ab5F5": [
       {
         cTokenContract: DelegateContractName.CErc20PluginDelegate,
         strategyName: "Mock Touch Strategy",

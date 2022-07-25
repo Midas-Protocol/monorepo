@@ -1,10 +1,16 @@
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
-import { BigNumber, constants, ethers, utils } from "ethers";
+import {BigNumber, constants, ContractFactory, ethers, utils} from "ethers";
 
 import { CErc20PluginRewardsDelegate } from "../../lib/contracts/typechain/CErc20PluginRewardsDelegate";
 import { DelegateContractName, FundOperationMode } from "../enums";
 import { COMPTROLLER_ERROR_CODES } from "../Fuse/config";
-import { InterestRateModelConf, MarketConfig, NativePricedFuseAsset } from "../types";
+import {
+  InterestRateModelConf,
+  MarketConfig,
+  MarketPluginConfig,
+  NativePricedFuseAsset
+} from "../types";
+import {ChainDeployConfig, chainDeployConfig, PluginConfig} from "../../chainDeploy";
 
 import { withCreateContracts } from "./CreateContracts";
 import { withFlywheel } from "./Flywheel";
@@ -23,8 +29,12 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
       //1. Validate configuration
       await this.#validateConfiguration(config);
 
-      //2. Deploy new asset to existing pool via SDK
       try {
+        //2a
+        // Deploy new plugin
+
+        // await this.#deployPlugin(config, options);
+        //2b Deploy new asset to existing pool via SDK
         const [assetAddress, implementationAddress, receipt] = await this.#deployMarket(config, options);
 
         return [assetAddress, implementationAddress, irmConf.interestRateModel!, receipt];
@@ -62,6 +72,50 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
       }
     }
 
+    async #deployPlugin(marketPluginConfig: MarketPluginConfig, options: any): Promise<[string, string, TransactionReceipt]> {
+      const { chainId } = await ethers.getDefaultProvider().getNetwork();
+      const { config } = chainDeployConfig[chainId];
+      const pluginConfig: PluginConfig = config.plugins[0];
+      const contractName = pluginConfig.strategy;
+
+      // interface AbstractPluginConfig {
+      //   cTokenContract: DelegateContractName;
+      //   strategyName: string;
+      //   strategyCode: string;
+      //   strategyAddress: string;
+      // }
+
+      if (marketPluginConfig.flywheels) {
+
+      }
+
+      const args = pluginConfig.flywheelAddresses
+        ? [
+          pluginConfig.underlying,
+          ...pluginConfig.flywheelAddresses,
+          ...pluginConfig.otherParams,
+        ]
+        : [pluginConfig.underlying, ...pluginConfig.otherParams];
+
+      const factory = new ContractFactory(
+        this.artifacts[contractName].abi,
+        this.artifacts[contractName].bytecode,
+        options.from
+      );
+
+      const res: ethers.Contract = await factory.deploy(args);
+
+      const erc4626 = await this.deployments.deploy(`${pluginConfig.strategy}_${pluginConfig.name}`, {
+        contract: pluginConfig.strategy,
+        from: deployer,
+        args: args,
+        log: true,
+        waitConfirmations: 1,
+      });
+      console.log(`${pluginConfig.strategy}_${pluginConfig.name}: `, erc4626.address);
+
+    }
+
     async #deployMarket(config: MarketConfig, options: any): Promise<[string, string, TransactionReceipt]> {
       const abiCoder = new utils.AbiCoder();
 
@@ -93,6 +147,8 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
         reserveFactorBN,
         adminFeeBN,
       ];
+
+      console.log(`deploy args ${deployArgs}`);
 
       const constructorData = abiCoder.encode(
         ["address", "address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
@@ -281,4 +337,10 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
       });
     }
   };
+
+  function getFlywheelAddresses(pluginConfig: PluginConfig, dynamicFlywheels: string[]): string[] {
+    return pluginConfig.flywheelIndices
+      ? pluginConfig.flywheelIndices.map((index) => dynamicFlywheels[index])
+      : pluginConfig.flywheelAddresses;
+  }
 }

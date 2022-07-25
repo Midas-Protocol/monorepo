@@ -24,19 +24,19 @@ task("jarvis-fix", "deploy new strategy for jarvis 2brl pool")
     const dddFlywheel = sdk.createFuseFlywheelCore(dddFlywheelAddress);
     const epxFlywheel = sdk.createFuseFlywheelCore(epxFlywheelAddress);
     const marketAddress = await sdk
-      .createComptroller("0x31d76A64Bc8BbEffb601fac5884372DEF910F044", signer)
+      .createComptroller(jarvisComptroller, signer)
       .callStatic.cTokensByUnderlying(twobrl);
     const cToken = await sdk.createCErc20PluginRewardsDelegate(marketAddress);
     console.log({ marketAddress });
 
     // Step 1: Deploy Fresh Strategy with marketAddress=rewardsDestination
     const strategyArgs = [
-      "0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9", //_asset,
+      twobrl, //_asset,
       dddFlywheelAddress, //_dddFlywheel,
       epxFlywheelAddress, //_epxFlywheel,
       "0x8189F0afdBf8fE6a9e13c69bA35528ac6abeB1af", //_lpDepositor,
       marketAddress, //_rewardsDestination,
-      ["0x84c97300a190676a19D1E13115629A11f8482Bd1", "0xaf41054c1487b0e5e2b9250c0332ecbce6ce9d71"], //_rewardTokens
+      [dddAddress, epxAddress], //_rewardTokens
     ];
     console.log({ strategyArgs });
 
