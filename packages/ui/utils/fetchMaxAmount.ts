@@ -1,7 +1,8 @@
 import { FundOperationMode, MidasSdk, NativePricedFuseAsset } from '@midas-capital/sdk';
-import { BigNumber } from 'ethers';
+import { BigNumber, utils } from 'ethers';
 
 import { fetchTokenBalance } from '@ui/hooks/useTokenBalance';
+import { toFixedNoRound } from '@ui/utils/formatNumber';
 
 export const fetchMaxAmount = async (
   mode: FundOperationMode,
@@ -38,10 +39,13 @@ export const fetchMaxAmount = async (
   }
 
   if (mode === FundOperationMode.WITHDRAW) {
-    const maxRedeem = await midasSdk.contracts.FusePoolLensSecondary.callStatic.getMaxRedeem(
+    let maxRedeem = await midasSdk.contracts.FusePoolLensSecondary.callStatic.getMaxRedeem(
       address,
-      asset.cToken
+      asset.cToken,
+      { from: address }
     );
+
+    maxRedeem = utils.parseUnits(toFixedNoRound(utils.formatUnits(maxRedeem), 7));
 
     if (maxRedeem) {
       return BigNumber.from(maxRedeem);
