@@ -10,11 +10,6 @@ export default task("market:create", "Create Market")
   .addParam("poolName", "Name of pool", undefined, types.string)
   .addParam("creator", "Signer name", undefined, types.string)
   .addParam("symbol", "Asset symbol", undefined, types.string)
-  .addOptionalParam("strategyCode", "If using strategy, pass its code", undefined, types.string)
-  .addOptionalParam("strategyAddress", "Override the strategy address", undefined, types.string)
-  .addOptionalParam("flywheels", "Override the flywheels", undefined, types.string)
-  .addOptionalParam("rewardTokens", "Override the reward tokens", undefined, types.string)
-
   .setAction(async (taskArgs, hre) => {
     const symbol = taskArgs.symbol;
     const poolName = taskArgs.poolName;
@@ -45,8 +40,6 @@ export default task("market:create", "Create Market")
       throw "No asset config found";
     }
 
-    // TODO needs rewrite
-
     console.log(
       `Creating market for token ${assetConfig.underlying}, pool ${poolName}, impl: ${enumsModule.DelegateContractName.CErc20Delegate}`
     );
@@ -65,7 +58,7 @@ task("market:plugin:create", "Create a Market together with a plugin")
   .addParam("poolName", "Name of pool", undefined, types.string)
   .addParam("creator", "Signer name", undefined, types.string)
   .addParam("symbol", "Asset symbol", undefined, types.string)
-  .addParam("pluginContract", "The contract name for the plugin", undefined, types.string)
+  .addParam("plugin", "The contract name for the plugin", undefined, types.string)
   .addOptionalParam("flywheels", "Override the flywheels", undefined, types.string)
   .addOptionalParam("rewardTokens", "Override the reward tokens", undefined, types.string)
   .addOptionalParam("otherParams", "Other plugin constructor params", undefined, types.string)
@@ -75,27 +68,28 @@ task("market:plugin:create", "Create a Market together with a plugin")
     // @ts-ignore
     const poolModule = await import("../tests/utils/pool");
     // @ts-ignore
-    const fuseModule = await import("../tests/utils/fuseSdk");
+    const midasModule = await import("../tests/utils/midasSdk");
     // @ts-ignore
     const enumsModule = await import("../src/enums");
 
-    const sdk = await fuseModule.getOrCreateFuse();
-    const poolName = taskArgs.poolName;
-    const pluginContract = taskArgs.pluginContract;
+    // Extract Task Arguments
+    const { poolName, plugin, symbol, creator } = taskArgs;
+
+    // Prepare required elements
+    const sdk = await midasModule.getOrCreateMidas();
     const pool = await poolModule.getPoolByName(poolName, sdk);
+    const signer = await hre.ethers.getNamedSigner(creator);
+    const assetConfig = (
+      await assetModule.getAssetsConf(
+        pool.comptroller,
+        sdk.contracts.FuseFeeDistributor.address,
+        sdk.irms.JumpRateModel.address,
+        hre.ethers,
+        poolName
+      )
+    ).find((a) => a.symbol === symbol);
 
-    const assets = await assetModule.getAssetsConf(
-      pool.comptroller,
-      sdk.contracts.FuseFeeDistributor.address,
-      sdk.irms.JumpRateModel.address,
-      hre.ethers,
-      poolName
-    );
-
-    const symbol = taskArgs.symbol;
-    const signer = await hre.ethers.getNamedSigner(taskArgs.creator);
-    const assetConfig = assets.find((a) => a.symbol === symbol);
-
+    // Deploy Flywheels
     if (taskArgs.flywheels) {
       // TODO
       // assetConfig.plugin =?
@@ -123,6 +117,7 @@ task("market:plugin:create", "Create a Market together with a plugin")
 
     const marketAddress = await generateMarketAddress(assetConfig, hre);
 
+    // Deploy Market
     console.log("Asset config: ", assetConfig);
     const [assetAddress, implementationAddress, interestRateModel, receipt] = await sdk.deployAsset(
       sdk.JumpRateModelConf,
@@ -130,6 +125,7 @@ task("market:plugin:create", "Create a Market together with a plugin")
       { from: signer.address }
     );
 
+    // Deploy Strategy aka Plugin
     const erc4626 = await hre.deployments.deploy(`${pluginContract}_${marketAddress}`, {
       contract: pluginContract,
       from: signer.address,
