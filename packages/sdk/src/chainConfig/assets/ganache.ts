@@ -13,14 +13,14 @@ export const assets: SupportedAsset[] = [
   },
   {
     symbol: assetSymbols.TOUCH,
-    underlying: "0x02Ec29Fd9f0bB212eD2C4926ACe1aeab732ed620",
+    underlying: "0x2A28662cCE2a1ddc00bC09c85672f6cA273ab5F5",
     name: "Touch Token",
     decimals: 18,
     oracle: OracleTypes.SimplePriceOracle,
   },
   {
     symbol: assetSymbols.TRIBE,
-    underlying: "0xf9a089C918ad9c484201E7d328C0d29019997117",
+    underlying: "0xc876AaE0CFC5DfEa18D2333Cad600C909b9228cC",
     name: "Tribe Token",
     decimals: 18,
     oracle: OracleTypes.SimplePriceOracle,
