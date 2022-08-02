@@ -14,6 +14,7 @@ import { FuseSafeLiquidator } from "../../lib/contracts/typechain/FuseSafeLiquid
 import { Artifacts, ARTIFACTS } from "../Artifacts";
 import {
   chainDeployedPlugins,
+  chainIrms,
   chainLiquidationDefaults,
   chainOracles,
   chainRedemptionStrategies,
@@ -47,7 +48,13 @@ import {
 } from "../types";
 
 import uniswapV3PoolAbiSlim from "./abi/UniswapV3Pool.slim.json";
-import { CTOKEN_ERROR_CODES, JUMP_RATE_MODEL_CONF, WHITE_PAPER_RATE_MODEL_CONF } from "./config";
+import {
+  ANKR_BNB_INTEREST_RATE_MODEL_CONF,
+  CTOKEN_ERROR_CODES,
+  JUMP_RATE_MODEL_CONF,
+  WHITE_PAPER_RATE_MODEL_CONF,
+} from "./config";
+import AnkrBNBInterestRateModel from "./irm/AnkrBnbInterestRateModel";
 import DAIInterestRateModelV2 from "./irm/DAIInterestRateModelV2";
 import JumpRateModel from "./irm/JumpRateModel";
 import WhitePaperInterestRateModel from "./irm/WhitePaperInterestRateModel";
@@ -66,9 +73,11 @@ export class MidasBase {
     [contractName: string]: Contract;
   };
   public JumpRateModelConf: InterestRateModelConf;
+  public AnkrBNBInterestRateModelConf: InterestRateModelConf;
   public WhitePaperRateModelConf: InterestRateModelConf;
 
   public availableOracles: Array<string>;
+  public availableIrms: Array<string>;
   public chainId: SupportedChains;
   public chainDeployment: ChainDeployment;
   public oracles: OracleConfig;
@@ -97,6 +106,7 @@ export class MidasBase {
     }
     this.WhitePaperRateModelConf = WHITE_PAPER_RATE_MODEL_CONF(chainId);
     this.JumpRateModelConf = JUMP_RATE_MODEL_CONF(chainId);
+    this.AnkrBNBInterestRateModelConf = ANKR_BNB_INTEREST_RATE_MODEL_CONF(chainId);
 
     this.contracts = {
       FusePoolDirectory: new Contract(
@@ -136,7 +146,13 @@ export class MidasBase {
     }
     this.artifacts = ARTIFACTS;
 
-    this.irms = irmConfig(this.chainDeployment, this.artifacts);
+    this.availableIrms = chainIrms[chainId].filter((o) => {
+      if (this.artifacts[o] === undefined || this.chainDeployment[o] === undefined) {
+        console.warn(`Irm ${o} not deployed to chain ${this.chainId}`);
+        return false;
+      }
+      return true;
+    });
     this.availableOracles = chainOracles[chainId].filter((o) => {
       if (this.artifacts[o] === undefined || this.chainDeployment[o] === undefined) {
         console.warn(`Oracle ${o} not deployed to chain ${this.chainId}`);
@@ -145,6 +161,7 @@ export class MidasBase {
       return true;
     });
     this.oracles = oracleConfig(this.chainDeployment, this.artifacts, this.availableOracles);
+    this.irms = irmConfig(this.chainDeployment, this.artifacts, this.availableIrms);
 
     this.chainSpecificAddresses = chainSpecificAddresses[chainId];
     this.chainSpecificParams = chainSpecificParams[chainId];
@@ -228,7 +245,7 @@ export class MidasBase {
       }
 
       return [poolAddress, implementationAddress, priceOracle, poolId];
-    } catch (error: any) {
+    } catch (error) {
       throw Error("Deployment of new Fuse pool failed: " + (error.message ? error.message : error));
     }
   }
@@ -239,6 +256,7 @@ export class MidasBase {
       JumpRateModel: JumpRateModel,
       DAIInterestRateModelV2: DAIInterestRateModelV2,
       WhitePaperInterestRateModel: WhitePaperInterestRateModel,
+      AnkrBNBInterestRateModel: AnkrBNBInterestRateModel,
     };
     const runtimeBytecodeHash = utils.keccak256(await this.provider.getCode(interestRateModelAddress));
 
