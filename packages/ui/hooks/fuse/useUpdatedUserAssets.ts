@@ -20,8 +20,8 @@ const useUpdatedUserAssets = <T extends MarketData>({
   assets,
   amount,
 }: UseUpdatedUserAssetsResult<T>) => {
-  const { midasSdk, currentChain, coingeckoId } = useMidas();
-  const { data: usdPrice } = useUSDPrice(coingeckoId);
+  const { midasSdk, currentChain } = useMidas();
+  const { data: usdPrice } = useUSDPrice(currentChain.id.toString());
 
   const { data: updatedAssets }: UseQueryResult<MarketData[]> = useQuery(
     [

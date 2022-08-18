@@ -25,8 +25,8 @@ export const letterScore = (totalScore: number) => {
 // Quite ridiculous to fetch usd prices and pool data in frontend to just pass it to the backend...
 
 export const usePoolRSS = (poolId: string | number) => {
-  const { midasSdk, currentChain, coingeckoId } = useMidas();
-  const { data: usdPrice } = useUSDPrice(coingeckoId);
+  const { midasSdk, currentChain } = useMidas();
+  const { data: usdPrice } = useUSDPrice(currentChain.id.toString());
   const { data: poolData } = useFusePoolData(poolId.toString());
 
   return useQuery(

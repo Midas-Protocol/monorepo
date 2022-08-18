@@ -13,8 +13,8 @@ export const fetchFuseNumberTVL = async (midasSdk: MidasSdk, usdPrice: number) =
 };
 
 export const useFuseTVL = () => {
-  const { midasSdk, coingeckoId } = useMidas();
-  const { data: usdPrice, isLoading, error } = useUSDPrice(coingeckoId);
+  const { midasSdk, currentChain } = useMidas();
+  const { data: usdPrice, isLoading, error } = useUSDPrice(currentChain.id.toString());
 
   return useQuery(['fuseTVL', midasSdk.chainId, usdPrice, isLoading, error], async () => {
     if (!isLoading && error) throw new Error('Could not get USD price');

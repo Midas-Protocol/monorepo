@@ -30,11 +30,11 @@ const FusePoolEditPage = memo(() => {
     onClose: closeAddAssetModal,
   } = useDisclosure();
 
-  const { setLoading, coingeckoId } = useMidas();
+  const { setLoading, currentChain } = useMidas();
   const router = useRouter();
   const poolId = router.query.poolId as string;
   const { data } = useFusePoolData(poolId);
-  const { data: usdPrice } = useUSDPrice(coingeckoId);
+  const { data: usdPrice } = useUSDPrice(currentChain.id.toString());
   const isAdmin = useIsComptrollerAdmin(data?.comptroller);
   const { cPage } = useColors();
 

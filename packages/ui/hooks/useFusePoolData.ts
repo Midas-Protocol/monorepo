@@ -24,8 +24,8 @@ export interface PoolData extends SDKFusePoolData {
 }
 
 export const useFusePoolData = (poolId: string) => {
-  const { midasSdk, address, coingeckoId } = useMidas();
-  const { data: usdPrice } = useUSDPrice(coingeckoId);
+  const { midasSdk, address, currentChain } = useMidas();
+  const { data: usdPrice } = useUSDPrice(currentChain.id.toString());
 
   return useQuery<PoolData | null>(
     ['useFusePoolData', poolId, address, usdPrice],

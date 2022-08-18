@@ -58,8 +58,8 @@ const PoolRow = ({ data, isMostSupplied }: PoolRowProps) => {
     setShowDetails((previous) => !previous);
   }, [setShowDetails]);
 
-  const { midasSdk, scanUrl, setLoading, currentChain, coingeckoId } = useMidas();
-  const { data: usdPrice } = useUSDPrice(coingeckoId);
+  const { midasSdk, scanUrl, setLoading, currentChain } = useMidas();
+  const { data: usdPrice } = useUSDPrice(currentChain.id.toString());
   return (
     <VStack
       borderWidth={4}

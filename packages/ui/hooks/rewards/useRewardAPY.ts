@@ -221,12 +221,12 @@ export const useAssetPricesInEth = (
   tokenAddresses: string[],
   comptroller: string
 ): TokenPrices | undefined => {
-  const { midasSdk, coingeckoId } = useMidas();
+  const { midasSdk, currentChain } = useMidas();
 
   midasSdk.createMasterPriceOracle();
 
   const tokensData = useTokensDataAsMap(tokenAddresses);
-  const { data: usdPrice, isLoading, error } = useUSDPrice(coingeckoId);
+  const { data: usdPrice, isLoading, error } = useUSDPrice(currentChain.id.toString());
 
   const { data } = useQuery(
     // TODO, can't we delete the Object.keys part?

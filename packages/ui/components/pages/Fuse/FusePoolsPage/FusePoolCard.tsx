@@ -32,9 +32,9 @@ const PoolCard = ({ data }: PoolCardProps) => {
   const { cCard } = useColors();
 
   const router = useRouter();
-  const { setLoading, currentChain, coingeckoId } = useMidas();
+  const { setLoading, currentChain } = useMidas();
 
-  const { data: usdPrice } = useUSDPrice(coingeckoId);
+  const { data: usdPrice } = useUSDPrice(currentChain.id.toString());
   return (
     <motion.div whileHover={{ scale: 1.05 }}>
       <Flex

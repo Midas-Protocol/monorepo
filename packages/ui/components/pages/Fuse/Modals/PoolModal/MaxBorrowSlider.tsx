@@ -47,8 +47,8 @@ function MaxBorrowSlider({
   );
 
   const [sliderValue, setSliderValue] = useState(borrowedPercent);
-  const { coingeckoId } = useMidas();
-  const { data: usdPrice } = useUSDPrice(coingeckoId);
+  const { currentChain } = useMidas();
+  const { data: usdPrice } = useUSDPrice(currentChain.id.toString());
 
   const price = useMemo(() => (usdPrice ? usdPrice : 1), [usdPrice]);
   const { cPage } = useColors();
