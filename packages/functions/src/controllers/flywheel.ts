@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import CTOKEN_ABI from '../abi/CToken.json';
 import FLYWHEEL_ABI from '../abi/FlywheelCore.json';
-import { functonsAlert } from '../alert';
+import { functionsAlert } from '../alert';
 import { flywheels } from '../assets';
 import { config, supabase, SupportedChains } from '../config';
 
@@ -26,16 +26,13 @@ const updateFlywheelData = async (chainId: SupportedChains, rpcUrl: string) => {
               marketContract.callStatic.underlying(),
               marketContract.callStatic.plugin(),
             ]);
-          // console.log({
-          //   state,
-          //   rewardToken,
-          //   totalSupply,
-          //   underlyingAsset,
-          //   pluginAddress,
-          // });
+
+          // Don't save anything if the market is empty
+          if (totalSupply.eq(0)) {
+            return;
+          }
 
           const index = state['index'];
-
           const { error } = await supabase.from(config.supabaseFlywheelTableName).insert([
             {
               totalAssets: index.toString(),
@@ -57,7 +54,7 @@ const updateFlywheelData = async (chainId: SupportedChains, rpcUrl: string) => {
       }
     }
   } catch (err) {
-    await functonsAlert("Saving Flywheel's plugin", err as string);
+    await functionsAlert("Saving Flywheel's plugin", err as string);
     console.error(err);
   }
 };
