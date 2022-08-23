@@ -2,6 +2,7 @@ import { NextPage } from 'next';
 import Head from 'next/head';
 import { useEffect } from 'react';
 
+import Terms from '@ui/components/pages/Fuse/Modals/Terms'
 import FusePoolsPage from '@ui/components/pages/Fuse/FusePoolsPage';
 import { useMidas } from '@ui/context/MidasContext';
 
@@ -22,6 +23,7 @@ const FusePage: NextPage = () => {
         <title>Midas Capital</title>
       </Head>
       <FusePoolsPage />
+      <Terms />
     </>
   );
 };
