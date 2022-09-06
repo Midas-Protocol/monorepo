@@ -3,6 +3,8 @@ import { assetSymbols, SupportedAsset } from "@midas-capital/types";
 import { BigNumber, ethers, utils } from "ethers";
 
 import { ChainDeployConfig } from "../helpers";
+import { deployPythOracle } from "../helpers/oracles/pyth";
+import { PythAsset } from "../helpers/types";
 
 const assets = neondevnet.assets;
 const BN = ethers.utils.parseEther("1");
@@ -29,7 +31,26 @@ export const deployConfig: ChainDeployConfig = {
   cgId: neondevnet.specificParams.cgId,
 };
 
-export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
+const pythAssets: PythAsset[] = [
+  {
+    symbol: assetSymbols.WBTC,
+    feed: "f9c0172ba10dfa4d19088d94f5bf61d3b54d5bd7483a322a982e1373ee8ea31b",
+  },
+  {
+    symbol: assetSymbols.AAVE,
+    feed: "d6b3bc030a8bbb7dd9de46fb564c34bb7f860dead8985eb16a49cdc62f8ab3a5",
+  },
+  {
+    symbol: assetSymbols.WETH,
+    feed: "ca80ba6dc32e08d06f1aa886011eed1d77c77be9eb761cc10d72b7d0a2fd57a6",
+  },
+  {
+    symbol: assetSymbols.USDC,
+    feed: "41f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722",
+  },
+];
+
+export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Promise<void> => {
   const { deployer } = await getNamedAccounts();
   //// ORACLES
   const simplePO = await deployments.deploy("SimplePriceOracle", {
@@ -40,18 +61,22 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
   });
   console.log("SimplePriceOracle: ", simplePO.address);
 
-  const pyth = await deployments.deploy("Pyth", {
-    from: deployer,
-    args: [],
-    log: true,
-    waitConfirmations: 1,
-  });
-  console.log("Pyth: ", pyth.address);
-
   const _assets = assets.filter((a) => a.symbol !== assetSymbols.WNEON);
 
   const masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
   const simplePriceOracle = await ethers.getContract("SimplePriceOracle", deployer);
+
+  // deploy pyth oracle
+  await deployPythOracle({
+    run,
+    ethers,
+    getNamedAccounts,
+    deployments,
+    deployConfig,
+    assets,
+    pythAssets,
+  });
+
   let tx;
 
   for (const a of _assets) {
