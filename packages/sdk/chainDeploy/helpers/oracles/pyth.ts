@@ -1,6 +1,8 @@
 import { assetSymbols, SupportedAsset } from "@midas-capital/types";
 import { providers } from "ethers";
-import { AddressesProvider } from "../../../lib/contracts/typechain";
+
+import { AddressesProvider } from "../../../lib/contracts/typechain/AddressesProvider";
+import { PythPriceOracle } from "../../../lib/contracts/typechain/PythPriceOracle";
 import { PythDeployFnParams } from "../types";
 
 export const deployPythOracle = async ({
@@ -40,7 +42,8 @@ export const deployPythOracle = async ({
   });
   console.log("PythPriceOracle: ", pythOracle.address);
 
-  tx = await pythOracle.setPriceFeeds(
+  const pythPriceOracle = (await ethers.getContract("PythPriceOracle", deployer)) as PythPriceOracle;
+  tx = await pythPriceOracle.setPriceFeeds(
     pythAssets.map((p) => assets.find((a: SupportedAsset) => a.symbol === p.symbol)!.underlying),
     pythAssets.map((p) => p.feed)
   );
