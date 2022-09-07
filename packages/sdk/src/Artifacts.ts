@@ -22,6 +22,7 @@ import FuseFlywheelCoreArtifact from "../lib/contracts/out/FuseFlywheelCore.sol/
 import FuseFlywheelDynamicRewardsArtifacts from "../lib/contracts/out/FuseFlywheelDynamicRewards.sol/FuseFlywheelDynamicRewards.json";
 import JumpRateModelArtifact from "../lib/contracts/out/JumpRateModel.sol/JumpRateModel.json";
 import MasterPriceOracleArtifact from "../lib/contracts/out/MasterPriceOracle.sol/MasterPriceOracle.json";
+import MidasFlywheelCoreArtifact from "../lib/contracts/out/MidasFlywheelCore.sol/MidasFlywheelCore.json";
 import RewardsDistributorDelegateArtifact from "../lib/contracts/out/RewardsDistributorDelegate.sol/RewardsDistributorDelegate.json";
 import RewardsDistributorDelegatorArtifact from "../lib/contracts/out/RewardsDistributorDelegator.sol/RewardsDistributorDelegator.json";
 import SimplePriceOracleArtifact from "../lib/contracts/out/SimplePriceOracle.sol/SimplePriceOracle.json";
@@ -50,6 +51,7 @@ const JumpRateModel: Artifact = JumpRateModelArtifact;
 const JumpRateModel_MIMO_002_004_4_08: Artifact = JumpRateModelArtifact;
 const AnkrBNBInterestRateModel: Artifact = AnkrBNBInterestRateModelArtifact;
 const MasterPriceOracle: Artifact = MasterPriceOracleArtifact;
+const MidasFlywheelCore: Artifact = MidasFlywheelCoreArtifact;
 const FixedNativePriceOracle: Artifact = FixedNativePriceOracleArtifact;
 const CurveLpTokenPriceOracleNoRegistry: Artifact = CurveLpTokenPriceOracleNoRegistryArtifact;
 const UniswapLpTokenPriceOracle: Artifact = UniswapLpTokenPriceOracleArtifact;
@@ -81,6 +83,7 @@ const ARTIFACTS = {
   JumpRateModel_MIMO_002_004_4_08,
   AnkrBNBInterestRateModel,
   MasterPriceOracle,
+  MidasFlywheelCore,
   FixedNativePriceOracle,
   CurveLpTokenPriceOracleNoRegistry,
   UniswapLpTokenPriceOracle,
@@ -112,6 +115,7 @@ export {
   FuseFlywheelDynamicRewards,
   FlywheelStaticRewards,
   FuseFlywheelCore,
+  MidasFlywheelCore,
   JumpRateModel,
   JumpRateModel_MIMO_002_004_4_08,
   AnkrBNBInterestRateModel,

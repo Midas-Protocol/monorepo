@@ -7,6 +7,8 @@ const underlyingsMapping = {
   [polygon.chainId]: polygon.assets,
 };
 
+// 3BRL pluginL "0xBE0cCFA6B09eB1f3C0c62D406aE00F528e20594b",
+
 task("deploy-dynamic-rewards-market", "deploy dynamic rewards plugin with flywheels")
   .addParam("signer", "Named account to use for tx", "deployer", types.string)
   .addParam("comptroller", "Comptroller address", undefined, types.string)
@@ -19,7 +21,7 @@ task("deploy-dynamic-rewards-market", "deploy dynamic rewards plugin with flywhe
     const signer = await hre.ethers.getNamedSigner(taskArgs.signer);
     // @ts-ignore
     const midasSdkModule = await import("../../tests/utils/midasSdk");
-    const sdk = await midasSdkModule.getOrCreateMidas();
+    const sdk = await midasSdkModule.getOrCreateMidas(signer);
     const underlyings = underlyingsMapping[sdk.chainId];
 
     // task argument parsing
@@ -27,26 +29,35 @@ task("deploy-dynamic-rewards-market", "deploy dynamic rewards plugin with flywhe
     const contractName = taskArgs.contractName;
     const pluginExtraParams = taskArgs.pluginExtraParams.split(",");
     const rewardTokens = taskArgs.rewardTokens.split(",");
-    const fwAddresses = taskArgs.fwAddress.split(",");
+    const fwAddresses = taskArgs.fwAddresses.split(",");
     const symbol = taskArgs.symbol;
 
     const underlying = underlyings.find((a) => a.symbol === symbol)!.underlying;
     const marketAddress = await sdk.createComptroller(comptroller, signer).callStatic.cTokensByUnderlying(underlying);
-    const cToken = await sdk.createCErc20PluginRewardsDelegate(marketAddress);
+    const cToken = await sdk.createCErc20PluginRewardsDelegate(marketAddress, signer);
+    const comptrollerInstance = await sdk.createComptroller(comptroller, signer);
 
     const cTokenImplementation = await cToken.callStatic.implementation();
     console.log({ marketAddress });
     const deployArgs = [underlying, ...fwAddresses, ...pluginExtraParams, marketAddress, rewardTokens];
 
     // STEP 1: deploy plugins
-    console.log(`Deploying plugin with arguments: ${{ deployArgs }}`);
-    const pluginDeployment = await hre.deployments.deploy(contractName + "_" + symbol + "_" + comptroller, {
-      contract: contractName,
-      from: signer.address,
-      args: deployArgs,
-      log: true,
-    });
+    console.log(`Deploying plugin with arguments: ${JSON.stringify({ deployArgs })}`);
+    const pluginContract = await hre.ethers.getContractFactory("DotDotLpERC4626", signer);
+    const pluginDeployment = await pluginContract.deploy();
+    console.log(pluginDeployment.deployTransaction.hash);
+    if (pluginDeployment.deployTransaction.hash)
+      await hre.ethers.provider.waitForTransaction(pluginDeployment.deployTransaction.hash);
+
     console.log(`Plugin deployed successfully: ${pluginDeployment.address}`);
+    const plugin = await hre.ethers.getContractAt(contractName, pluginDeployment.address, signer);
+
+    const _asset = await plugin.asset();
+
+    if (_asset === hre.ethers.constants.AddressZero) {
+      await plugin.initialize(...deployArgs);
+      console.log(`Plugin initialised`);
+    }
 
     // STEP 2: whitelist plugins
     console.log(`Whitelisting plugin: ${pluginDeployment.address} ...`);
@@ -80,8 +91,11 @@ task("deploy-dynamic-rewards-market", "deploy dynamic rewards plugin with flywhe
     console.log("Market upgraded");
 
     // for each token and its flywheel, set up the market and its rewards
+
     for (const [idx, rewardToken] of rewardTokens.entries()) {
-      const flywheel = sdk.createFuseFlywheelCore(fwAddresses[idx]);
+      console.log(`Operating on flywheel: ${fwAddresses[idx]} with reward token ${rewardToken}`);
+
+      const flywheel = sdk.createFuseFlywheelCore(fwAddresses[idx], signer);
       const tokenRewards = await flywheel.callStatic.flywheelRewards();
 
       // Step 1: Approve fwc Rewards to get rewardTokens from it (!IMPORTANT to use "approve(address,address)", it has two approve functions)
@@ -89,9 +103,10 @@ task("deploy-dynamic-rewards-market", "deploy dynamic rewards plugin with flywhe
       const approveRewardReceipt = await approveRewardTx.wait();
       console.log(`ctoken approved for rewards for ${rewardToken}`, approveRewardReceipt.status, approveRewardTx.hash);
 
+      console.log(await flywheel.callStatic.getAllStrategies());
       // Step 2: enable marketAddress on flywheels
       try {
-        const fwAddTx = await flywheel.addStrategyForRewards(marketAddress);
+        const fwAddTx = await flywheel.addStrategyForRewards(marketAddress, { from: signer.address });
         const feAddTxResult = await fwAddTx.wait(2);
         console.log("enabled market on FW with status: ", feAddTxResult.status);
       } catch (e) {
@@ -100,7 +115,9 @@ task("deploy-dynamic-rewards-market", "deploy dynamic rewards plugin with flywhe
       }
       // Step 3: add Flywheels to market
       try {
-        await sdk.addFlywheelCoreToComptroller(flywheel.address, comptroller);
+        const fwAddTx = await comptrollerInstance._addRewardsDistributor(fwAddresses[idx]);
+        const feAddTxResult = await fwAddTx.wait(2);
+        console.log("enabled market on FW with status: ", feAddTxResult.status);
         console.log(`FW ${flywheel.address} added to comptroller`);
       } catch (e) {
         console.log("already added");
