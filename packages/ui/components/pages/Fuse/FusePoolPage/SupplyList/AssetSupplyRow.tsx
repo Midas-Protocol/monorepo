@@ -157,7 +157,18 @@ export const AssetSupplyRow = ({
       >
         <Td cursor={'pointer'} onClick={openModal} pr={0}>
           <Row mainAxisAlignment="flex-start" crossAxisAlignment="center">
-            <CTokenIcon size="sm" address={asset.underlyingToken} />
+            <PopoverTooltip
+              placement="top-start"
+              body={
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: asset.extraDocs || asset.underlyingSymbol,
+                  }}
+                />
+              }
+            >
+              <CTokenIcon size="sm" address={asset.underlyingToken} withTooltip={false} />
+            </PopoverTooltip>
             <VStack alignItems={'flex-start'} ml={2}>
               <PopoverTooltip
                 placement="top-start"
@@ -174,7 +185,7 @@ export const AssetSupplyRow = ({
                   textAlign={'left'}
                   fontSize={{ base: '2.8vw', sm: '0.9rem' }}
                 >
-                  {tokenData?.symbol ?? asset.underlyingSymbol}
+                  TEST{tokenData?.symbol ?? asset.underlyingSymbol}
                 </Text>
               </PopoverTooltip>
               <PopoverTooltip
@@ -194,13 +205,6 @@ export const AssetSupplyRow = ({
             </VStack>
 
             <HStack ml={2}>
-              {asset.underlyingSymbol &&
-                tokenData?.symbol &&
-                asset.underlyingSymbol.toLowerCase() !== tokenData?.symbol?.toLowerCase() && (
-                  <PopoverTooltip body={asset.underlyingSymbol}>
-                    <QuestionIcon />
-                  </PopoverTooltip>
-                )}
               <PopoverTooltip
                 placement="top-start"
                 body={`${scanUrl}/address/${asset.underlyingToken}`}
@@ -219,49 +223,6 @@ export const AssetSupplyRow = ({
                   <LinkIcon h={{ base: 3, sm: 6 }} color={cCard.txtColor} />
                 </Button>
               </PopoverTooltip>
-
-              {asset.plugin && (
-                <PopoverTooltip
-                  placement="top-start"
-                  body={
-                    <Text lineHeight="base">
-                      This market is using the <b>{pluginInfo?.name}</b> ERC4626 Strategy.
-                      <br />
-                      {pluginInfo?.apyDocsUrl ? (
-                        <ChakraLink
-                          href={pluginInfo.apyDocsUrl}
-                          isExternal
-                          variant={'color'}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                          }}
-                        >
-                          Vault details
-                        </ChakraLink>
-                      ) : (
-                        <>
-                          Read more about it{' '}
-                          <ChakraLink
-                            href={pluginInfo?.strategyDocsUrl || URL_MIDAS_DOCS}
-                            isExternal
-                            variant={'color'}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                            }}
-                          >
-                            in our Docs <ExternalLinkIcon mx="2px" />
-                          </ChakraLink>
-                        </>
-                      )}
-                      .
-                    </Text>
-                  }
-                >
-                  <span role="img" aria-label="plugin" style={{ fontSize: 18 }}>
-                    🔌
-                  </span>
-                </PopoverTooltip>
-              )}
             </HStack>
           </Row>
         </Td>
