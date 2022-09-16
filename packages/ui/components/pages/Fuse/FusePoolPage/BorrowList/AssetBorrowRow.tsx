@@ -66,7 +66,20 @@ export const AssetBorrowRow = ({ assets, asset, comptrollerAddress }: AssetBorro
       >
         <Td verticalAlign={'middle'}>
           <HStack width={isMobile ? '8%' : '6%'}>
-            <CTokenIcon size="sm" address={asset.underlyingToken} />
+            <PopoverTooltip
+              placement="top-start"
+              body={
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: asset.extraDocs || asset.underlyingSymbol,
+                  }}
+                />
+              }
+            >
+              <div>
+                <CTokenIcon size="sm" address={asset.underlyingToken} withTooltip={false} />
+              </div>
+            </PopoverTooltip>
             <PopoverTooltip
               placement="top-start"
               body={<div dangerouslySetInnerHTML={{ __html: asset.extraDocs || '' }} />}
