@@ -1,4 +1,4 @@
-import { ExternalLinkIcon, LinkIcon, QuestionIcon } from '@chakra-ui/icons';
+import { LinkIcon } from '@chakra-ui/icons';
 import {
   Button,
   Link as ChakraLink,
@@ -31,11 +31,9 @@ import {
   aprDays,
   DOWN_LIMIT,
   UP_LIMIT,
-  URL_MIDAS_DOCS,
 } from '@ui/constants/index';
 import { useMidas } from '@ui/context/MidasContext';
 import { useColors } from '@ui/hooks/useColors';
-import { usePluginInfo } from '@ui/hooks/usePluginInfo';
 import { useIsMobile } from '@ui/hooks/useScreenSize';
 import { useErrorToast, useInfoToast } from '@ui/hooks/useToast';
 import { useTokenData } from '@ui/hooks/useTokenData';
@@ -74,7 +72,6 @@ export const AssetSupplyRow = ({
     [asset.cToken, rewards]
   );
 
-  const { data: pluginInfo } = usePluginInfo(asset.plugin);
   const [aBNBcApr, setaBNBcApr] = useState('');
 
   useEffect(() => {
@@ -167,7 +164,9 @@ export const AssetSupplyRow = ({
                 />
               }
             >
-              <CTokenIcon size="sm" address={asset.underlyingToken} withTooltip={false} />
+              <div>
+                <CTokenIcon size="sm" address={asset.underlyingToken} withTooltip={false} />
+              </div>
             </PopoverTooltip>
             <VStack alignItems={'flex-start'} ml={2}>
               <PopoverTooltip
@@ -185,7 +184,7 @@ export const AssetSupplyRow = ({
                   textAlign={'left'}
                   fontSize={{ base: '2.8vw', sm: '0.9rem' }}
                 >
-                  TEST{tokenData?.symbol ?? asset.underlyingSymbol}
+                  {tokenData?.symbol ?? asset.underlyingSymbol}
                 </Text>
               </PopoverTooltip>
               <PopoverTooltip
