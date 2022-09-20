@@ -13,7 +13,7 @@ import {
   Tabs,
   Text,
 } from '@chakra-ui/react';
-import { MidasSdk } from '@midas-capital/sdk';
+import { ERC20Abi, MidasSdk } from '@midas-capital/sdk';
 import {
   ComptrollerErrorCodes,
   CTokenErrorCodes,
@@ -25,6 +25,7 @@ import axios from 'axios';
 import { BigNumber, constants, ContractTransaction, utils } from 'ethers';
 import LogRocket from 'logrocket';
 import { ReactNode, useMemo, useState } from 'react';
+import { getContract } from 'sdk/dist/cjs/src/MidasSdk/utils';
 
 import MaxBorrowSlider from '@ui/components/pages/Fuse/Modals/PoolModal/MaxBorrowSlider';
 import { CTokenIcon } from '@ui/components/shared/CTokenIcon';
@@ -84,6 +85,8 @@ const AmountSelect = ({
   const showEnableAsCollateral = !asset.membership && mode === FundOperationMode.SUPPLY;
   const [enableAsCollateral, setEnableAsCollateral] = useState(showEnableAsCollateral);
   const { cCard, cSwitch } = useColors();
+
+  const [needApproval, setNeedApproval] = useState<boolean>(true);
 
   const { data: maxBorrowInAsset } = useMaxAmount(FundOperationMode.BORROW, asset);
   const { data: myBalance } = useTokenBalance(asset.underlyingToken);
@@ -239,6 +242,11 @@ const AmountSelect = ({
       setUserAction(UserAction.NO_ACTION);
     }
   };
+
+  const token = getContract(asset.underlyingToken, ERC20Abi, midasSdk.signer);
+  token.callStatic.allowance(address, asset.cToken).then((allowance) => {
+    allowance.isZero() ? setNeedApproval(true) : setNeedApproval(false);
+  });
 
   return (
     <Column
@@ -413,7 +421,7 @@ const AmountSelect = ({
               onClick={onConfirm}
               isDisabled={!amountIsValid}
             >
-              {depositOrWithdrawAlert ?? 'Confirm'}
+              {depositOrWithdrawAlert ?? (needApproval ? 'Approve' : 'Confirm')}
             </Button>
           </Column>
         </>
