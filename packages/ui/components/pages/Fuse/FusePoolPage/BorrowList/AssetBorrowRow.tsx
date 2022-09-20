@@ -13,9 +13,9 @@ import { useColors } from '@ui/hooks/useColors';
 import { useIsMobile } from '@ui/hooks/useScreenSize';
 import { useTokenData } from '@ui/hooks/useTokenData';
 import { MarketData } from '@ui/types/TokensDataMap';
+import { abbreviator } from '@ui/utils/abbreviator';
 import { shortUsdFormatter, smallUsdFormatter } from '@ui/utils/bigUtils';
 import { getBlockTimePerMinuteByChainId } from '@ui/utils/networkData';
-
 interface AssetBorrowRowProps {
   assets: MarketData[];
   asset: MarketData;
@@ -151,7 +151,7 @@ export const AssetBorrowRow = ({ assets, asset, comptrollerAddress }: AssetBorro
                   Number(utils.formatUnits(asset.borrowBalance, asset.underlyingDecimals)) <
                     UP_LIMIT &&
                   '+'}{' '}
-                {tokenData?.symbol ?? asset.underlyingSymbol}
+                {abbreviator(tokenData?.symbol, 9) ?? abbreviator(asset.underlyingSymbol, 9)}
               </Text>
             </SimpleTooltip>
           </VStack>
