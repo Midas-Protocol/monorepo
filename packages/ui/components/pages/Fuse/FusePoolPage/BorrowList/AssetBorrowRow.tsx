@@ -13,7 +13,6 @@ import { useColors } from '@ui/hooks/useColors';
 import { useIsMobile } from '@ui/hooks/useScreenSize';
 import { useTokenData } from '@ui/hooks/useTokenData';
 import { MarketData } from '@ui/types/TokensDataMap';
-import { abbreviator } from '@ui/utils/abbreviator';
 import { shortUsdFormatter, smallUsdFormatter } from '@ui/utils/bigUtils';
 import { getBlockTimePerMinuteByChainId } from '@ui/utils/networkData';
 interface AssetBorrowRowProps {
@@ -121,7 +120,7 @@ export const AssetBorrowRow = ({ assets, asset, comptrollerAddress }: AssetBorro
           </Td>
         )}
 
-        <Td isNumeric verticalAlign={'top'}>
+        <Td isNumeric verticalAlign={'top'} textAlign={'right'}>
           <VStack alignItems={'flex-end'}>
             <SimpleTooltip
               label={asset.borrowBalanceFiat.toString()}
@@ -142,7 +141,14 @@ export const AssetBorrowRow = ({ assets, asset, comptrollerAddress }: AssetBorro
                 Number(utils.formatUnits(asset.borrowBalance, asset.underlyingDecimals)) >= UP_LIMIT
               }
             >
-              <Text color={cCard.txtColor} mt={1} fontSize={{ base: '2.8vw', sm: '0.8rem' }}>
+              <Text
+                color={cCard.txtColor}
+                mt={1}
+                fontSize={{ base: '2.8vw', sm: '0.8rem' }}
+                textOverflow={'ellipsis'}
+                maxWidth={'4rem'}
+                noOfLines={[1, 2]}
+              >
                 {smallUsdFormatter(
                   Number(utils.formatUnits(asset.borrowBalance, asset.underlyingDecimals))
                 ).replace('$', '')}
@@ -151,13 +157,15 @@ export const AssetBorrowRow = ({ assets, asset, comptrollerAddress }: AssetBorro
                   Number(utils.formatUnits(asset.borrowBalance, asset.underlyingDecimals)) <
                     UP_LIMIT &&
                   '+'}{' '}
-                {abbreviator(tokenData?.symbol, 9) ?? abbreviator(asset.underlyingSymbol, 9)}
+                <span title={tokenData?.symbol ?? asset.underlyingSymbol}>
+                  {tokenData?.symbol ?? asset.underlyingSymbol}
+                </span>
               </Text>
             </SimpleTooltip>
           </VStack>
         </Td>
 
-        <Td verticalAlign={'top'}>
+        <Td verticalAlign={'top'} textAlign={'right'}>
           <PopoverTooltip
             body={
               <>
@@ -181,11 +189,20 @@ export const AssetBorrowRow = ({ assets, asset, comptrollerAddress }: AssetBorro
                 {smallUsdFormatter(asset.liquidityFiat)}
                 {asset.liquidityFiat > DOWN_LIMIT && asset.liquidityFiat < UP_LIMIT && '+'}
               </Text>
-              <Text color={cCard.txtColor} fontSize={{ base: '2.8vw', sm: '0.8rem' }}>
-                {shortUsdFormatter(
-                  Number(utils.formatUnits(asset.liquidity, asset.underlyingDecimals))
-                ).replace('$', '')}{' '}
-                {tokenData?.symbol}
+              <Text
+                color={cCard.txtColor}
+                fontSize={{ base: '2.8vw', sm: '0.8rem' }}
+                textOverflow={'ellipsis'}
+                maxWidth={'4rem'}
+                noOfLines={[1, 2]}
+              >
+                {' '}
+                <span title={tokenData?.symbol}>
+                  {shortUsdFormatter(
+                    Number(utils.formatUnits(asset.liquidity, asset.underlyingDecimals))
+                  ).replace('$', '')}{' '}
+                  {tokenData?.symbol}
+                </span>
               </Text>
             </VStack>
           </PopoverTooltip>

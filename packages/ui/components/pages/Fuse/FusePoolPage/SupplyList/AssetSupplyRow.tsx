@@ -40,7 +40,6 @@ import { useIsMobile } from '@ui/hooks/useScreenSize';
 import { useErrorToast, useInfoToast } from '@ui/hooks/useToast';
 import { useTokenData } from '@ui/hooks/useTokenData';
 import { MarketData } from '@ui/types/TokensDataMap';
-import { abbreviator } from '@ui/utils/abbreviator';
 import { aprFormatter, smallUsdFormatter, tokenFormatter } from '@ui/utils/bigUtils';
 import { errorCodeToMessage } from '@ui/utils/errorCodeToMessage';
 import { getBlockTimePerMinuteByChainId } from '@ui/utils/networkData';
@@ -353,16 +352,27 @@ export const AssetSupplyRow = ({
                 Number(utils.formatUnits(asset.supplyBalance, asset.underlyingDecimals)) >= UP_LIMIT
               }
             >
-              <Text color={cCard.txtColor} mt={1} fontSize={{ base: '2.8vw', sm: '0.8rem' }}>
+              <Text
+                textOverflow={'ellipsis'}
+                maxWidth={'4rem'}
+                noOfLines={[1, 2]}
+                color={cCard.txtColor}
+                mt={1}
+                fontSize={{ base: '2.8vw', sm: '0.8rem' }}
+              >
                 {tokenFormatter(asset.supplyBalance, asset.underlyingDecimals)}
                 {Number(utils.formatUnits(asset.supplyBalance, asset.underlyingDecimals)) >
                   DOWN_LIMIT &&
                   Number(utils.formatUnits(asset.supplyBalance, asset.underlyingDecimals)) <
                     UP_LIMIT &&
                   '+'}{' '}
-                {abbreviator(tokenData?.extraData?.shortName, 9) ??
-                  abbreviator(tokenData?.symbol, 9) ??
-                  abbreviator(asset.underlyingSymbol, 9)}
+                <span
+                  title={
+                    tokenData?.extraData?.shortName ?? tokenData?.symbol ?? asset.underlyingSymbol
+                  }
+                >
+                  {tokenData?.extraData?.shortName ?? tokenData?.symbol ?? asset.underlyingSymbol}
+                </span>
               </Text>
             </SimpleTooltip>
           </VStack>
