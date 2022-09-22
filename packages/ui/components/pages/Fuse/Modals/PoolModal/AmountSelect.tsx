@@ -199,13 +199,17 @@ const AmountSelect = ({
       let tx: ContractTransaction;
 
       if (mode === FundOperationMode.SUPPLY) {
-        const resp = await midasSdk.supply(
-          asset.cToken,
-          asset.underlyingToken,
-          comptrollerAddress,
-          enableAsCollateral,
-          amount
-        );
+        let resp;
+
+        needApproval
+          ? (resp = await approveTest(asset.cToken, asset.underlyingToken))
+          : (resp = await midasSdk.supply(
+              asset.cToken,
+              asset.underlyingToken,
+              comptrollerAddress,
+              enableAsCollateral,
+              amount
+            ));
 
         if (resp.errorCode !== null) {
           fundOperationError(resp.errorCode, minBorrowUSD);
@@ -286,6 +290,21 @@ const AmountSelect = ({
   token.callStatic.allowance(address, asset.cToken).then((allowance) => {
     allowance.isZero() ? setNeedApproval(true) : setNeedApproval(false);
   });
+
+  const approveTest = async (cTokenAddress: string, underlyingTokenAddress: string) => {
+    const token = getContract(underlyingTokenAddress, ERC20Abi, midasSdk.signer);
+    const max = BigNumber.from(2);
+    // BigNumber.from(2).pow(BigNumber.from(256)).sub(constants.One);
+    const tx = await token.approve(cTokenAddress, max);
+    console.log(tx, 'approve test tx');
+    const resp = await tx.wait();
+    console.log(resp, 'approve test resp');
+    if (resp.confirmations === 1) {
+      return { tx, errorCode: null };
+    } else {
+      return { errorCode: 1 };
+    }
+  };
 
   return (
     <Column
