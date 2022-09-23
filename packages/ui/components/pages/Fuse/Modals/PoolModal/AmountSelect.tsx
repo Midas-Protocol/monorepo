@@ -252,7 +252,7 @@ const AmountSelect = ({
 
         LogRocket.track('Fuse-Withdraw');
       }
-      onClose();
+      !needApproval ? onClose() : setUserAction(UserAction.NO_ACTION);
     } catch (e) {
       handleGenericError(e, errorToast);
       setUserAction(UserAction.NO_ACTION);
@@ -529,7 +529,7 @@ const AmountSelect = ({
                 onClick={onConfirm}
                 isDisabled={!amountIsValid}
               >
-                {depositOrWithdrawAlert ?? (needApproval ? 'Approve' : 'Confirm')}
+                {depositOrWithdrawAlert ?? (needApproval ? 'Approve' : 'Supply')}
               </Button>
             )}
           </Column>
