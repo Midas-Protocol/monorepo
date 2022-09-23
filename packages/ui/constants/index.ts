@@ -74,3 +74,18 @@ export const aBNBcContractABI = [
 ];
 
 export const DISCORD_URL = 'https://discord.gg/85YxVuPeMt';
+export const MARKETS_COUNT_PER_PAGE = [10, 20, 30, 50];
+
+//Assets Filters
+export const REWARDS = 'Rewards';
+export const COLLATERAL = 'Collateral';
+export const PROTECTED = 'Protected';
+export const BORROWABLE = 'Borrowable';
+export const SEARCH = 'Search';
+
+export const RESERVE_FACTOR_TOOLTIP =
+  'The reserve factor defines the portion of borrower interest that is converted into reserves.';
+export const COLLATERAL_FACTOR_TOOLTIP =
+  'Collateral factor can range from 0-90%, and represents the proportionate increase in liquidity (borrow limit) that an account receives by depositing the asset.';
+export const ADMIN_FEE_TOOLTIP =
+  "The fraction of interest generated on a given asset that is routed to the asset's admin address as a fee.";
