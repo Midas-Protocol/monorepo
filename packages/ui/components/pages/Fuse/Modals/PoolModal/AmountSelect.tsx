@@ -202,7 +202,7 @@ const AmountSelect = ({
         let resp;
 
         needApproval
-          ? (resp = await approveTest(asset.cToken, asset.underlyingToken))
+          ? (resp = await midasSdk.approve(asset.cToken, asset.underlyingToken))
           : (resp = await midasSdk.supply(
               asset.cToken,
               asset.underlyingToken,
@@ -288,23 +288,8 @@ const AmountSelect = ({
 
   const token = getContract(asset.underlyingToken, ERC20Abi, midasSdk.signer);
   token.callStatic.allowance(address, asset.cToken).then((allowance) => {
-    allowance.isZero() ? setNeedApproval(true) : setNeedApproval(false);
+    allowance.lt(amount) ? setNeedApproval(true) : setNeedApproval(false);
   });
-
-  const approveTest = async (cTokenAddress: string, underlyingTokenAddress: string) => {
-    const token = getContract(underlyingTokenAddress, ERC20Abi, midasSdk.signer);
-    const max = BigNumber.from(2);
-    // BigNumber.from(2).pow(BigNumber.from(256)).sub(constants.One);
-    const tx = await token.approve(cTokenAddress, max);
-    console.log(tx, 'approve test tx');
-    const resp = await tx.wait();
-    console.log(resp, 'approve test resp');
-    if (resp.confirmations === 1) {
-      return { tx, errorCode: null };
-    } else {
-      return { errorCode: 1 };
-    }
-  };
 
   return (
     <Column

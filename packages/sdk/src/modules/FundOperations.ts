@@ -28,6 +28,18 @@ export function withFundOperations<TBase extends MidasBaseConstructor>(Base: TBa
       return { gasWEI, gasPrice, estimatedGas };
     }
 
+    async approve(cTokenAddress: string, underlyingTokenAddress: string) {
+      const token = getContract(underlyingTokenAddress, this.artifacts.EIP20Interface.abi, this.signer);
+      const max = BigNumber.from(2).pow(BigNumber.from(256)).sub(constants.One);
+      const tx = await token.approve(cTokenAddress, max);
+      const resp = await tx.wait();
+      if (resp.confirmations === 1) {
+        return { tx, errorCode: null };
+      } else {
+        return { errorCode: 1 };
+      }
+    }
+
     async supply(
       cTokenAddress: string,
       underlyingTokenAddress: string,
@@ -40,9 +52,7 @@ export function withFundOperations<TBase extends MidasBaseConstructor>(Base: TBa
 
       const hasApprovedEnough = (await token.callStatic.allowance(currentSignerAddress, cTokenAddress)).gte(amount);
       if (!hasApprovedEnough) {
-        const max = BigNumber.from(2).pow(BigNumber.from(256)).sub(constants.One);
-        const approveTx = await token.approve(cTokenAddress, max);
-        await approveTx.wait();
+        await this.approve(cTokenAddress, underlyingTokenAddress);
       }
       if (enableAsCollateral) {
         const comptrollerInstance = getContract(
@@ -74,8 +84,7 @@ export function withFundOperations<TBase extends MidasBaseConstructor>(Base: TBa
       const currentSignerAddress = await this.signer.getAddress();
       const hasApprovedEnough = (await token.callStatic.allowance(currentSignerAddress, cTokenAddress)).gte(amount);
       if (!hasApprovedEnough) {
-        const approveTx = await token.approve(cTokenAddress, max);
-        await approveTx.wait();
+        await this.approve(cTokenAddress, underlyingTokenAddress);
       }
       const cToken = getContract(cTokenAddress, this.artifacts.CErc20Delegate.abi, this.signer) as CErc20Delegate;
 
