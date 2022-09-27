@@ -1,5 +1,5 @@
 import { ArrowBackIcon } from '@chakra-ui/icons';
-import { AvatarGroup, Flex, Heading, HStack, Skeleton } from '@chakra-ui/react';
+import { AvatarGroup, HStack, Skeleton, Text } from '@chakra-ui/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { memo } from 'react';
@@ -9,7 +9,7 @@ import { MarketsList } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList'
 import PoolDetails from '@ui/components/pages/Fuse/FusePoolPage/PoolDetails';
 import { PoolStats } from '@ui/components/pages/Fuse/FusePoolPage/PoolStats';
 import { RewardsBanner } from '@ui/components/pages/Fuse/FusePoolPage/RewardsBanner';
-import FuseNavbar from '@ui/components/pages/Layout/FuseNavbar';
+import FusePageLayout from '@ui/components/pages/Layout/FusePageLayout';
 import { MidasBox } from '@ui/components/shared/Box';
 import { CTokenIcon } from '@ui/components/shared/CTokenIcon';
 import PageTransitionLayout from '@ui/components/shared/PageTransitionLayout';
@@ -17,7 +17,6 @@ import { TableSkeleton } from '@ui/components/shared/TableSkeleton';
 import { useMidas } from '@ui/context/MidasContext';
 import { useFlywheelRewardsForPool } from '@ui/hooks/rewards/useFlywheelRewardsForPool';
 import { useRewardTokensOfPool } from '@ui/hooks/rewards/useRewardTokensOfPool';
-import { useColors } from '@ui/hooks/useColors';
 import { useFusePoolData } from '@ui/hooks/useFusePoolData';
 
 const FusePoolPage = memo(() => {
@@ -29,8 +28,6 @@ const FusePoolPage = memo(() => {
   const { data: marketRewards } = useFlywheelRewardsForPool(data?.comptroller);
   const rewardTokens = useRewardTokensOfPool(data?.comptroller);
 
-  const { cPage } = useColors();
-
   return (
     <>
       {data && (
@@ -40,15 +37,7 @@ const FusePoolPage = memo(() => {
       )}
 
       <PageTransitionLayout>
-        <Flex
-          minH="100vh"
-          flexDir="column"
-          alignItems="flex-start"
-          bgColor={cPage.primary.bgColor}
-          justifyContent="flex-start"
-          mb={20}
-        >
-          <FuseNavbar />
+        <FusePageLayout>
           <HStack width={'100%'} mx="auto" spacing={6}>
             <ArrowBackIcon
               fontSize="2xl"
@@ -60,9 +49,9 @@ const FusePoolPage = memo(() => {
               }}
             />
             {data ? (
-              <Heading textAlign="left" fontSize="xl" fontWeight="bold">
+              <Text textAlign="left" variant="title" fontWeight="bold">
                 {data.name}
-              </Heading>
+              </Text>
             ) : (
               <Skeleton>Pool Name</Skeleton>
             )}
@@ -106,7 +95,7 @@ const FusePoolPage = memo(() => {
           </MidasBox>
 
           <PoolDetails data={data} />
-        </Flex>
+        </FusePageLayout>
       </PageTransitionLayout>
     </>
   );

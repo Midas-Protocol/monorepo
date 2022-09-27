@@ -8,7 +8,7 @@ import { Row } from '@ui/components/shared/Flex';
 import { GlowingBox } from '@ui/components/shared/GlowingBox';
 import { PopoverTooltip } from '@ui/components/shared/PopoverTooltip';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
-import { URL_MIDAS_DOCS } from '@ui/constants/index';
+import { MIDAS_DOCS_URL } from '@ui/constants/index';
 import { useMidas } from '@ui/context/MidasContext';
 import { useAssetClaimableRewards } from '@ui/hooks/rewards/useAssetClaimableRewards';
 import { useColors } from '@ui/hooks/useColors';
@@ -33,30 +33,30 @@ export const TokenName = ({ asset, poolAddress }: { asset: MarketData; poolAddre
     <Row mainAxisAlignment="flex-start" crossAxisAlignment="center">
       <CTokenIcon size="md" address={asset.underlyingToken} />
       <VStack alignItems={'flex-start'} ml={2} spacing={1}>
-        <PopoverTooltip
-          placement="top-start"
-          body={
-            <div
-              dangerouslySetInnerHTML={{
-                __html: asset.extraDocs || asset.underlyingSymbol,
-              }}
-            />
-          }
-        >
-          <Text textAlign={'left'} fontWeight="bold" fontSize={{ base: '2.8vw', sm: 'md' }}>
-            {tokenData?.symbol ?? asset.underlyingSymbol}
-          </Text>
-        </PopoverTooltip>
-        <PopoverTooltip
-          placement="top-start"
-          body={
-            'The Loan to Value (LTV) ratio defines the maximum amount of tokens in the pool that can be borrowed with a specific collateral. It’s expressed in percentage: if in a pool ETH has 75% LTV, for every 1 ETH worth of collateral, borrowers will be able to borrow 0.75 ETH worth of other tokens in the pool.'
-          }
-        >
-          <Text color={cCard.txtColor} fontSize={{ base: '2.8vw', sm: 'sm' }}>
-            {utils.formatUnits(asset.collateralFactor, 16)}% LTV
-          </Text>
-        </PopoverTooltip>
+        <HStack>
+          <PopoverTooltip
+            placement="top-start"
+            body={
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: asset.extraDocs || asset.underlyingSymbol,
+                }}
+              />
+            }
+          >
+            <Text fontWeight="bold" variant="mdText">
+              {tokenData?.symbol ?? asset.underlyingSymbol}
+            </Text>
+          </PopoverTooltip>
+          <PopoverTooltip
+            placement="top-start"
+            body={
+              'The Loan to Value (LTV) ratio defines the maximum amount of tokens in the pool that can be borrowed with a specific collateral. It’s expressed in percentage: if in a pool ETH has 75% LTV, for every 1 ETH worth of collateral, borrowers will be able to borrow 0.75 ETH worth of other tokens in the pool.'
+            }
+          >
+            <Text variant="xsText">{utils.formatUnits(asset.collateralFactor, 16)}% LTV</Text>
+          </PopoverTooltip>
+        </HStack>
         <VStack alignItems={'flex-start'} ml={2} spacing={1}>
           {claimableRewards && claimableRewards.length > 0 && (
             <SimpleTooltip label="This asset has rewards!">
@@ -75,11 +75,19 @@ export const TokenName = ({ asset, poolAddress }: { asset: MarketData; poolAddre
             </SimpleTooltip>
           )}
           {asset.isBorrowPaused ? (
-            <SimpleTooltip label="This asset cannot be borrowed">
-              <Badge variant="outline" colorScheme="purple" textTransform="capitalize">
-                Protected
-              </Badge>
-            </SimpleTooltip>
+            asset.isSupplyPaused ? (
+              <SimpleTooltip label="This asset cannot be supplied and borrowed">
+                <Badge variant="outline" colorScheme="gray" textTransform="capitalize">
+                  Deprecated
+                </Badge>
+              </SimpleTooltip>
+            ) : (
+              <SimpleTooltip label="This asset cannot be borrowed">
+                <Badge variant="outline" colorScheme="purple" textTransform="capitalize">
+                  Protected
+                </Badge>
+              </SimpleTooltip>
+            )
           ) : (
             <SimpleTooltip label="This asset can be borrowed">
               <Badge variant="outline" colorScheme="orange" textTransform="capitalize">
@@ -136,7 +144,7 @@ export const TokenName = ({ asset, poolAddress }: { asset: MarketData; poolAddre
                   <>
                     Read more about it{' '}
                     <ChakraLink
-                      href={pluginInfo?.strategyDocsUrl || URL_MIDAS_DOCS}
+                      href={pluginInfo?.strategyDocsUrl || MIDAS_DOCS_URL}
                       isExternal
                       variant={'color'}
                       onClick={(e) => {

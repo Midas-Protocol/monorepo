@@ -12,8 +12,8 @@ import "./tasks/oracle";
 import "./tasks/plugin";
 import "./tasks/pool";
 import "./tasks/irm";
-import "./tasks/swap/index";
 import "./tasks/fork";
+import "./tasks/swap";
 
 import "./tasks/addChainlinkFeeds";
 import "./tasks/createPoolsWithAssets";
@@ -23,21 +23,17 @@ import "./tasks/fluxFeed";
 import "./tasks/flywheel";
 import "./tasks/getPoolData";
 import "./tasks/liquidation";
-import "./tasks/pauseMarketMinting";
 import "./tasks/sendTestTokens";
-import "./tasks/swap";
 import "./tasks/upgradeMarket";
 import "./tasks/updateFuseFee";
 import "./tasks/upgradePools";
 import "./tasks/replaceDeployer";
 import "./tasks/replacePlugins";
-import "./tasks/one-time/setNonAccruingFlywheels";
 
+import "./tasks/one-time/setNonAccruingFlywheels";
 import "./tasks/one-time/dot-dot-bsc-plugins";
-// import "./tasks/one-time/jarvis-polygon-plugins";
 import "./tasks/one-time/jarvis-polygon-mimo-plugin";
 import "./tasks/one-time/arrakis-polygon-plugins";
-import "./tasks/oracle/increase-cardinality";
 
 dotEnvConfig();
 

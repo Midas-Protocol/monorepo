@@ -6,7 +6,6 @@ import {
   Flex,
   Grid,
   HStack,
-  IconButton,
   Input,
   Select,
   Table,
@@ -44,12 +43,14 @@ import { Liquidity } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/Li
 import { SupplyApy } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/SupplyApy';
 import { SupplyBalance } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/SupplyBalance';
 import { TokenName } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/TokenName';
+import { CIconButton } from '@ui/components/shared/Button';
 import { GlowingBox } from '@ui/components/shared/GlowingBox';
 import { PopoverTooltip } from '@ui/components/shared/PopoverTooltip';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
 import {
   BORROWABLE,
   COLLATERAL,
+  DEPRECARED,
   DOWN_LIMIT,
   MARKETS_COUNT_PER_PAGE,
   PROTECTED,
@@ -97,11 +98,15 @@ export const MarketsList = ({
     assetsAddress: assets.map((asset) => asset.cToken),
   });
 
-  const [collateralCounts, protectedCounts, borrowableCounts] = useMemo(() => {
+  const [collateralCounts, protectedCounts, borrowableCounts, deprecatedCounts] = useMemo(() => {
+    const availableAssets = assets.filter(
+      (asset) => !asset.isSupplyPaused || (asset.isSupplyPaused && asset.supplyBalanceFiat !== 0)
+    );
     return [
-      assets.filter((asset) => asset.membership).length,
-      assets.filter((asset) => asset.isBorrowPaused).length,
-      assets.filter((asset) => !asset.isBorrowPaused).length,
+      availableAssets.filter((asset) => asset.membership).length,
+      availableAssets.filter((asset) => asset.isBorrowPaused && !asset.isSupplyPaused).length,
+      availableAssets.filter((asset) => !asset.isBorrowPaused).length,
+      availableAssets.filter((asset) => asset.isBorrowPaused && asset.isSupplyPaused).length,
     ];
   }, [assets]);
 
@@ -118,8 +123,13 @@ export const MarketsList = ({
           allClaimableRewards &&
           allClaimableRewards[row.original.market.cToken]) ||
         (value.includes(COLLATERAL) && row.original.market.membership) ||
-        (value.includes(PROTECTED) && row.original.market.isBorrowPaused) ||
-        (value.includes(BORROWABLE) && !row.original.market.isBorrowPaused)
+        (value.includes(PROTECTED) &&
+          row.original.market.isBorrowPaused &&
+          !row.original.market.isSupplyPaused) ||
+        (value.includes(BORROWABLE) && !row.original.market.isBorrowPaused) ||
+        (value.includes(DEPRECARED) &&
+          row.original.market.isBorrowPaused &&
+          row.original.market.isSupplyPaused)
       ) {
         return true;
       } else {
@@ -173,7 +183,10 @@ export const MarketsList = ({
   };
 
   const data: Market[] = useMemo(() => {
-    return sortAssets(assets).map((asset) => {
+    const availableAssets = assets.filter(
+      (asset) => !asset.isSupplyPaused || (asset.isSupplyPaused && asset.supplyBalanceFiat !== 0)
+    );
+    return sortAssets(availableAssets).map((asset) => {
       return {
         market: asset,
         supplyApy: asset,
@@ -190,7 +203,11 @@ export const MarketsList = ({
     return [
       {
         accessorKey: 'market',
-        header: () => <Text py={2}>Market / LTV</Text>,
+        header: () => (
+          <Text variant="smText" fontWeight="bold" py={2}>
+            Market / LTV
+          </Text>
+        ),
         cell: ({ getValue }) => (
           <TokenName asset={getValue<MarketData>()} poolAddress={comptrollerAddress} />
         ),
@@ -204,7 +221,9 @@ export const MarketsList = ({
         cell: ({ getValue }) => <SupplyApy asset={getValue<MarketData>()} rewards={rewards} />,
         header: () => (
           <Box py={2} textAlign="end" alignItems="end">
-            <Text lineHeight="1.4">Supply APY</Text>
+            <Text variant="smText" fontWeight="bold" lineHeight={6}>
+              Supply APY
+            </Text>
           </Box>
         ),
         footer: (props) => props.column.id,
@@ -216,7 +235,9 @@ export const MarketsList = ({
         cell: ({ getValue }) => <BorrowApy asset={getValue<MarketData>()} />,
         header: () => (
           <Box py={2} textAlign="end" alignItems="end">
-            <Text lineHeight="1.4">Borrow APY</Text>
+            <Text variant="smText" fontWeight="bold" lineHeight={6}>
+              Borrow APY
+            </Text>
           </Box>
         ),
         footer: (props) => props.column.id,
@@ -227,9 +248,13 @@ export const MarketsList = ({
         id: 'supplyBalance',
         cell: ({ getValue }) => <SupplyBalance asset={getValue<MarketData>()} />,
         header: () => (
-          <VStack py={2} textAlign="end" alignItems="end">
-            <Text>Supply</Text>
-            <Text>Balance</Text>
+          <VStack py={2} textAlign="end" alignItems="end" spacing={0}>
+            <Text variant="smText" fontWeight="bold" lineHeight={6}>
+              Supply
+            </Text>
+            <Text variant="smText" fontWeight="bold">
+              Balance
+            </Text>
           </VStack>
         ),
         footer: (props) => props.column.id,
@@ -240,9 +265,13 @@ export const MarketsList = ({
         id: 'borrowBalance',
         cell: ({ getValue }) => <BorrowBalance asset={getValue<MarketData>()} />,
         header: () => (
-          <VStack py={2} textAlign="end" alignItems="end">
-            <Text>Borrow</Text>
-            <Text>Balance</Text>
+          <VStack py={2} textAlign="end" alignItems="end" spacing={0}>
+            <Text variant="smText" fontWeight="bold" lineHeight={6}>
+              Borrow
+            </Text>
+            <Text variant="smText" fontWeight="bold">
+              Balance
+            </Text>
           </VStack>
         ),
         footer: (props) => props.column.id,
@@ -253,7 +282,7 @@ export const MarketsList = ({
         id: 'liquidity',
         cell: ({ getValue }) => <Liquidity asset={getValue<MarketData>()} />,
         header: () => (
-          <Text textAlign="end" py={2}>
+          <Text textAlign="end" py={2} variant="smText" fontWeight="bold">
             Liquidity
           </Text>
         ),
@@ -266,7 +295,11 @@ export const MarketsList = ({
         cell: ({ getValue }) => (
           <Collateral asset={getValue<MarketData>()} comptrollerAddress={comptrollerAddress} />
         ),
-        header: () => <Text py={2}>Collateral</Text>,
+        header: () => (
+          <Text py={2} variant="smText" fontWeight="bold">
+            Collateral
+          </Text>
+        ),
         footer: (props) => props.column.id,
         sortingFn: assetSort,
         // enableSorting: false,
@@ -285,12 +318,14 @@ export const MarketsList = ({
   const [isCollateralFiltered, setIsCollateralFiltered] = useState<boolean>(true);
   const [isRewardsFiltered, setIsRewardsFiltered] = useState<boolean>(true);
   const [isProtectedFiltered, setIsProtectedFiltered] = useState<boolean>(true);
+  const [isDeprecatedFiltered, setIsDeprecatedFiltered] = useState<boolean>(true);
   const [isBorrowableFiltered, setIsBorrowableFiltered] = useState<boolean>(true);
   const [globalFilter, setGlobalFilter] = useState<string[]>([
     REWARDS,
     COLLATERAL,
     PROTECTED,
     BORROWABLE,
+    DEPRECARED,
   ]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [searchText, setSearchText] = useState('');
@@ -359,6 +394,16 @@ export const MarketsList = ({
     setIsProtectedFiltered(!isProtectedFiltered);
   };
 
+  const onDeprecatedFiltered = () => {
+    if (!isDeprecatedFiltered) {
+      setGlobalFilter([...globalFilter, DEPRECARED]);
+    } else {
+      setGlobalFilter(globalFilter.filter((f) => f !== DEPRECARED));
+    }
+
+    setIsDeprecatedFiltered(!isDeprecatedFiltered);
+  };
+
   const onBorrowableFiltered = () => {
     if (!isBorrowableFiltered) {
       setGlobalFilter([...globalFilter, BORROWABLE]);
@@ -391,26 +436,30 @@ export const MarketsList = ({
         flexDirection={{ base: 'column', sm: 'row' }}
         gap={4}
       >
-        <Flex flexDirection={{ base: 'column', lg: 'row' }} gap={8}>
+        <Flex flexDirection={{ base: 'column', lg: 'row' }} gap={{ base: 4, lg: 8 }}>
           <HStack>
-            <Text>Your Supply Balance :</Text>
+            <Text variant="mdText" width="max-content">
+              Your Supply Balance :
+            </Text>
             <SimpleTooltip
               label={supplyBalanceFiat.toString()}
               isDisabled={supplyBalanceFiat === DOWN_LIMIT || supplyBalanceFiat > UP_LIMIT}
             >
-              <Text fontSize={24}>
+              <Text variant="lgText" fontWeight="bold">
                 {smallUsdFormatter(supplyBalanceFiat)}
                 {supplyBalanceFiat > DOWN_LIMIT && supplyBalanceFiat < UP_LIMIT && '+'}
               </Text>
             </SimpleTooltip>
           </HStack>
           <HStack>
-            <Text>Your Borrow Balance :</Text>
+            <Text variant="mdText" width="max-content">
+              Your Borrow Balance :
+            </Text>
             <SimpleTooltip
               label={borrowBalanceFiat.toString()}
               isDisabled={borrowBalanceFiat === DOWN_LIMIT || borrowBalanceFiat > UP_LIMIT}
             >
-              <Text fontSize={24}>
+              <Text variant="lgText" fontWeight="bold">
                 {smallUsdFormatter(borrowBalanceFiat)}
                 {borrowBalanceFiat > DOWN_LIMIT && borrowBalanceFiat < UP_LIMIT && '+'}
               </Text>
@@ -425,7 +474,7 @@ export const MarketsList = ({
           alignItems="flex-end"
         >
           <HStack>
-            {!isMobile && <Text>Rows Per Page :</Text>}
+            {!isMobile && <Text variant="smText">Rows Per Page :</Text>}
             <Select
               value={pagination.pageSize}
               onChange={(e) => {
@@ -441,7 +490,7 @@ export const MarketsList = ({
             </Select>
           </HStack>
           <HStack gap={2}>
-            <Text>
+            <Text variant="smText">
               {table.getFilteredRowModel().rows.length === 0
                 ? 0
                 : pagination.pageIndex * pagination.pageSize + 1}{' '}
@@ -453,7 +502,7 @@ export const MarketsList = ({
               of {table.getFilteredRowModel().rows.length}
             </Text>
             <HStack>
-              <IconButton
+              <CIconButton
                 variant="_outline"
                 aria-label="toPrevious"
                 icon={<ChevronLeftIcon fontSize={30} />}
@@ -461,7 +510,7 @@ export const MarketsList = ({
                 disabled={!table.getCanPreviousPage()}
                 isRound
               />
-              <IconButton
+              <CIconButton
                 variant="_outline"
                 aria-label="toNext"
                 icon={<ChevronRightIcon fontSize={30} />}
@@ -481,23 +530,24 @@ export const MarketsList = ({
         gap={4}
       >
         <Flex className="pagination" flexDirection={{ base: 'column', lg: 'row' }} gap={4}>
-          <Text fontSize={24}>Assets</Text>
+          <Text variant="title">Assets</Text>
           <Grid
             templateColumns={{
               base: 'repeat(1, 1fr)',
-              lg: 'repeat(4, 1fr)',
               sm: 'repeat(2, 1fr)',
+              md: 'repeat(2, 1fr)',
+              lg: 'repeat(5, 1fr)',
             }}
             gap={2}
           >
             <PopoverTooltip
               body={
                 <VStack alignItems="flex-start">
-                  <Text fontSize={18} fontWeight="bold">
+                  <Text variant="mdText" fontWeight="bold">
                     Rewards Asset
                   </Text>
-                  <Text>Assets that have rewards.</Text>
-                  <Text>Click to filter</Text>
+                  <Text variant="smText">Assets that have rewards.</Text>
+                  <Text variant="smText">Click to filter</Text>
                 </VStack>
               }
             >
@@ -505,19 +555,19 @@ export const MarketsList = ({
                 variant="ghost"
                 onClick={onRewardsFiltered}
                 p={0}
-                minWidth="150px"
+                width="140px"
                 disabled={!allClaimableRewards || Object.keys(allClaimableRewards).length === 0}
               >
                 {isRewardsFiltered ? (
                   <GlowingBox height="100%" width="100%">
-                    <Center width="100%" height="100%" borderRadius="xl">
+                    <Center width="100%" height="100%" borderRadius="xl" pt="2px">
                       {`${
                         (allClaimableRewards && Object.keys(allClaimableRewards).length) || 0
                       } Rewards`}
                     </Center>
                   </GlowingBox>
                 ) : (
-                  <Center width="100%" height="100%" fontWeight="bold" borderRadius="xl">
+                  <Center width="100%" height="100%" fontWeight="bold" borderRadius="xl" pt="2px">
                     {`${
                       (allClaimableRewards && Object.keys(allClaimableRewards).length) || 0
                     } Rewards`}
@@ -540,32 +590,10 @@ export const MarketsList = ({
                 variant={isCollateralFiltered ? 'outline' : 'ghost'}
                 colorScheme="cyan"
                 onClick={onCollateralFiltered}
-                minWidth="150px"
+                width="140px"
                 disabled={collateralCounts === 0}
               >
-                <Center fontWeight="bold">{`${collateralCounts} Collateral`}</Center>
-              </Button>
-            </PopoverTooltip>
-
-            <PopoverTooltip
-              body={
-                <VStack alignItems="flex-start">
-                  <Text fontSize={18} fontWeight="bold">
-                    Protected Asset
-                  </Text>
-                  <Text>Assets cannot be borrowed.</Text>
-                  <Text>Click to filter</Text>
-                </VStack>
-              }
-            >
-              <Button
-                variant={isProtectedFiltered ? 'outline' : 'ghost'}
-                colorScheme="purple"
-                onClick={onProtectedFiltered}
-                minWidth="150px"
-                disabled={protectedCounts === 0}
-              >
-                <Center fontWeight="bold">{`${protectedCounts} Protected`}</Center>
+                <Center fontWeight="bold" pt="2px">{`${collateralCounts} Collateral`}</Center>
               </Button>
             </PopoverTooltip>
             <PopoverTooltip
@@ -583,12 +611,56 @@ export const MarketsList = ({
                 variant={isBorrowableFiltered ? 'outline' : 'ghost'}
                 colorScheme="orange"
                 onClick={onBorrowableFiltered}
-                minWidth="150px"
+                width="140px"
                 disabled={borrowableCounts === 0}
+                pt="2px"
               >
                 <Center fontWeight="bold">{`${borrowableCounts} Borrowable`}</Center>
               </Button>
             </PopoverTooltip>
+            <PopoverTooltip
+              body={
+                <VStack alignItems="flex-start">
+                  <Text fontSize={18} fontWeight="bold">
+                    Protected Asset
+                  </Text>
+                  <Text>Assets that cannot be borrowed.</Text>
+                  <Text>Click to filter</Text>
+                </VStack>
+              }
+            >
+              <Button
+                variant={isProtectedFiltered ? 'outline' : 'ghost'}
+                colorScheme="purple"
+                onClick={onProtectedFiltered}
+                width="140px"
+                disabled={protectedCounts === 0}
+              >
+                <Center fontWeight="bold" pt="2px">{`${protectedCounts} Protected`}</Center>
+              </Button>
+            </PopoverTooltip>
+            {deprecatedCounts !== 0 && (
+              <PopoverTooltip
+                body={
+                  <VStack alignItems="flex-start">
+                    <Text fontSize={18} fontWeight="bold">
+                      Deprecated Asset
+                    </Text>
+                    <Text>Assets that cannot be supplied and borrowed.</Text>
+                    <Text>Click to filter</Text>
+                  </VStack>
+                }
+              >
+                <Button
+                  variant={isDeprecatedFiltered ? 'outline' : 'ghost'}
+                  colorScheme="grey"
+                  onClick={onDeprecatedFiltered}
+                  width="140px"
+                >
+                  <Center fontWeight="bold" pt="2px">{`${deprecatedCounts} Deprecated`}</Center>
+                </Button>
+              </PopoverTooltip>
+            )}
           </Grid>
         </Flex>
         <Flex className="searchAsset" justifyContent="flex-end" alignItems="flex-end">
@@ -611,7 +683,6 @@ export const MarketsList = ({
                     onClick={header.column.getToggleSortingHandler()}
                     border="none"
                     color={cCard.txtColor}
-                    fontSize={16}
                     textTransform="capitalize"
                     py={2}
                     cursor="pointer"
