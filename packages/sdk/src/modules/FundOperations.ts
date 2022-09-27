@@ -51,9 +51,9 @@ export function withFundOperations<TBase extends MidasBaseConstructor>(Base: TBa
       const currentSignerAddress = await this.signer.getAddress();
 
       const hasApprovedEnough = (await token.callStatic.allowance(currentSignerAddress, cTokenAddress)).gte(amount);
-      if (!hasApprovedEnough) {
-        await this.approve(cTokenAddress, underlyingTokenAddress);
-      }
+      // if (!hasApprovedEnough) {
+      //   await this.approve(cTokenAddress, underlyingTokenAddress);
+      // }
       if (enableAsCollateral) {
         const comptrollerInstance = getContract(
           comptrollerAddress,
@@ -81,11 +81,11 @@ export function withFundOperations<TBase extends MidasBaseConstructor>(Base: TBa
 
       const token = getContract(underlyingTokenAddress, this.artifacts.EIP20Interface.abi, this.signer);
 
-      const currentSignerAddress = await this.signer.getAddress();
-      const hasApprovedEnough = (await token.callStatic.allowance(currentSignerAddress, cTokenAddress)).gte(amount);
-      if (!hasApprovedEnough) {
-        await this.approve(cTokenAddress, underlyingTokenAddress);
-      }
+      // const currentSignerAddress = await this.signer.getAddress();
+      // const hasApprovedEnough = (await token.callStatic.allowance(currentSignerAddress, cTokenAddress)).gte(amount);
+      // if (!hasApprovedEnough) {
+      //   this.approve(cTokenAddress, underlyingTokenAddress);
+      // }
       const cToken = getContract(cTokenAddress, this.artifacts.CErc20Delegate.abi, this.signer) as CErc20Delegate;
 
       const response = (await cToken.callStatic.repayBorrow(isRepayingMax ? max : amount)) as BigNumber;
