@@ -8,8 +8,8 @@ import { getContract } from "../MidasSdk/utils";
 
 export function withFundOperations<TBase extends MidasBaseConstructor>(Base: TBase) {
   return class FundOperations extends Base {
-    async fetchGasForCall(amount: BigNumber, address: string) {
-      const estimatedGas = BigNumber.from(
+    async getProperGasLimit(amount: BigNumber, address: string) {
+      return BigNumber.from(
         (
           (
             await this.provider.estimateGas({
@@ -19,13 +19,6 @@ export function withFundOperations<TBase extends MidasBaseConstructor>(Base: TBa
           ).toNumber() * 3.13
         ).toFixed(0)
       );
-
-      const res = await axios.get("/api/getGasPrice");
-      const average = res.data.average;
-      const gasPrice = utils.parseUnits(average.toString(), "gwei");
-      const gasWEI = estimatedGas.mul(gasPrice);
-
-      return { gasWEI, gasPrice, estimatedGas };
     }
 
     async supply(
@@ -56,9 +49,9 @@ export function withFundOperations<TBase extends MidasBaseConstructor>(Base: TBa
       const cToken = getContract(cTokenAddress, this.artifacts.CErc20Delegate.abi, this.signer) as CErc20Delegate;
 
       const address = await this.signer.getAddress();
-      const { estimatedGas } = await this.fetchGasForCall(amount, address);
+      const gasLimit = await this.getProperGasLimit(amount, address);
 
-      const response = (await cToken.callStatic.mint(amount, { gasLimit: estimatedGas })) as BigNumber;
+      const response = (await cToken.callStatic.mint(amount, { gasLimit })) as BigNumber;
 
       if (response.toString() !== "0") {
         const errorCode = parseInt(response.toString());
