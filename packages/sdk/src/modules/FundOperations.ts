@@ -55,7 +55,10 @@ export function withFundOperations<TBase extends MidasBaseConstructor>(Base: TBa
       }
       const cToken = getContract(cTokenAddress, this.artifacts.CErc20Delegate.abi, this.signer) as CErc20Delegate;
 
-      const response = (await cToken.callStatic.mint(amount)) as BigNumber;
+      const address = await this.signer.getAddress();
+      const { estimatedGas } = await this.fetchGasForCall(amount, address);
+
+      const response = (await cToken.callStatic.mint(amount, { gasLimit: estimatedGas })) as BigNumber;
 
       if (response.toString() !== "0") {
         const errorCode = parseInt(response.toString());
