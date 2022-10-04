@@ -32,17 +32,9 @@ describe("FundOperation", () => {
 
   describe("fetchGasForCall", () => {
     it("calculate correct gas fee", async () => {
-      const gasPriceAvg = 5;
-      axiosStub = stub(axios, "get").resolves({ data: { average: gasPriceAvg } });
-      const { gasWEI, gasPrice, estimatedGas } = await fundOperations.fetchGasForCall(
-        BigNumber.from(1),
-        mkAddress("0x123")
-      );
+      const gasLimit = await fundOperations.getProperGasLimit(BigNumber.from(1), mkAddress("0x123"));
 
-      expect(axiosStub).be.calledOnce;
-      expect(estimatedGas.toNumber()).to.be.equal(9);
-      expect(gasPrice.toNumber()).to.be.equal(gasPriceAvg * 1000000000);
-      expect(gasWEI.toNumber()).to.be.equal(9 * gasPriceAvg * 1000000000);
+      expect(gasLimit.toNumber()).to.be.equal(9);
     });
   });
 
