@@ -32,12 +32,8 @@ export function withFundOperations<TBase extends MidasBaseConstructor>(Base: TBa
       const token = getContract(underlyingTokenAddress, this.artifacts.EIP20Interface.abi, this.signer);
       const max = BigNumber.from(2).pow(BigNumber.from(256)).sub(constants.One);
       const tx = await token.approve(cTokenAddress, max);
-      const resp = await tx.wait();
-      if (resp.confirmations === 1) {
-        return { tx, errorCode: null };
-      } else {
-        return { errorCode: 1 };
-      }
+      await tx.wait();
+      return { tx, errorCode: null };
     }
 
     async supply(
@@ -47,13 +43,6 @@ export function withFundOperations<TBase extends MidasBaseConstructor>(Base: TBa
       enableAsCollateral: boolean,
       amount: BigNumber
     ) {
-      const token = getContract(underlyingTokenAddress, this.artifacts.EIP20Interface.abi, this.signer);
-      const currentSignerAddress = await this.signer.getAddress();
-
-      const hasApprovedEnough = (await token.callStatic.allowance(currentSignerAddress, cTokenAddress)).gte(amount);
-      // if (!hasApprovedEnough) {
-      //   await this.approve(cTokenAddress, underlyingTokenAddress);
-      // }
       if (enableAsCollateral) {
         const comptrollerInstance = getContract(
           comptrollerAddress,
@@ -79,13 +68,6 @@ export function withFundOperations<TBase extends MidasBaseConstructor>(Base: TBa
     async repay(cTokenAddress: string, underlyingTokenAddress: string, isRepayingMax: boolean, amount: BigNumber) {
       const max = BigNumber.from(2).pow(BigNumber.from(256)).sub(constants.One);
 
-      const token = getContract(underlyingTokenAddress, this.artifacts.EIP20Interface.abi, this.signer);
-
-      // const currentSignerAddress = await this.signer.getAddress();
-      // const hasApprovedEnough = (await token.callStatic.allowance(currentSignerAddress, cTokenAddress)).gte(amount);
-      // if (!hasApprovedEnough) {
-      //   this.approve(cTokenAddress, underlyingTokenAddress);
-      // }
       const cToken = getContract(cTokenAddress, this.artifacts.CErc20Delegate.abi, this.signer) as CErc20Delegate;
 
       const response = (await cToken.callStatic.repayBorrow(isRepayingMax ? max : amount)) as BigNumber;

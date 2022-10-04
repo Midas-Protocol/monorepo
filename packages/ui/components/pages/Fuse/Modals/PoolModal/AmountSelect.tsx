@@ -211,7 +211,6 @@ const AmountSelect = ({
               enableAsCollateral,
               amount
             ));
-
         if (resp.errorCode !== null) {
           fundOperationError(resp.errorCode, minBorrowUSD);
         } else {
@@ -293,11 +292,12 @@ const AmountSelect = ({
     }
   }, [mode, updateAvailableToWithdraw]);
 
-  const token = getContract(asset.underlyingToken, ERC20Abi, midasSdk.signer);
-  token.callStatic.allowance(address, asset.cToken).then((allowance) => {
-    allowance.lt(amount) ? setNeedApproval(true) : setNeedApproval(false);
-  });
-
+  useEffect(() => {
+    const token = getContract(asset.underlyingToken, ERC20Abi, midasSdk.signer);
+    token.callStatic.allowance(address, asset.cToken).then((allowance) => {
+      allowance.lt(amount) ? setNeedApproval(true) : setNeedApproval(false);
+    });
+  }, [address, amount, asset.cToken, asset.underlyingToken, midasSdk.signer]);
   return (
     <Column
       id="fundOperationModal"
