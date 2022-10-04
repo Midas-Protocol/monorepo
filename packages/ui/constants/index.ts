@@ -76,14 +76,14 @@ export const aBNBcContractABI = [
   },
 ];
 
-export const MARKETS_COUNT_PER_PAGE = [10, 20, 30, 50];
+export const MARKETS_COUNT_PER_PAGE = [25, 40, 60];
 
 //Assets Filters
 export const REWARDS = 'Rewards';
 export const COLLATERAL = 'Collateral';
 export const PROTECTED = 'Protected';
 export const BORROWABLE = 'Borrowable';
-export const DEPRECARED = 'Deprecated';
+export const DEPRECATED = 'Deprecated';
 export const SEARCH = 'Search';
 
 export const RESERVE_FACTOR_TOOLTIP =

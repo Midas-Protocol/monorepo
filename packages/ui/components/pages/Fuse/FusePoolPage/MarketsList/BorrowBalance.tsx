@@ -28,7 +28,16 @@ export const BorrowBalance = ({ asset }: { asset: MarketData }) => {
       <SimpleTooltip
         label={`${longFormat(borrowBalance)} ${tokenData?.symbol ?? asset.underlyingSymbol}`}
       >
-        <Text color={cCard.txtColor} mt={1} variant="smText">
+        <Text
+          id="borrowBalance"
+          mt={1}
+          variant="smText"
+          maxWidth={'90px'}
+          textOverflow={'ellipsis'}
+          align={'right'}
+          whiteSpace="nowrap"
+          overflow="hidden"
+        >
           {smallUsdFormatter(borrowBalance).replace('$', '')}
           {borrowBalance > DOWN_LIMIT && borrowBalance < UP_LIMIT && '+'}{' '}
           {tokenData?.symbol ?? asset.underlyingSymbol}

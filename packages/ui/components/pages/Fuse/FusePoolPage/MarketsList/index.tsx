@@ -50,7 +50,7 @@ import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
 import {
   BORROWABLE,
   COLLATERAL,
-  DEPRECARED,
+  DEPRECATED,
   DOWN_LIMIT,
   MARKETS_COUNT_PER_PAGE,
   PROTECTED,
@@ -127,7 +127,7 @@ export const MarketsList = ({
           row.original.market.isBorrowPaused &&
           !row.original.market.isSupplyPaused) ||
         (value.includes(BORROWABLE) && !row.original.market.isBorrowPaused) ||
-        (value.includes(DEPRECARED) &&
+        (value.includes(DEPRECATED) &&
           row.original.market.isBorrowPaused &&
           row.original.market.isSupplyPaused)
       ) {
@@ -156,14 +156,18 @@ export const MarketsList = ({
       );
       return rowASupplyAPY > rowBSupplyAPY ? 1 : -1;
     } else if (columnId === 'borrowApy') {
-      const rowABorrowAPY = midasSdk.ratePerBlockToAPY(
-        rowA.original.market.borrowRatePerBlock,
-        getBlockTimePerMinuteByChainId(currentChain.id)
-      );
-      const rowBBorrowAPY = midasSdk.ratePerBlockToAPY(
-        rowB.original.market.borrowRatePerBlock,
-        getBlockTimePerMinuteByChainId(currentChain.id)
-      );
+      const rowABorrowAPY = !rowA.original.market.isBorrowPaused
+        ? midasSdk.ratePerBlockToAPY(
+            rowA.original.market.borrowRatePerBlock,
+            getBlockTimePerMinuteByChainId(currentChain.id)
+          )
+        : -1;
+      const rowBBorrowAPY = !rowB.original.market.isBorrowPaused
+        ? midasSdk.ratePerBlockToAPY(
+            rowB.original.market.borrowRatePerBlock,
+            getBlockTimePerMinuteByChainId(currentChain.id)
+          )
+        : -1;
       return rowABorrowAPY > rowBBorrowAPY ? 1 : -1;
     } else if (columnId === 'supplyBalance') {
       return rowA.original.market.supplyBalanceFiat > rowB.original.market.supplyBalanceFiat
@@ -325,7 +329,7 @@ export const MarketsList = ({
     COLLATERAL,
     PROTECTED,
     BORROWABLE,
-    DEPRECARED,
+    DEPRECATED,
   ]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [searchText, setSearchText] = useState('');
@@ -396,9 +400,9 @@ export const MarketsList = ({
 
   const onDeprecatedFiltered = () => {
     if (!isDeprecatedFiltered) {
-      setGlobalFilter([...globalFilter, DEPRECARED]);
+      setGlobalFilter([...globalFilter, DEPRECATED]);
     } else {
-      setGlobalFilter(globalFilter.filter((f) => f !== DEPRECARED));
+      setGlobalFilter(globalFilter.filter((f) => f !== DEPRECATED));
     }
 
     setIsDeprecatedFiltered(!isDeprecatedFiltered);
@@ -530,7 +534,9 @@ export const MarketsList = ({
         gap={4}
       >
         <Flex className="pagination" flexDirection={{ base: 'column', lg: 'row' }} gap={4}>
-          <Text variant="title">Assets</Text>
+          <Text paddingTop="2px" variant="title">
+            Assets
+          </Text>
           <Grid
             templateColumns={{
               base: 'repeat(1, 1fr)',

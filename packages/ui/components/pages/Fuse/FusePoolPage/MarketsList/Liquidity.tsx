@@ -41,7 +41,16 @@ export const Liquidity = ({ asset }: { asset: MarketData }) => {
         <SimpleTooltip
           label={`${longFormat(liquidity)} ${tokenData?.symbol ?? asset.underlyingSymbol}`}
         >
-          <Text color={cCard.txtColor} mt={1} variant="smText">
+          <Text
+            id="liquidity"
+            mt={1}
+            variant="smText"
+            maxWidth={'90px'}
+            textOverflow={'ellipsis'}
+            align={'right'}
+            whiteSpace="nowrap"
+            overflow="hidden"
+          >
             {shortUsdFormatter(liquidity).replace('$', '')}
             {liquidity > DOWN_LIMIT && liquidity < UP_LIMIT && '+'}{' '}
             {tokenData?.symbol ?? asset.underlyingSymbol}
