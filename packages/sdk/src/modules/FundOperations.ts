@@ -51,14 +51,14 @@ export function withFundOperations<TBase extends MidasBaseConstructor>(Base: TBa
       const address = await this.signer.getAddress();
       const gasLimit = await this.getProperGasLimit(amount, address);
 
-      const response = (await cToken.callStatic.mint(amount, { gasLimit })) as BigNumber;
+      const response = (await cToken.callStatic.mint(amount, { gasLimit, from: address })) as BigNumber;
 
       if (response.toString() !== "0") {
         const errorCode = parseInt(response.toString());
         return { errorCode };
       }
 
-      const tx: ContractTransaction = await cToken.mint(amount, { gasLimit });
+      const tx: ContractTransaction = await cToken.mint(amount, { gasLimit, from: address });
       return { tx, errorCode: null };
     }
 
