@@ -58,7 +58,7 @@ export function withFundOperations<TBase extends MidasBaseConstructor>(Base: TBa
         return { errorCode };
       }
 
-      const tx: ContractTransaction = await cToken.mint(amount);
+      const tx: ContractTransaction = await cToken.mint(amount, { gasLimit });
       return { tx, errorCode: null };
     }
 
