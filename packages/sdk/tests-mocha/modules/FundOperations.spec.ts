@@ -3,7 +3,6 @@ import axios from "axios";
 import { BigNumber, Contract, providers, Signer } from "ethers";
 import { createStubInstance, SinonStub, SinonStubbedInstance, stub } from "sinon";
 
-import { MidasBaseConstructor } from "../../src";
 import { MidasBase } from "../../src/MidasSdk/index";
 import * as utilsFns from "../../src/MidasSdk/utils";
 import * as FundOperationsModule from "../../src/modules/FundOperations";
@@ -47,17 +46,44 @@ describe("FundOperation", () => {
     });
   });
 
+  describe("approve", async () => {
+    let mockTokenContract: SinonStubbedInstance<Contract>;
+
+    beforeEach(() => {
+      mockTokenContract = createStubInstance(Contract);
+      mockTokenContract.approve = stub().resolves("txId");
+
+      Object.defineProperty(mockTokenContract, "callStatic", {
+        value: {
+          allowance: stub().resolves(BigNumber.from(4)),
+        },
+      });
+    });
+
+    it("Approve succeds", async () => {
+      stub(utilsFns, "getContract").onFirstCall().returns(mockTokenContract);
+
+      const { tx, errorCode } = await fundOperations.approve(mkAddress("0xeee"), mkAddress("0xdbc"));
+      expect(tx).to.be.eq("txId");
+      expect(errorCode).to.be.null;
+    });
+
+    it("Approve fails", async () => {
+      stub(utilsFns, "getContract").onFirstCall().returns(mockTokenContract);
+      // TODO: implement failure mode
+      expect(true).to.be.false;
+    });
+  });
+
   describe("supply", async () => {
     let mockTokenContract: SinonStubbedInstance<Contract>;
     let mockComptrollerContract: SinonStubbedInstance<Contract>;
     let mockcTokenContract: SinonStubbedInstance<Contract>;
     const enterMarketStub = stub().resolves();
-    const maxApproveStub = stub().resolves();
     let mintResponse = 0;
 
     beforeEach(() => {
       mockTokenContract = createStubInstance(Contract);
-      mockTokenContract.approve = stub().resolves({ wait: maxApproveStub });
 
       Object.defineProperty(mockTokenContract, "callStatic", {
         value: {
@@ -87,14 +113,11 @@ describe("FundOperation", () => {
 
       stub(utilsFns, "getContract")
         .onFirstCall()
-        .returns(mockTokenContract)
-        .onSecondCall()
         .returns(mockComptrollerContract)
-        .onThirdCall()
+        .onSecondCall()
         .returns(mockcTokenContract);
 
       const { tx, errorCode } = await fundOperations.supply(
-        mkAddress("0xabc"),
         mkAddress("0xeee"),
         mkAddress("0xdbc"),
         true,
@@ -119,44 +142,15 @@ describe("FundOperation", () => {
         },
       });
 
-      stub(utilsFns, "getContract").onFirstCall().returns(mockTokenContract).onSecondCall().returns(mockcTokenContract);
+      stub(utilsFns, "getContract").onFirstCall().returns(mockcTokenContract);
 
       const { tx, errorCode } = await fundOperations.supply(
-        mkAddress("0xabc"),
         mkAddress("0xeee"),
         mkAddress("0xdbc"),
         false,
         BigNumber.from(3)
       );
 
-      expect(tx).to.be.eq("txId");
-      expect(errorCode).to.be.null;
-    });
-
-    it("Not has approved enough", async () => {
-      Object.defineProperty(mockcTokenContract, "callStatic", {
-        value: {
-          mint: stub().resolves(BigNumber.from(mintResponse)),
-        },
-      });
-
-      Object.defineProperty(mockcTokenContract, "estimateGas", {
-        value: {
-          mint: stub().resolves(BigNumber.from(mintResponse)),
-        },
-      });
-
-      stub(utilsFns, "getContract").onFirstCall().returns(mockTokenContract).onSecondCall().returns(mockcTokenContract);
-
-      const { tx, errorCode } = await fundOperations.supply(
-        mkAddress("0xabc"),
-        mkAddress("0xeee"),
-        mkAddress("0xdbc"),
-        false,
-        BigNumber.from(5)
-      );
-
-      // expect(maxApproveStub).to.be.calledOnce;
       expect(tx).to.be.eq("txId");
       expect(errorCode).to.be.null;
     });
@@ -175,10 +169,9 @@ describe("FundOperation", () => {
         },
       });
 
-      stub(utilsFns, "getContract").onFirstCall().returns(mockTokenContract).onSecondCall().returns(mockcTokenContract);
+      stub(utilsFns, "getContract").onFirstCall().returns(mockcTokenContract);
 
       const { tx, errorCode } = await fundOperations.supply(
-        mkAddress("0xabc"),
         mkAddress("0xeee"),
         mkAddress("0xdbc"),
         false,
@@ -193,11 +186,9 @@ describe("FundOperation", () => {
   describe("repay", async () => {
     let mockTokenContract: SinonStubbedInstance<Contract>;
     let mockcTokenContract: SinonStubbedInstance<Contract>;
-    const maxApproveStub = stub().resolves();
 
     beforeEach(() => {
       mockTokenContract = createStubInstance(Contract);
-      mockTokenContract.approve = stub().resolves({ wait: maxApproveStub });
 
       Object.defineProperty(mockTokenContract, "callStatic", {
         value: {
@@ -216,14 +207,9 @@ describe("FundOperation", () => {
         },
       });
 
-      stub(utilsFns, "getContract").onFirstCall().returns(mockTokenContract).onSecondCall().returns(mockcTokenContract);
+      stub(utilsFns, "getContract").onFirstCall().returns(mockcTokenContract);
 
-      const { tx, errorCode } = await fundOperations.repay(
-        mkAddress("0xabc"),
-        mkAddress("0xeee"),
-        true,
-        BigNumber.from(3)
-      );
+      const { tx, errorCode } = await fundOperations.repay(mkAddress("0xabc"), true, BigNumber.from(3));
 
       expect(tx).to.be.eq("txId");
       expect(errorCode).to.be.null;
@@ -236,36 +222,10 @@ describe("FundOperation", () => {
         },
       });
 
-      stub(utilsFns, "getContract").onFirstCall().returns(mockTokenContract).onSecondCall().returns(mockcTokenContract);
+      stub(utilsFns, "getContract").onFirstCall().returns(mockcTokenContract);
 
-      const { tx, errorCode } = await fundOperations.repay(
-        mkAddress("0xabc"),
-        mkAddress("0xeee"),
-        false,
-        BigNumber.from(3)
-      );
+      const { tx, errorCode } = await fundOperations.repay(mkAddress("0xabc"), false, BigNumber.from(3));
 
-      expect(tx).to.be.eq("txId");
-      expect(errorCode).to.be.null;
-    });
-
-    it("Not has approved enough", async () => {
-      Object.defineProperty(mockcTokenContract, "callStatic", {
-        value: {
-          repayBorrow: stub().resolves(BigNumber.from(0)),
-        },
-      });
-
-      stub(utilsFns, "getContract").onFirstCall().returns(mockTokenContract).onSecondCall().returns(mockcTokenContract);
-
-      const { tx, errorCode } = await fundOperations.repay(
-        mkAddress("0xabc"),
-        mkAddress("0xdbc"),
-        false,
-        BigNumber.from(5)
-      );
-
-      // expect(maxApproveStub).to.be.calledOnce;
       expect(tx).to.be.eq("txId");
       expect(errorCode).to.be.null;
     });
@@ -277,14 +237,9 @@ describe("FundOperation", () => {
         },
       });
 
-      stub(utilsFns, "getContract").onFirstCall().returns(mockTokenContract).onSecondCall().returns(mockcTokenContract);
+      stub(utilsFns, "getContract").onFirstCall().returns(mockcTokenContract);
 
-      const { tx, errorCode } = await fundOperations.repay(
-        mkAddress("0xabc"),
-        mkAddress("0xeee"),
-        false,
-        BigNumber.from(5)
-      );
+      const { tx, errorCode } = await fundOperations.repay(mkAddress("0xabc"), false, BigNumber.from(5));
 
       expect(tx).to.be.undefined;
       expect(errorCode).to.be.eq(2);

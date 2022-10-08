@@ -32,17 +32,10 @@ export function withFundOperations<TBase extends MidasBaseConstructor>(Base: TBa
       const token = getContract(underlyingTokenAddress, this.artifacts.EIP20Interface.abi, this.signer);
       const max = BigNumber.from(2).pow(BigNumber.from(256)).sub(constants.One);
       const tx = await token.approve(cTokenAddress, max);
-      await tx.wait();
       return { tx, errorCode: null };
     }
 
-    async supply(
-      cTokenAddress: string,
-      underlyingTokenAddress: string,
-      comptrollerAddress: string,
-      enableAsCollateral: boolean,
-      amount: BigNumber
-    ) {
+    async supply(cTokenAddress: string, comptrollerAddress: string, enableAsCollateral: boolean, amount: BigNumber) {
       if (enableAsCollateral) {
         const comptrollerInstance = getContract(
           comptrollerAddress,
@@ -67,7 +60,7 @@ export function withFundOperations<TBase extends MidasBaseConstructor>(Base: TBa
       return { tx, errorCode: null };
     }
 
-    async repay(cTokenAddress: string, underlyingTokenAddress: string, isRepayingMax: boolean, amount: BigNumber) {
+    async repay(cTokenAddress: string, isRepayingMax: boolean, amount: BigNumber) {
       const max = BigNumber.from(2).pow(BigNumber.from(256)).sub(constants.One);
 
       const cToken = getContract(cTokenAddress, this.artifacts.CErc20Delegate.abi, this.signer) as CErc20Delegate;
