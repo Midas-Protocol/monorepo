@@ -308,11 +308,11 @@ const AmountSelect = ({
   }, [mode, updateAvailableToWithdraw]);
 
   useEffect(() => {
-    const token = getContract(asset.underlyingToken, ERC20Abi, midasSdk.signer);
+    const token = getContract(asset.underlyingToken, ERC20Abi, currentSdk.signer);
     token.callStatic.allowance(address, asset.cToken).then((allowance) => {
       allowance.lt(amount) ? setNeedApproval(true) : setNeedApproval(false);
     });
-  }, [address, amount, asset.cToken, asset.underlyingToken, midasSdk.signer]);
+  }, [address, amount, asset.cToken, asset.underlyingToken, currentSdk.signer]);
   return (
     <Column
       id="fundOperationModal"
