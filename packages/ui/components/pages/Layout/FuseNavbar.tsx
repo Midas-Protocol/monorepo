@@ -10,10 +10,10 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
-import { AccountButton } from '@ui/components/shared/AccountButton';
+import { WalletButtons } from '@ui/components/shared/WalletButtons';
 import { useColors } from '@ui/hooks/useColors';
 
-const FuseNavbar = () => {
+export const FuseNavbar = () => {
   const { colorMode, toggleColorMode } = useColorMode();
   const { cPage } = useColors();
   const logoPrefix = useBreakpointValue({
@@ -34,7 +34,7 @@ const FuseNavbar = () => {
       </Link>
       <VStack w={'100%'}>
         <HStack w={'100%'} justifyContent="flex-end" pt={2}>
-          <AccountButton />
+          <WalletButtons />
           <Button variant="_solid" ml={2} px={2} onClick={toggleColorMode}>
             {colorMode === 'light' ? (
               <MoonIcon color="gray.700" w={5} h={5} />
@@ -48,5 +48,3 @@ const FuseNavbar = () => {
     </HStack>
   );
 };
-
-export default FuseNavbar;
