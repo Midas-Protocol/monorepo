@@ -48,6 +48,8 @@ describe("FundOperation", () => {
 
   describe("approve", async () => {
     let mockTokenContract: SinonStubbedInstance<Contract>;
+    let mockcTokenContract: SinonStubbedInstance<Contract>;
+    const mintResponse = 2;
 
     beforeEach(() => {
       mockTokenContract = createStubInstance(Contract);
@@ -69,9 +71,31 @@ describe("FundOperation", () => {
     });
 
     it("Approve fails", async () => {
-      stub(utilsFns, "getContract").onFirstCall().returns(mockTokenContract);
-      // TODO: implement failure mode
-      expect(true).to.be.false;
+      mockcTokenContract = createStubInstance(Contract);
+      mockcTokenContract.mint = stub().resolves("txId");
+
+      Object.defineProperty(mockcTokenContract, "callStatic", {
+        value: {
+          mint: stub().resolves(BigNumber.from(mintResponse)),
+        },
+      });
+
+      Object.defineProperty(mockcTokenContract, "estimateGas", {
+        value: {
+          mint: stub().resolves(BigNumber.from(mintResponse)),
+        },
+      });
+
+      stub(utilsFns, "getContract").onFirstCall().returns(mockcTokenContract);
+
+      const { errorCode } = await fundOperations.supply(
+        mkAddress("0xeee"),
+        mkAddress("0xdbc"),
+        false,
+        BigNumber.from(5)
+      );
+
+      expect(errorCode).to.be.equal(mintResponse);
     });
   });
 
