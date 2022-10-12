@@ -58,7 +58,7 @@ import { liquidateAndVerify, resetPriceOracle, wrapNativeToken } from "../utils/
 
     let approveRes = await sdk.approve(deployedErc20One.assetAddress, deployedErc20One.underlying);
     await approveRes.tx.wait();
-    approveRes = await sdk.approve(deployedErc20Two.assetAddress, deployedErc20One.underlying);
+    approveRes = await sdk.approve(deployedErc20Two.assetAddress, deployedErc20Two.underlying);
     await approveRes.tx.wait();
   });
 
