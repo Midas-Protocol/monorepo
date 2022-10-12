@@ -54,8 +54,10 @@ import { liquidateAndVerify, resetPriceOracle, wrapNativeToken } from "../utils/
     erc20OneOriginalUnderlyingPrice = await oracle.getUnderlyingPrice(deployedErc20One.assetAddress);
     erc20TwoUnderlying = new Contract(erc20One.underlying, ERC20Abi, sdk.provider.getSigner()) as EIP20Interface;
 
-    sdk.approve(deployedErc20One.assetAddress, deployedErc20One.underlying);
-    sdk.approve(deployedErc20Two.assetAddress, deployedErc20One.underlying);
+    let approveRes = await sdk.approve(deployedErc20One.assetAddress, deployedErc20One.underlying);
+    await approveRes.tx.wait();
+    approveRes = await sdk.approve(deployedErc20Two.assetAddress, deployedErc20One.underlying);
+    await approveRes.tx.wait();
   });
 
   afterEach(async () => {
