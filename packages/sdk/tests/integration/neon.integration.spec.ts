@@ -47,10 +47,10 @@ import { liquidateAndVerify, resetPriceOracle, wrapNativeToken } from "../utils/
     await setUpPriceOraclePrices();
     ({ poolAddress, liquidator, oracle, deployedAssets, simplePriceOracle, assets } = await setUpLiquidation(poolName));
 
-    erc20One = assets.find((d) => d.symbol === assetSymbols.WBTC);
+    erc20One = assets.find((d) => d.symbol === assetSymbols.MORA);
     erc20Two = assets.find((d) => d.symbol === assetSymbols.USDC);
 
-    deployedErc20One = deployedAssets.find((d) => d.symbol === assetSymbols.WBTC);
+    deployedErc20One = deployedAssets.find((d) => d.symbol === assetSymbols.MORA);
     deployedErc20Two = deployedAssets.find((d) => d.symbol === assetSymbols.USDC);
 
     erc20OneOriginalUnderlyingPrice = await oracle.getUnderlyingPrice(deployedErc20One.assetAddress);
@@ -75,13 +75,7 @@ import { liquidateAndVerify, resetPriceOracle, wrapNativeToken } from "../utils/
 
     const btcbSuply = await sdk
       .setSigner(alice)
-      .supply(
-        deployedErc20One.assetAddress,
-        erc20One.underlying,
-        poolAddress,
-        true,
-        ethers.utils.parseEther(supply1Amount)
-      );
+      .supply(deployedErc20One.assetAddress, poolAddress, true, ethers.utils.parseEther(supply1Amount));
     console.log(
       `Added ${supply1Amount} ${erc20One.symbol} collateral from ${alice.address}, ERROR: ${btcbSuply.errorCode}`
     );
@@ -89,13 +83,7 @@ import { liquidateAndVerify, resetPriceOracle, wrapNativeToken } from "../utils/
     const supply2Amount = "8500";
     const busdSupply = await sdk
       .setSigner(bob)
-      .supply(
-        deployedErc20Two.assetAddress,
-        erc20Two.underlying,
-        poolAddress,
-        true,
-        ethers.utils.parseEther(supply2Amount)
-      );
+      .supply(deployedErc20Two.assetAddress, poolAddress, true, ethers.utils.parseEther(supply2Amount));
     console.log(
       `Added ${supply2Amount} ${erc20Two.symbol} collateral from ${bob.address}, ERROR: ${busdSupply.errorCode}`
     );

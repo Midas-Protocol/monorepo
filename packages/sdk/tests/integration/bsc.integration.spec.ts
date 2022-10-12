@@ -53,6 +53,9 @@ import { liquidateAndVerify, resetPriceOracle, wrapNativeToken } from "../utils/
 
     erc20OneOriginalUnderlyingPrice = await oracle.getUnderlyingPrice(deployedErc20One.assetAddress);
     erc20TwoUnderlying = new Contract(erc20One.underlying, ERC20Abi, sdk.provider.getSigner()) as EIP20Interface;
+
+    sdk.approve(deployedErc20One.assetAddress, deployedErc20One.underlying);
+    sdk.approve(deployedErc20Two.assetAddress, deployedErc20One.underlying);
   });
 
   afterEach(async () => {
@@ -73,13 +76,7 @@ import { liquidateAndVerify, resetPriceOracle, wrapNativeToken } from "../utils/
 
     const btcbSuply = await sdk
       .setSigner(alice)
-      .supply(
-        deployedErc20One.assetAddress,
-        erc20One.underlying,
-        poolAddress,
-        true,
-        ethers.utils.parseEther(supply1Amount)
-      );
+      .supply(deployedErc20One.assetAddress, poolAddress, true, ethers.utils.parseEther(supply1Amount));
     console.log(
       `Added ${supply1Amount} ${erc20One.symbol} collateral from ${alice.address}, ERROR: ${btcbSuply.errorCode}`
     );
@@ -87,13 +84,7 @@ import { liquidateAndVerify, resetPriceOracle, wrapNativeToken } from "../utils/
     const supply2Amount = "8500";
     const busdSupply = await sdk
       .setSigner(bob)
-      .supply(
-        deployedErc20Two.assetAddress,
-        erc20Two.underlying,
-        poolAddress,
-        true,
-        ethers.utils.parseEther(supply2Amount)
-      );
+      .supply(deployedErc20Two.assetAddress, poolAddress, true, ethers.utils.parseEther(supply2Amount));
     console.log(
       `Added ${supply2Amount} ${erc20Two.symbol} collateral from ${bob.address}, ERROR: ${busdSupply.errorCode}`
     );

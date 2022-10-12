@@ -39,6 +39,10 @@ describe("FundOperationsModule", function () {
     const poolId = (await poolHelpers.getPoolIndex(poolAddress, sdk))!.toString();
     const assetsInPool = await sdk.fetchFusePoolData(poolId);
     const asset = assetsInPool.assets.find((asset) => asset.underlyingToken === sdk.chainSpecificAddresses.W_TOKEN)!;
+
+    const approveRes = await sdk.approve(asset.cToken, asset.underlyingToken);
+    await approveRes.tx.wait();
+
     const res = await sdk.supply(asset.cToken, assetsInPool.comptroller, true, utils.parseUnits("3", 18));
     tx = res.tx;
     rec = await tx.wait();
@@ -52,6 +56,9 @@ describe("FundOperationsModule", function () {
     const poolId = (await poolHelpers.getPoolIndex(poolAddress, sdk))!.toString();
     const assetsInPool = await sdk.fetchFusePoolData(poolId);
     const asset = assetsInPool.assets.find((asset) => asset.underlyingToken === sdk.chainSpecificAddresses.W_TOKEN)!;
+
+    const approveRes = await sdk.approve(asset.cToken, asset.underlyingToken);
+    await approveRes.tx.wait();
 
     const res = await sdk.supply(asset.cToken, assetsInPool.comptroller, true, utils.parseUnits("3", 18));
     tx = res.tx;
@@ -70,6 +77,10 @@ describe("FundOperationsModule", function () {
     const poolId = (await poolHelpers.getPoolIndex(poolAddress, sdk))!.toString();
     const assetsInPool = await sdk.fetchFusePoolData(poolId);
     const asset = assetsInPool.assets.find((asset) => asset.underlyingToken === sdk.chainSpecificAddresses.W_TOKEN)!;
+
+    const approveRes = await sdk.approve(asset.cToken, asset.underlyingToken);
+    await approveRes.tx.wait();
+
     const res = await sdk.supply(asset.cToken, assetsInPool.comptroller, true, utils.parseUnits("3", 18));
     tx = res.tx;
     rec = await tx.wait();
@@ -87,6 +98,10 @@ describe("FundOperationsModule", function () {
     const poolId = (await poolHelpers.getPoolIndex(poolAddress, sdk))!.toString();
     const assetsInPool = await sdk.fetchFusePoolData(poolId);
     const asset = assetsInPool.assets.find((asset) => asset.underlyingToken === sdk.chainSpecificAddresses.W_TOKEN)!;
+
+    const approveRes = await sdk.approve(asset.cToken, asset.underlyingToken);
+    await approveRes.tx.wait();
+
     let res = await sdk.supply(asset.cToken, assetsInPool.comptroller, true, utils.parseUnits("5", 18));
     tx = res.tx;
     rec = await tx.wait();
