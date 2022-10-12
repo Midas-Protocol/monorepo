@@ -82,6 +82,7 @@ const PoolsRowList = ({
   const { address, setGlobalLoading } = useMultiMidas();
   const [err, setErr] = useState<Err | undefined>();
   const [isLoadingPerChain, setIsLoadingPerChain] = useState(false);
+  const [selectedFilteredPools, setSelectedFilteredPools] = useState<PoolData[]>([]);
   const [sorting, setSorting] = useState<SortingState>([
     { id: address ? 'supplyBalance' : 'totalSupplied', desc: true },
   ]);
@@ -95,6 +96,31 @@ const PoolsRowList = ({
   const isSmallScreen = useIsSmallScreen();
   const mounted = useRef(false);
   const router = useRouter();
+  const allPools = useMemo(() => {
+    return Object.values(poolsPerChain).reduce((res, pools) => {
+      if (pools.data && pools.data.length > 0) {
+        res.push(...pools.data);
+      }
+      return res;
+    }, [] as PoolData[]);
+  }, [poolsPerChain]);
+
+  useEffect(() => {
+    const pools: PoolData[] = [];
+
+    if (globalFilter.includes(ALL)) {
+      setSelectedFilteredPools([...allPools]);
+    } else {
+      globalFilter.map((filter) => {
+        const data = poolsPerChain[filter.toString()]?.data;
+        if (data) {
+          pools.push(...data);
+        }
+      });
+
+      setSelectedFilteredPools(pools);
+    }
+  }, [globalFilter, poolsPerChain, allPools]);
 
   const poolFilter: FilterFn<PoolRowData> = (row, columnId, value) => {
     if (
@@ -140,15 +166,6 @@ const PoolsRowList = ({
       return 1;
     }
   };
-
-  const allPools = useMemo(() => {
-    return Object.values(poolsPerChain).reduce((res, pools) => {
-      if (pools.data && pools.data.length > 0) {
-        res.push(...pools.data);
-      }
-      return res;
-    }, [] as PoolData[]);
-  }, [poolsPerChain]);
 
   const data: PoolRowData[] = useMemo(() => {
     return poolSortByAddress(allPools).map((pool) => {
@@ -390,13 +407,13 @@ const PoolsRowList = ({
       <Flex
         justifyContent="space-between"
         p={4}
-        flexDirection={{ base: 'column', sm: 'row' }}
+        flexDirection={{ base: 'column', md: 'row' }}
         gap={4}
       >
-        <Flex className="pagination">
+        <Flex className="pagination" justifyContent="center">
           <ButtonGroup
-            isAttached={!isSmallScreen ? true : false}
-            gap={!isSmallScreen ? 0 : 2}
+            isAttached
+            gap={0}
             spacing={0}
             flexFlow={'row wrap'}
             justifyContent="flex-start"
@@ -411,7 +428,7 @@ const PoolsRowList = ({
               px={2}
             >
               <HStack>
-                <Text pt="2px">All Pools</Text>
+                <Text pt="2px">{isSmallScreen ? 'All' : 'All Pools'}</Text>
               </HStack>
             </CButton>
             {enabledChains.map((chainId) => {
@@ -539,7 +556,7 @@ const PoolsRowList = ({
                   )}
                 </Fragment>
               ))
-            ) : allPools.length === 0 ? (
+            ) : selectedFilteredPools.length === 0 ? (
               <Tr>
                 <Td border="none" colSpan={table.getHeaderGroups()[0].headers.length}>
                   <Center py={8}>There are no pools.</Center>
@@ -678,6 +695,7 @@ const ChainFilterButton = ({
   isLoading: boolean;
 }) => {
   const chainConfig = useChainConfig(chainId);
+  const isSmallScreen = useIsSmallScreen();
 
   return chainConfig ? (
     <CButton
@@ -686,6 +704,7 @@ const ChainFilterButton = ({
       variant="filter"
       disabled={isLoading}
       px={2}
+      mx={'-1px'}
     >
       <HStack>
         {isLoading ? (
@@ -699,8 +718,7 @@ const ChainFilterButton = ({
             alt=""
           />
         )}
-
-        <Text pt="2px">{chainConfig.specificParams.metadata.shortName}</Text>
+        {!isSmallScreen && <Text pt="2px">{chainConfig.specificParams.metadata.shortName}</Text>}
       </HStack>
     </CButton>
   ) : null;

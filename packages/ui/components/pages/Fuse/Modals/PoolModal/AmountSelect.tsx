@@ -78,7 +78,7 @@ const AmountSelect = ({
 
   const errorToast = useErrorToast();
 
-  const { data: tokenData } = useTokenData(asset.underlyingToken);
+  const { data: tokenData } = useTokenData(asset.underlyingToken, poolChainId);
 
   const [userAction, setUserAction] = useState(UserAction.NO_ACTION);
 
@@ -213,7 +213,6 @@ const AmountSelect = ({
           ? (resp = await currentSdk.approve(asset.cToken, asset.underlyingToken))
           : (resp = await currentSdk.supply(
               asset.cToken,
-              asset.underlyingToken,
               comptrollerAddress,
               enableAsCollateral,
               amount
@@ -225,12 +224,7 @@ const AmountSelect = ({
           setPendingTxHash(tx.hash);
         }
       } else if (mode === FundOperationMode.REPAY) {
-        const resp = await currentSdk.repay(
-          asset.cToken,
-          asset.underlyingToken,
-          isRepayingMax,
-          amount
-        );
+        const resp = await currentSdk.repay(asset.cToken, isRepayingMax, amount);
 
         if (resp.errorCode !== null) {
           fundOperationError(resp.errorCode, minBorrowUSD);
