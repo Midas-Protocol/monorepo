@@ -53,11 +53,6 @@ import { liquidateAndVerify, resetPriceOracle, wrapNativeToken } from "../utils/
 
     erc20OneOriginalUnderlyingPrice = await oracle.getUnderlyingPrice(deployedErc20One.assetAddress);
     erc20TwoUnderlying = new Contract(erc20One.underlying, ERC20Abi, sdk.provider.getSigner()) as EIP20Interface;
-
-    let approveRes = await sdk.approve(deployedErc20One.assetAddress, deployedErc20One.underlying);
-    await approveRes.tx.wait();
-    approveRes = await sdk.approve(deployedErc20Two.assetAddress, deployedErc20Two.underlying);
-    await approveRes.tx.wait();
   });
 
   afterEach(async () => {
@@ -76,12 +71,20 @@ import { liquidateAndVerify, resetPriceOracle, wrapNativeToken } from "../utils/
     // Supply 0.1 tokenOne from other account
     const supply1Amount = "1";
 
+    let approveRes = await await sdk
+      .setSigner(alice)
+      .approve(deployedErc20One.assetAddress, deployedErc20One.underlying);
+    await approveRes.tx.wait();
+
     const btcbSuply = await sdk
       .setSigner(alice)
       .supply(deployedErc20One.assetAddress, poolAddress, true, ethers.utils.parseEther(supply1Amount));
     console.log(
       `Added ${supply1Amount} ${erc20One.symbol} collateral from ${alice.address}, ERROR: ${btcbSuply.errorCode}`
     );
+
+    approveRes = await await sdk.setSigner(bob).approve(deployedErc20Two.assetAddress, deployedErc20Two.underlying);
+    await approveRes.tx.wait();
 
     const supply2Amount = "8500";
     const busdSupply = await sdk
@@ -92,6 +95,9 @@ import { liquidateAndVerify, resetPriceOracle, wrapNativeToken } from "../utils/
     );
 
     const borrowAmount = "0.22";
+
+    approveRes = await await sdk.setSigner(bob).approve(deployedErc20One.assetAddress, deployedErc20One.underlying);
+    await approveRes.tx.wait();
 
     const btcbBorrow = await sdk
       .setSigner(bob)
