@@ -1,8 +1,18 @@
+import { MidasSdk } from '@midas-capital/sdk';
 import { useQuery } from '@tanstack/react-query';
 
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
-import { getCTokenContract } from '@ui/utils/contracts';
+import { BigNumber } from 'ethers';
 import { useMemo } from 'react';
+
+export const fetchTokenBalance = async (
+  tokenAddress: string,
+  sdk: MidasSdk,
+  ownerAddress?: string
+): Promise<BigNumber> => {
+  if (!ownerAddress) return BigNumber.from(0);
+  return sdk.getCTokenInstance(tokenAddress).balanceOf(ownerAddress);
+};
 
 export function useTokenBalance(tokenAddress: string, ownerAddress?: string) {
   const { currentSdk, currentChain, address: connectedAddress } = useMultiMidas();
@@ -13,8 +23,7 @@ export function useTokenBalance(tokenAddress: string, ownerAddress?: string) {
   return useQuery(
     ['useTokenBalance', currentChain?.id, tokenAddress, owner],
     () => {
-      if (currentSdk && owner)
-        return getCTokenContract(tokenAddress, currentSdk).callStatic.balanceOf(owner);
+      if (currentSdk && owner) return fetchTokenBalance(tokenAddress, currentSdk, owner);
     },
     {
       cacheTime: Infinity,
