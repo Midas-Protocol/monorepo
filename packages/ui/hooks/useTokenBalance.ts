@@ -1,41 +1,25 @@
-import { MidasSdk } from '@midas-capital/sdk';
 import { useQuery } from '@tanstack/react-query';
-import { BigNumber } from 'ethers';
 
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
 import { getCTokenContract } from '@ui/utils/contracts';
+import { useMemo } from 'react';
 
-export const fetchTokenBalance = async (
-  tokenAddress: string,
-  currentSdk: MidasSdk,
-  address?: string
-): Promise<BigNumber> => {
-  let balance: BigNumber;
-
-  if (!address) {
-    balance = BigNumber.from(0);
-  } else if (tokenAddress === 'NO_ADDRESS_HERE_USE_WETH_FOR_ADDRESS') {
-    balance = await currentSdk.provider.getBalance(address);
-  } else {
-    const contract = getCTokenContract(tokenAddress, currentSdk);
-    balance = (await contract.callStatic.balanceOf(address)) as BigNumber;
-  }
-
-  return balance;
-};
-
-export function useTokenBalance(tokenAddress: string, customAddress?: string) {
-  const { currentSdk, currentChain, address } = useMultiMidas();
-
-  const addressToCheck = customAddress ?? address;
+export function useTokenBalance(tokenAddress: string, ownerAddress?: string) {
+  const { currentSdk, currentChain, address: connectedAddress } = useMultiMidas();
+  const owner = useMemo(() => {
+    return ownerAddress ? ownerAddress : connectedAddress;
+  }, [ownerAddress, connectedAddress]);
 
   return useQuery(
-    ['TokenBalance', currentChain?.id, tokenAddress, addressToCheck, currentSdk?.chainId],
-    () => currentSdk && fetchTokenBalance(tokenAddress, currentSdk, addressToCheck),
+    ['useTokenBalance', currentChain?.id, tokenAddress, owner],
+    () => {
+      if (currentSdk && owner)
+        return getCTokenContract(tokenAddress, currentSdk).callStatic.balanceOf(owner);
+    },
     {
       cacheTime: Infinity,
       staleTime: Infinity,
-      enabled: !!currentChain && !!tokenAddress && !!addressToCheck && !!currentSdk,
+      enabled: !!currentChain && !!currentSdk && !!tokenAddress && !!owner,
     }
   );
 }
