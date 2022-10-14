@@ -76,8 +76,29 @@ const deployedPlugins: DeployedPlugins = {
       "0x5fF63E442AC4724EC342f4a3d26924233832EcBB", // _flywheel
       "0x528330fF7c358FE1bAe348D23849CCed8edA5917", // IGuniPool _pool
       "0xa5A14c3814d358230a56e8f011B8fc97A508E890", // _rewardsDestination
-      ["0xADAC33f543267c4D59a8c299cF804c303BC3e4aC"], // _rewardTokens
+      [underlying(assets, assetSymbols.MIMO)], // _rewardTokens
     ],
+  },
+  "0xd682451F627d54cfdA74a80972aDaeF133cdc15e": {
+    market: "0xcb67Bd2aE0597eDb2426802CdF34bb4085d9483A",
+    name: "Balancer LP MIMO80-PAR20",
+    strategy: "ArrakisERC4626",
+    underlying: underlying(assets, assetSymbols.MIMO_PAR_80_20),
+    otherParams: [
+      "0x5fF63E442AC4724EC342f4a3d26924233832EcBB", // _flywheel
+      "0xBA2D426DCb186d670eD54a759098947fad395C95", // IGuniPool _pool
+      "0xcb67Bd2aE0597eDb2426802CdF34bb4085d9483A", // _rewardsDestination
+      [underlying(assets, assetSymbols.MIMO)], // _rewardTokens
+    ],
+  },
+  "0xc8E8B4A7E0F854Cf516A75fE742FC791dBec9F86": {
+    market: "0x30b32BbfcA3A81922F88809F53E625b5EE5286f6",
+    name: "Beefy jEUR-PAR Vault",
+    strategy: "BeefyERC4626",
+    apyDocsUrl: "https://app.beefy.com/vault/jarvis-2eurp",
+    strategyDocsUrl: "https://docs.midascapital.xyz/guides/assets-and-strategies-addresses/polygon/mimo-pool",
+    underlying: underlying(assets, assetSymbols["JEUR-PAR"]),
+    otherParams: ["0xfE1779834EaDD60660a7F3f576448D6010f5e3Fc", "0"],
   },
 };
 
