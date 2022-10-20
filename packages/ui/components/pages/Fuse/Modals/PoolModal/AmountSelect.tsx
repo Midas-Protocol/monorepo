@@ -40,6 +40,7 @@ import useUpdatedUserAssets from '@ui/hooks/fuse/useUpdatedUserAssets';
 import { useBorrowLimit } from '@ui/hooks/useBorrowLimit';
 import { useBorrowMinimum } from '@ui/hooks/useBorrowMinimum';
 import { useColors } from '@ui/hooks/useColors';
+import { useNativeTokenBalance } from '@ui/hooks/useNativeTokenBalance';
 import { useIsMobile } from '@ui/hooks/useScreenSize';
 import { useErrorToast, useSuccessToast } from '@ui/hooks/useToast';
 import { useTokenBalance } from '@ui/hooks/useTokenBalance';
@@ -95,7 +96,7 @@ const AmountSelect = ({
 
   const { data: maxBorrowInAsset } = useMaxAmount(FundOperationMode.BORROW, asset);
   const { data: myBalance } = useTokenBalance(asset.underlyingToken);
-  const { data: myNativeBalance } = useTokenBalance('NO_ADDRESS_HERE_USE_WETH_FOR_ADDRESS');
+  const { data: myNativeBalance } = useNativeTokenBalance();
 
   const [isDeploying, setIsDeploying] = useState(false);
   const [activeStep, setActiveStep] = useState<number>(0);
