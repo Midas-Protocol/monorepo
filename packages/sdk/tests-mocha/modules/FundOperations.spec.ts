@@ -134,31 +134,11 @@ describe("FundOperation", () => {
     });
 
     it("Not has approved enough", async () => {
-      Object.defineProperty(mockcTokenContract, "callStatic", {
-        value: {
-          mint: stub().resolves(BigNumber.from(mintResponse)),
-        },
-      });
+      stub(utilsFns, "getContract").onFirstCall().returns(mockTokenContract);
 
-      Object.defineProperty(mockcTokenContract, "estimateGas", {
-        value: {
-          mint: stub().resolves(BigNumber.from(mintResponse)),
-        },
-      });
-
-      stub(utilsFns, "getContract").onFirstCall().returns(mockTokenContract).onSecondCall().returns(mockcTokenContract);
-
-      const { tx, errorCode } = await fundOperations.supply(
-        mkAddress("0xabc"),
-        mkAddress("0xeee"),
-        mkAddress("0xdbc"),
-        false,
-        BigNumber.from(5)
-      );
+      await fundOperations.approve(mkAddress("0xabc"), mkAddress("0xeee"), BigNumber.from(50));
 
       expect(maxApproveStub).to.be.calledOnce;
-      expect(tx).to.be.eq("txId");
-      expect(errorCode).to.be.null;
     });
 
     it("Mint fail", async () => {

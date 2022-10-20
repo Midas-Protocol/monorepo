@@ -1,5 +1,5 @@
 import axios from "axios";
-import { BigNumber, constants, ContractTransaction, utils } from "ethers";
+import { BigNumber, constants, Contract, ContractTransaction, utils } from "ethers";
 
 import { MidasBaseConstructor } from "..";
 import { CErc20Delegate } from "../../lib/contracts/typechain/CErc20Delegate";
@@ -28,8 +28,7 @@ export function withFundOperations<TBase extends MidasBaseConstructor>(Base: TBa
       return { gasWEI, gasPrice, estimatedGas };
     }
 
-    async isApprovedEnough(cTokenAddress: string, underlyingTokenAddress: string, amount: BigNumber) {
-      const token = getContract(underlyingTokenAddress, this.artifacts.EIP20Interface.abi, this.signer);
+    async isApprovedEnough(token: Contract, cTokenAddress: string, amount: BigNumber) {
       const currentSignerAddress = await this.signer.getAddress();
 
       return (await token.callStatic.allowance(currentSignerAddress, cTokenAddress)).gte(amount);
@@ -37,8 +36,7 @@ export function withFundOperations<TBase extends MidasBaseConstructor>(Base: TBa
 
     async approve(cTokenAddress: string, underlyingTokenAddress: string, amount: BigNumber) {
       const token = getContract(underlyingTokenAddress, this.artifacts.EIP20Interface.abi, this.signer);
-      const isApprovedEnough = this.isApprovedEnough(cTokenAddress, underlyingTokenAddress, amount);
-
+      const isApprovedEnough = await this.isApprovedEnough(token, cTokenAddress, amount);
       if (!isApprovedEnough) {
         const max = BigNumber.from(2).pow(BigNumber.from(256)).sub(constants.One);
         const approveTx = await token.approve(cTokenAddress, max);
