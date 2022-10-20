@@ -217,9 +217,13 @@ const AmountSelect = ({
           setFailedStep(0);
           setIsDeploying(true);
 
-          const isApprovedEnough = await currentSdk.isApprovedEnough(
-            asset.cToken,
+          const token = getContract(
             asset.underlyingToken,
+            currentSdk.artifacts.EIP20Interface.abi,
+            currentSdk.signer
+          );
+
+          const isApprovedEnough = (await token.callStatic.allowance(address, asset.cToken)).gte(
             amount
           );
 
