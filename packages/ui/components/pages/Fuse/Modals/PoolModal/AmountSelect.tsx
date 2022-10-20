@@ -217,14 +217,21 @@ const AmountSelect = ({
           setFailedStep(0);
           setIsDeploying(true);
 
+          const isApprovedEnough = await currentSdk.isApprovedEnough(
+            asset.cToken,
+            asset.underlyingToken,
+            amount
+          );
+
           try {
             setActiveStep(1);
+            if (!isApprovedEnough) {
+              await currentSdk.approve(asset.cToken, asset.underlyingToken, amount);
 
-            await currentSdk.approve(asset.cToken, asset.underlyingToken, amount);
-
-            successToast({
-              description: 'Successfully Approved!',
-            });
+              successToast({
+                description: 'Successfully Approved!',
+              });
+            }
           } catch (error) {
             setFailedStep(1);
             console.error(error);
@@ -234,11 +241,13 @@ const AmountSelect = ({
           try {
             setActiveStep(2);
 
-            await currentSdk.enterMarkets(asset.cToken, comptrollerAddress, enableAsCollateral);
+            if (enableAsCollateral) {
+              await currentSdk.enterMarkets(asset.cToken, comptrollerAddress, enableAsCollateral);
 
-            successToast({
-              description: 'Collateral enabled!',
-            });
+              successToast({
+                description: 'Collateral enabled!',
+              });
+            }
           } catch (error) {
             setFailedStep(2);
             console.error(error);
