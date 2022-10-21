@@ -275,18 +275,56 @@ const AmountSelect = ({
           return;
         }
       } else if (mode === FundOperationMode.REPAY) {
-        const resp = await currentSdk.repay(
-          asset.cToken,
-          asset.underlyingToken,
-          isRepayingMax,
-          amount
-        );
+        try {
+          setActiveStep(0);
+          setFailedStep(0);
+          setIsDeploying(true);
 
-        if (resp.errorCode !== null) {
-          fundOperationError(resp.errorCode, minBorrowUSD);
-        } else {
-          tx = resp.tx;
-          setPendingTxHash(tx.hash);
+          const token = getContract(
+            asset.underlyingToken,
+            currentSdk.artifacts.EIP20Interface.abi,
+            currentSdk.signer
+          );
+
+          const isApprovedEnough = (await token.callStatic.allowance(address, asset.cToken)).gte(
+            amount
+          );
+
+          try {
+            setActiveStep(1);
+            if (!isApprovedEnough) {
+              await currentSdk.approve(asset.cToken, asset.underlyingToken, amount);
+
+              successToast({
+                description: 'Successfully Approved!',
+              });
+            }
+          } catch (error) {
+            setFailedStep(1);
+            throw error;
+          }
+
+          try {
+            setActiveStep(2);
+            const { tx, errorCode } = await currentSdk.repayBorrow(
+              asset.cToken,
+              isRepayingMax,
+              amount
+            );
+            if (errorCode !== null) {
+              fundOperationError(errorCode, minBorrowUSD);
+            } else {
+              setPendingTxHash(tx.hash);
+            }
+          } catch (error) {
+            setFailedStep(2);
+            throw error;
+          }
+        } catch (error) {
+          setIsDeploying(false);
+          handleGenericError(error, errorToast);
+
+          return;
         }
       } else if (mode === FundOperationMode.BORROW) {
         const resp = await currentSdk.borrow(asset.cToken, amount);
