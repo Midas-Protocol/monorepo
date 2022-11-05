@@ -10,7 +10,13 @@ import { useTokenData } from '@ui/hooks/useTokenData';
 import { MarketData } from '@ui/types/TokensDataMap';
 import { longFormat, smallUsdFormatter, tokenFormatter } from '@ui/utils/bigUtils';
 
-export const TotalBorrow = ({ asset, poolChainId }: { asset: MarketData; poolChainId: number }) => {
+export const TotalBorrow = ({
+  asset,
+  poolChainId,
+}: {
+  asset: MarketData;
+  poolChainId?: number;
+}) => {
   const { data: tokenData } = useTokenData(asset.underlyingToken, poolChainId);
   const totalBorrow = useMemo(() => {
     return Number(utils.formatUnits(asset.totalBorrow, asset.underlyingDecimals));

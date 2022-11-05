@@ -16,7 +16,7 @@ export const BorrowBalance = ({
   poolChainId,
 }: {
   asset: MarketData;
-  poolChainId: number;
+  poolChainId?: number;
 }) => {
   const { data: tokenData } = useTokenData(asset.underlyingToken, poolChainId);
   const borrowBalance = useMemo(() => {

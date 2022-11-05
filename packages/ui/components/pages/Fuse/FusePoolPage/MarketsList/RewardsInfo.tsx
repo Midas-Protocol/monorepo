@@ -10,7 +10,7 @@ import { usePluginInfo } from '@ui/hooks/usePluginInfo';
 
 interface RewardsInfoProps {
   reward: Reward;
-  chainId: number;
+  chainId?: number;
 }
 
 export const RewardsInfo = ({ reward, chainId }: RewardsInfoProps) => {

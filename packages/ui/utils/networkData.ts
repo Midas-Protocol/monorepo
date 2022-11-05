@@ -35,11 +35,15 @@ export function getSupportedChains(): ChainConfig[] {
   );
 }
 
-export function getChainConfig(chainId: number): ChainConfig | undefined {
+export function getChainConfig(chainId?: number): ChainConfig | undefined {
+  if (!chainId) return undefined;
+
   return chainIdToConfig[chainId];
 }
 
-export function getScanUrlByChainId(chainId: number | SupportedChains): string | null {
+export function getScanUrlByChainId(chainId?: number | SupportedChains): string | null {
+  if (!chainId) return null;
+
   const chain = chainIdToConfig[chainId];
 
   return chain && chain.specificParams.metadata.blockExplorerUrls.default

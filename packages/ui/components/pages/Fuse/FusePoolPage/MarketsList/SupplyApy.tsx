@@ -16,8 +16,8 @@ import { getBlockTimePerMinuteByChainId } from '@ui/utils/networkData';
 
 interface SupplyApyProps {
   asset: MarketData;
-  rewards: UseRewardsData;
-  poolChainId: number;
+  rewards?: UseRewardsData;
+  poolChainId?: number;
 }
 
 export const SupplyApy = ({ asset, rewards, poolChainId }: SupplyApyProps) => {

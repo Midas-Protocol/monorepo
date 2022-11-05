@@ -7,7 +7,7 @@ export const useAssetClaimableRewards = ({
   poolAddress,
   assetAddress,
 }: {
-  poolAddress: string;
+  poolAddress?: string;
   assetAddress: string;
 }) => {
   const { currentSdk, address } = useMultiMidas();
@@ -15,7 +15,7 @@ export const useAssetClaimableRewards = ({
   return useQuery<FlywheelClaimableRewards[] | undefined>(
     ['useAssetClaimableRewards', poolAddress, assetAddress, address, currentSdk?.chainId],
     () => {
-      if (currentSdk && address)
+      if (currentSdk && address && poolAddress)
         return currentSdk.getFlywheelClaimableRewardsForAsset(poolAddress, assetAddress, address);
     },
     { enabled: !!poolAddress && !!address && !!currentSdk }
@@ -26,15 +26,15 @@ export const useAssetsClaimableRewards = ({
   poolAddress,
   assetsAddress,
 }: {
-  poolAddress: string;
-  assetsAddress: string[];
+  poolAddress?: string;
+  assetsAddress?: string[];
 }) => {
   const { currentSdk, address } = useMultiMidas();
 
   return useQuery<{ [key: string]: FlywheelClaimableRewards[] } | undefined>(
     ['useAssetClaimableRewards', poolAddress, assetsAddress, address, currentSdk?.chainId],
     async () => {
-      if (currentSdk && address) {
+      if (currentSdk && address && poolAddress && assetsAddress?.length) {
         const res: { [key: string]: FlywheelClaimableRewards[] } = {};
 
         const allRewards = await Promise.all(

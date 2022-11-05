@@ -17,8 +17,8 @@ export const TokenName = ({
   poolChainId,
 }: {
   asset: MarketData;
-  poolAddress: string;
-  poolChainId: number;
+  poolAddress?: string;
+  poolChainId?: number;
 }) => {
   const { data: tokenData } = useTokenData(asset.underlyingToken, poolChainId);
   const { data: claimableRewards } = useAssetClaimableRewards({

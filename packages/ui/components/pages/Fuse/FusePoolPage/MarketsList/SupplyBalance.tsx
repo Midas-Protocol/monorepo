@@ -16,7 +16,7 @@ export const SupplyBalance = ({
   poolChainId,
 }: {
   asset: MarketData;
-  poolChainId: number;
+  poolChainId?: number;
 }) => {
   const { data: tokenData } = useTokenData(asset.underlyingToken, poolChainId);
   const supplyBalance = useMemo(() => {

@@ -19,6 +19,7 @@ import {
   PopoverContent,
   PopoverTrigger,
   Select,
+  Skeleton,
   Table,
   Tbody,
   Td,
@@ -86,7 +87,8 @@ import { useSdk } from '@ui/hooks/fuse/useSdk';
 import { useAssetsClaimableRewards } from '@ui/hooks/rewards/useAssetClaimableRewards';
 import { useColors } from '@ui/hooks/useColors';
 import { useDebounce } from '@ui/hooks/useDebounce';
-import { UseRewardsData } from '@ui/hooks/useRewards';
+import { useFusePoolData } from '@ui/hooks/useFusePoolData';
+import { useRewards } from '@ui/hooks/useRewards';
 import { useIsMobile, useIsSemiSmallScreen } from '@ui/hooks/useScreenSize';
 import { MarketData } from '@ui/types/TokensDataMap';
 import { smallUsdFormatter } from '@ui/utils/bigUtils';
@@ -106,56 +108,50 @@ export type Market = {
 };
 
 export const MarketsList = ({
-  assets,
-  rewards = {},
-  comptrollerAddress,
-  supplyBalanceFiat,
-  borrowBalanceFiat,
-  poolChainId,
   initSorting,
   initColumnVisibility,
+  poolId,
+  chainId,
 }: {
-  assets: MarketData[];
-  rewards?: UseRewardsData;
-  comptrollerAddress: string;
-  supplyBalanceFiat: number;
-  borrowBalanceFiat: number;
-  poolChainId: number;
   initSorting: SortingState;
   initColumnVisibility: VisibilityState;
+  poolId: string;
+  chainId: string;
 }) => {
-  const sdk = useSdk(poolChainId);
+  const { data: poolData, isLoading: isPoolLoading } = useFusePoolData(poolId, Number(chainId));
+  const { data: allRewards } = useRewards({ poolId: poolId, chainId: Number(chainId) });
+  const sdk = useSdk(poolData?.chainId);
 
   const { data: allClaimableRewards } = useAssetsClaimableRewards({
-    poolAddress: comptrollerAddress,
-    assetsAddress: assets.map((asset) => asset.cToken),
+    poolAddress: poolData?.comptroller,
+    assetsAddress: poolData?.assets.map((asset) => asset.cToken),
   });
 
   const [collateralCounts, protectedCounts, borrowableCounts, deprecatedCounts] = useMemo(() => {
-    const availableAssets = assets.filter(
+    const availableAssets = poolData?.assets.filter(
       (asset) => !asset.isSupplyPaused || (asset.isSupplyPaused && asset.supplyBalanceFiat !== 0)
     );
     return [
-      availableAssets.filter((asset) => asset.membership).length,
-      availableAssets.filter((asset) => asset.isBorrowPaused && !asset.isSupplyPaused).length,
-      availableAssets.filter((asset) => !asset.isBorrowPaused).length,
-      availableAssets.filter((asset) => asset.isBorrowPaused && asset.isSupplyPaused).length,
+      availableAssets?.filter((asset) => asset.membership).length || 0,
+      availableAssets?.filter((asset) => asset.isBorrowPaused && !asset.isSupplyPaused).length || 0,
+      availableAssets?.filter((asset) => !asset.isBorrowPaused).length || 0,
+      availableAssets?.filter((asset) => asset.isBorrowPaused && asset.isSupplyPaused).length || 0,
     ];
-  }, [assets]);
+  }, [poolData?.assets]);
 
   const totalApy = useMemo(() => {
-    if (!sdk) return undefined;
+    if (!sdk || !poolData?.assets || !poolData?.chainId) return undefined;
 
     const result: { [market: string]: number } = {};
-    for (const asset of assets) {
+    for (const asset of poolData.assets) {
       let marketTotalAPY =
         sdk.ratePerBlockToAPY(
           asset.supplyRatePerBlock,
-          getBlockTimePerMinuteByChainId(poolChainId)
+          getBlockTimePerMinuteByChainId(poolData.chainId)
         ) / 100;
 
-      if (rewards[asset.cToken]) {
-        marketTotalAPY += rewards[asset.cToken].reduce(
+      if (allRewards && allRewards[asset.cToken]) {
+        marketTotalAPY += allRewards[asset.cToken].reduce(
           (acc, cur) => (cur.apy ? acc + cur.apy : acc),
           0
         );
@@ -164,7 +160,7 @@ export const MarketsList = ({
     }
 
     return result;
-  }, [rewards, assets, poolChainId, sdk]);
+  }, [allRewards, poolData?.assets, poolData?.chainId, sdk]);
 
   const assetFilter: FilterFn<Market> = (row, columnId, value) => {
     if (
@@ -199,7 +195,7 @@ export const MarketsList = ({
 
   const assetSort: SortingFn<Market> = React.useCallback(
     (rowA, rowB, columnId) => {
-      if (!sdk) return 0;
+      if (!sdk || !poolData?.chainId) return 0;
 
       if (columnId === MARKET_LTV) {
         return rowB.original.market.underlyingSymbol.localeCompare(
@@ -213,13 +209,13 @@ export const MarketsList = ({
         const rowABorrowAPY = !rowA.original.market.isBorrowPaused
           ? sdk.ratePerBlockToAPY(
               rowA.original.market.borrowRatePerBlock,
-              getBlockTimePerMinuteByChainId(poolChainId)
+              getBlockTimePerMinuteByChainId(poolData.chainId)
             )
           : -1;
         const rowBBorrowAPY = !rowB.original.market.isBorrowPaused
           ? sdk.ratePerBlockToAPY(
               rowB.original.market.borrowRatePerBlock,
-              getBlockTimePerMinuteByChainId(poolChainId)
+              getBlockTimePerMinuteByChainId(poolData.chainId)
             )
           : -1;
         return rowABorrowAPY > rowBBorrowAPY ? 1 : -1;
@@ -249,27 +245,29 @@ export const MarketsList = ({
         return 0;
       }
     },
-    [totalApy, poolChainId, sdk]
+    [totalApy, poolData?.chainId, sdk]
   );
 
   const data: Market[] = useMemo(() => {
-    const availableAssets = assets.filter(
+    const availableAssets = poolData?.assets.filter(
       (asset) => !asset.isSupplyPaused || (asset.isSupplyPaused && asset.supplyBalanceFiat !== 0)
     );
-    return sortAssets(availableAssets).map((asset) => {
-      return {
-        market: asset,
-        supplyApy: asset,
-        supplyBalance: asset,
-        collateral: asset,
-        borrowApy: asset,
-        borrowBalance: asset,
-        totalSupply: asset,
-        totalBorrow: asset,
-        liquidity: asset,
-      };
-    });
-  }, [assets]);
+    return availableAssets
+      ? sortAssets(availableAssets).map((asset) => {
+          return {
+            market: asset,
+            supplyApy: asset,
+            supplyBalance: asset,
+            collateral: asset,
+            borrowApy: asset,
+            borrowBalance: asset,
+            totalSupply: asset,
+            totalBorrow: asset,
+            liquidity: asset,
+          };
+        })
+      : [];
+  }, [poolData?.assets]);
 
   const columns: ColumnDef<Market>[] = useMemo(() => {
     return [
@@ -284,8 +282,8 @@ export const MarketsList = ({
         cell: ({ getValue }) => (
           <TokenName
             asset={getValue<MarketData>()}
-            poolAddress={comptrollerAddress}
-            poolChainId={poolChainId}
+            poolAddress={poolData?.comptroller}
+            poolChainId={poolData?.chainId}
           />
         ),
         footer: (props) => props.column.id,
@@ -297,7 +295,11 @@ export const MarketsList = ({
         accessorFn: (row) => row.supplyApy,
         id: SUPPLY_APY,
         cell: ({ getValue }) => (
-          <SupplyApy asset={getValue<MarketData>()} rewards={rewards} poolChainId={poolChainId} />
+          <SupplyApy
+            asset={getValue<MarketData>()}
+            rewards={allRewards}
+            poolChainId={poolData?.chainId}
+          />
         ),
         header: () => (
           <Box py={2} textAlign="end" alignItems="end">
@@ -314,7 +316,7 @@ export const MarketsList = ({
         accessorFn: (row) => row.borrowApy,
         id: BORROW_APY,
         cell: ({ getValue }) => (
-          <BorrowApy asset={getValue<MarketData>()} poolChainId={poolChainId} />
+          <BorrowApy asset={getValue<MarketData>()} poolChainId={poolData?.chainId} />
         ),
         header: () => (
           <Box py={2} textAlign="end" alignItems="end">
@@ -330,7 +332,7 @@ export const MarketsList = ({
         accessorFn: (row) => row.supplyBalance,
         id: SUPPLY_BALANCE,
         cell: ({ getValue }) => (
-          <SupplyBalance asset={getValue<MarketData>()} poolChainId={poolChainId} />
+          <SupplyBalance asset={getValue<MarketData>()} poolChainId={poolData?.chainId} />
         ),
         header: () => (
           <VStack py={2} textAlign="end" alignItems="end" spacing={0}>
@@ -349,7 +351,7 @@ export const MarketsList = ({
         accessorFn: (row) => row.borrowBalance,
         id: BORROW_BALANCE,
         cell: ({ getValue }) => (
-          <BorrowBalance asset={getValue<MarketData>()} poolChainId={poolChainId} />
+          <BorrowBalance asset={getValue<MarketData>()} poolChainId={poolData?.chainId} />
         ),
         header: () => (
           <VStack py={2} textAlign="end" alignItems="end" spacing={0}>
@@ -368,7 +370,7 @@ export const MarketsList = ({
         accessorFn: (row) => row.totalSupply,
         id: TOTAL_SUPPLY,
         cell: ({ getValue }) => (
-          <TotalSupply asset={getValue<MarketData>()} poolChainId={poolChainId} />
+          <TotalSupply asset={getValue<MarketData>()} poolChainId={poolData?.chainId} />
         ),
         header: () => (
           <VStack py={2} textAlign="end" alignItems="end" spacing={0}>
@@ -387,7 +389,7 @@ export const MarketsList = ({
         accessorFn: (row) => row.totalBorrow,
         id: TOTAL_BORROW,
         cell: ({ getValue }) => (
-          <TotalBorrow asset={getValue<MarketData>()} poolChainId={poolChainId} />
+          <TotalBorrow asset={getValue<MarketData>()} poolChainId={poolData?.chainId} />
         ),
         header: () => (
           <VStack py={2} textAlign="end" alignItems="end" spacing={0}>
@@ -406,7 +408,7 @@ export const MarketsList = ({
         accessorFn: (row) => row.liquidity,
         id: LIQUIDITY,
         cell: ({ getValue }) => (
-          <Liquidity asset={getValue<MarketData>()} poolChainId={poolChainId} />
+          <Liquidity asset={getValue<MarketData>()} poolChainId={poolData?.chainId} />
         ),
         header: () => (
           <Text textAlign="end" py={2} variant="smText" fontWeight="bold">
@@ -422,8 +424,8 @@ export const MarketsList = ({
         cell: ({ getValue }) => (
           <Collateral
             asset={getValue<MarketData>()}
-            comptrollerAddress={comptrollerAddress}
-            poolChainId={poolChainId}
+            comptrollerAddress={poolData?.comptroller}
+            poolChainId={poolData?.chainId}
           />
         ),
         header: () => (
@@ -437,7 +439,7 @@ export const MarketsList = ({
       },
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rewards, comptrollerAddress, totalApy]);
+  }, [allRewards, poolData?.comptroller, totalApy]);
 
   const [sorting, setSorting] = useState<SortingState>(initSorting);
   const [pagination, onPagination] = useState<PaginationState>({
@@ -528,29 +530,43 @@ export const MarketsList = ({
             <Text variant="mdText" width="max-content">
               Your Supply Balance :
             </Text>
-            <SimpleTooltip
-              label={supplyBalanceFiat.toString()}
-              isDisabled={supplyBalanceFiat === DOWN_LIMIT || supplyBalanceFiat > UP_LIMIT}
-            >
-              <Text variant="lgText" fontWeight="bold">
-                {smallUsdFormatter(supplyBalanceFiat)}
-                {supplyBalanceFiat > DOWN_LIMIT && supplyBalanceFiat < UP_LIMIT && '+'}
-              </Text>
-            </SimpleTooltip>
+            <Skeleton isLoaded={!isPoolLoading}>
+              <SimpleTooltip
+                label={poolData?.totalSupplyBalanceFiat.toString() || ''}
+                isDisabled={
+                  poolData?.totalSupplyBalanceFiat === DOWN_LIMIT ||
+                  (poolData?.totalSupplyBalanceFiat || 0) > UP_LIMIT
+                }
+              >
+                <Text variant="lgText" fontWeight="bold">
+                  {smallUsdFormatter(poolData?.totalSupplyBalanceFiat || 0)}
+                  {(poolData?.totalSupplyBalanceFiat || 0) > DOWN_LIMIT &&
+                    (poolData?.totalSupplyBalanceFiat || 0) < UP_LIMIT &&
+                    '+'}
+                </Text>
+              </SimpleTooltip>
+            </Skeleton>
           </HStack>
           <HStack>
             <Text variant="mdText" width="max-content">
               Your Borrow Balance :
             </Text>
-            <SimpleTooltip
-              label={borrowBalanceFiat.toString()}
-              isDisabled={borrowBalanceFiat === DOWN_LIMIT || borrowBalanceFiat > UP_LIMIT}
-            >
-              <Text variant="lgText" fontWeight="bold">
-                {smallUsdFormatter(borrowBalanceFiat)}
-                {borrowBalanceFiat > DOWN_LIMIT && borrowBalanceFiat < UP_LIMIT && '+'}
-              </Text>
-            </SimpleTooltip>
+            <Skeleton isLoaded={!isPoolLoading}>
+              <SimpleTooltip
+                label={(poolData?.totalBorrowBalanceFiat || 0).toString()}
+                isDisabled={
+                  (poolData?.totalBorrowBalanceFiat || 0) === DOWN_LIMIT ||
+                  (poolData?.totalBorrowBalanceFiat || 0) > UP_LIMIT
+                }
+              >
+                <Text variant="lgText" fontWeight="bold">
+                  {smallUsdFormatter(poolData?.totalBorrowBalanceFiat || 0)}
+                  {(poolData?.totalBorrowBalanceFiat || 0) > DOWN_LIMIT &&
+                    (poolData?.totalBorrowBalanceFiat || 0) < UP_LIMIT &&
+                    '+'}
+                </Text>
+              </SimpleTooltip>
+            </Skeleton>
           </HStack>
         </Flex>
       </Flex>
@@ -565,87 +581,27 @@ export const MarketsList = ({
           <Text paddingTop="2px" variant="title">
             Assets
           </Text>
-          <ButtonGroup
-            isAttached={!isSemiSmallScreen ? true : false}
-            gap={isSemiSmallScreen ? 2 : 0}
-            spacing={0}
-            flexFlow={'row wrap'}
-            justifyContent="flex-start"
-          >
-            <CButton
-              isSelected={globalFilter.includes(ALL)}
-              onClick={() => onFilter(ALL)}
-              disabled={data.length === 0}
-              variant="filter"
-              width="80px"
-              p={0}
+          <Skeleton isLoaded={!isPoolLoading}>
+            <ButtonGroup
+              isAttached={!isSemiSmallScreen ? true : false}
+              gap={isSemiSmallScreen ? 2 : 0}
+              spacing={0}
+              flexFlow={'row wrap'}
+              justifyContent="flex-start"
             >
-              <PopoverTooltip
-                body={
-                  <VStack alignItems="flex-start" whiteSpace="pre-wrap">
-                    <Text variant="mdText">All Assets</Text>
-                    <Text variant="smText">Assets that are available in this pool.</Text>
-                    <Text variant="smText">Click to filter</Text>
-                  </VStack>
-                }
-                width="100%"
-                height="100%"
-              >
-                <Center
-                  width="100%"
-                  height="100%"
-                  fontWeight="bold"
-                  pt="2px"
-                >{`${data.length} All`}</Center>
-              </PopoverTooltip>
-            </CButton>
-            {allClaimableRewards && Object.keys(allClaimableRewards).length !== 0 && (
-              <GradientButton
-                isSelected={globalFilter.includes(REWARDS)}
-                onClick={() => onFilter(REWARDS)}
-                borderWidth={globalFilter.includes(REWARDS) ? 0 : 2}
-                mr="-px"
-                width="115px"
-              >
-                <PopoverTooltip
-                  body={
-                    <VStack alignItems="flex-start" whiteSpace="pre-wrap">
-                      <Text variant="mdText" fontWeight="bold">
-                        Rewards Asset
-                      </Text>
-                      <Text variant="smText">Assets that have rewards.</Text>
-                      <Text variant="smText">Click to filter</Text>
-                    </VStack>
-                  }
-                  width="100%"
-                  height="100%"
-                >
-                  <Center width="100%" height="100%" fontWeight="bold" pt="2px">
-                    <GradientText isEnabled={!globalFilter.includes(REWARDS)} color={cCard.bgColor}>
-                      {`${
-                        (allClaimableRewards && Object.keys(allClaimableRewards).length) || 0
-                      } Rewards`}
-                    </GradientText>
-                  </Center>
-                </PopoverTooltip>
-              </GradientButton>
-            )}
-            {collateralCounts !== 0 && (
               <CButton
-                isSelected={globalFilter.includes(COLLATERAL)}
+                isSelected={globalFilter.includes(ALL)}
+                onClick={() => onFilter(ALL)}
+                disabled={data.length === 0}
                 variant="filter"
-                color="cyan"
-                onClick={() => onFilter(COLLATERAL)}
-                width="125px"
+                width="80px"
                 p={0}
               >
                 <PopoverTooltip
                   body={
                     <VStack alignItems="flex-start" whiteSpace="pre-wrap">
-                      <Text variant="mdText">Collateral Asset</Text>
-                      <Text variant="smText">
-                        Assets that can be deposited as collateral to borrow other assets.
-                      </Text>
+                      <Text variant="mdText">All Assets</Text>
+                      <Text variant="smText">Assets that are available in this pool.</Text>
                       <Text variant="smText">Click to filter</Text>
                     </VStack>
                   }
@@ -657,99 +613,164 @@ export const MarketsList = ({
                     height="100%"
                     fontWeight="bold"
                     pt="2px"
-                  >{`${collateralCounts} Collateral`}</Center>
+                  >{`${data.length} All`}</Center>
                 </PopoverTooltip>
               </CButton>
-            )}
-            {borrowableCounts !== 0 && (
-              <CButton
-                isSelected={globalFilter.includes(BORROWABLE)}
-                variant="filter"
-                color="orange"
-                onClick={() => onFilter(BORROWABLE)}
-                width="135px"
-                p={0}
-              >
-                <PopoverTooltip
-                  body={
-                    <VStack alignItems="flex-start" whiteSpace="pre-wrap">
-                      <Text variant="mdText">Borrowable Asset</Text>
-                      <Text variant="smText">Assets that can be borrowed.</Text>
-                      <Text variant="smText">Click to filter</Text>
-                    </VStack>
-                  }
-                  width="100%"
-                  height="100%"
+              {allClaimableRewards && Object.keys(allClaimableRewards).length !== 0 && (
+                <GradientButton
+                  isSelected={globalFilter.includes(REWARDS)}
+                  onClick={() => onFilter(REWARDS)}
+                  borderWidth={globalFilter.includes(REWARDS) ? 0 : 2}
+                  mr="-px"
+                  width="115px"
                 >
-                  <Center
+                  <PopoverTooltip
+                    body={
+                      <VStack alignItems="flex-start" whiteSpace="pre-wrap">
+                        <Text variant="mdText" fontWeight="bold">
+                          Rewards Asset
+                        </Text>
+                        <Text variant="smText">Assets that have rewards.</Text>
+                        <Text variant="smText">Click to filter</Text>
+                      </VStack>
+                    }
                     width="100%"
                     height="100%"
-                    pt="2px"
-                    fontWeight="bold"
-                  >{`${borrowableCounts} Borrowable`}</Center>
-                </PopoverTooltip>
-              </CButton>
-            )}
-            {protectedCounts !== 0 && (
-              <CButton
-                isSelected={globalFilter.includes(PROTECTED)}
-                variant="filter"
-                color="purple"
-                onClick={() => onFilter(PROTECTED)}
-                width="125px"
-                p={0}
-              >
-                <PopoverTooltip
-                  body={
-                    <VStack alignItems="flex-start" whiteSpace="pre-wrap">
-                      <Text variant="mdText">Protected Asset</Text>
-                      <Text variant="smText">Assets that cannot be borrowed.</Text>
-                      <Text variant="smText">Click to filter</Text>
-                    </VStack>
-                  }
-                  width="100%"
-                  height="100%"
+                  >
+                    <Center width="100%" height="100%" fontWeight="bold" pt="2px">
+                      <GradientText
+                        isEnabled={!globalFilter.includes(REWARDS)}
+                        color={cCard.bgColor}
+                      >
+                        {`${
+                          (allClaimableRewards && Object.keys(allClaimableRewards).length) || 0
+                        } Rewards`}
+                      </GradientText>
+                    </Center>
+                  </PopoverTooltip>
+                </GradientButton>
+              )}
+              {collateralCounts !== 0 && (
+                <CButton
+                  isSelected={globalFilter.includes(COLLATERAL)}
+                  variant="filter"
+                  color="cyan"
+                  onClick={() => onFilter(COLLATERAL)}
+                  width="125px"
+                  p={0}
                 >
-                  <Center
-                    fontWeight="bold"
+                  <PopoverTooltip
+                    body={
+                      <VStack alignItems="flex-start" whiteSpace="pre-wrap">
+                        <Text variant="mdText">Collateral Asset</Text>
+                        <Text variant="smText">
+                          Assets that can be deposited as collateral to borrow other assets.
+                        </Text>
+                        <Text variant="smText">Click to filter</Text>
+                      </VStack>
+                    }
                     width="100%"
                     height="100%"
-                    pt="2px"
-                  >{`${protectedCounts} Protected`}</Center>
-                </PopoverTooltip>
-              </CButton>
-            )}
-            {deprecatedCounts !== 0 && (
-              <CButton
-                isSelected={globalFilter.includes(DEPRECATED)}
-                variant="filter"
-                color="gray"
-                onClick={() => onFilter(DEPRECATED)}
-                width="140px"
-                p={0}
-              >
-                <PopoverTooltip
-                  body={
-                    <VStack alignItems="flex-start" whiteSpace="pre-wrap">
-                      <Text variant="mdText">Deprecated Asset</Text>
-                      <Text variant="smText">Assets that cannot be supplied and borrowed.</Text>
-                      <Text variant="smText">Click to filter</Text>
-                    </VStack>
-                  }
-                  width="100%"
-                  height="100%"
+                  >
+                    <Center
+                      width="100%"
+                      height="100%"
+                      fontWeight="bold"
+                      pt="2px"
+                    >{`${collateralCounts} Collateral`}</Center>
+                  </PopoverTooltip>
+                </CButton>
+              )}
+              {borrowableCounts !== 0 && (
+                <CButton
+                  isSelected={globalFilter.includes(BORROWABLE)}
+                  variant="filter"
+                  color="orange"
+                  onClick={() => onFilter(BORROWABLE)}
+                  width="135px"
+                  p={0}
                 >
-                  <Center
-                    fontWeight="bold"
+                  <PopoverTooltip
+                    body={
+                      <VStack alignItems="flex-start" whiteSpace="pre-wrap">
+                        <Text variant="mdText">Borrowable Asset</Text>
+                        <Text variant="smText">Assets that can be borrowed.</Text>
+                        <Text variant="smText">Click to filter</Text>
+                      </VStack>
+                    }
                     width="100%"
                     height="100%"
-                    pt="2px"
-                    whiteSpace="nowrap"
-                  >{`${deprecatedCounts} Deprecated`}</Center>
-                </PopoverTooltip>
-              </CButton>
-            )}
-          </ButtonGroup>
+                  >
+                    <Center
+                      width="100%"
+                      height="100%"
+                      pt="2px"
+                      fontWeight="bold"
+                    >{`${borrowableCounts} Borrowable`}</Center>
+                  </PopoverTooltip>
+                </CButton>
+              )}
+              {protectedCounts !== 0 && (
+                <CButton
+                  isSelected={globalFilter.includes(PROTECTED)}
+                  variant="filter"
+                  color="purple"
+                  onClick={() => onFilter(PROTECTED)}
+                  width="125px"
+                  p={0}
+                >
+                  <PopoverTooltip
+                    body={
+                      <VStack alignItems="flex-start" whiteSpace="pre-wrap">
+                        <Text variant="mdText">Protected Asset</Text>
+                        <Text variant="smText">Assets that cannot be borrowed.</Text>
+                        <Text variant="smText">Click to filter</Text>
+                      </VStack>
+                    }
+                    width="100%"
+                    height="100%"
+                  >
+                    <Center
+                      fontWeight="bold"
+                      width="100%"
+                      height="100%"
+                      pt="2px"
+                    >{`${protectedCounts} Protected`}</Center>
+                  </PopoverTooltip>
+                </CButton>
+              )}
+              {deprecatedCounts !== 0 && (
+                <CButton
+                  isSelected={globalFilter.includes(DEPRECATED)}
+                  variant="filter"
+                  color="gray"
+                  onClick={() => onFilter(DEPRECATED)}
+                  width="140px"
+                  p={0}
+                >
+                  <PopoverTooltip
+                    body={
+                      <VStack alignItems="flex-start" whiteSpace="pre-wrap">
+                        <Text variant="mdText">Deprecated Asset</Text>
+                        <Text variant="smText">Assets that cannot be supplied and borrowed.</Text>
+                        <Text variant="smText">Click to filter</Text>
+                      </VStack>
+                    }
+                    width="100%"
+                    height="100%"
+                  >
+                    <Center
+                      fontWeight="bold"
+                      width="100%"
+                      height="100%"
+                      pt="2px"
+                      whiteSpace="nowrap"
+                    >{`${deprecatedCounts} Deprecated`}</Center>
+                  </PopoverTooltip>
+                </CButton>
+              )}
+            </ButtonGroup>
+          </Skeleton>
         </Flex>
         <Flex className="searchAsset" justifyContent="flex-start" alignItems="flex-end" gap={2}>
           <ControlledSearchInput onUpdate={(searchText) => setSearchText(searchText)} />
@@ -793,54 +814,72 @@ export const MarketsList = ({
       </Flex>
       <Table>
         <Thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <Tr
-              key={headerGroup.id}
-              borderColor={cCard.dividerColor}
-              borderBottomWidth={1}
-              borderTopWidth={2}
-            >
-              {headerGroup.headers.map((header) => {
-                return (
-                  <Th
-                    key={header.id}
-                    onClick={header.column.getToggleSortingHandler()}
-                    border="none"
-                    color={cCard.txtColor}
-                    textTransform="capitalize"
-                    py={2}
-                    cursor="pointer"
-                    px={{ base: 2, lg: 4 }}
-                  >
-                    <HStack
-                      gap={0}
-                      justifyContent={
-                        header.index === 0
-                          ? 'flex-start'
-                          : header.column.id === COLLATERAL
-                          ? 'center'
-                          : 'flex-end'
-                      }
-                    >
-                      <Box width={3} mb={1}>
-                        <Box hidden={header.column.getIsSorted() ? false : true}>
-                          {header.column.getIsSorted() === 'desc' ? (
-                            <ArrowDownIcon aria-label="sorted descending" />
-                          ) : (
-                            <ArrowUpIcon aria-label="sorted ascending" />
-                          )}
-                        </Box>
-                      </Box>
-                      <>{flexRender(header.column.columnDef.header, header.getContext())}</>
-                    </HStack>
-                  </Th>
-                );
-              })}
+          {isPoolLoading ? (
+            <Tr>
+              <Td border="none" colSpan={10}>
+                <Skeleton width="100%" height={12} />
+              </Td>
             </Tr>
-          ))}
+          ) : (
+            table.getHeaderGroups().map((headerGroup) => (
+              <Tr
+                key={headerGroup.id}
+                borderColor={cCard.dividerColor}
+                borderBottomWidth={1}
+                borderTopWidth={2}
+              >
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <Th
+                      key={header.id}
+                      onClick={header.column.getToggleSortingHandler()}
+                      border="none"
+                      color={cCard.txtColor}
+                      textTransform="capitalize"
+                      py={2}
+                      cursor="pointer"
+                      px={{ base: 2, lg: 4 }}
+                    >
+                      <HStack
+                        gap={0}
+                        justifyContent={
+                          header.index === 0
+                            ? 'flex-start'
+                            : header.column.id === COLLATERAL
+                            ? 'center'
+                            : 'flex-end'
+                        }
+                      >
+                        <Box width={3} mb={1}>
+                          <Box hidden={header.column.getIsSorted() ? false : true}>
+                            {header.column.getIsSorted() === 'desc' ? (
+                              <ArrowDownIcon aria-label="sorted descending" />
+                            ) : (
+                              <ArrowUpIcon aria-label="sorted ascending" />
+                            )}
+                          </Box>
+                        </Box>
+                        <>{flexRender(header.column.columnDef.header, header.getContext())}</>
+                      </HStack>
+                    </Th>
+                  );
+                })}
+              </Tr>
+            ))
+          )}
         </Thead>
         <Tbody>
-          {table.getRowModel().rows && table.getRowModel().rows.length !== 0 ? (
+          {isPoolLoading ? (
+            <Tr>
+              <Td border="none" colSpan={10}>
+                <VStack gap={0.5}>
+                  <Skeleton width="100%" height={12} />
+                  <Skeleton width="100%" height={12} />
+                  <Skeleton width="100%" height={12} />
+                </VStack>
+              </Td>
+            </Tr>
+          ) : table.getRowModel().rows && table.getRowModel().rows.length !== 0 ? (
             table.getRowModel().rows.map((row) => (
               <Fragment key={row.id}>
                 <Tr
@@ -875,16 +914,16 @@ export const MarketsList = ({
                       <AdditionalInfo
                         row={row}
                         rows={table.getCoreRowModel().rows}
-                        comptrollerAddress={comptrollerAddress}
-                        supplyBalanceFiat={supplyBalanceFiat}
-                        poolChainId={poolChainId}
+                        comptrollerAddress={poolData?.comptroller}
+                        supplyBalanceFiat={poolData?.totalSupplyBalanceFiat}
+                        poolChainId={poolData?.chainId}
                       />
                     </Td>
                   </Tr>
                 )}
               </Fragment>
             ))
-          ) : assets.length === 0 ? (
+          ) : poolData?.assets.length === 0 ? (
             <Tr>
               <Td border="none" colSpan={table.getHeaderGroups()[0].headers.length}>
                 <Center py={8}>There are no assets in this pool.</Center>

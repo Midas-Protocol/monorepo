@@ -12,7 +12,7 @@ const ClaimAssetRewardsButton = ({
   poolAddress,
   assetAddress,
 }: {
-  poolAddress: string;
+  poolAddress?: string;
   assetAddress: string;
 }) => {
   const {

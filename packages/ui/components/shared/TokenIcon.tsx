@@ -30,7 +30,7 @@ const PlaceholderIcon = ({ color, ...restOfProps }: PlaceholderIconProps) => {
 
 interface TokenIconProps extends AvatarProps {
   address: string;
-  chainId: number;
+  chainId?: number;
   withTooltip?: boolean;
   withMotion?: boolean;
 }

@@ -6,7 +6,7 @@ import { useSdk } from '@ui/hooks/fuse/useSdk';
 import { MarketData } from '@ui/types/TokensDataMap';
 import { getBlockTimePerMinuteByChainId } from '@ui/utils/networkData';
 
-export const BorrowApy = ({ asset, poolChainId }: { asset: MarketData; poolChainId: number }) => {
+export const BorrowApy = ({ asset, poolChainId }: { asset: MarketData; poolChainId?: number }) => {
   const sdk = useSdk(poolChainId);
   const borrowApyColor = useColorModeValue('orange.500', 'orange');
 

@@ -15,7 +15,7 @@ export const FundButton = ({
   supplyBalanceFiat,
   poolChainId,
 }: {
-  comptrollerAddress: string;
+  comptrollerAddress?: string;
   assets: MarketData[];
   asset: MarketData;
   mode: FundOperationMode;

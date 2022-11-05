@@ -54,7 +54,7 @@ import { getBlockTimePerMinuteByChainId } from '@ui/utils/networkData';
 interface AmountSelectProps {
   asset: MarketData;
   assets: MarketData[];
-  comptrollerAddress: string;
+  comptrollerAddress?: string;
   isBorrowPaused?: boolean;
   mode: FundOperationMode;
   onClose: () => void;
@@ -204,7 +204,7 @@ const AmountSelect = ({
   }
 
   const onConfirm = async () => {
-    if (!currentSdk || !address) return;
+    if (!currentSdk || !address || !comptrollerAddress) return;
 
     try {
       setUserAction(UserAction.WAITING_FOR_TRANSACTIONS);

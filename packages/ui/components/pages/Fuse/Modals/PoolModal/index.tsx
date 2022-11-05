@@ -11,7 +11,7 @@ interface PoolModalProps {
   defaultMode: FundOperationMode;
   asset: MarketData;
   assets: MarketData[];
-  comptrollerAddress: string;
+  comptrollerAddress?: string;
   supplyBalanceFiat?: number;
   poolChainId: number;
 }

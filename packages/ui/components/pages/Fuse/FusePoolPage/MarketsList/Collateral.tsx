@@ -17,8 +17,8 @@ export const Collateral = ({
   poolChainId,
 }: {
   asset: MarketData;
-  comptrollerAddress: string;
-  poolChainId: number;
+  comptrollerAddress?: string;
+  poolChainId?: number;
 }) => {
   const { setPendingTxHash, currentChain } = useMultiMidas();
   const sdk = useSdk(poolChainId);
@@ -27,7 +27,7 @@ export const Collateral = ({
   const isMobile = useIsMobile();
 
   const onToggleCollateral = async () => {
-    if (!sdk) return;
+    if (!sdk || !comptrollerAddress) return;
 
     const comptroller = sdk.createComptroller(comptrollerAddress);
 

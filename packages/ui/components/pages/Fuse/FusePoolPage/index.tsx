@@ -13,7 +13,6 @@ import { RewardsBanner } from '@ui/components/pages/Fuse/FusePoolPage/RewardsBan
 import FusePageLayout from '@ui/components/pages/Layout/FusePageLayout';
 import { MidasBox } from '@ui/components/shared/Box';
 import PageTransitionLayout from '@ui/components/shared/PageTransitionLayout';
-import { TableSkeleton } from '@ui/components/shared/TableSkeleton';
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
 import {
   MARKET_COLUMNS,
@@ -24,7 +23,6 @@ import {
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
 import { useRewardTokensOfPool } from '@ui/hooks/rewards/useRewardTokensOfPool';
 import { useFusePoolData } from '@ui/hooks/useFusePoolData';
-import { useRewards } from '@ui/hooks/useRewards';
 import { useIsMobile } from '@ui/hooks/useScreenSize';
 
 const FusePoolPage = memo(() => {
@@ -34,7 +32,6 @@ const FusePoolPage = memo(() => {
   const poolId = router.query.poolId as string;
   const chainId = router.query.chainId as string;
   const { data } = useFusePoolData(poolId, Number(chainId));
-  const { data: allRewards } = useRewards({ poolId: poolId, chainId: Number(chainId) });
   const rewardTokens = useRewardTokensOfPool(data?.comptroller, data?.chainId);
   const isMobile = useIsMobile();
   const [initSorting, setInitSorting] = useState<SortingState | undefined>();
@@ -167,19 +164,15 @@ const FusePoolPage = memo(() => {
           )}
 
           <MidasBox overflowX="auto" width="100%" mb="4">
-            {data && initSorting && initColumnVisibility && allRewards ? (
+            {initSorting && initColumnVisibility ? (
               <MarketsList
-                assets={data.assets}
-                rewards={allRewards}
-                comptrollerAddress={data.comptroller}
-                supplyBalanceFiat={data.totalSupplyBalanceFiat}
-                borrowBalanceFiat={data.totalBorrowBalanceFiat}
-                poolChainId={data.chainId}
                 initSorting={initSorting}
                 initColumnVisibility={initColumnVisibility}
+                poolId={poolId}
+                chainId={chainId}
               />
             ) : (
-              <TableSkeleton tableHeading="Assets" />
+              <Skeleton height={8} />
             )}
           </MidasBox>
 

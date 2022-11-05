@@ -9,7 +9,7 @@ export const NoRewardInfo = ({
   poolChainId,
 }: {
   pluginAddress?: string;
-  poolChainId: number;
+  poolChainId?: number;
 }) => {
   const { data: pluginInfo } = usePluginInfo(poolChainId, pluginAddress);
 

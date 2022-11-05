@@ -49,9 +49,9 @@ export const AdditionalInfo = ({
 }: {
   row: Row<Market>;
   rows: Row<Market>[];
-  comptrollerAddress: string;
-  supplyBalanceFiat: number;
-  poolChainId: number;
+  comptrollerAddress?: string;
+  supplyBalanceFiat?: number;
+  poolChainId?: number;
 }) => {
   const scanUrl = useMemo(() => getScanUrlByChainId(poolChainId), [poolChainId]);
   const asset: MarketData = row.original.market;
