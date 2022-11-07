@@ -581,7 +581,7 @@ export const MarketsList = ({
           <Text paddingTop="2px" variant="title">
             Assets
           </Text>
-          <Skeleton isLoaded={!isPoolLoading}>
+          <Skeleton isLoaded={!isPoolLoading} width={isPoolLoading ? 60 : 'auto'}>
             <ButtonGroup
               isAttached={!isSemiSmallScreen ? true : false}
               gap={isSemiSmallScreen ? 2 : 0}

@@ -85,7 +85,7 @@ export const AdditionalInfo = ({
     }
   };
   const vaultUrl = useMemo(() => {
-    if (strategyScore?.strategy.address) {
+    if (strategyScore?.strategy.address && poolChainId) {
       return deployedPlugins[poolChainId][strategyScore.strategy.address].apyDocsUrl;
     }
   }, [strategyScore, poolChainId]);

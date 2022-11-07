@@ -172,7 +172,7 @@ const FusePoolPage = memo(() => {
                 chainId={chainId}
               />
             ) : (
-              <Skeleton height={8} />
+              <Skeleton width="100%" height={200} />
             )}
           </MidasBox>
 
