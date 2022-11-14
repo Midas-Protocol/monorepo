@@ -25,6 +25,7 @@ POLYGON = "true"
 ARBITRUM = "true"
 
 [context.development.environment]
+NEXTAUTH_URL="https://development.midascapital.xyz"
 NEXT_PUBLIC_SHOW_TESTNETS = "true"
 EVMOS = "true"
 BSC = "true"
@@ -33,6 +34,7 @@ POLYGON = "true"
 ARBITRUM = "true"
 
 [context.production.environment]
+NEXTAUTH_URL="https://app.midascapital.xyz"
 NEXT_PUBLIC_SHOW_TESTNETS = "false"
 EVMOS = "false"
 BSC = "true"
