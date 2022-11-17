@@ -775,7 +775,7 @@ const StatsColumn = ({
 }: StatsColumnProps) => {
   const index = useMemo(() => assets.findIndex((a) => a.cToken === asset.cToken), [assets, asset]);
   // Get the new representation of a user's NativePricedFuseAssets after proposing a supply amount.
-  const updatedAssets: MarketData[] | undefined = useUpdatedUserAssets({
+  const { data: updatedAssets } = useUpdatedUserAssets({
     mode,
     assets,
     index,

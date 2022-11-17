@@ -2,7 +2,7 @@ import { Box, Button, useDisclosure } from '@chakra-ui/react';
 import { FundOperationMode } from '@midas-capital/types';
 import { useMemo } from 'react';
 
-import PoolModal from '@ui/components/pages/Fuse/Modals/PoolModal/index';
+import { SupplyModal } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/SupplyModal';
 import { useTokenData } from '@ui/hooks/useTokenData';
 import { MarketData } from '@ui/types/TokensDataMap';
 
@@ -12,7 +12,7 @@ export const FundButton = ({
   asset,
   mode,
   isDisabled,
-  supplyBalanceFiat,
+  // supplyBalanceFiat,
   poolChainId,
 }: {
   comptrollerAddress: string;
@@ -20,7 +20,7 @@ export const FundButton = ({
   asset: MarketData;
   mode: FundOperationMode;
   isDisabled?: boolean;
-  supplyBalanceFiat?: number;
+  // supplyBalanceFiat?: number;
   poolChainId: number;
 }) => {
   const { isOpen: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure();
@@ -41,7 +41,17 @@ export const FundButton = ({
       >
         {modeName}
       </Button>
-      <PoolModal
+      {mode === FundOperationMode.SUPPLY && (
+        <SupplyModal
+          isOpen={isModalOpen}
+          asset={asset}
+          assets={assets}
+          comptrollerAddress={comptrollerAddress}
+          onClose={closeModal}
+          poolChainId={poolChainId}
+        />
+      )}
+      {/* <PoolModal
         defaultMode={mode}
         comptrollerAddress={comptrollerAddress}
         assets={assets}
@@ -50,7 +60,7 @@ export const FundButton = ({
         onClose={closeModal}
         supplyBalanceFiat={supplyBalanceFiat}
         poolChainId={poolChainId}
-      />
+      /> */}
     </Box>
   );
 };

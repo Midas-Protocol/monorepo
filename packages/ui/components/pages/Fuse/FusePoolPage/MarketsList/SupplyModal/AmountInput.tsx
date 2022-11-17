@@ -1,12 +1,85 @@
 import { Box, Button, Input, Text } from '@chakra-ui/react';
 import { FundOperationMode } from '@midas-capital/types';
+import { BigNumber, constants, utils } from 'ethers';
+import { useState } from 'react';
 
 import { MidasBox } from '@ui/components/shared/Box';
 import { Row } from '@ui/components/shared/Flex';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
+import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useErrorToast } from '@ui/hooks/useToast';
+import { MarketData } from '@ui/types/TokensDataMap';
+import { handleGenericError } from '@ui/utils/errorHandling';
+import { fetchMaxAmount } from '@ui/utils/fetchMaxAmount';
+import { toFixedNoRound } from '@ui/utils/formatNumber';
 
-export const AmountInput = () => {
+export const AmountInput = ({
+  asset,
+  optionToWrap,
+  poolChainId,
+  setAmount,
+}: {
+  asset: MarketData;
+  optionToWrap?: boolean;
+  poolChainId: number;
+  setAmount: (amount: BigNumber) => void;
+}) => {
+  const { currentSdk, address } = useMultiMidas();
+  const [userEnteredAmount, setUserEnteredAmount] = useState('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const errorToast = useErrorToast();
+
+  const updateAmount = (newAmount: string) => {
+    if (newAmount.startsWith('-') || !newAmount) {
+      setUserEnteredAmount('');
+      setAmount(constants.Zero);
+
+      return;
+    }
+    try {
+      setUserEnteredAmount(newAmount);
+      const bigAmount = utils.parseUnits(
+        toFixedNoRound(newAmount, Number(asset.underlyingDecimals)),
+        Number(asset.underlyingDecimals)
+      );
+      setAmount(bigAmount);
+    } catch (e) {
+      setAmount(constants.Zero);
+    }
+  };
+
+  const setToMax = async () => {
+    if (!currentSdk || !address) return;
+
+    setIsLoading(true);
+
+    try {
+      let maxBN;
+      if (optionToWrap) {
+        maxBN = await currentSdk.signer.getBalance();
+      } else {
+        maxBN = (await fetchMaxAmount(
+          FundOperationMode.SUPPLY,
+          currentSdk,
+          address,
+          asset
+        )) as BigNumber;
+      }
+
+      if (maxBN.lt(constants.Zero) || maxBN.isZero()) {
+        updateAmount('');
+      } else {
+        const str = utils.formatUnits(maxBN, asset.underlyingDecimals);
+        updateAmount(str);
+      }
+
+      setIsLoading(false);
+    } catch (e) {
+      handleGenericError(e, errorToast);
+    }
+  };
+
   return (
     <MidasBox width="100%" height="70px" mt={3}>
       <Row width="100%" p={4} mainAxisAlignment="space-between" crossAxisAlignment="center" expand>
@@ -21,7 +94,6 @@ export const AmountInput = () => {
           value={userEnteredAmount}
           onChange={(event) => updateAmount(event.target.value)}
           mr={4}
-          disabled={isBorrowPaused}
           autoFocus
         />
         <Row mainAxisAlignment="flex-start" crossAxisAlignment="center" flexShrink={0}>
@@ -55,13 +127,6 @@ export const AmountInput = () => {
             MAX
           </Button>
         </Row>
-        <TokenNameAndMaxButton
-          mode={FundOperationMode.SUPPLY}
-          asset={asset}
-          updateAmount={updateAmount}
-          optionToWrap={optionToWrap}
-          poolChainId={poolChainId}
-        />
       </Row>
     </MidasBox>
   );
