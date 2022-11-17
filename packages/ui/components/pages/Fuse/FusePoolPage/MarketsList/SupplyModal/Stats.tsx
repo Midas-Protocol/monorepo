@@ -93,9 +93,13 @@ export const Stats = ({ assets, asset, amount, enableAsCollateral, poolChainId }
                 whiteSpace="nowrap"
                 overflow="hidden"
               >
-                {supplyBalanceFrom.slice(0, supplyBalanceFrom.indexOf('.') + 3)}
-                {' → '}
-                {supplyBalanceTo.slice(0, supplyBalanceTo.indexOf('.') + 3)}{' '}
+                {supplyBalanceFrom.slice(0, supplyBalanceFrom.indexOf('.') + 3)}{' '}
+                {!amount.isZero() && (
+                  <>
+                    {'→ '}
+                    {supplyBalanceTo.slice(0, supplyBalanceTo.indexOf('.') + 3)}{' '}
+                  </>
+                )}
                 {asset.underlyingSymbol}
               </Text>
             </SimpleTooltip>
@@ -116,8 +120,12 @@ export const Stats = ({ assets, asset, amount, enableAsCollateral, poolChainId }
             </Text>
             <Text fontWeight="bold" variant={'xsText'}>
               {smallUsdFormatter(borrowLimit)}
-              {' → '}
-              {smallUsdFormatter(updatedBorrowLimit)}
+              {!amount.isZero() && (
+                <>
+                  {' → '}
+                  {smallUsdFormatter(updatedBorrowLimit)}
+                </>
+              )}
             </Text>
           </Row>
           <Row mainAxisAlignment="space-between" crossAxisAlignment="center" width="100%">

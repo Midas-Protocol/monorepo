@@ -201,7 +201,15 @@ export const SupplyModal = ({
   }, [optionToWrap]);
 
   return (
-    <Modal motionPreset="slideInBottom" isOpen={isOpen} onClose={onClose} isCentered>
+    <Modal
+      motionPreset="slideInBottom"
+      isOpen={isOpen}
+      onClose={() => {
+        setAmount(constants.Zero);
+        onClose();
+      }}
+      isCentered
+    >
       <ModalOverlay />
       <ModalContent>
         <ModalBody p={0}>
