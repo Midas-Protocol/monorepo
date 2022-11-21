@@ -3,6 +3,7 @@ import { FundOperationMode } from '@midas-capital/types';
 import { useMemo } from 'react';
 
 import { SupplyModal } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/SupplyModal';
+import { WithdrawModal } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/WithdrawModal';
 import { useTokenData } from '@ui/hooks/useTokenData';
 import { MarketData } from '@ui/types/TokensDataMap';
 
@@ -47,6 +48,15 @@ export const FundButton = ({
           asset={asset}
           assets={assets}
           comptrollerAddress={comptrollerAddress}
+          onClose={closeModal}
+          poolChainId={poolChainId}
+        />
+      )}
+      {mode === FundOperationMode.WITHDRAW && (
+        <WithdrawModal
+          isOpen={isModalOpen}
+          asset={asset}
+          assets={assets}
           onClose={closeModal}
           poolChainId={poolChainId}
         />
