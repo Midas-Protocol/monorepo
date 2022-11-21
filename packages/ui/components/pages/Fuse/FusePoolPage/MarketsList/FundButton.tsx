@@ -2,6 +2,7 @@ import { Box, Button, useDisclosure } from '@chakra-ui/react';
 import { FundOperationMode } from '@midas-capital/types';
 import { useMemo } from 'react';
 
+import { BorrowModal } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/BorrowModal';
 import { SupplyModal } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/SupplyModal';
 import { WithdrawModal } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/WithdrawModal';
 import { useTokenData } from '@ui/hooks/useTokenData';
@@ -54,6 +55,15 @@ export const FundButton = ({
       )}
       {mode === FundOperationMode.WITHDRAW && (
         <WithdrawModal
+          isOpen={isModalOpen}
+          asset={asset}
+          assets={assets}
+          onClose={closeModal}
+          poolChainId={poolChainId}
+        />
+      )}
+      {mode === FundOperationMode.BORROW && (
+        <BorrowModal
           isOpen={isModalOpen}
           asset={asset}
           assets={assets}
