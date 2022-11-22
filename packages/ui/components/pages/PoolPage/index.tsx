@@ -5,11 +5,11 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { memo, useEffect, useState } from 'react';
 
-import { CollateralRatioBar } from '@ui/components/pages/Fuse/FusePoolPage/CollateralRatioBar';
-import { MarketsList } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList';
-import PoolDetails from '@ui/components/pages/Fuse/FusePoolPage/PoolDetails';
-import { PoolStats } from '@ui/components/pages/Fuse/FusePoolPage/PoolStats';
-import { RewardsBanner } from '@ui/components/pages/Fuse/FusePoolPage/RewardsBanner';
+import { CollateralRatioBar } from '@ui/components/pages/PoolPage/CollateralRatioBar';
+import { MarketsList } from '@ui/components/pages/PoolPage/MarketsList';
+import PoolDetails from '@ui/components/pages/PoolPage/PoolDetails';
+import { PoolStats } from '@ui/components/pages/PoolPage/PoolStats';
+import { RewardsBanner } from '@ui/components/pages/PoolPage/RewardsBanner';
 import FusePageLayout from '@ui/components/pages/Layout/FusePageLayout';
 import { MidasBox } from '@ui/components/shared/Box';
 import PageTransitionLayout from '@ui/components/shared/PageTransitionLayout';

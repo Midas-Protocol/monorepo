@@ -2,7 +2,7 @@ import { Box, Button, useDisclosure } from '@chakra-ui/react';
 import { FundOperationMode } from '@midas-capital/types';
 import { useMemo } from 'react';
 
-import PoolModal from '@ui/components/pages/Fuse/Modals/PoolModal/index';
+import PoolModal from '@ui/components/pages/PoolPage/AmountModal/index';
 import { useTokenData } from '@ui/hooks/useTokenData';
 import { MarketData } from '@ui/types/TokensDataMap';
 
