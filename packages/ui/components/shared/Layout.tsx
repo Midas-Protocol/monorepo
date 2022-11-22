@@ -1,7 +1,7 @@
 import { Container } from '@chakra-ui/react';
 import { ReactNode, useEffect, useRef, useState } from 'react';
 
-import Terms from '@ui/components/pages/Fuse/Modals/Terms';
+import Terms from '@ui/components/pages/Modals/Terms';
 import { Column } from '@ui/components/shared/Flex';
 import LoadingOverlay from '@ui/components/shared/LoadingOverlay';
 import { MIDAS_T_AND_C_ACCEPTED } from '@ui/constants/index';
