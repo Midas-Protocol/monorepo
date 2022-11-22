@@ -32,7 +32,7 @@ import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
-import RemoveAssetButton from '@ui/components/pages/Fuse/FusePoolEditPage/AssetConfiguration/RemoveAssetButton';
+import RemoveAssetButton from '@ui/components/pages/PoolEditPage/AssetConfiguration/RemoveAssetButton';
 import { ConfigRow } from '@ui/components/shared/ConfigRow';
 import { Column, Row } from '@ui/components/shared/Flex';
 import { PopoverTooltip } from '@ui/components/shared/PopoverTooltip';
@@ -62,7 +62,7 @@ import { smallUsdFormatter } from '@ui/utils/bigUtils';
 import { handleGenericError } from '@ui/utils/errorHandling';
 
 const IRMChart = dynamic(
-  () => import('@ui/components/pages/Fuse/FusePoolEditPage/AssetConfiguration/IRMChart'),
+  () => import('@ui/components/pages/PoolEditPage/AssetConfiguration/IRMChart'),
   {
     ssr: false,
   }

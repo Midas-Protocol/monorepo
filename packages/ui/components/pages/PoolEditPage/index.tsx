@@ -4,11 +4,11 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import React, { memo, useEffect } from 'react';
 
-import AssetConfiguration from '@ui/components/pages/Fuse/FusePoolEditPage/AssetConfiguration';
-import AddAssetButton from '@ui/components/pages/Fuse/FusePoolEditPage/AssetConfiguration/AddAssetButton';
-import AddAssetModal from '@ui/components/pages/Fuse/FusePoolEditPage/AssetConfiguration/AddAssetModal';
-import FlywheelEdit from '@ui/components/pages/Fuse/FusePoolEditPage/FlywheelEdit';
-import PoolConfiguration from '@ui/components/pages/Fuse/FusePoolEditPage/PoolConfiguration';
+import AssetConfiguration from '@ui/components/pages/PoolEditPage/AssetConfiguration';
+import AddAssetButton from '@ui/components/pages/PoolEditPage/AssetConfiguration/AddAssetButton';
+import AddAssetModal from '@ui/components/pages/PoolEditPage/AssetConfiguration/AddAssetModal';
+import FlywheelEdit from '@ui/components/pages/PoolEditPage/FlywheelEdit';
+import PoolConfiguration from '@ui/components/pages/PoolEditPage/PoolConfiguration';
 import FusePageLayout from '@ui/components/pages/Layout/FusePageLayout';
 import { AdminAlert } from '@ui/components/shared/Alert';
 import { MidasBox } from '@ui/components/shared/Box';
