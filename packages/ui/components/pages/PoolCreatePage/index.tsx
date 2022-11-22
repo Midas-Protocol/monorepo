@@ -1,6 +1,6 @@
 import { memo } from 'react';
 
-import { CreatePoolConfiguration } from '@ui/components/pages/Fuse/FusePoolCreatePage/CreatePoolConfiguration';
+import { CreatePoolConfiguration } from '@ui/components/pages/PoolCreatePage/CreatePoolConfiguration';
 import FusePageLayout from '@ui/components/pages/Layout/FusePageLayout';
 import PageTransitionLayout from '@ui/components/shared/PageTransitionLayout';
 

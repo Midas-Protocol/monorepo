@@ -3,7 +3,7 @@ import { IconButton, Input, Text } from '@chakra-ui/react';
 import { isAddress } from '@ethersproject/address';
 import { useState } from 'react';
 
-import { OptionRow } from '@ui/components/pages/Fuse/FusePoolCreatePage/OptionRow';
+import { OptionRow } from '@ui/components/pages/PoolCreatePage/OptionRow';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
 import { useColors } from '@ui/hooks/useColors';
 import { useErrorToast } from '@ui/hooks/useToast';

@@ -20,8 +20,8 @@ import { useRouter } from 'next/router';
 import { useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
-import { OptionRow } from '@ui/components/pages/Fuse/FusePoolCreatePage/OptionRow';
-import { WhitelistInfo } from '@ui/components/pages/Fuse/FusePoolCreatePage/WhitelistInfo';
+import { OptionRow } from '@ui/components/pages/PoolCreatePage/OptionRow';
+import { WhitelistInfo } from '@ui/components/pages/PoolCreatePage/WhitelistInfo';
 import { Banner } from '@ui/components/shared/Banner';
 import { MidasBox } from '@ui/components/shared/Box';
 import { Center, Column } from '@ui/components/shared/Flex';
