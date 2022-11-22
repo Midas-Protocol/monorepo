@@ -12,7 +12,7 @@ import {
 import { Row } from '@tanstack/react-table';
 import { useMemo } from 'react';
 
-import { PoolRowData } from '@ui/components/pages/Fuse/FusePoolsPage/FusePoolList/FusePoolRow/index';
+import { PoolRowData } from '@ui/components/pages/PoolsPage/FusePoolList/FusePoolRow/index';
 import ClaimPoolRewardsButton from '@ui/components/shared/ClaimPoolRewardsButton';
 import { ClipboardValueIconButton } from '@ui/components/shared/ClipboardValue';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';

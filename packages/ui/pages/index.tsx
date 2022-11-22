@@ -2,7 +2,7 @@ import { NextPage } from 'next';
 import Head from 'next/head';
 import { useEffect } from 'react';
 
-import FusePoolsPage from '@ui/components/pages/Fuse/FusePoolsPage';
+import FusePoolsPage from '@ui/components/pages/PoolsPage';
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
 
 export async function getInitialProps() {
