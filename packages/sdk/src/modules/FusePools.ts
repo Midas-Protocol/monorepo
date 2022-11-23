@@ -44,14 +44,14 @@ export function withFusePools<TBase extends MidasBaseConstructor>(Base: TBase) {
       } = await this.contracts.FusePoolDirectory.callStatic.pools(Number(poolId), overrides);
       const name = filterPoolName(_unfiliteredName);
 
-      // hardcode deprecated assets here
-      const DEPRECATED_ASSETS: string[] = [];
+      // hardcode deprecated markets here
+      const DEPRECATED_MARKETS: string[] = [];
 
       const _assets: NativePricedFuseAsset[] = (
         await this.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(comptroller, overrides)
       ).map(filterOnlyObjectProperties);
 
-      const assets = [..._assets].filter((asset) => !DEPRECATED_ASSETS.includes(asset.cToken));
+      const assets = [..._assets].filter((asset) => !DEPRECATED_MARKETS.includes(asset.cToken));
 
       let totalLiquidityNative = 0;
       let totalAvailableLiquidityNative = 0;
