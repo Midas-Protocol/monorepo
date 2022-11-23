@@ -3,6 +3,7 @@ import { FundOperationMode } from '@midas-capital/types';
 import { useMemo } from 'react';
 
 import { BorrowModal } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/BorrowModal';
+import { RepayModal } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/RepayModal';
 import { SupplyModal } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/SupplyModal';
 import { WithdrawModal } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/WithdrawModal';
 import { useTokenData } from '@ui/hooks/useTokenData';
@@ -14,7 +15,6 @@ export const FundButton = ({
   asset,
   mode,
   isDisabled,
-  // supplyBalanceFiat,
   poolChainId,
 }: {
   comptrollerAddress: string;
@@ -22,7 +22,6 @@ export const FundButton = ({
   asset: MarketData;
   mode: FundOperationMode;
   isDisabled?: boolean;
-  // supplyBalanceFiat?: number;
   poolChainId: number;
 }) => {
   const { isOpen: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure();
@@ -71,16 +70,15 @@ export const FundButton = ({
           poolChainId={poolChainId}
         />
       )}
-      {/* <PoolModal
-        defaultMode={mode}
-        comptrollerAddress={comptrollerAddress}
-        assets={assets}
-        asset={asset}
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        supplyBalanceFiat={supplyBalanceFiat}
-        poolChainId={poolChainId}
-      /> */}
+      {mode === FundOperationMode.REPAY && (
+        <RepayModal
+          isOpen={isModalOpen}
+          asset={asset}
+          assets={assets}
+          onClose={closeModal}
+          poolChainId={poolChainId}
+        />
+      )}
     </Box>
   );
 };

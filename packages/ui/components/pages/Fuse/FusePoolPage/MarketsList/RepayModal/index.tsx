@@ -36,8 +36,6 @@ interface RepayModalProps {
   isOpen: boolean;
   asset: MarketData;
   assets: MarketData[];
-  comptrollerAddress: string;
-  isBorrowPaused?: boolean;
   onClose: () => void;
   poolChainId: number;
 }
@@ -227,7 +225,7 @@ export const RepayModal = ({ isOpen, asset, assets, onClose, poolChainId }: Repa
                     <TokenIcon size="36" address={asset.underlyingToken} chainId={poolChainId} />
                   </Box>
                   <Text id="symbol" variant="title" fontWeight="bold" ml={3}>
-                    {tokenData?.symbol || asset.underlyingSymbol}
+                    {tokenData?.symbol || asset.underlyingSymbol} Repay
                   </Text>
                 </Row>
 
