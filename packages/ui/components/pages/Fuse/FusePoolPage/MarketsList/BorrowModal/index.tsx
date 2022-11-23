@@ -21,7 +21,7 @@ import { BorrowError } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/
 import { PendingTransaction } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/BorrowModal//PendingTransaction';
 import { Stats } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/BorrowModal//Stats';
 import { AmountInput } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/BorrowModal/AmountInput';
-import MaxBorrowSlider from '@ui/components/pages/Fuse/Modals/PoolModal/MaxBorrowSlider';
+import MaxBorrowSlider from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/BorrowModal/MaxBorrowSlider';
 import { Column, Row } from '@ui/components/shared/Flex';
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
 import { DEFAULT_DECIMALS, HIGH_RISK_RATIO } from '@ui/constants/index';
