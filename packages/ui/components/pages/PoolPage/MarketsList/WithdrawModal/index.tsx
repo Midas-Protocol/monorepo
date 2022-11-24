@@ -15,11 +15,11 @@ import { BigNumber, constants } from 'ethers';
 import LogRocket from 'logrocket';
 import { useEffect, useState } from 'react';
 
-import { AmountInput } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/WithdrawModal/AmountInput';
-import { Balance } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/WithdrawModal/Balance';
-import { PendingTransaction } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/WithdrawModal/PendingTransaction';
-import { Stats } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/WithdrawModal/Stats';
-import { WithdrawError } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/WithdrawModal/WithdrawError';
+import { AmountInput } from '@ui/components/pages/PoolPage/MarketsList/WithdrawModal/AmountInput';
+import { Balance } from '@ui/components/pages/PoolPage/MarketsList/WithdrawModal/Balance';
+import { PendingTransaction } from '@ui/components/pages/PoolPage/MarketsList/WithdrawModal/PendingTransaction';
+import { Stats } from '@ui/components/pages/PoolPage/MarketsList/WithdrawModal/Stats';
+import { WithdrawError } from '@ui/components/pages/PoolPage/MarketsList/WithdrawModal/WithdrawError';
 import { Column, Row } from '@ui/components/shared/Flex';
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
 import { useMultiMidas } from '@ui/context/MultiMidasContext';

@@ -15,12 +15,12 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { BigNumber, constants } from 'ethers';
 import { useEffect, useState } from 'react';
 
-import { AmountInput } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/SupplyModal/AmountInput';
-import { Balance } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/SupplyModal/Balance';
-import { EnableCollateral } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/SupplyModal/EnableCollateral';
-import { PendingTransaction } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/SupplyModal/PendingTransaction';
-import { Stats } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/SupplyModal/Stats';
-import { SupplyError } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/SupplyModal/SupplyError';
+import { AmountInput } from '@ui/components/pages/PoolPage/MarketsList/SupplyModal/AmountInput';
+import { Balance } from '@ui/components/pages/PoolPage/MarketsList/SupplyModal/Balance';
+import { EnableCollateral } from '@ui/components/pages/PoolPage/MarketsList/SupplyModal/EnableCollateral';
+import { PendingTransaction } from '@ui/components/pages/PoolPage/MarketsList/SupplyModal/PendingTransaction';
+import { Stats } from '@ui/components/pages/PoolPage/MarketsList/SupplyModal/Stats';
+import { SupplyError } from '@ui/components/pages/PoolPage/MarketsList/SupplyModal/SupplyError';
 import { Column, Row } from '@ui/components/shared/Flex';
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
 import { SUPPLY_STEPS } from '@ui/constants/index';

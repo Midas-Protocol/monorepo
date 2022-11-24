@@ -15,11 +15,11 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { BigNumber, constants } from 'ethers';
 import { useEffect, useState } from 'react';
 
-import { Balance } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/RepayModal//Balance';
-import { PendingTransaction } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/RepayModal//PendingTransaction';
-import { RepayError } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/RepayModal//RepayError';
-import { Stats } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/RepayModal//Stats';
-import { AmountInput } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/RepayModal/AmountInput';
+import { Balance } from '@ui/components/pages/PoolPage/MarketsList/RepayModal//Balance';
+import { PendingTransaction } from '@ui/components/pages/PoolPage/MarketsList/RepayModal//PendingTransaction';
+import { RepayError } from '@ui/components/pages/PoolPage/MarketsList/RepayModal//RepayError';
+import { Stats } from '@ui/components/pages/PoolPage/MarketsList/RepayModal//Stats';
+import { AmountInput } from '@ui/components/pages/PoolPage/MarketsList/RepayModal/AmountInput';
 import { Column, Row } from '@ui/components/shared/Flex';
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
 import { REPAY_STEPS } from '@ui/constants/index';

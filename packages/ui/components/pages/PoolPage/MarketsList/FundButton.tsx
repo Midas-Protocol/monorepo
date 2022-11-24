@@ -2,10 +2,10 @@ import { Box, Button, useDisclosure } from '@chakra-ui/react';
 import { FundOperationMode } from '@midas-capital/types';
 import { useMemo } from 'react';
 
-import { BorrowModal } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/BorrowModal';
-import { RepayModal } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/RepayModal';
-import { SupplyModal } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/SupplyModal';
-import { WithdrawModal } from '@ui/components/pages/Fuse/FusePoolPage/MarketsList/WithdrawModal';
+import { BorrowModal } from '@ui/components/pages/PoolPage/MarketsList/BorrowModal';
+import { RepayModal } from '@ui/components/pages/PoolPage/MarketsList/RepayModal';
+import { SupplyModal } from '@ui/components/pages/PoolPage/MarketsList/SupplyModal';
+import { WithdrawModal } from '@ui/components/pages/PoolPage/MarketsList/WithdrawModal';
 import { useTokenData } from '@ui/hooks/useTokenData';
 import { MarketData } from '@ui/types/TokensDataMap';
 
