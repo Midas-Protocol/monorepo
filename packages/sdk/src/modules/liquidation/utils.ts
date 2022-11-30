@@ -38,6 +38,7 @@ export type LiquidatablePool = {
 export type ErroredPool = {
   comptroller: string;
   msg: string;
+  error?: any;
 };
 
 export type FusePoolUserStruct = {
@@ -54,15 +55,16 @@ export type PublicPoolUserWithData = {
   liquidationIncentive: BigNumber;
 };
 
-export async function fetchGasLimitForTransaction(fuse: MidasBase, method: string, tx: TransactionRequest) {
+export async function fetchGasLimitForTransaction(sdk: MidasBase, method: string, tx: TransactionRequest) {
   try {
-    return await fuse.provider.estimateGas(tx);
+    return await sdk.provider.estimateGas(tx);
   } catch (error) {
     throw `Failed to estimate gas before signing and sending ${method} transaction: ${error}`;
   }
 }
 
 export const logLiquidation = (
+  sdk: MidasBase,
   borrower: FusePoolUserWithAssets,
   exchangeToTokenAddress: string,
   liquidationAmount: BigNumber,
@@ -70,7 +72,7 @@ export const logLiquidation = (
   liquidationStrategy: LiquidationStrategy,
   debtFundingStrategies: any[]
 ) => {
-  console.log(
+  sdk.logger.info(
     `Gathered transaction data for safeLiquidate a ${liquidationTokenSymbol} borrow of kind ${liquidationStrategy}:
          - Liquidation Amount: ${utils.formatEther(liquidationAmount)}
          - Underlying Collateral Token: ${borrower.collateral[0].underlyingSymbol}

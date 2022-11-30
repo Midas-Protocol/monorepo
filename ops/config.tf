@@ -25,10 +25,10 @@ locals {
   ]
 
   bsc_mainnet_rpc_0    = var.chainstack_bsc_rpc_url
-  bsc_mainnet_rpc_1    = "https://rpc.ankr.com/bsc"
+  bsc_mainnet_rpc_1    = "https://bsc-dataseed4.binance.org"
   bsc_mainnet_chain_id = "56"
 
-  moonbeam_mainnet_rpc_0    = "https://moonbeam-mainnet.gateway.pokt.network/v1/lb/${var.pokt_api_key}"
+  moonbeam_mainnet_rpc_0    = "https://moonbeam.public.blastapi.io"
   moonbeam_mainnet_rpc_1    = "https://rpc.ankr.com/moonbeam"
   moonbeam_mainnet_chain_id = "1284"
 
@@ -36,8 +36,12 @@ locals {
   evmos_testnet_chain_id = "9000"
 
   polygon_mainnet_rpc_0    = var.chainstack_polygon_rpc_url
-  polygon_mainnet_rpc_1    = "https://rpc.ankr.com/polygon"
+  polygon_mainnet_rpc_1    = "https://polygon-rpc.com/"
   polygon_mainnet_chain_id = "137"
+
+  // per-chain liquidation bot configs
+  bsc_excluded_comptrollers     = "0x11355CF65a9B76e5Ac4C289362fD7c22eE93E762,0x47FE09AeED6545aE66f5f2309EC52828164Aa6D5,0xd3E5AAFebBF06A071509cf894f665710dDaa800d"
+  polygon_excluded_comptrollers = "0x7048847d460291E35De52Cfa444873DE0B9b2331"
 
 }
 

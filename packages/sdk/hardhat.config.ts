@@ -27,6 +27,7 @@ import "./tasks/one-time/arrakis-polygon-plugins";
 import "./tasks/one-time/dot-dot-bsc-plugins";
 import "./tasks/one-time/jarvis-polygon-mimo-plugin";
 import "./tasks/one-time/downgradeMarket";
+import "./tasks/one-time/loopless-booster";
 import "./tasks/oracle/add-apeswap-oracle";
 import "./tasks/configureApStrategies";
 
@@ -109,6 +110,13 @@ const config: HardhatUserConfig = {
       gasPrice: 20e10,
       url: "http://localhost:8545",
     },
+    localchapel: {
+      accounts: { mnemonic },
+      chainId: 97,
+      gas: 25e6,
+      gasPrice: 20e10,
+      url: "http://localhost:8547",
+    },
     localpolygon: {
       accounts: { mnemonic },
       chainId: 137,
@@ -116,15 +124,12 @@ const config: HardhatUserConfig = {
       gasPrice: 20e10,
       url: "http://localhost:8546",
     },
-    rinkeby: {
+    localarbitrum: {
       accounts: { mnemonic },
-      chainId: 4,
-      url: OVERRIDE_RPC_URL || process.env.RINKEBY_ETH_PROVIDER_URL || "https://rpc.ankr.com/eth_rinkeby",
-    },
-    kovan: {
-      accounts: { mnemonic },
-      chainId: 42,
-      url: "https://kovan.infura.io/v3/10bc2717e7f14941a3ab5bea569da361",
+      chainId: 42161,
+      gas: 25e6,
+      gasPrice: 20e10,
+      url: "http://localhost:8548",
     },
     bsc: {
       accounts: { mnemonic },
@@ -141,18 +146,10 @@ const config: HardhatUserConfig = {
       chainId: 1,
       url: OVERRIDE_RPC_URL || "https://eth-mainnet.alchemyapi.io/v2/2Mt-6brbJvTA4w9cpiDtnbTo6qOoySnN",
     },
-    evmostestnet: {
+    evmos: {
       accounts: { mnemonic },
-      chainId: 9000,
-      url: "https://eth.bd.evmos.dev:8545",
-    },
-    moonbase: {
-      url: OVERRIDE_RPC_URL || `https://rpc.api.moonbase.moonbeam.network`,
-      accounts: { mnemonic },
-      chainId: 1287,
-      saveDeployments: true,
-      gasPrice: 1000000000,
-      gas: 8000000,
+      chainId: 9001,
+      url: OVERRIDE_RPC_URL || "https://eth.bd.evmos.org:8545",
     },
     moonbeam: {
       url: OVERRIDE_RPC_URL || `https://rpc.api.moonbeam.network`,
@@ -174,6 +171,11 @@ const config: HardhatUserConfig = {
       url: OVERRIDE_RPC_URL || `https://arb1.arbitrum.io/rpc`,
       accounts: { mnemonic },
       chainId: 42161,
+    },
+    fantom: {
+      url: OVERRIDE_RPC_URL || `https://rpcapi.fantom.network`,
+      accounts: { mnemonic },
+      chainId: 250,
     },
   },
 };

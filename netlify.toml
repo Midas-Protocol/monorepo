@@ -23,6 +23,7 @@ BSC = "true"
 MOONBEAM = "true"
 POLYGON = "true"
 ARBITRUM = "true"
+FANTOM = "true"
 
 [context.development.environment]
 NEXTAUTH_URL="https://development.midascapital.xyz"
@@ -32,6 +33,7 @@ BSC = "true"
 MOONBEAM = "true"
 POLYGON = "true"
 ARBITRUM = "true"
+FANTOM = "true"
 
 [context.production.environment]
 NEXTAUTH_URL="https://app.midascapital.xyz"
@@ -41,6 +43,7 @@ BSC = "true"
 MOONBEAM = "true"
 POLYGON = "true"
 ARBITRUM = "false"
+FANTOM = "false"
 
 [functions]
 directory = "./packages/functions/dist/functions/src/functions"

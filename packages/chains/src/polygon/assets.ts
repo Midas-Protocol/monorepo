@@ -9,6 +9,7 @@ import {
   quickSwapDocs,
   wrappedAssetDocs,
 } from "../common";
+import { oneInchDocs } from "../common/docs";
 
 export const WBTC = "0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6";
 export const WMATIC = "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270";
@@ -56,6 +57,8 @@ const JSGD_XSGD = "0xeF75E9C7097842AcC5D0869E1dB4e5fDdf4BFDDA";
 const JNZD_NZDS = "0x976A750168801F58E8AEdbCfF9328138D544cc09";
 const JEUR_EURT = "0x2C3cc8e698890271c8141be9F6fD6243d56B39f1";
 const EURE_JEUR = "0x2F3E9CA3bFf85B91D9fe6a9f3e8F9B1A6a4c3cF4";
+const MAI_USDC = "0x160532D2536175d65C03B97b0630A9802c274daD";
+const am3CRV = "0xE7a24EF0C5e95Ffb0f6684b813A78F2a3AD7D171";
 
 // stable fore
 const AGEUR = "0xE0B52e49357Fd4DAf2c15e02058DCE6BC0057db4";
@@ -159,7 +162,7 @@ export const assets: SupportedAsset[] = [
     name: "Dai Stablecoin (PoS)",
     decimals: 18,
     oracle: OracleTypes.ChainlinkPriceOracleV2,
-    extraDocs: defaultDocs("https://polygonscan.com", DAI),
+    extraDocs: oneInchDocs("https://app.1inch.io/#/137/unified/swap/MATIC/DAI"),
   },
   {
     symbol: assetSymbols.WETH,
@@ -175,7 +178,7 @@ export const assets: SupportedAsset[] = [
     name: "Frax",
     decimals: 18,
     oracle: OracleTypes.ChainlinkPriceOracleV2,
-    extraDocs: defaultDocs("https://polygonscan.com", FRAX),
+    extraDocs: oneInchDocs("https://app.1inch.io/#/137/unified/swap/MATIC/FRAX"),
   },
   {
     symbol: assetSymbols.FTM,
@@ -263,7 +266,7 @@ export const assets: SupportedAsset[] = [
     name: "SushiToken (PoS)",
     decimals: 18,
     oracle: OracleTypes.ChainlinkPriceOracleV2,
-    extraDocs: defaultDocs("https://polygonscan.com", SUSHI),
+    extraDocs: oneInchDocs("https://app.1inch.io/#/137/unified/swap/MATIC/SUSHI"),
   },
   {
     symbol: assetSymbols.YFI,
@@ -279,7 +282,7 @@ export const assets: SupportedAsset[] = [
     name: "USD Coin (PoS)",
     decimals: 6,
     oracle: OracleTypes.ChainlinkPriceOracleV2,
-    extraDocs: defaultDocs("https://polygonscan.com", USDC),
+    extraDocs: oneInchDocs("https://app.1inch.io/#/137/unified/swap/MATIC/USDC"),
   },
   {
     symbol: assetSymbols.USDT,
@@ -287,7 +290,7 @@ export const assets: SupportedAsset[] = [
     name: "Tether USD (PoS)",
     decimals: 6,
     oracle: OracleTypes.ChainlinkPriceOracleV2,
-    extraDocs: defaultDocs("https://polygonscan.com", USDT),
+    extraDocs: oneInchDocs("https://app.1inch.io/#/137/unified/swap/MATIC/USDT"),
   },
   {
     symbol: assetSymbols.WBTC,
@@ -295,7 +298,7 @@ export const assets: SupportedAsset[] = [
     name: "Wrapped BTC (PoS)",
     decimals: 8,
     oracle: OracleTypes.ChainlinkPriceOracleV2,
-    extraDocs: defaultDocs("https://polygonscan.com", WBTC),
+    extraDocs: oneInchDocs("https://app.1inch.io/#/137/unified/swap/MATIC/WBTC"),
   },
   {
     symbol: assetSymbols.WMATIC,
@@ -311,7 +314,7 @@ export const assets: SupportedAsset[] = [
     name: "MIMO Parallel Governance Token (PoS) ",
     decimals: 18,
     oracle: OracleTypes.DiaPriceOracle,
-    extraDocs: defaultDocs("https://polygonscan.com", MIMO),
+    extraDocs: oneInchDocs("https://app.1inch.io/#/137/unified/swap/MATIC/MIMO"),
   },
   // QuickSwap LPs
   {
@@ -345,6 +348,14 @@ export const assets: SupportedAsset[] = [
     decimals: 18,
     oracle: OracleTypes.UniswapLpTokenPriceOracle,
     extraDocs: quickSwapDocs(WETH, WBTC, "WETH-WBTC", WETH_WBTC),
+  },
+  {
+    symbol: assetSymbols["MAI-USDC"],
+    underlying: MAI_USDC,
+    name: "MAI-USDC LP Token",
+    decimals: 18,
+    oracle: OracleTypes.UniswapLpTokenPriceOracle,
+    extraDocs: quickSwapDocs(MAI, USDC, "MAI-USDC", MAI_USDC),
   },
   // curve.fi LP tokens
   {
@@ -411,6 +422,15 @@ export const assets: SupportedAsset[] = [
     oracle: OracleTypes.CurveLpTokenPriceOracleNoRegistry,
     extraDocs: curveFinancePolygonDocs(304, "EURE-JEUR", EURE_JEUR, true),
   },
+  {
+    symbol: assetSymbols.am3CRV,
+    underlying: am3CRV,
+    name: "Curve.fi amDAI/amUSDC/amUSDT",
+    decimals: 18,
+    oracle: OracleTypes.CurveLpTokenPriceOracleNoRegistry,
+    extraDocs: curveFinancePolygonDocs("aave", "am3CRV", am3CRV, false),
+  },
+
   // Balancer
   {
     symbol: assetSymbols["MIMO_PAR_80_20"],
@@ -432,6 +452,7 @@ export const assets: SupportedAsset[] = [
     name: "agEUR Token",
     decimals: 18,
     oracle: OracleTypes.ChainlinkPriceOracleV2,
+    extraDocs: oneInchDocs("https://app.1inch.io/#/137/unified/swap/MATIC/agEUR"),
   },
   {
     symbol: assetSymbols.JEUR,
@@ -447,6 +468,7 @@ export const assets: SupportedAsset[] = [
     name: "PAR Stablecoin (PoS)",
     decimals: 18,
     oracle: OracleTypes.ChainlinkPriceOracleV2,
+    extraDocs: oneInchDocs("https://app.1inch.io/#/137/unified/swap/MATIC/PAR"),
   },
   {
     symbol: assetSymbols.EURT,
