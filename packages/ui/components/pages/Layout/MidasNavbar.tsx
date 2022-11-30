@@ -1,6 +1,16 @@
 import { MoonIcon, SunIcon } from '@chakra-ui/icons';
-import { Box, Button, HStack, Image, useBreakpointValue, useColorMode } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  HStack,
+  Image,
+  Link,
+  useBreakpointValue,
+  useColorMode,
+} from '@chakra-ui/react';
+import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
+import { useDisconnect } from 'wagmi';
 
 import { WalletButtons } from '@ui/components/shared/WalletButtons';
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
@@ -22,6 +32,12 @@ export const MidasNavbar = () => {
   );
   const { setGlobalLoading } = useMultiMidas();
   const scrollPos = useScrollPosition();
+
+  const { data: session, status } = useSession();
+  const loading = status === 'loading';
+  const { disconnect } = useDisconnect();
+
+  console.log(session);
 
   return (
     <>
@@ -75,6 +91,51 @@ export const MidasNavbar = () => {
           )}
         </Button>
       </HStack>
+      <>
+        <header>
+          <div>
+            <p>
+              {!session && (
+                <>
+                  <span>You are not signed in</span>
+                </>
+              )}
+              {session?.user && (
+                <>
+                  {session.user.image && (
+                    <span style={{ backgroundImage: `url('${session.user.image}')` }} />
+                  )}
+                  <span>
+                    <small>Signed in as</small>
+                    <br />
+                    <strong>{session.user.email ?? session.user.name}</strong>
+                  </span>
+                  <a
+                    href={`/api/auth/signout`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      disconnect();
+                      signOut();
+                    }}
+                  >
+                    Sign out
+                  </a>
+                </>
+              )}
+            </p>
+          </div>
+          <nav>
+            <ul>
+              <li>
+                <Link href="/">Home</Link>
+              </li>
+              <li>
+                <Link href="/siwe">SIWE</Link>
+              </li>
+            </ul>
+          </nav>
+        </header>
+      </>
     </>
   );
 };

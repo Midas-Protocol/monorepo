@@ -5,6 +5,7 @@ import { SiweMessage } from 'siwe';
 
 // For more information on each option (and a full list of options) go to
 // https://next-auth.js.org/configuration/options
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default async function auth(req: any, res: any) {
   const providers = [
     CredentialsProvider({
@@ -24,7 +25,8 @@ export default async function auth(req: any, res: any) {
       async authorize(credentials) {
         try {
           const siwe = new SiweMessage(JSON.parse(credentials?.message || '{}'));
-          const nextAuthUrl = new URL(process.env.NEXTAUTH_URL);
+
+          const nextAuthUrl = new URL(process.env.NEXTAUTH_URL || 'http://localhost:3000');
 
           const result = await siwe.verify({
             signature: credentials?.signature || '',
@@ -60,6 +62,7 @@ export default async function auth(req: any, res: any) {
     },
     secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       async session({ session, token }: { session: any; token: any }) {
         session.address = token.sub;
         session.user.name = token.sub;
