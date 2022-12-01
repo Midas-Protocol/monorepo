@@ -33,7 +33,7 @@ function MidasDapp({ Component, pageProps }: AppProps) {
   return (
     <ChakraProvider theme={theme}>
       <WagmiConfig client={client}>
-        <SessionProvider session={pageProps.session}>
+        <SessionProvider session={pageProps.session} refetchInterval={0}>
           <RainbowKitSiweNextAuthProvider getSiweMessageOptions={getSiweMessageOptions}>
             <RainbowKit>
               <QueryClientProvider client={queryClient}>
