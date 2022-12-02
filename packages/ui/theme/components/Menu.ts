@@ -6,13 +6,15 @@ export const MenuStyleConfig: ComponentStyleConfig = {
   baseStyle: (props) => ({
     button: {},
     list: {
-      pt: '4',
+      mt: '-1',
       borderRadius: 'md',
       borderWidth: 1,
-      borderColor: mode('silverMetallic50', 'ecru30')(props),
+      borderColor: mode('ecru', 'ecru')(props),
       backgroundColor: mode('whiteBg', 'raisinBlack')(props),
+      minWidth: 150,
     },
     item: {
+      bg: mode('whiteBg', 'raisinBlack')(props),
       color: mode('raisinBlack', 'whiteBg')(props),
       _hover: {
         bg: mode('silverMetallic20', 'ecru20')(props),
