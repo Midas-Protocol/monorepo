@@ -9,14 +9,19 @@ import {
   Spacer,
   Text,
 } from '@chakra-ui/react';
+import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { Controller, useForm } from 'react-hook-form';
 
 import FusePageLayout from '@ui/components/pages/Layout/FusePageLayout';
 import { Column } from '@ui/components/shared/Flex';
+import { useErrorToast, useSuccessToast } from '@ui/hooks/useToast';
+import { handleGenericError } from '@ui/utils/errorHandling';
 
 export const SettingsPage = () => {
   const { data: session } = useSession();
+  const errorToast = useErrorToast();
+  const successToast = useSuccessToast();
 
   const {
     control,
@@ -29,8 +34,21 @@ export const SettingsPage = () => {
   });
 
   const setEmail = async ({ email }: { email: string }) => {
-    console.log(email);
-    // save email address
+    try {
+      if (session?.user?.name && email) {
+        await axios.post('/api/accounts', {
+          address: session.user.name,
+          email,
+        });
+
+        successToast({
+          title: 'Update',
+          description: 'Successfully updated!',
+        });
+      }
+    } catch (e) {
+      handleGenericError(e, errorToast);
+    }
   };
 
   return (
