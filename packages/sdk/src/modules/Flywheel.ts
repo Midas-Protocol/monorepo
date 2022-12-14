@@ -1,5 +1,6 @@
-import { BigNumber, constants, Contract, ContractFactory } from "ethers";
-
+import { Contract, ContractFactory } from "@ethersproject/contracts";
+import { BigNumber } from "@ethersproject/bignumber";
+import { AddressZero } from "@ethersproject/constants";
 import ComptrollerABI from "@abis/Comptroller";
 import MidasFlywheelABI from "@abis/MidasFlywheel";
 import { FlywheelStaticRewards__factory } from "@typechain/factories/FlywheelStaticRewards__factory";
@@ -233,8 +234,8 @@ export function withFlywheel<TBase extends FuseBaseConstructorWithCreateContract
       const flywheelCore = await midasFlywheel.deploy();
       const initializeTx = await flywheelCore.initialize(
         rewardTokenAddress,
-        options?.rewardsAddress || constants.AddressZero,
-        options?.boosterAddress || constants.AddressZero,
+        options?.rewardsAddress || AddressZero,
+        options?.boosterAddress || AddressZero,
         options?.ownerAddress || addressOfSigner
       );
       await initializeTx.wait();
@@ -256,7 +257,7 @@ export function withFlywheel<TBase extends FuseBaseConstructorWithCreateContract
       return (await fwStaticRewardsFactory.deploy(
         flywheelCoreAddress,
         options?.ownerAddress || addressOfSigner,
-        options?.authorityAddress || constants.AddressZero
+        options?.authorityAddress || AddressZero
       )) as FlywheelStaticRewards;
     }
 

@@ -1,6 +1,11 @@
 import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
+import { Contract, ContractFactory } from "@ethersproject/contracts";
+import { Signer } from "@ethersproject/abstract-signer";
+import { keccak256 as solidityKeccak256 } from "@ethersproject/solidity";
+import { keccak256 } from "@ethersproject/keccak256";
+import { getCreate2Address } from "@ethersproject/address";
+import { AbiCoder } from "@ethersproject/abi";
 import Filter from "bad-words";
-import { Contract, ContractFactory, Signer, utils } from "ethers";
 
 import ComptrollerArtifact from "@artifacts/Comptroller.json";
 import UnitrollerArtifact from "@artifacts/Unitroller.json";
@@ -23,12 +28,12 @@ export const getComptrollerFactory = (signer?: Signer): ContractFactory => {
 };
 
 export const getSaltsHash = (from: string, poolName: string, blockNumber: number): string => {
-  return utils.solidityKeccak256(["address", "string", "uint"], [from, poolName, blockNumber]);
+  return solidityKeccak256(["address", "string", "uint"], [from, poolName, blockNumber]);
 };
 
 export const getBytecodeHash = (fuseFeeDistributorAddress: string): string => {
-  return utils.keccak256(
-    UnitrollerArtifact.bytecode.object + new utils.AbiCoder().encode(["address"], [fuseFeeDistributorAddress]).slice(2)
+  return keccak256(
+    UnitrollerArtifact.bytecode.object + new AbiCoder().encode(["address"], [fuseFeeDistributorAddress]).slice(2)
   );
 };
 
@@ -39,7 +44,7 @@ export const getPoolAddress = (
   fuseFeeDistributorAddress: string,
   fusePoolDirectoryAddress: string
 ): string => {
-  return utils.getCreate2Address(
+  return getCreate2Address(
     fusePoolDirectoryAddress,
     getSaltsHash(from, poolName, marketsCounter),
     getBytecodeHash(fuseFeeDistributorAddress)

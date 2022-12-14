@@ -1,5 +1,6 @@
 import { Web3Provider } from "@ethersproject/providers";
-import { BigNumber, BigNumberish, utils } from "ethers";
+import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
+import { keccak256 } from "@ethersproject/keccak256";
 
 import CTokenInterfacesArtifact from "@artifacts/CTokenInterface.json";
 import DAIInterestRateModelV2Artifact from "@artifacts/DAIInterestRateModelV2.json";
@@ -8,7 +9,7 @@ import { getContract } from "../utils";
 import JumpRateModel from "./JumpRateModel";
 
 export default class DAIInterestRateModelV2 extends JumpRateModel {
-  static RUNTIME_BYTECODE_HASH = utils.keccak256(DAIInterestRateModelV2Artifact.deployedBytecode.object);
+  static RUNTIME_BYTECODE_HASH = keccak256(DAIInterestRateModelV2Artifact.deployedBytecode.object);
 
   initialized: boolean | undefined;
   dsrPerBlock: BigNumber | undefined;

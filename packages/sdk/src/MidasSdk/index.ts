@@ -34,7 +34,11 @@ import { FuseSafeLiquidator } from "@typechain/FuseSafeLiquidator";
 import { MidasERC4626 } from "@typechain/MidasERC4626";
 import { MidasFlywheelLensRouter } from "@typechain/MidasFlywheelLensRouter";
 import { Unitroller } from "@typechain/Unitroller";
-import { BigNumber, Contract, Signer, utils } from "ethers";
+import { BigNumber } from "@ethersproject/bignumber";
+import { Contract } from "@ethersproject/contracts";
+import { Signer } from "@ethersproject/abstract-signer";
+import { AbiCoder } from "@ethersproject/abi";
+import { keccak256 } from "@ethersproject/keccak256";
 import ARTIFACTS, { Artifacts, irmConfig, oracleConfig } from "../Artifacts";
 import { withAsset } from "../modules/Asset";
 import { withConvertMantissa } from "../modules/ConvertMantissa";
@@ -239,7 +243,7 @@ export class MidasBase {
       const deployTx = await contract.deployPool(
         poolName,
         implementationAddress,
-        new utils.AbiCoder().encode(["address"], [this.chainDeployment.FuseFeeDistributor.address]),
+        new AbiCoder().encode(["address"], [this.chainDeployment.FuseFeeDistributor.address]),
         enforceWhitelist,
         closeFactor,
         liquidationIncentive,
@@ -305,7 +309,7 @@ export class MidasBase {
       AdjustableJumpRateModel_PSTAKE_WBNB: AdjustableJumpRateModel,
       AdjustableJumpRateModel_MIXBYTES_XCDOT: AdjustableJumpRateModel,
     };
-    const runtimeBytecodeHash = utils.keccak256(await this.provider.getCode(interestRateModelAddress));
+    const runtimeBytecodeHash = keccak256(await this.provider.getCode(interestRateModelAddress));
 
     let irmModel = null;
 

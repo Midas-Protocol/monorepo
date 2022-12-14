@@ -1,13 +1,15 @@
 import { Web3Provider } from "@ethersproject/providers";
 import { InterestRateModel } from "@midas-capital/types";
-import { BigNumber, BigNumberish, utils } from "ethers";
+import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
+import { keccak256 } from "@ethersproject/keccak256";
+import { parseEther } from "@ethersproject/units";
 
 import CTokenInterfaceArtifact from "@artifacts/CTokenInterface.json";
 import JumpRateModelArtifact from "@artifacts/JumpRateModel.json";
 import { getContract } from "../utils";
 
 export default class JumpRateModel implements InterestRateModel {
-  static RUNTIME_BYTECODE_HASH = utils.keccak256(JumpRateModelArtifact.deployedBytecode.object);
+  static RUNTIME_BYTECODE_HASH = keccak256(JumpRateModelArtifact.deployedBytecode.object);
 
   initialized: boolean | undefined;
   baseRatePerBlock: BigNumber | undefined;
@@ -84,19 +86,19 @@ export default class JumpRateModel implements InterestRateModel {
     )
       throw new Error("Interest rate model class not initialized.");
     if (utilizationRate.lte(this.kink)) {
-      return utilizationRate.mul(this.multiplierPerBlock).div(utils.parseEther("1")).add(this.baseRatePerBlock);
+      return utilizationRate.mul(this.multiplierPerBlock).div(parseEther("1")).add(this.baseRatePerBlock);
     } else {
-      const normalRate = this.kink.mul(this.multiplierPerBlock).div(utils.parseEther("1")).add(this.baseRatePerBlock);
+      const normalRate = this.kink.mul(this.multiplierPerBlock).div(parseEther("1")).add(this.baseRatePerBlock);
       const excessUtil = utilizationRate.sub(this.kink);
-      return excessUtil.mul(this.jumpMultiplierPerBlock).div(utils.parseEther("1")).add(normalRate);
+      return excessUtil.mul(this.jumpMultiplierPerBlock).div(parseEther("1")).add(normalRate);
     }
   }
 
   getSupplyRate(utilizationRate: BigNumber) {
     if (!this.initialized || !this.reserveFactorMantissa) throw new Error("Interest rate model class not initialized.");
-    const oneMinusReserveFactor = utils.parseEther("1").sub(this.reserveFactorMantissa);
+    const oneMinusReserveFactor = parseEther("1").sub(this.reserveFactorMantissa);
     const borrowRate = this.getBorrowRate(utilizationRate);
-    const rateToPool = borrowRate.mul(oneMinusReserveFactor).div(utils.parseEther("1"));
-    return utilizationRate.mul(rateToPool).div(utils.parseEther("1"));
+    const rateToPool = borrowRate.mul(oneMinusReserveFactor).div(parseEther("1"));
+    return utilizationRate.mul(rateToPool).div(parseEther("1"));
   }
 }

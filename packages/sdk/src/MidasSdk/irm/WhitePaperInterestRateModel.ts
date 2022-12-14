@@ -1,6 +1,8 @@
 import { Web3Provider } from "@ethersproject/providers";
 import { InterestRateModel } from "@midas-capital/types";
-import { BigNumber, BigNumberish, constants, utils } from "ethers";
+import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
+import { WeiPerEther } from "@ethersproject/constants";
+import { keccak256 } from "@ethersproject/keccak256";
 
 import CTokenInterfaceArtifact from "@artifacts/CTokenInterface.json";
 import WhitePaperInterestRateModelArtifact from "@artifacts/WhitePaperInterestRateModel.json";

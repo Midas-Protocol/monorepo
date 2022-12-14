@@ -2,8 +2,7 @@ import FlywheelStaticRewardsABI from "@abis/FlywheelStaticRewards";
 import JumpRateModelABI from "@abis/JumpRateModel";
 import MidasFlywheelABI from "@abis/MidasFlywheel";
 import UnitrollerABI from "@abis/Unitroller";
-import { Contract, ContractInterface } from "ethers";
-import { Fragment } from "ethers/lib/utils";
+import { Contract, ContractInterface } from "@ethersproject/contracts";
 
 import { CErc20Delegate } from "@typechain/CErc20Delegate";
 import { CErc20PluginRewardsDelegate } from "@typechain/CErc20PluginRewardsDelegate";
@@ -43,7 +42,7 @@ export function withCreateContracts<TBase extends MidasBaseConstructor>(Base: TB
     }
 
     createComptroller(comptrollerAddress: string, signerOrProvider: SignerOrProvider = this.signer) {
-      const comptrollerABI: Array<Fragment> = this.chainDeployment.Comptroller.abi;
+      const comptrollerABI: Array = this.chainDeployment.Comptroller.abi;
 
       if (this.chainDeployment.ComptrollerFirstExtension) {
         comptrollerABI.push(...this.chainDeployment.ComptrollerFirstExtension.abi);
