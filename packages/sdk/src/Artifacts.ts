@@ -9,8 +9,8 @@ import BalancerLpTokenPriceOracleArtifact from "../lib/contracts/out/BalancerLpT
 import CErc20DelegateArtifact from "../lib/contracts/out/CErc20Delegate.sol/CErc20Delegate.json";
 import CErc20DelegatorArtifact from "../lib/contracts/out/CErc20Delegator.sol/CErc20Delegator.json";
 import CErc20PluginDelegateArtifact from "../lib/contracts/out/CErc20PluginDelegate.sol/CErc20PluginDelegate.json";
-import CErc20WrappingDelegateArtifact from "../lib/contracts/out/CErc20WrappingDelegate.sol/CErc20WrappingDelegate.json";
 import CErc20PluginRewardsDelegateArtifact from "../lib/contracts/out/CErc20PluginRewardsDelegate.sol/CErc20PluginRewardsDelegate.json";
+import CErc20WrappingDelegateArtifact from "../lib/contracts/out/CErc20WrappingDelegate.sol/CErc20WrappingDelegate.json";
 import ChainlinkPriceOracleV2Artifact from "../lib/contracts/out/ChainlinkPriceOracleV2.sol/ChainlinkPriceOracleV2.json";
 import ComptrollerArtifact from "../lib/contracts/out/Comptroller.sol/Comptroller.json";
 import CTokenInterfaceArtifact from "../lib/contracts/out/CTokenInterfaces.sol/CTokenInterface.json";
