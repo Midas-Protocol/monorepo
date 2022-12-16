@@ -214,7 +214,11 @@ export function withFusePools<TBase extends MidasBaseConstructor>(Base: TBase) {
 
     getAssetInstance = <T extends CErc20Delegate = CErc20Delegate>(
       address: string,
-      implementation: "CErc20Delegate" | "CErc20PluginDelegate" | "CErc20PluginRewardsDelegate" = "CErc20Delegate"
+      implementation:
+        | "CErc20Delegate"
+        | "CErc20PluginDelegate"
+        | "CErc20WrappingDelegate"
+        | "CErc20PluginRewardsDelegate" = "CErc20Delegate"
     ): T => {
       switch (implementation) {
         case "CErc20PluginDelegate":

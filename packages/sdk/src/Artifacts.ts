@@ -9,6 +9,7 @@ import BalancerLpTokenPriceOracleArtifact from "../lib/contracts/out/BalancerLpT
 import CErc20DelegateArtifact from "../lib/contracts/out/CErc20Delegate.sol/CErc20Delegate.json";
 import CErc20DelegatorArtifact from "../lib/contracts/out/CErc20Delegator.sol/CErc20Delegator.json";
 import CErc20PluginDelegateArtifact from "../lib/contracts/out/CErc20PluginDelegate.sol/CErc20PluginDelegate.json";
+import CErc20WrappingDelegateArtifact from "../lib/contracts/out/CErc20WrappingDelegate.sol/CErc20WrappingDelegate.json";
 import CErc20PluginRewardsDelegateArtifact from "../lib/contracts/out/CErc20PluginRewardsDelegate.sol/CErc20PluginRewardsDelegate.json";
 import ChainlinkPriceOracleV2Artifact from "../lib/contracts/out/ChainlinkPriceOracleV2.sol/ChainlinkPriceOracleV2.json";
 import ComptrollerArtifact from "../lib/contracts/out/Comptroller.sol/Comptroller.json";
@@ -39,6 +40,7 @@ import WhitePaperInterestRateModelArtifact from "../lib/contracts/out/WhitePaper
 const CErc20Delegate: Artifact = CErc20DelegateArtifact;
 const CErc20Delegator: Artifact = CErc20DelegatorArtifact;
 const CErc20PluginDelegate: Artifact = CErc20PluginDelegateArtifact;
+const CErc20WrappingDelegate: Artifact = CErc20WrappingDelegateArtifact;
 const CErc20PluginRewardsDelegate: Artifact = CErc20PluginRewardsDelegateArtifact;
 const ChainlinkPriceOracleV2: Artifact = ChainlinkPriceOracleV2Artifact;
 const Comptroller: Artifact = ComptrollerArtifact;
@@ -84,6 +86,7 @@ const ARTIFACTS = {
   CErc20Delegate,
   CErc20Delegator,
   CErc20PluginDelegate,
+  CErc20WrappingDelegate,
   CErc20PluginRewardsDelegate,
   ChainlinkPriceOracleV2,
   Comptroller,

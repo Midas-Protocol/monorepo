@@ -21,6 +21,13 @@ export const getCommonDeployments = async (chainDeployment: ChainDeployment) => 
     address: CErc20PluginDelegate.address,
   };
 
+  const CErc20WrappingDelegate = await ethers.getContract("CErc20WrappingDelegate");
+  const CErc20WrappingDelegateArtifact = await deployments.getArtifact("CErc20WrappingDelegate");
+  chainDeployment.CErc20WrappingDelegate = {
+    abi: CErc20WrappingDelegateArtifact.abi,
+    address: CErc20WrappingDelegate.address,
+  };
+
   const CErc20PluginRewardsDelegate = await ethers.getContract("CErc20PluginRewardsDelegate");
   const CErc20PluginRewardsArtifact = await deployments.getArtifact("CErc20PluginRewardsDelegate");
   chainDeployment.CErc20PluginRewardsDelegate = {

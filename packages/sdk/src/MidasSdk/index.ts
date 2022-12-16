@@ -20,6 +20,7 @@ import { BigNumber, Contract, Signer, utils } from "ethers";
 import { CErc20Delegate } from "../../lib/contracts/typechain/CErc20Delegate";
 import { CErc20PluginDelegate } from "../../lib/contracts/typechain/CErc20PluginDelegate";
 import { CErc20PluginRewardsDelegate } from "../../lib/contracts/typechain/CErc20PluginRewardsDelegate";
+import { CErc20WrappingDelegate } from "../../lib/contracts/typechain/CErc20WrappingDelegate";
 import { Comptroller } from "../../lib/contracts/typechain/Comptroller";
 import { EIP20Interface } from "../../lib/contracts/typechain/EIP20Interface";
 import { FuseFeeDistributor } from "../../lib/contracts/typechain/FuseFeeDistributor";
@@ -378,6 +379,14 @@ export class MidasBase {
       this.chainDeployment[DelegateContractName.CErc20PluginDelegate].abi,
       signerOrProvider
     ) as CErc20PluginDelegate;
+  }
+
+  getCErc20WrappingInstance(address: string, signerOrProvider: SignerOrProvider = this.provider) {
+    return new Contract(
+      address,
+      this.chainDeployment[DelegateContractName.CErc20WrappingDelegate].abi,
+      signerOrProvider
+    ) as CErc20WrappingDelegate;
   }
 
   getEIP20RewardTokenInstance(address: string, signerOrProvider: SignerOrProvider = this.provider) {

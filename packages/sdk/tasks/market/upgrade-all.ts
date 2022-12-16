@@ -25,12 +25,19 @@ task("market:updatewhitelist", "Updates the markets' implementations whitelist")
     undefined,
     types.string
   )
+  .addOptionalParam(
+    "oldWrappingDelegate",
+    "The old wrapping delegate implementation to whitelist for the latest impl",
+    undefined,
+    types.string
+  )
   .addFlag("setLatest", "Set the new implementation as the latest for the autoimplementations")
   .setAction(async (taskArgs, { ethers }) => {
     const signer = await ethers.getNamedSigner("deployer");
     const oldErc20Delegate = taskArgs.oldDelegate;
     const oldErc20PluginDelegate = taskArgs.oldPluginDelegate;
     const oldErc20PluginRewardsDelegate = taskArgs.oldPluginRewardsDelegate;
+    const oldErc20WrappingDelegate = taskArgs.oldWrappingDelegate;
     const setLatest = taskArgs.setLatest;
 
     // @ts-ignoreutils/fuseSdk
@@ -39,12 +46,23 @@ task("market:updatewhitelist", "Updates the markets' implementations whitelist")
     const fuseFeeDistributor = (await ethers.getContract("FuseFeeDistributor", signer)) as FuseFeeDistributor;
     const erc20Delegate = await ethers.getContract("CErc20Delegate", signer);
     const erc20PluginDelegate = await ethers.getContract("CErc20PluginDelegate", signer);
+    const erc20WrappingDelegate = await ethers.getContract("CErc20WrappingDelegate", signer);
     const erc20PluginRewardsDelegate = await ethers.getContract("CErc20PluginRewardsDelegate", signer);
 
-    const oldImplementations = [constants.AddressZero, constants.AddressZero, constants.AddressZero];
-    const newImplementations = [erc20Delegate.address, erc20PluginDelegate.address, erc20PluginRewardsDelegate.address];
-    const arrayOfFalse = [false, false, false];
-    const arrayOfTrue = [true, true, true];
+    const oldImplementations = [
+      constants.AddressZero,
+      constants.AddressZero,
+      constants.AddressZero,
+      constants.AddressZero,
+    ];
+    const newImplementations = [
+      erc20Delegate.address,
+      erc20PluginDelegate.address,
+      erc20PluginRewardsDelegate.address,
+      erc20WrappingDelegate.address,
+    ];
+    const arrayOfFalse = [false, false, false, false];
+    const arrayOfTrue = [true, true, true, true];
 
     if (oldErc20Delegate) {
       oldImplementations.push(oldErc20Delegate);
@@ -63,6 +81,13 @@ task("market:updatewhitelist", "Updates the markets' implementations whitelist")
     if (oldErc20PluginRewardsDelegate) {
       oldImplementations.push(oldErc20PluginRewardsDelegate);
       newImplementations.push(erc20PluginRewardsDelegate.address);
+      arrayOfFalse.push(false);
+      arrayOfTrue.push(true);
+    }
+
+    if (oldErc20WrappingDelegate) {
+      oldImplementations.push(oldErc20WrappingDelegate);
+      newImplementations.push(erc20WrappingDelegate.address);
       arrayOfFalse.push(false);
       arrayOfTrue.push(true);
     }
@@ -214,6 +239,12 @@ task("markets:setlatestimpl", "Sets the latest implementations for the CErc20 De
   .addOptionalParam("oldDelegate", "The old delegate implementation to replace", undefined, types.string)
   .addOptionalParam("oldPluginDelegate", "The old plugin delegate implementation to replace", undefined, types.string)
   .addOptionalParam(
+    "oldWrappingDelegate",
+    "The old wrapping delegate implementation to replace",
+    undefined,
+    types.string
+  )
+  .addOptionalParam(
     "oldPluginRewardsDelegate",
     "The old plugin rewards delegate implementation to replace",
     undefined,
@@ -224,12 +255,14 @@ task("markets:setlatestimpl", "Sets the latest implementations for the CErc20 De
     const signer = await ethers.getNamedSigner(taskArgs.admin);
     const oldErc20Delegate = taskArgs.oldDelegate;
     const oldErc20PluginDelegate = taskArgs.oldPluginDelegate;
+    const oldErc20WrappingDelegate = taskArgs.oldWrappingDelegate;
     const oldErc20PluginRewardsDelegate = taskArgs.oldPluginRewardsDelegate;
 
     const fuseFeeDistributor = (await ethers.getContract("FuseFeeDistributor", signer)) as FuseFeeDistributor;
 
     const erc20Del = await ethers.getContract("CErc20Delegate", signer);
     const erc20PluginDel = await ethers.getContract("CErc20PluginDelegate", signer);
+    const erc20WrappingDel = await ethers.getContract("CErc20WrappingDelegate", signer);
     const erc20PluginRewardsDel = await ethers.getContract("CErc20PluginRewardsDelegate", signer);
 
     const becomeImplementationData = new ethers.utils.AbiCoder().encode(["address"], [constants.AddressZero]);
@@ -274,6 +307,29 @@ task("markets:setlatestimpl", "Sets the latest implementations for the CErc20 De
         );
       } else {
         console.log(`No change in the latest CErc20PluginDelegate implementation ${erc20PluginDel.address}`);
+      }
+    }
+
+    if (oldErc20WrappingDelegate) {
+      const [latestCErc20WrappingDelegate] = await fuseFeeDistributor.callStatic.latestCErc20Delegate(
+        oldErc20WrappingDelegate
+      );
+      if (
+        latestCErc20WrappingDelegate === constants.AddressZero ||
+        latestCErc20WrappingDelegate !== erc20WrappingDel.address
+      ) {
+        tx = await fuseFeeDistributor._setLatestCErc20Delegate(
+          oldErc20WrappingDelegate,
+          erc20WrappingDel.address,
+          false,
+          becomeImplementationData
+        );
+        await tx.wait();
+        console.log(
+          `Set the latest CErc20WrappingDelegate implementation from ${latestCErc20WrappingDelegate} to ${erc20WrappingDel.address}`
+        );
+      } else {
+        console.log(`No change in the latest CErc20WrappingDelegate implementation ${erc20WrappingDel.address}`);
       }
     }
 
