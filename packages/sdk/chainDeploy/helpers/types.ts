@@ -54,6 +54,7 @@ export type DynamicFlywheelConfig = {
   name: string;
   rewardToken: string;
   cycleLength: number;
+  flywheelToReplace?: string;
 };
 
 export type PluginConfig = {
@@ -181,6 +182,11 @@ export type CurveLpFnParams = ChainDeployFnParams & {
   curvePools: CurvePoolConfig[];
 };
 
+export type SaddleLpFnParams = ChainDeployFnParams & {
+  deployConfig: ChainDeployConfig;
+  saddlePools: CurvePoolConfig[];
+};
+
 export type CurveV2LpFnParams = ChainDeployFnParams & {
   deployConfig: ChainDeployConfig;
   curveV2Pools: CurveV2PoolConfig[];
@@ -201,7 +207,7 @@ export type FuseFlywheelDeployFnParams = ChainDeployFnParams & {
 
 export type aXXXcDeployParams = ChainDeployFnParams & {
   assets: SupportedAsset[];
-  certificateAssetSymbol: assetSymbols.aBNBc | assetSymbols.aFTMc | assetSymbols.aMATICc;
+  certificateAssetSymbol: assetSymbols.ankrBNB | assetSymbols.aFTMc | assetSymbols.aMATICc;
 };
 
 export type stkBNBOracleDeployParams = ChainDeployFnParams & {

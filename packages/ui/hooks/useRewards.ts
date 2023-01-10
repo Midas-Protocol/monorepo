@@ -1,13 +1,14 @@
+import { FlywheelMarketRewardsInfo } from '@midas-capital/sdk/dist/cjs/src/modules/Flywheel';
 import { FlywheelReward, Reward } from '@midas-capital/types';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import { utils } from 'ethers';
 
 import { RewardsResponse } from '../pages/api/rewards';
 
 import { useFusePoolData } from './useFusePoolData';
 
 import { useSdk } from '@ui/hooks/fuse/useSdk';
-import { utils } from 'ethers';
 
 interface UseRewardsProps {
   chainId: number;
@@ -43,7 +44,6 @@ export function useRewards({ poolId, chainId }: UseRewardsProps) {
             if (rewardWithAPY) return rewardWithAPY;
             return fwReward;
           });
-
           const rewardsOfMarkets: UseRewardsData = {};
           await Promise.all(
             poolData.assets.map(async (asset) => {
@@ -90,6 +90,7 @@ export function useRewards({ poolId, chainId }: UseRewardsProps) {
           console.error(exception);
         }
       }
+
       return {};
     },
     {
@@ -98,4 +99,27 @@ export function useRewards({ poolId, chainId }: UseRewardsProps) {
       enabled: !!poolData,
     }
   );
+}
+
+function applyAPYFix(rewards: FlywheelMarketRewardsInfo[]) {
+  console.warn('Manually updating APYs in Pool, fix me soon!');
+  return rewards.map((r) => {
+    // `xcDOT` Market
+    if (r.market === '0xa9736bA05de1213145F688e4619E5A7e0dcf4C72') {
+      return {
+        ...r,
+        rewardsInfo: r.rewardsInfo.map((info) => {
+          // only USDC reward token
+          if (info.rewardToken === '0x931715FEE2d06333043d11F658C8CE934aC61D0c') {
+            return { ...info, formattedAPR: info.formattedAPR?.div(100000000) }; // make 8 decimals smaller
+          }
+          // Or change nothing
+          return info;
+        }),
+      };
+    }
+
+    // Or change nothing
+    return r;
+  });
 }

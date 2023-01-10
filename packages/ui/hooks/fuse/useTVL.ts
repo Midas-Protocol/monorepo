@@ -25,7 +25,7 @@ export const useTVL = () => {
   const { sdks, chainIds } = useMultiMidas();
   const { data: prices, isLoading, error } = useUSDPrices(chainIds);
 
-  return useQuery<CrossChainTVL | undefined>(
+  return useQuery<CrossChainTVL | null | undefined>(
     ['useTVL', ...chainIds, prices && Object.values(prices).sort(), isLoading],
     async () => {
       if (!isLoading && error) throw new Error('Could not get USD price');
@@ -33,11 +33,15 @@ export const useTVL = () => {
         const chainTVLs: CrossChainTVL = new Map();
         await Promise.all(
           sdks.map(async (sdk) => {
-            chainTVLs.set(sdk.chainId.toString(), {
-              value: (await fetchFuseNumberTVL(sdk)) * prices[sdk.chainId.toString()].value,
-              name: sdk.chainSpecificParams.metadata.name,
-              logo: sdk.chainSpecificParams.metadata.img,
-            });
+            try {
+              chainTVLs.set(sdk.chainId.toString(), {
+                value: (await fetchFuseNumberTVL(sdk)) * prices[sdk.chainId.toString()].value,
+                name: sdk.chainSpecificParams.metadata.name,
+                logo: sdk.chainSpecificParams.metadata.img,
+              });
+            } catch (e) {
+              console.warn(`Unable to fetch TVL for chain ${sdk.chainId}`, e);
+            }
           })
         );
 
@@ -45,7 +49,9 @@ export const useTVL = () => {
 
         return sortedChainTVLs;
       }
+
+      return null;
     },
-    { enabled: !!prices && !isLoading }
+    { cacheTime: Infinity, staleTime: Infinity, enabled: !!prices && !isLoading }
   );
 };

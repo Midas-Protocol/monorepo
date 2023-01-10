@@ -1,11 +1,4 @@
-import {
-  ArrowDownIcon,
-  ArrowUpIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  SettingsIcon,
-  ViewOffIcon,
-} from '@chakra-ui/icons';
+import { ChevronLeftIcon, ChevronRightIcon, SettingsIcon, ViewOffIcon } from '@chakra-ui/icons';
 import {
   Box,
   ButtonGroup,
@@ -48,10 +41,9 @@ import {
 import * as React from 'react';
 import { Fragment, useEffect, useMemo, useState } from 'react';
 
-import { AdditionalInfo } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo';
+import { AdditionalInfo } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/index';
 import { BorrowApy } from '@ui/components/pages/PoolPage/MarketsList/BorrowApy';
 import { BorrowBalance } from '@ui/components/pages/PoolPage/MarketsList/BorrowBalance';
-import { Collateral } from '@ui/components/pages/PoolPage/MarketsList/Collateral';
 import { Liquidity } from '@ui/components/pages/PoolPage/MarketsList/Liquidity';
 import { SupplyApy } from '@ui/components/pages/PoolPage/MarketsList/SupplyApy';
 import { SupplyBalance } from '@ui/components/pages/PoolPage/MarketsList/SupplyBalance';
@@ -61,8 +53,8 @@ import { TotalSupply } from '@ui/components/pages/PoolPage/MarketsList/TotalSupp
 import { CButton, CIconButton } from '@ui/components/shared/Button';
 import { GradientButton } from '@ui/components/shared/GradientButton';
 import { GradientText } from '@ui/components/shared/GradientText';
-import { PopoverTooltip } from '@ui/components/shared/PopoverTooltip';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
+import { TableHeaderCell } from '@ui/components/shared/TableHeaderCell';
 import {
   ALL,
   BORROW_APY,
@@ -92,7 +84,7 @@ import { useColors } from '@ui/hooks/useColors';
 import { useDebounce } from '@ui/hooks/useDebounce';
 import { UseRewardsData } from '@ui/hooks/useRewards';
 import { useIsMobile, useIsSemiSmallScreen } from '@ui/hooks/useScreenSize';
-import { MarketData } from '@ui/types/TokensDataMap';
+import { MarketData, PoolData } from '@ui/types/TokensDataMap';
 import { smallUsdFormatter } from '@ui/utils/bigUtils';
 import { getBlockTimePerMinuteByChainId } from '@ui/utils/networkData';
 import { sortAssets } from '@ui/utils/sorts';
@@ -101,7 +93,6 @@ export type Market = {
   market: MarketData;
   supplyApy: MarketData;
   supplyBalance: MarketData;
-  collateral: MarketData;
   borrowApy: MarketData;
   borrowBalance: MarketData;
   totalSupply: MarketData;
@@ -110,26 +101,25 @@ export type Market = {
 };
 
 export const MarketsList = ({
-  assets,
+  poolData,
   rewards = {},
-  comptrollerAddress,
-  supplyBalanceFiat,
-  borrowBalanceFiat,
-  poolChainId,
   initSorting,
   initColumnVisibility,
   initHidden,
 }: {
-  assets: MarketData[];
+  poolData: PoolData;
   rewards?: UseRewardsData;
-  comptrollerAddress: string;
-  supplyBalanceFiat: number;
-  borrowBalanceFiat: number;
-  poolChainId: number;
   initSorting: SortingState;
   initColumnVisibility: VisibilityState;
   initHidden: boolean;
 }) => {
+  const {
+    assets,
+    comptroller: comptrollerAddress,
+    totalSupplyBalanceFiat: supplyBalanceFiat,
+    totalBorrowBalanceFiat: borrowBalanceFiat,
+    chainId: poolChainId,
+  } = poolData;
   const sdk = useSdk(poolChainId);
   const { address } = useMultiMidas();
   const [isHidden, setIsHidden] = useState<boolean>(initHidden);
@@ -252,8 +242,6 @@ export const MarketsList = ({
           ? rowB.original.market.liquidityFiat
           : -1;
         return liquidityA > liquidityB ? 1 : -1;
-      } else if (columnId === COLLATERAL) {
-        return rowA.original.market.membership ? 1 : -1;
       } else {
         return 0;
       }
@@ -267,7 +255,6 @@ export const MarketsList = ({
         market: asset,
         supplyApy: asset,
         supplyBalance: asset,
-        collateral: asset,
         borrowApy: asset,
         borrowBalance: asset,
         totalSupply: asset,
@@ -282,11 +269,7 @@ export const MarketsList = ({
       {
         accessorFn: (row) => row.market,
         id: MARKET_LTV,
-        header: () => (
-          <Text variant="smText" fontWeight="bold" py={2}>
-            Market / LTV
-          </Text>
-        ),
+        header: (context) => <TableHeaderCell context={context}>Market / LTV</TableHeaderCell>,
         cell: ({ getValue }) => (
           <TokenName
             asset={getValue<MarketData>()}
@@ -305,13 +288,8 @@ export const MarketsList = ({
         cell: ({ getValue }) => (
           <SupplyApy asset={getValue<MarketData>()} rewards={rewards} poolChainId={poolChainId} />
         ),
-        header: () => (
-          <Box py={2} textAlign="end" alignItems="end">
-            <Text variant="smText" fontWeight="bold" lineHeight={5}>
-              Supply APY
-            </Text>
-          </Box>
-        ),
+        header: (context) => <TableHeaderCell context={context}>Supply APY</TableHeaderCell>,
+
         footer: (props) => props.column.id,
         sortingFn: assetSort,
         enableSorting: !!totalApy,
@@ -322,13 +300,7 @@ export const MarketsList = ({
         cell: ({ getValue }) => (
           <BorrowApy asset={getValue<MarketData>()} poolChainId={poolChainId} />
         ),
-        header: () => (
-          <Box py={2} textAlign="end" alignItems="end">
-            <Text variant="smText" fontWeight="bold" lineHeight={5}>
-              Borrow APY
-            </Text>
-          </Box>
-        ),
+        header: (context) => <TableHeaderCell context={context}>Borrow APY</TableHeaderCell>,
         footer: (props) => props.column.id,
         sortingFn: assetSort,
       },
@@ -338,16 +310,8 @@ export const MarketsList = ({
         cell: ({ getValue }) => (
           <SupplyBalance asset={getValue<MarketData>()} poolChainId={poolChainId} />
         ),
-        header: () => (
-          <VStack py={2} textAlign="end" alignItems="end" spacing={0}>
-            <Text variant="smText" fontWeight="bold" lineHeight={5}>
-              Supply
-            </Text>
-            <Text variant="smText" fontWeight="bold" lineHeight={5}>
-              Balance
-            </Text>
-          </VStack>
-        ),
+        header: (context) => <TableHeaderCell context={context}>Supply Balance</TableHeaderCell>,
+
         footer: (props) => props.column.id,
         sortingFn: assetSort,
       },
@@ -357,16 +321,8 @@ export const MarketsList = ({
         cell: ({ getValue }) => (
           <BorrowBalance asset={getValue<MarketData>()} poolChainId={poolChainId} />
         ),
-        header: () => (
-          <VStack py={2} textAlign="end" alignItems="end" spacing={0}>
-            <Text variant="smText" fontWeight="bold" lineHeight={5}>
-              Borrow
-            </Text>
-            <Text variant="smText" fontWeight="bold" lineHeight={5}>
-              Balance
-            </Text>
-          </VStack>
-        ),
+        header: (context) => <TableHeaderCell context={context}>Borrow Balance</TableHeaderCell>,
+
         footer: (props) => props.column.id,
         sortingFn: assetSort,
       },
@@ -376,16 +332,8 @@ export const MarketsList = ({
         cell: ({ getValue }) => (
           <TotalSupply asset={getValue<MarketData>()} poolChainId={poolChainId} />
         ),
-        header: () => (
-          <VStack py={2} textAlign="end" alignItems="end" spacing={0}>
-            <Text variant="smText" fontWeight="bold" lineHeight={5}>
-              Total
-            </Text>
-            <Text variant="smText" fontWeight="bold" lineHeight={5}>
-              Supply
-            </Text>
-          </VStack>
-        ),
+        header: (context) => <TableHeaderCell context={context}>Total Supply</TableHeaderCell>,
+
         footer: (props) => props.column.id,
         sortingFn: assetSort,
       },
@@ -395,16 +343,8 @@ export const MarketsList = ({
         cell: ({ getValue }) => (
           <TotalBorrow asset={getValue<MarketData>()} poolChainId={poolChainId} />
         ),
-        header: () => (
-          <VStack py={2} textAlign="end" alignItems="end" spacing={0}>
-            <Text variant="smText" fontWeight="bold" lineHeight={5}>
-              Total
-            </Text>
-            <Text variant="smText" fontWeight="bold" lineHeight={5}>
-              Borrow
-            </Text>
-          </VStack>
-        ),
+        header: (context) => <TableHeaderCell context={context}>Total Borrow</TableHeaderCell>,
+
         footer: (props) => props.column.id,
         sortingFn: assetSort,
       },
@@ -414,32 +354,10 @@ export const MarketsList = ({
         cell: ({ getValue }) => (
           <Liquidity asset={getValue<MarketData>()} poolChainId={poolChainId} />
         ),
-        header: () => (
-          <Text textAlign="end" py={2} variant="smText" fontWeight="bold">
-            Liquidity
-          </Text>
-        ),
+        header: (context) => <TableHeaderCell context={context}>Liquidity</TableHeaderCell>,
+
         footer: (props) => props.column.id,
         sortingFn: assetSort,
-      },
-      {
-        accessorFn: (row) => row.collateral,
-        id: COLLATERAL,
-        cell: ({ getValue }) => (
-          <Collateral
-            asset={getValue<MarketData>()}
-            comptrollerAddress={comptrollerAddress}
-            poolChainId={poolChainId}
-          />
-        ),
-        header: () => (
-          <Text py={2} variant="smText" fontWeight="bold">
-            Collateral
-          </Text>
-        ),
-        footer: (props) => props.column.id,
-        sortingFn: assetSort,
-        // enableSorting: false,
       },
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -553,28 +471,28 @@ export const MarketsList = ({
         justifyContent={['center', 'center', 'flex-start']}
       >
         <HStack>
-          <Text variant="mdText" width="max-content">
+          <Text size="md" width="max-content">
             Your Supply Balance :
           </Text>
           <SimpleTooltip
             label={supplyBalanceFiat.toString()}
             isDisabled={supplyBalanceFiat === DOWN_LIMIT || supplyBalanceFiat > UP_LIMIT}
           >
-            <Text variant="lgText" fontWeight="bold">
+            <Text size="lg" fontWeight="bold">
               {smallUsdFormatter(supplyBalanceFiat)}
               {supplyBalanceFiat > DOWN_LIMIT && supplyBalanceFiat < UP_LIMIT && '+'}
             </Text>
           </SimpleTooltip>
         </HStack>
         <HStack>
-          <Text variant="mdText" width="max-content">
+          <Text size="md" width="max-content">
             Your Borrow Balance :
           </Text>
           <SimpleTooltip
             label={borrowBalanceFiat.toString()}
             isDisabled={borrowBalanceFiat === DOWN_LIMIT || borrowBalanceFiat > UP_LIMIT}
           >
-            <Text variant="lgText" fontWeight="bold">
+            <Text size="lg" fontWeight="bold">
               {smallUsdFormatter(borrowBalanceFiat)}
               {borrowBalanceFiat > DOWN_LIMIT && borrowBalanceFiat < UP_LIMIT && '+'}
             </Text>
@@ -606,19 +524,7 @@ export const MarketsList = ({
             width="80px"
             p={0}
           >
-            <PopoverTooltip
-              body={
-                <VStack alignItems="flex-start" whiteSpace="pre-wrap">
-                  <Text variant="mdText">All Assets</Text>
-                  <Text variant="smText">Assets that are available in this pool.</Text>
-                  <Text variant="smText">Click to filter</Text>
-                </VStack>
-              }
-              width="100%"
-              height="100%"
-            >
-              <Center width="100%" height="100%" fontWeight="bold">{`${data.length} All`}</Center>
-            </PopoverTooltip>
+            <Center width="100%" height="100%" fontWeight="bold">{`${data.length} All`}</Center>
           </CButton>
           {allClaimableRewards && Object.keys(allClaimableRewards).length !== 0 && (
             <GradientButton
@@ -629,27 +535,13 @@ export const MarketsList = ({
               width="115px"
               height="52px"
             >
-              <PopoverTooltip
-                body={
-                  <VStack alignItems="flex-start" whiteSpace="pre-wrap">
-                    <Text variant="mdText" fontWeight="bold">
-                      Rewards Asset
-                    </Text>
-                    <Text variant="smText">Assets that have rewards.</Text>
-                    <Text variant="smText">Click to filter</Text>
-                  </VStack>
-                }
-                width="100%"
-                height="100%"
-              >
-                <Center width="100%" height="100%" fontWeight="bold" pt="2px">
-                  <GradientText isEnabled={!globalFilter.includes(REWARDS)} color={cCard.bgColor}>
-                    {`${
-                      (allClaimableRewards && Object.keys(allClaimableRewards).length) || 0
-                    } Rewards`}
-                  </GradientText>
-                </Center>
-              </PopoverTooltip>
+              <Center width="100%" height="100%" fontWeight="bold" pt="2px">
+                <GradientText isEnabled={!globalFilter.includes(REWARDS)} color={cCard.bgColor}>
+                  {`${
+                    (allClaimableRewards && Object.keys(allClaimableRewards).length) || 0
+                  } Rewards`}
+                </GradientText>
+              </Center>
             </GradientButton>
           )}
           {collateralCounts !== 0 && (
@@ -661,23 +553,9 @@ export const MarketsList = ({
               width="125px"
               p={0}
             >
-              <PopoverTooltip
-                body={
-                  <VStack alignItems="flex-start" whiteSpace="pre-wrap">
-                    <Text variant="mdText">Collateral Asset</Text>
-                    <Text variant="smText">
-                      Assets that can be deposited as collateral to borrow other assets.
-                    </Text>
-                    <Text variant="smText">Click to filter</Text>
-                  </VStack>
-                }
-                width="100%"
-                height="100%"
-              >
-                <Center width="100%" height="100%" fontWeight="bold">
-                  {`${collateralCounts} Collateral`}
-                </Center>
-              </PopoverTooltip>
+              <Center width="100%" height="100%" fontWeight="bold">
+                {`${collateralCounts} Collateral`}
+              </Center>
             </CButton>
           )}
           {borrowableCounts !== 0 && (
@@ -689,21 +567,9 @@ export const MarketsList = ({
               width="135px"
               p={0}
             >
-              <PopoverTooltip
-                body={
-                  <VStack alignItems="flex-start" whiteSpace="pre-wrap">
-                    <Text variant="mdText">Borrowable Asset</Text>
-                    <Text variant="smText">Assets that can be borrowed.</Text>
-                    <Text variant="smText">Click to filter</Text>
-                  </VStack>
-                }
-                width="100%"
-                height="100%"
-              >
-                <Center width="100%" height="100%" fontWeight="bold">
-                  {`${borrowableCounts} Borrowable`}
-                </Center>
-              </PopoverTooltip>
+              <Center width="100%" height="100%" fontWeight="bold">
+                {`${borrowableCounts} Borrowable`}
+              </Center>
             </CButton>
           )}
           {protectedCounts !== 0 && (
@@ -715,21 +581,9 @@ export const MarketsList = ({
               width="125px"
               p={0}
             >
-              <PopoverTooltip
-                body={
-                  <VStack alignItems="flex-start" whiteSpace="pre-wrap">
-                    <Text variant="mdText">Protected Asset</Text>
-                    <Text variant="smText">Assets that cannot be borrowed.</Text>
-                    <Text variant="smText">Click to filter</Text>
-                  </VStack>
-                }
-                width="100%"
-                height="100%"
-              >
-                <Center fontWeight="bold" width="100%" height="100%">
-                  {`${protectedCounts} Protected`}
-                </Center>
-              </PopoverTooltip>
+              <Center fontWeight="bold" width="100%" height="100%">
+                {`${protectedCounts} Protected`}
+              </Center>
             </CButton>
           )}
           {pausedCounts !== 0 && (
@@ -741,21 +595,9 @@ export const MarketsList = ({
               width="140px"
               p={0}
             >
-              <PopoverTooltip
-                body={
-                  <VStack alignItems="flex-start" whiteSpace="pre-wrap">
-                    <Text variant="mdText">Paused Asset</Text>
-                    <Text variant="smText">Assets that cannot be supplied and borrowed.</Text>
-                    <Text variant="smText">Click to filter</Text>
-                  </VStack>
-                }
-                width="100%"
-                height="100%"
-              >
-                <Center fontWeight="bold" width="100%" height="100%" whiteSpace="nowrap">
-                  {`${pausedCounts} Paused`}
-                </Center>
-              </PopoverTooltip>
+              <Center fontWeight="bold" width="100%" height="100%" whiteSpace="nowrap">
+                {`${pausedCounts} Paused`}
+              </Center>
             </CButton>
           )}
         </ButtonGroup>
@@ -841,30 +683,13 @@ export const MarketsList = ({
                     border="none"
                     color={cCard.txtColor}
                     textTransform="capitalize"
-                    py={2}
-                    cursor="pointer"
-                    px={{ base: 2, lg: 4 }}
+                    py={4}
+                    px={{ base: 1, lg: 2 }}
                   >
                     <HStack
-                      gap={0}
-                      justifyContent={
-                        header.index === 0
-                          ? 'flex-start'
-                          : header.column.id === COLLATERAL
-                          ? 'center'
-                          : 'flex-end'
-                      }
+                      justifyContent={header.column.id === MARKET_LTV ? 'center' : 'flex-end'}
                     >
-                      <Box width={3} mb={1}>
-                        <Box hidden={header.column.getIsSorted() ? false : true}>
-                          {header.column.getIsSorted() === 'desc' ? (
-                            <ArrowDownIcon aria-label="sorted descending" />
-                          ) : (
-                            <ArrowUpIcon aria-label="sorted ascending" />
-                          )}
-                        </Box>
-                      </Box>
-                      <>{flexRender(header.column.columnDef.header, header.getContext())}</>
+                      {flexRender(header.column.columnDef.header, header.getContext())}
                     </HStack>
                   </Th>
                 );
@@ -910,6 +735,7 @@ export const MarketsList = ({
                         rows={table.getCoreRowModel().rows}
                         comptrollerAddress={comptrollerAddress}
                         supplyBalanceFiat={supplyBalanceFiat}
+                        borrowBalanceFiat={borrowBalanceFiat}
                         poolChainId={poolChainId}
                       />
                     </Td>
@@ -937,7 +763,7 @@ export const MarketsList = ({
       <Flex className="pagination" gap={4} justifyContent="flex-end" alignItems="center" p={4}>
         <HStack>
           <Hide below="lg">
-            <Text variant="smText">Markets Per Page</Text>
+            <Text size="md">Markets Per Page</Text>
           </Hide>
           <Select
             value={pagination.pageSize}
@@ -954,7 +780,7 @@ export const MarketsList = ({
           </Select>
         </HStack>
         <HStack gap={2}>
-          <Text variant="smText">
+          <Text size="md">
             {table.getFilteredRowModel().rows.length === 0
               ? 0
               : pagination.pageIndex * pagination.pageSize + 1}{' '}

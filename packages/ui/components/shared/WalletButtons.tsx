@@ -112,7 +112,11 @@ export const WalletButtons = memo(() => {
                           borderRadius="50%"
                         />
                       )}
-                      {!isMobile && <Text ml={2}>{chain.name}</Text>}
+                      {!isMobile && (
+                        <Text ml={2} color="raisinBlack">
+                          {chain.name}
+                        </Text>
+                      )}
                     </Button>
                     <Menu isOpen={isOpen}>
                       <MenuButton as={Button} px={2} onMouseEnter={onOpen} onMouseLeave={onClose}>
@@ -121,12 +125,14 @@ export const WalletButtons = memo(() => {
                             <Center height="100%">
                               <Spinner size="md" thickness="4px" speed="1s" />
                             </Center>
-                            {!isMobile && <Text>Pending</Text>}
+                            {!isMobile && <Text color="raisinBlack">Pending</Text>}
                           </HStack>
                         ) : (
                           <HStack>
                             {<Jazzicon diameter={23} seed={jsNumberForAddress(account.address)} />}
-                            {!isMobile && <Text>{shortAddress(account.address)}</Text>}
+                            {!isMobile && (
+                              <Text color="raisinBlack">{shortAddress(account.address)}</Text>
+                            )}
                           </HStack>
                         )}
                       </MenuButton>
