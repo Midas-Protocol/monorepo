@@ -1,6 +1,11 @@
 import { ChakraProvider } from '@chakra-ui/react';
+import {
+  GetSiweMessageOptions,
+  RainbowKitSiweNextAuthProvider,
+} from '@rainbow-me/rainbowkit-siwe-next-auth';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { SessionProvider } from 'next-auth/react';
 import { appWithTranslation } from 'next-i18next';
 import { AppProps } from 'next/app';
 import { createClient, WagmiConfig } from 'wagmi';
@@ -21,19 +26,27 @@ const client = createClient({
 });
 
 function MidasDapp({ Component, pageProps }: AppProps) {
+  const getSiweMessageOptions: GetSiweMessageOptions = () => ({
+    statement: 'Sign in to my RainbowKit app',
+  });
+
   return (
     <ChakraProvider theme={theme}>
       <WagmiConfig client={client}>
-        <RainbowKit>
-          <QueryClientProvider client={queryClient}>
-            <MultiMidasProvider>
-              <Layout>
-                <Component {...pageProps} />
-              </Layout>
-            </MultiMidasProvider>
-            {config.isDevelopment && <ReactQueryDevtools initialIsOpen={false} />}
-          </QueryClientProvider>
-        </RainbowKit>
+        <SessionProvider session={pageProps.session} refetchInterval={0}>
+          <RainbowKitSiweNextAuthProvider getSiweMessageOptions={getSiweMessageOptions}>
+            <RainbowKit>
+              <QueryClientProvider client={queryClient}>
+                <MultiMidasProvider>
+                  <Layout>
+                    <Component {...pageProps} />
+                  </Layout>
+                </MultiMidasProvider>
+                {config.isDevelopment && <ReactQueryDevtools initialIsOpen={false} />}
+              </QueryClientProvider>
+            </RainbowKit>
+          </RainbowKitSiweNextAuthProvider>
+        </SessionProvider>
       </WagmiConfig>
     </ChakraProvider>
   );
