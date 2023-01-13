@@ -12,14 +12,7 @@ const forkMainnet: DeployFunction = async (hre): Promise<void> => {
   if (!chainDeployConfig[chainId]) {
     throw new Error(`Config invalid for ${chainId}`);
   }
-  const { config: chainDeployParams }: { config: ChainDeployConfig } = chainDeployConfig[chainId];
   const fundingValue = hre.ethers.utils.parseEther("10");
-  let whale = chainDeployParams.wtoken;
-  const balanceOfWToken = await ethers.provider.getBalance(whale);
-  if (balanceOfWToken < fundingValue) {
-    whale = (await hre.getNamedAccounts())["alice"];
-  }
-  console.log("whale: ", whale);
 
   const { deployer } = await hre.getNamedAccounts();
 

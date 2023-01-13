@@ -121,10 +121,8 @@ task("get-position-ratio", "Get unhealthy po data")
     return ratio;
   });
 
-task("get-public-pools", "Get public pools").setAction(async ({}, { ethers, getNamedAccounts }) => {
-  const { deployer } = await getNamedAccounts();
-
-  const fpd = await ethers.getContract("FusePoolLens", deployer);
+task("get-public-pools", "Get public pools").setAction(async ({}, { ethers }) => {
+  const fpd = await ethers.getContract("FusePoolLens");
   const pools = await fpd.callStatic.getPublicPoolsWithData();
   console.log("pools: ", pools);
 });
