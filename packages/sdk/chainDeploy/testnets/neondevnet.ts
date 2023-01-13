@@ -3,7 +3,7 @@ import { assetSymbols, underlying } from "@midas-capital/types";
 import { ethers } from "ethers";
 
 import { ChainDeployConfig } from "../helpers";
-import {ChainDeployFnParams} from "../helpers/types";
+import { ChainDeployFnParams } from "../helpers/types";
 
 const assets = neondevnet.assets;
 const BN = ethers.utils.parseEther("1");

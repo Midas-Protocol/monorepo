@@ -9,7 +9,7 @@ import {
   deployUniswapLpOracle,
   deployUniswapOracle,
 } from "../helpers";
-import {ChainDeployFnParams, ChainlinkAsset} from "../helpers/types";
+import { ChainDeployFnParams, ChainlinkAsset } from "../helpers/types";
 
 const assets = chapel.assets;
 

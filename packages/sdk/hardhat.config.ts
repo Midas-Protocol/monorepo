@@ -80,7 +80,7 @@ const config: HardhatUserConfig = {
     // alice: { default: 1 },
     // bob: { default: 2 },
     // rando: { default: 3 },
-},
+  },
   networks: {
     // This is the unchangeable default network which is started with `hardhat node`
     hardhat: {

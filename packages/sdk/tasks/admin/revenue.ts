@@ -184,10 +184,7 @@ task("revenue:flywheels:calculate", "Calculate the fees accrued from 4626 Perfor
           const performanceFeeRewardTokens = await flywheelContract.callStatic.rewardsAccrued(
             await flywheelContract.callStatic.feeRecipient()
           );
-          const rewardToken = new Contract(
-            await flywheelContract.callStatic.rewardToken(),
-            sdk.artifacts.ERC20.abi
-          );
+          const rewardToken = new Contract(await flywheelContract.callStatic.rewardToken(), sdk.artifacts.ERC20.abi);
           const rewardTokenPrice = await mpo.callStatic.price(rewardToken.address);
 
           const nativeFee = performanceFeeRewardTokens

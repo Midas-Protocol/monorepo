@@ -24,7 +24,7 @@ task("flywheel:remove", "remove a rewards distributor from a pool")
   .addParam("flywheel", "address of flywheel", undefined, types.string)
   .addParam("pool", "address of comptroller", undefined, types.string)
   .setAction(async (taskArgs, hre) => {
-      const { poolsSuperAdmin, extrasAdmin } = await hre.ethers.getNamedSigners();
+    const { poolsSuperAdmin, extrasAdmin } = await hre.ethers.getNamedSigners();
 
     // extract the leftover rewards to the extrasAdmin
     const flywheel = (await hre.ethers.getContractAt("MidasFlywheel", taskArgs.flywheel, extrasAdmin)) as MidasFlywheel;

@@ -17,10 +17,16 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   const chainId = await getChainId();
   console.log("chainId: ", chainId);
   const MIN_BORROW_USD = chainId === "97" ? 0 : 100;
-  const { upgradesAdmin, liquidator, poolsSuperAdmin, oraclesAdmin, extrasAdmin, testConfigAdmin } = await getNamedAccounts();
+  const { upgradesAdmin, liquidator, poolsSuperAdmin, oraclesAdmin, extrasAdmin, testConfigAdmin } =
+    await getNamedAccounts();
   console.log("upgradesAdmin: ", upgradesAdmin);
   console.log("accounts", {
-    upgradesAdmin, liquidator, poolsSuperAdmin, testConfigAdmin, oraclesAdmin, extrasAdmin
+    upgradesAdmin,
+    liquidator,
+    poolsSuperAdmin,
+    testConfigAdmin,
+    oraclesAdmin,
+    extrasAdmin,
   });
   const balance = await ethers.provider.getBalance(upgradesAdmin);
   console.log("upgradesAdmin balance: ", balance.toString());

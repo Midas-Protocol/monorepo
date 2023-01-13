@@ -10,7 +10,7 @@ task("oracle:increase-cardinality", "Increase cardinality for pool")
     const address = taskArgs.address;
 
     const poolContract = new hre.ethers.Contract(address, IUniswapV3Pool__factory.abi, oraclesAdmin);
-    let tx = await poolContract.increaseObservationCardinalityNext(10, {
+    const tx = await poolContract.increaseObservationCardinalityNext(10, {
       gasLimit: 1000000,
     });
     await tx.wait();

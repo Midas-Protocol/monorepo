@@ -2,6 +2,7 @@ import { providers } from "ethers";
 import { task, types } from "hardhat/config";
 
 import { AddressesProvider } from "../../typechain/AddressesProvider";
+import { AdrastiaPriceOracle } from "../../typechain/AdrastiaPriceOracle";
 import { CErc20PluginDelegate } from "../../typechain/CErc20PluginDelegate";
 import { ComptrollerFirstExtension } from "../../typechain/ComptrollerFirstExtension";
 import { DiaPriceOracle } from "../../typechain/DiaPriceOracle";
@@ -11,10 +12,9 @@ import { MidasERC4626 } from "../../typechain/MidasERC4626";
 import { MidasFlywheelCore } from "../../typechain/MidasFlywheelCore";
 import { Ownable } from "../../typechain/Ownable";
 import { OwnableUpgradeable } from "../../typechain/OwnableUpgradeable";
+import { SaddleLpPriceOracle } from "../../typechain/SaddleLpPriceOracle";
 import { SafeOwnableUpgradeable } from "../../typechain/SafeOwnableUpgradeable";
 import { Unitroller } from "../../typechain/Unitroller";
-import { SaddleLpPriceOracle } from "../../typechain/SaddleLpPriceOracle";
-import { AdrastiaPriceOracle } from "../../typechain/AdrastiaPriceOracle";
 
 // TODO add ERC20Wrapper from CErc20WrappingDelegate
 export default task("system:admin:change", "Changes the system admin to a new address")
@@ -442,7 +442,8 @@ task("system:admins:split", "Split the contracts admin to different roles")
     const deployer = await ethers.getSigner(currentDeployer);
 
     // TODO probably hardcode these
-    const { upgradesAdmin, liquidator, poolsSuperAdmin, testConfigAdmin, oraclesAdmin, extrasAdmin } = await getNamedAccounts();
+    const { upgradesAdmin, liquidator, poolsSuperAdmin, testConfigAdmin, oraclesAdmin, extrasAdmin } =
+      await getNamedAccounts();
 
     // OwnableUpgradeable - transferOwnership(newDeployer)
     const fsl = (await ethers.getContract("FuseSafeLiquidator", deployer)) as OwnableUpgradeable;
@@ -457,7 +458,7 @@ task("system:admins:split", "Split the contracts admin to different roles")
       console.error(`unknown  owner ${currentOwnerFSL}`);
     }
 
-    const saddleLpOracle = await ethers.getContractOrNull("SaddleLpPriceOracle", deployer) as SafeOwnableUpgradeable;
+    const saddleLpOracle = (await ethers.getContractOrNull("SaddleLpPriceOracle", deployer)) as SafeOwnableUpgradeable;
     if (saddleLpOracle) {
       const currentOwner = await saddleLpOracle.callStatic.owner();
       if (currentOwner == currentDeployer) {
@@ -473,7 +474,10 @@ task("system:admins:split", "Split the contracts admin to different roles")
       }
     }
 
-    const adrastiaPriceOracle = (await ethers.getContractOrNull("AdrastiaPriceOracle", deployer)) as SafeOwnableUpgradeable;
+    const adrastiaPriceOracle = (await ethers.getContractOrNull(
+      "AdrastiaPriceOracle",
+      deployer
+    )) as SafeOwnableUpgradeable;
     if (adrastiaPriceOracle) {
       const currentOwner = await adrastiaPriceOracle.callStatic.owner();
       if (currentOwner == currentDeployer) {
@@ -489,7 +493,10 @@ task("system:admins:split", "Split the contracts admin to different roles")
       }
     }
 
-    const ankrCertificateTokenPriceOracle = (await ethers.getContractOrNull("AnkrCertificateTokenPriceOracle", deployer)) as SafeOwnableUpgradeable;
+    const ankrCertificateTokenPriceOracle = (await ethers.getContractOrNull(
+      "AnkrCertificateTokenPriceOracle",
+      deployer
+    )) as SafeOwnableUpgradeable;
     if (ankrCertificateTokenPriceOracle) {
       const currentOwner = await ankrCertificateTokenPriceOracle.callStatic.owner();
       if (currentOwner == currentDeployer) {
@@ -521,7 +528,10 @@ task("system:admins:split", "Split the contracts admin to different roles")
       }
     }
 
-    const curveOracle = (await ethers.getContractOrNull("CurveLpTokenPriceOracleNoRegistry", oraclesAdmin)) as SafeOwnableUpgradeable;
+    const curveOracle = (await ethers.getContractOrNull(
+      "CurveLpTokenPriceOracleNoRegistry",
+      oraclesAdmin
+    )) as SafeOwnableUpgradeable;
     if (curveOracle) {
       const currentOwner = await curveOracle.callStatic.owner();
       if (currentOwner == currentDeployer) {
@@ -537,7 +547,10 @@ task("system:admins:split", "Split the contracts admin to different roles")
       }
     }
 
-    const curveV2Oracle = (await ethers.getContractOrNull("CurveV2LpTokenPriceOracleNoRegistry", deployer)) as SafeOwnableUpgradeable;
+    const curveV2Oracle = (await ethers.getContractOrNull(
+      "CurveV2LpTokenPriceOracleNoRegistry",
+      deployer
+    )) as SafeOwnableUpgradeable;
     if (curveV2Oracle) {
       const currentOwner = await curveV2Oracle.callStatic.owner();
       if (currentOwner == currentDeployer) {
@@ -597,7 +610,10 @@ task("system:admins:split", "Split the contracts admin to different roles")
       }
     }
 
-    const nativeUsdPriceOracle = (await ethers.getContractOrNull("NativeUSDPriceOracle", deployer)) as SafeOwnableUpgradeable;
+    const nativeUsdPriceOracle = (await ethers.getContractOrNull(
+      "NativeUSDPriceOracle",
+      deployer
+    )) as SafeOwnableUpgradeable;
     if (nativeUsdPriceOracle) {
       const currentOwner = await nativeUsdPriceOracle.callStatic.owner();
       if (currentOwner == currentDeployer) {
@@ -629,7 +645,10 @@ task("system:admins:split", "Split the contracts admin to different roles")
       }
     }
 
-    const twapPriceOracleResolver = (await ethers.getContractOrNull("UniswapTwapPriceOracleV2Resolver", deployer)) as Ownable;
+    const twapPriceOracleResolver = (await ethers.getContractOrNull(
+      "UniswapTwapPriceOracleV2Resolver",
+      deployer
+    )) as Ownable;
     if (twapPriceOracleResolver) {
       const currentOwner = await twapPriceOracleResolver.callStatic.owner();
       if (currentOwner == currentDeployer) {
@@ -641,7 +660,10 @@ task("system:admins:split", "Split the contracts admin to different roles")
       }
     }
 
-    const midasSafeLiquidator = (await ethers.getContractOrNull("MidasSafeLiquidator", deployer)) as SafeOwnableUpgradeable;
+    const midasSafeLiquidator = (await ethers.getContractOrNull(
+      "MidasSafeLiquidator",
+      deployer
+    )) as SafeOwnableUpgradeable;
     if (midasSafeLiquidator) {
       const currentOwner = await midasSafeLiquidator.callStatic.owner();
       if (currentOwner == currentDeployer) {

@@ -78,12 +78,12 @@ task("plugins:deploy:upgradable", "Deploys the upgradable plugins from a config 
       if (deployment.transactionHash) await ethers.provider.waitForTransaction(deployment.transactionHash);
       console.log("ERC4626 Strategy: ", deployment.address);
 
-      let asOwnable = await ethers.getContract(contractId, upgradesAdmin) as SafeOwnableUpgradeable;
+      let asOwnable = (await ethers.getContract(contractId, upgradesAdmin)) as SafeOwnableUpgradeable;
       let tx = await asOwnable._setPendingOwner(extrasAdmin.address);
       await tx.wait();
       console.log(`transferring the admin to ${extrasAdmin.address} with tx ${tx.hash}`);
 
-      asOwnable = await ethers.getContract(contractId, extrasAdmin) as SafeOwnableUpgradeable;
+      asOwnable = (await ethers.getContract(contractId, extrasAdmin)) as SafeOwnableUpgradeable;
       tx = await asOwnable._acceptOwner();
       await tx.wait();
       console.log(`accepted to be the owner ${extrasAdmin.address} with tx ${tx.hash}`);
