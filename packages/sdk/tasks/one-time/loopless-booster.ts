@@ -8,7 +8,7 @@ import { MidasFlywheelCore } from "../../typechain/MidasFlywheelCore";
 
 task("loopless-booster", "deploy and a loopless booster for a flywheel")
   .addParam("flywheelAddress", "Address of the flywheel to set the booster to", undefined, types.string)
-  .setAction(async ({ flywheelAddress }, { ethers, deployments, getChainId, getNamedAccounts }) => {
+  .setAction(async ({ flywheelAddress }, { ethers, deployments, getChainId }) => {
     const { upgradesAdmin, extrasAdmin } = await ethers.getNamedSigners();
     const chainid = await getChainId();
     if (flywheelAddress == "0xUseThisToVerify") {
@@ -44,7 +44,7 @@ task("loopless-booster", "deploy and a loopless booster for a flywheel")
   });
 
 task("replace-flywheel-with-upgradable", "").setAction(
-  async ({}, { ethers, deployments, getNamedAccounts, getChainId }) => {
+  async ({}, { ethers, deployments, getChainId }) => {
     const poolAddress = "0xeB2D3A9D962d89b4A9a34ce2bF6a2650c938e185"; // stDOT Pool
     const brokenFlywheelAddress = "0xbCeB5Cb9b7Ea70994d8a7cfAC5D48dEA849CED06";
     const fxcDOTMarketAddress = "0xa9736bA05de1213145F688e4619E5A7e0dcf4C72";

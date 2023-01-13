@@ -19,7 +19,7 @@ task("liquidate:take-bad-debt", "liquidate a debt position by borrowing the same
   .setAction(
     async (
       { debtMarket, collateralMarket, stableCollateralMarket, repayAmount, borrower },
-      { deployments, ethers, getChainId, getNamedAccounts }
+      { deployments, ethers, getChainId }
     ) => {
       const { upgradesAdmin, liquidator, oraclesAdmin } = await ethers.getNamedSigners();
 

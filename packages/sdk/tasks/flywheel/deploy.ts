@@ -5,7 +5,7 @@ task("flywheel:deploy-static-rewards", "Deploy static rewards flywheel for LM re
   .addParam("rewardToken", "Reward token of flywheel", undefined, types.string)
   .addParam("strategy", "address of strategy for which to enable the flywheel", undefined, types.string)
   .addParam("pool", "comptroller to which to add the flywheel", undefined, types.string)
-  .setAction(async ({ name, rewardToken, strategy, pool }, { ethers, deployments, getNamedAccounts, run }) => {
+  .setAction(async ({ name, rewardToken, strategy, pool }, { ethers, deployments, run }) => {
     const { extrasAdmin } = await ethers.getNamedSigners();
 
     const flywheelBooster = await ethers.getContract("LooplessFlywheelBooster");

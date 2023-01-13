@@ -9,7 +9,7 @@ export default task("send-tokens", "send tokens")
   .setAction(
     async (
       { tokens: _tokens, sendTo: _sendTo, sendAmount: _sendAmount, sendFrom: _sendFrom },
-      { getNamedAccounts, ethers }
+      { ethers }
     ) => {
       const tokens = _tokens.split(",");
       let tx: providers.TransactionResponse;
