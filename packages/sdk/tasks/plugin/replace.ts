@@ -5,6 +5,7 @@ import { task, types } from "hardhat/config";
 import { CErc20PluginRewardsDelegate } from "../../typechain/CErc20PluginRewardsDelegate";
 import { Comptroller } from "../../typechain/Comptroller";
 import { FuseFeeDistributor } from "../../typechain/FuseFeeDistributor";
+import { SafeOwnableUpgradeable } from "../../typechain/SafeOwnableUpgradeable";
 
 const chainIdToConfig: { [chainId: number]: ChainConfig } = {
   [bsc.chainId]: bsc,
@@ -19,10 +20,10 @@ const chainIdToConfig: { [chainId: number]: ChainConfig } = {
 
 task("plugins:deploy:upgradable", "Deploys the upgradable plugins from a config list").setAction(
   async ({}, { ethers, getChainId, deployments }) => {
-    const deployer = await ethers.getNamedSigner("deployer");
+    const { upgradesAdmin, poolsSuperAdmin, extrasAdmin } = await ethers.getNamedSigners();
 
-    console.log({ deployer: deployer.address });
-    const ffd = (await ethers.getContract("FuseFeeDistributor", deployer)) as FuseFeeDistributor;
+    console.log({ deployer: poolsSuperAdmin.address });
+    const ffd = (await ethers.getContract("FuseFeeDistributor", poolsSuperAdmin)) as FuseFeeDistributor;
 
     const chainid = await getChainId();
     const pluginConfigs: DeployedPlugins = chainIdToConfig[chainid].deployedPlugins;
@@ -60,7 +61,7 @@ task("plugins:deploy:upgradable", "Deploys the upgradable plugins from a config 
       const artifact = await deployments.getArtifact(conf.strategy);
       const deployment = await deployments.deploy(contractId, {
         contract: artifact,
-        from: deployer.address,
+        from: upgradesAdmin.address,
         proxy: {
           proxyContract: "OpenZeppelinTransparentProxy",
           execute: {
@@ -69,13 +70,23 @@ task("plugins:deploy:upgradable", "Deploys the upgradable plugins from a config 
               args: deployArgs,
             },
           },
-          owner: deployer.address,
+          owner: upgradesAdmin.address,
         },
         log: true,
       });
 
       if (deployment.transactionHash) await ethers.provider.waitForTransaction(deployment.transactionHash);
       console.log("ERC4626 Strategy: ", deployment.address);
+
+      let asOwnable = await ethers.getContract(contractId, upgradesAdmin) as SafeOwnableUpgradeable;
+      let tx = await asOwnable._setPendingOwner(extrasAdmin.address);
+      await tx.wait();
+      console.log(`transferring the admin to ${extrasAdmin.address} with tx ${tx.hash}`);
+
+      asOwnable = await ethers.getContract(contractId, extrasAdmin) as SafeOwnableUpgradeable;
+      tx = await asOwnable._acceptOwner();
+      await tx.wait();
+      console.log(`accepted to be the owner ${extrasAdmin.address} with tx ${tx.hash}`);
 
       newImplementations.push(deployment.address);
       arrayOfTrue.push(true);
@@ -92,7 +103,7 @@ task("plugins:deploy:upgradable", "Deploys the upgradable plugins from a config 
       const market = (await ethers.getContractAt(
         "CErc20PluginRewardsDelegate",
         conf.market,
-        deployer
+        poolsSuperAdmin
       )) as CErc20PluginRewardsDelegate;
 
       const comptrollerAddress = await market.callStatic.comptroller();
@@ -100,11 +111,11 @@ task("plugins:deploy:upgradable", "Deploys the upgradable plugins from a config 
       const comptroller = (await ethers.getContractAt(
         "Comptroller.sol:Comptroller",
         comptrollerAddress,
-        deployer
+        poolsSuperAdmin
       )) as Comptroller;
 
       const admin = await comptroller.callStatic.admin();
-      if (admin == deployer.address) {
+      if (admin == poolsSuperAdmin.address) {
         const currentPluginAddress = await market.callStatic.plugin();
         const contractId = `${conf.strategy}_${conf.market}`;
         const newPlugin = await ethers.getContract(contractId);
@@ -117,7 +128,7 @@ task("plugins:deploy:upgradable", "Deploys the upgradable plugins from a config 
           console.log("_updatePlugin: ", tx.hash);
         }
       } else {
-        console.log(`market poll has a different admin ${admin}`);
+        console.log(`market and pool have different admins ${admin}`);
       }
     }
   }
@@ -127,12 +138,12 @@ task("plugins:replace", "Replaces an old plugin contract with a new one")
   .addParam("market", "The address of the market", undefined, types.string)
   .addParam("newPlugin", "The address of the new plugin", undefined, types.string)
   .setAction(async ({ market: marketAddress, newPlugin: newPluginAddress }, { ethers }) => {
-    const deployer = await ethers.getNamedSigner("deployer");
+    const { poolsSuperAdmin } = await ethers.getNamedSigners();
 
     const market = (await ethers.getContractAt(
       "CErc20PluginRewardsDelegate",
       marketAddress,
-      deployer
+      poolsSuperAdmin
     )) as CErc20PluginRewardsDelegate;
     try {
       const currentPluginAddress = await market.callStatic.plugin();

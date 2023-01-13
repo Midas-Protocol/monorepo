@@ -24,9 +24,9 @@ export const deployFuseSafeLiquidator = async ({
   deployments,
   deployConfig,
 }: LiquidatorDeployFnParams): Promise<void> => {
-  const { deployer } = await getNamedAccounts();
+  const { upgradesAdmin, liquidator } = await getNamedAccounts();
   const fsl = await deployments.deploy("FuseSafeLiquidator", {
-    from: deployer,
+    from: upgradesAdmin,
     log: true,
     proxy: {
       execute: {
@@ -47,13 +47,13 @@ export const deployFuseSafeLiquidator = async ({
         },
       },
       proxyContract: "OpenZeppelinTransparentProxy",
-      owner: deployer,
+      owner: upgradesAdmin,
     },
   });
   if (fsl.transactionHash) await ethers.provider.waitForTransaction(fsl.transactionHash);
   console.log("FuseSafeLiquidator: ", fsl.address);
 
-  const fuseSafeLiquidator = (await ethers.getContract("FuseSafeLiquidator", deployer)) as FuseSafeLiquidator;
+  const fuseSafeLiquidator = (await ethers.getContract("FuseSafeLiquidator", liquidator)) as FuseSafeLiquidator;
   const fslOwner = await fuseSafeLiquidator.callStatic.owner();
   console.log(`FuseSafeLiquidator owner is ${fslOwner}`);
 };
@@ -63,15 +63,15 @@ export const configureFuseSafeLiquidator = async ({
   getNamedAccounts,
   chainId,
 }: LiquidatorConfigFnParams): Promise<void> => {
-  const { deployer } = await getNamedAccounts();
+  const { liquidator } = await getNamedAccounts();
 
   const strategies: string[] = [];
   const arrayOfTrue: boolean[] = [];
-  const fuseSafeLiquidator = (await ethers.getContract("FuseSafeLiquidator", deployer)) as FuseSafeLiquidator;
+  const fuseSafeLiquidator = (await ethers.getContract("FuseSafeLiquidator", liquidator)) as FuseSafeLiquidator;
 
   for (const address in chainIdToConfig[chainId].redemptionStrategies) {
     const [redemptionStrategyType] = chainIdToConfig[chainId].redemptionStrategies[address];
-    const redemptionStrategy = await ethers.getContract(redemptionStrategyType, deployer);
+    const redemptionStrategy = await ethers.getContract(redemptionStrategyType);
 
     const whitelistedAlready = await fuseSafeLiquidator.callStatic.redemptionStrategiesWhitelist(
       redemptionStrategy.address
@@ -84,7 +84,7 @@ export const configureFuseSafeLiquidator = async ({
 
   for (const address in chainIdToConfig[chainId].fundingStrategies) {
     const [fundingStrategyType] = chainIdToConfig[chainId].fundingStrategies[address];
-    const fundingStrategy = await ethers.getContract(fundingStrategyType, deployer);
+    const fundingStrategy = await ethers.getContract(fundingStrategyType);
 
     const whitelistedAlready = await fuseSafeLiquidator.callStatic.redemptionStrategiesWhitelist(
       fundingStrategy.address
@@ -109,11 +109,11 @@ export const configureAddressesProviderStrategies = async ({
   getNamedAccounts,
   chainId,
 }: LiquidatorConfigFnParams): Promise<void> => {
-  const { deployer } = await getNamedAccounts();
+  const { testConfigAdmin } = await getNamedAccounts();
   const chainConfig = chainIdToConfig[chainId];
 
   const redemptionStrategiesToUpdate: [string, string, string, string][] = [];
-  const ap = (await ethers.getContract("AddressesProvider", deployer)) as AddressesProvider;
+  const ap = (await ethers.getContract("AddressesProvider", testConfigAdmin)) as AddressesProvider;
 
   // configure the redemption strategies in the AddressesProvider
   for (const assetAddress in chainConfig.redemptionStrategies) {

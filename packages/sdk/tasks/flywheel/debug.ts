@@ -5,11 +5,9 @@ task("flywheel:debug", "Deploy static rewards flywheel for LM rewards")
   .addParam("pool", "comptroller to which to add the flywheel", undefined, types.string)
   .addParam("user", "user for which to debug", undefined, types.string)
   .setAction(async ({ signer, pool, user }, { ethers, run }) => {
-    const deployer = await ethers.getNamedSigner(signer);
-
     // @ts-ignore
     const midasSdkModule = await import("../../tests/utils/midasSdk");
-    const sdk = await midasSdkModule.getOrCreateMidas(deployer);
+    const sdk = await midasSdkModule.getOrCreateMidas();
     const assets = await sdk.createComptroller(pool).callStatic.getAllMarkets();
     console.log({ assets });
 

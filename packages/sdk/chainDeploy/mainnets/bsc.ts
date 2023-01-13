@@ -322,17 +322,17 @@ const wombatAssets: WombatAsset[] = [
 ];
 
 export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: ChainDeployFnParams): Promise<void> => {
-  const { deployer } = await getNamedAccounts();
+  const { upgradesAdmin, oraclesAdmin, testConfigAdmin } = await getNamedAccounts();
   ////
   //// ORACLES
 
   // set Native BNB price
-  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  const mpo = await ethers.getContract("MasterPriceOracle", oraclesAdmin);
   const nativeBnb = underlying(assets, assetSymbols.BNB);
 
   const existingOracle = await mpo.callStatic.oracles(nativeBnb);
   if (existingOracle === ethers.constants.AddressZero) {
-    const fpo = await ethers.getContract("FixedNativePriceOracle", deployer);
+    const fpo = await ethers.getContract("FixedNativePriceOracle");
     const tx = await mpo.add([nativeBnb], [fpo.address]);
     await tx.wait();
   }
@@ -428,7 +428,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   //// Liquidator Redemption Strategies
   const uniswapLpTokenLiquidator = await deployments.deploy("UniswapLpTokenLiquidator", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -442,7 +442,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   //// custom uniswap v2 redemptions and funding
   const uniswapV2LiquidatorFunder = await deployments.deploy("UniswapV2LiquidatorFunder", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -454,7 +454,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   /// xBOMB<>BOMB
   const xbombLiquidatorFunder = await deployments.deploy("XBombLiquidatorFunder", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -465,7 +465,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   //// JarvisLiquidatorFunder
   const jarvisLiquidatorFunder = await deployments.deploy("JarvisLiquidatorFunder", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -476,7 +476,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   /// curve LP tokens
   const curveLpTokenLiquidatorNoRegistry = await deployments.deploy("CurveLpTokenLiquidatorNoRegistry", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -487,7 +487,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   // curve swap underlying tokens
   const curveSwapLiquidator = await deployments.deploy("CurveSwapLiquidator", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -498,7 +498,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   // curve swap liquidator funder - TODO replace the CurveSwapLiquidator above
   const curveSwapLiquidatorFunder = await deployments.deploy("CurveSwapLiquidatorFunder", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -509,7 +509,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   // wombat Lp token liquidator
   const wombatLpTokenLiquidator = await deployments.deploy("WombatLpTokenLiquidator", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
   });
@@ -519,7 +519,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   //// deploy ankr bnb interest rate model
   const abirm = await deployments.deploy("AnkrBNBInterestRateModel", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [
       deployConfig.blocksPerYear,
       "5000000000000000",
@@ -545,7 +545,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
   console.log("deployed dynamicFlywheels: ", dynamicFlywheels);
 
   /// Addresses Provider - set bUSD
-  const addressesProvider = (await ethers.getContract("AddressesProvider", deployer)) as AddressesProvider;
+  const addressesProvider = (await ethers.getContract("AddressesProvider", testConfigAdmin)) as AddressesProvider;
   const busdAddress = underlying(assets, assetSymbols.BUSD);
   const busdAddressAp = await addressesProvider.callStatic.getAddress("bUSD");
   if (busdAddressAp != busdAddress) {

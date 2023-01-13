@@ -8,10 +8,10 @@ import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
 const LOG = process.env.LOG ? true : false;
 
 async function setUpFeeCalculation(hre: HardhatRuntimeEnvironment) {
-  const { deployer } = await hre.ethers.getNamedSigners();
+  const { poolsSuperAdmin, oraclesAdmin } = await hre.ethers.getNamedSigners();
   // @ts-ignore
-  const fpd = (await hre.ethers.getContract("FusePoolDirectory", deployer)) as FusePoolDirectory;
-  const mpo = await hre.ethers.getContract("MasterPriceOracle", deployer);
+  const fpd = (await hre.ethers.getContract("FusePoolDirectory", poolsSuperAdmin)) as FusePoolDirectory;
+  const mpo = await hre.ethers.getContract("MasterPriceOracle", oraclesAdmin);
   const [, pools] = await fpd.callStatic.getActivePools();
   return { pools, fpd, mpo };
 }
@@ -35,7 +35,7 @@ async function createComptroller(
 
 export default task("revenue:admin:calculate", "Calculate the fees accrued from 4626 Performance Fees").setAction(
   async (taskArgs, hre) => {
-    const { deployer } = await hre.ethers.getNamedSigners();
+    const { poolsSuperAdmin } = await hre.ethers.getNamedSigners();
     // @ts-ignore
     const midasSdkModule = await import("../../tests/utils/midasSdk");
     const sdk = await midasSdkModule.getOrCreateMidas();
@@ -52,7 +52,7 @@ export default task("revenue:admin:calculate", "Calculate the fees accrued from 
       let poolFuseFeesTotal = BigNumber.from(0);
 
       for (const market of markets) {
-        const cToken = sdk.createCTokenWithExtensions(market, deployer);
+        const cToken = sdk.createCTokenWithExtensions(market);
         const underlying = await cToken.callStatic.underlying();
         const underlyingPrice = await mpo.callStatic.getUnderlyingPrice(market);
 
@@ -87,7 +87,6 @@ export default task("revenue:admin:calculate", "Calculate the fees accrued from 
 
 task("revenue:4626:calculate", "Calculate the fees accrued from 4626 Performance Fees").setAction(
   async (taskArgs, hre) => {
-    const { deployer } = await hre.ethers.getNamedSigners();
     // @ts-ignore
     const midasSdkModule = await import("../../tests/utils/midasSdk");
     const sdk = await midasSdkModule.getOrCreateMidas();
@@ -104,7 +103,7 @@ task("revenue:4626:calculate", "Calculate the fees accrued from 4626 Performance
       let pluginFeesPool = BigNumber.from(0);
 
       for (const market of markets) {
-        const cToken = sdk.createCErc20PluginRewardsDelegate(market, deployer);
+        const cToken = sdk.createCErc20PluginRewardsDelegate(market);
         const underlying = await cToken.callStatic.underlying();
         const underlyingDecimals = await cToken.callStatic.decimals();
 
@@ -155,7 +154,6 @@ task("revenue:4626:calculate", "Calculate the fees accrued from 4626 Performance
 
 task("revenue:flywheels:calculate", "Calculate the fees accrued from 4626 Performance Fees").setAction(
   async (taskArgs, hre) => {
-    const { deployer } = await hre.ethers.getNamedSigners();
     // @ts-ignore
     const midasSdkModule = await import("../../tests/utils/midasSdk");
     const sdk = await midasSdkModule.getOrCreateMidas();
@@ -172,7 +170,7 @@ task("revenue:flywheels:calculate", "Calculate the fees accrued from 4626 Perfor
       let flywheelFeesPool = BigNumber.from(0);
 
       for (const flywheel of flywheels) {
-        const flywheelContract = sdk.createMidasFlywheel(flywheel, deployer);
+        const flywheelContract = sdk.createMidasFlywheel(flywheel);
 
         try {
           await flywheelContract.callStatic.performanceFee();
@@ -188,8 +186,7 @@ task("revenue:flywheels:calculate", "Calculate the fees accrued from 4626 Perfor
           );
           const rewardToken = new Contract(
             await flywheelContract.callStatic.rewardToken(),
-            sdk.artifacts.ERC20.abi,
-            deployer
+            sdk.artifacts.ERC20.abi
           );
           const rewardTokenPrice = await mpo.callStatic.price(rewardToken.address);
 

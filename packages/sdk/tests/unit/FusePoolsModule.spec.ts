@@ -14,16 +14,16 @@ use(solidity);
 describe("FusePoolsModule", function () {
   let poolAddress: string;
   let sdk: MidasSdk;
-  let deployer: SignerWithAddress;
+  let upgradesAdmin: SignerWithAddress;
 
   this.beforeEach(async () => {
     await deployments.fixture("prod");
     await setUpPriceOraclePrices();
-    deployer = (await ethers.getNamedSigners()).deployer;
+    upgradesAdmin = (await ethers.getNamedSigners()).upgradesAdmin;
 
     sdk = await getOrCreateMidas();
 
-    [poolAddress] = await poolHelpers.createPool({ signer: deployer, poolName: "Fetching-Pools-Test" });
+    [poolAddress] = await poolHelpers.createPool({ signer: upgradesAdmin, poolName: "Fetching-Pools-Test" });
     const assets = await assetHelpers.getAssetsConf(
       poolAddress,
       sdk.contracts.FuseFeeDistributor.address,
@@ -37,7 +37,7 @@ describe("FusePoolsModule", function () {
     it("user can fetch all pools", async function () {
       const pools = await sdk.fetchPoolsManual();
       expect(pools.length).to.equal(1);
-      expect(pools[0].creator).to.equal(deployer.address);
+      expect(pools[0].creator).to.equal(upgradesAdmin.address);
       expect(pools[0].name).to.equal("Fetching-Pools-Test");
       expect(pools[0].totalLiquidityNative).to.equal(0);
       expect(pools[0].totalSuppliedNative).to.equal(0);
@@ -49,10 +49,10 @@ describe("FusePoolsModule", function () {
     it("user can fetch filtered pools", async function () {
       let pools = await sdk.fetchPools({
         filter: "created-pools",
-        options: { from: deployer.address },
+        options: { from: upgradesAdmin.address },
       });
       expect(pools.length).to.equal(1);
-      expect(pools[0].creator).to.equal(deployer.address);
+      expect(pools[0].creator).to.equal(upgradesAdmin.address);
       expect(pools[0].name).to.equal("Fetching-Pools-Test");
       expect(pools[0].totalLiquidityNative).to.equal(0);
       expect(pools[0].totalSuppliedNative).to.equal(0);
@@ -62,19 +62,19 @@ describe("FusePoolsModule", function () {
 
       pools = await sdk.fetchPools({
         filter: "verified-pools",
-        options: { from: deployer.address },
+        options: { from: upgradesAdmin.address },
       });
       expect(pools.length).to.equal(0);
 
       pools = await sdk.fetchPools({
         filter: "unverified-pools",
-        options: { from: deployer.address },
+        options: { from: upgradesAdmin.address },
       });
       expect(pools.length).to.equal(1);
 
       pools = await sdk.fetchPools({
         filter: "random-filter",
-        options: { from: deployer.address },
+        options: { from: upgradesAdmin.address },
       });
       expect(pools.length).to.equal(1);
     });

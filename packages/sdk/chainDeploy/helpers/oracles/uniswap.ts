@@ -10,13 +10,13 @@ export const deployUniswapOracle = async ({
   deployments,
   deployConfig,
 }: UniswapDeployFnParams): Promise<void> => {
-  const { deployer } = await getNamedAccounts();
-  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  const { upgradesAdmin, oraclesAdmin, testConfigAdmin } = await getNamedAccounts();
+  const mpo = await ethers.getContract("MasterPriceOracle", oraclesAdmin);
   const updateOracles = [],
     updateUnderlyings = [];
   //// Uniswap Oracle
   const utpo = await deployments.deploy("UniswapTwapPriceOracleV2", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
   });
@@ -24,7 +24,7 @@ export const deployUniswapOracle = async ({
   console.log("UniswapTwapPriceOracleV2: ", utpo.address);
 
   const utpor = await deployments.deploy("UniswapTwapPriceOracleV2Root", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [deployConfig.wtoken],
     log: true,
   });
@@ -32,7 +32,7 @@ export const deployUniswapOracle = async ({
   console.log("UniswapTwapPriceOracleV2Root: ", utpor.address);
 
   const utpof = await deployments.deploy("UniswapTwapPriceOracleV2Factory", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [utpor.address, utpo.address, deployConfig.wtoken],
     log: true,
   });
@@ -42,7 +42,7 @@ export const deployUniswapOracle = async ({
   //// deploy uniswap twap price oracle v2 resolver
 
   const twapPriceOracleResolver = await deployments.deploy("UniswapTwapPriceOracleV2Resolver", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [[], utpor.address],
     log: true,
     waitConfirmations: 1,
@@ -52,7 +52,7 @@ export const deployUniswapOracle = async ({
   }
   console.log("UniswapTwapPriceOracleV2Resolver: ", twapPriceOracleResolver.address);
 
-  const resolverContract = await ethers.getContract("UniswapTwapPriceOracleV2Resolver", deployer);
+  const resolverContract = await ethers.getContract("UniswapTwapPriceOracleV2Resolver", oraclesAdmin);
 
   const oldPairs = await resolverContract.getPairs();
 
@@ -80,7 +80,7 @@ export const deployUniswapOracle = async ({
 
   const uniTwapOracleFactory = (await ethers.getContract(
     "UniswapTwapPriceOracleV2Factory",
-    deployer
+    oraclesAdmin
   )) as UniswapTwapPriceOracleV2Factory;
 
   const existingOracle = await uniTwapOracleFactory.callStatic.oracles(
@@ -128,7 +128,7 @@ export const deployUniswapOracle = async ({
     );
   }
 
-  const addressesProvider = (await ethers.getContract("AddressesProvider", deployer)) as AddressesProvider;
+  const addressesProvider = (await ethers.getContract("AddressesProvider", testConfigAdmin)) as AddressesProvider;
   const uniTwapOracleFactoryAddress = await addressesProvider.callStatic.getAddress("UniswapTwapPriceOracleV2Factory");
   const uniTwapOracleV2ResolverAddress = await addressesProvider.callStatic.getAddress(
     "UniswapTwapPriceOracleV2Resolver"

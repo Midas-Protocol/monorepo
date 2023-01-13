@@ -6,10 +6,10 @@ export const deployIRMs = async ({
   deployments,
   deployConfig,
 }: IrmDeployFnParams): Promise<void> => {
-  const { deployer } = await getNamedAccounts();
+  const { upgradesAdmin } = await getNamedAccounts();
   //// IRM MODELS|
   const jrm = await deployments.deploy("JumpRateModel", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [
       deployConfig.blocksPerYear,
       ethers.utils.parseEther("0").toString(), // baseRatePerYear   0
@@ -25,7 +25,7 @@ export const deployIRMs = async ({
   // taken from WhitePaperInterestRateModel used for cETH
   // https://etherscan.io/address/0x0c3f8df27e1a00b47653fde878d68d35f00714c0#code
   const wprm = await deployments.deploy("WhitePaperInterestRateModel", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [
       deployConfig.blocksPerYear,
       ethers.utils.parseEther("0.02").toString(), // baseRatePerYear

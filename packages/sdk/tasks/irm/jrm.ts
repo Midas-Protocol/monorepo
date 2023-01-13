@@ -6,7 +6,7 @@ export default task("irm:deploy:custom-jrm", "deploys custom JRM")
   .addParam("postfix", "Postfix to use for the deployment name", undefined, types.string)
   .addParam("args", "args to use", undefined, types.string)
   .setAction(async ({ irm: _irm, args: _args, postfix: _postfix }, { deployments, ethers }) => {
-    const { deployer } = await ethers.getNamedSigners();
+    const { upgradesAdmin } = await ethers.getNamedSigners();
 
     // @ts-ignore
     const midasSdkModule = await import("../../tests/utils/midasSdk");
@@ -54,7 +54,7 @@ export default task("irm:deploy:custom-jrm", "deploys custom JRM")
 
     const deployment = await deployments.deploy(_irm + "_" + _postfix, {
       contract: _irm,
-      from: deployer.address,
+      from: upgradesAdmin,
       args: args,
       log: true,
     });
@@ -68,12 +68,12 @@ task("irm:edit:adjustable-jrm-params", "Edit adjustable JRM parameters")
   .addParam("irmAddress", "IRM address to adjust", undefined, types.string)
   .addParam("args", "args to use", undefined, types.string)
   .setAction(async ({ irmAddress: _irm, args: _args }, { ethers }) => {
-    const { deployer } = await ethers.getNamedSigners();
+    const { poolsSuperAdmin } = await ethers.getNamedSigners();
 
     // @ts-ignore
     const midasSdkModule = await import("../../tests/utils/midasSdk");
     const sdk = await midasSdkModule.getOrCreateMidas();
-    const irm = new ethers.Contract(_irm, sdk.artifacts.AdjustableJumpRateModel.abi, deployer);
+    const irm = new ethers.Contract(_irm, sdk.artifacts.AdjustableJumpRateModel.abi, poolsSuperAdmin);
 
     let promises: Array<Promise<any>>;
     let blocksPerYear;

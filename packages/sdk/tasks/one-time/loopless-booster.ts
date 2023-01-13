@@ -8,14 +8,14 @@ import { MidasFlywheelCore } from "../../typechain/MidasFlywheelCore";
 
 task("loopless-booster", "deploy and a loopless booster for a flywheel")
   .addParam("flywheelAddress", "Address of the flywheel to set the booster to", undefined, types.string)
-  .setAction(async ({ flywheelAddress }, { ethers, deployments, getChainId }) => {
-    const deployer = await ethers.getNamedSigner("deployer");
+  .setAction(async ({ flywheelAddress }, { ethers, deployments, getChainId, getNamedAccounts }) => {
+    const { upgradesAdmin, extrasAdmin } = await ethers.getNamedSigners();
     const chainid = await getChainId();
     if (flywheelAddress == "0xUseThisToVerify") {
       const flywheel = (await ethers.getContractAt(
         "MidasFlywheelCore",
         flywheelAddress,
-        deployer
+        extrasAdmin
       )) as MidasFlywheelCore;
       const currentBoosterAddress = await flywheel.callStatic.flywheelBooster();
       let oldBooster;
@@ -26,7 +26,7 @@ task("loopless-booster", "deploy and a loopless booster for a flywheel")
       }
       if (currentBoosterAddress == oldBooster) {
         const booster = await deployments.deploy("LooplessFlywheelBooster", {
-          from: deployer.address,
+          from: upgradesAdmin.address,
           log: true,
           args: [],
         });
@@ -43,27 +43,29 @@ task("loopless-booster", "deploy and a loopless booster for a flywheel")
     }
   });
 
-task("replace-flywheel-with-upgradable", "").setAction(async ({}, { ethers, deployments, getChainId }) => {
+task("replace-flywheel-with-upgradable", "").setAction(async ({}, { ethers, deployments, getNamedAccounts, getChainId }) => {
   const poolAddress = "0xeB2D3A9D962d89b4A9a34ce2bF6a2650c938e185"; // stDOT Pool
   const brokenFlywheelAddress = "0xbCeB5Cb9b7Ea70994d8a7cfAC5D48dEA849CED06";
   const fxcDOTMarketAddress = "0xa9736bA05de1213145F688e4619E5A7e0dcf4C72";
   //const fwstDOTMarketAddress = "0xb3D83F2CAb787adcB99d4c768f1Eb42c8734b563";
 
-  const deployer = await ethers.getNamedSigner("deployer");
+  const { upgradesAdmin, poolsSuperAdmin, extrasAdmin } = await ethers.getNamedSigners();
+
+  // const deployer = await ethers.getNamedSigner("deployer");
   const chainid = await getChainId();
   if (chainid == "1284") {
     const asComptrollerExtension = (await ethers.getContractAt(
       "ComptrollerFirstExtension",
       poolAddress,
-      deployer
+      poolsSuperAdmin
     )) as ComptrollerFirstExtension;
 
-    const asComptroller = (await ethers.getContractAt("Comptroller", poolAddress, deployer)) as Comptroller;
+    const asComptroller = (await ethers.getContractAt("Comptroller", poolAddress, poolsSuperAdmin)) as Comptroller;
 
     const brokenFlywheel = (await ethers.getContractAt(
       "MidasFlywheelCore",
       brokenFlywheelAddress,
-      deployer
+      extrasAdmin
     )) as MidasFlywheelCore;
 
     const rewardToken = await brokenFlywheel.callStatic.rewardToken();
@@ -73,7 +75,7 @@ task("replace-flywheel-with-upgradable", "").setAction(async ({}, { ethers, depl
     const oldStaticRewards = (await ethers.getContractAt(
       "FlywheelStaticRewards",
       oldStaticRewardsAddress,
-      deployer
+      extrasAdmin
     )) as FlywheelStaticRewards;
 
     let tx = await oldStaticRewards.setRewardsInfo(fxcDOTMarketAddress, {
@@ -92,17 +94,17 @@ task("replace-flywheel-with-upgradable", "").setAction(async ({}, { ethers, depl
 
     const replacingFlywheel = await deployments.deploy("MidasFlywheel", {
       contract: "MidasFlywheel",
-      from: deployer.address,
+      from: upgradesAdmin.address,
       log: true,
       proxy: {
         proxyContract: "OpenZeppelinTransparentProxy",
         execute: {
           init: {
             methodName: "initialize",
-            args: [rewardToken, constants.AddressZero, flywheelBooster, deployer.address],
+            args: [rewardToken, constants.AddressZero, flywheelBooster, extrasAdmin.address],
           },
         },
-        owner: deployer.address,
+        owner: upgradesAdmin.address,
       },
       waitConfirmations: 1,
     });
@@ -110,11 +112,11 @@ task("replace-flywheel-with-upgradable", "").setAction(async ({}, { ethers, depl
     // the replacing rewards contract is needed because on creation it makes an infinite approve to the flywheel
     const replacingRewards = await deployments.deploy("FlywheelStaticRewards", {
       contract: "FlywheelStaticRewards",
-      from: deployer.address,
+      from: upgradesAdmin.address,
       log: true,
       args: [
         replacingFlywheel.address, // flywheel
-        deployer.address, // owner
+        extrasAdmin.address, // owner
         constants.AddressZero, // Authority
       ],
       waitConfirmations: 1,
@@ -141,7 +143,7 @@ task("replace-flywheel-with-upgradable", "").setAction(async ({}, { ethers, depl
     const newFlywheel = (await ethers.getContractAt(
       "MidasFlywheelCore",
       replacingFlywheel.address,
-      deployer
+      extrasAdmin
     )) as MidasFlywheelCore;
 
     // the flywheel was initialized with address(0) for the rewards, so set it up

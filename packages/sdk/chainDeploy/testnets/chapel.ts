@@ -9,7 +9,7 @@ import {
   deployUniswapLpOracle,
   deployUniswapOracle,
 } from "../helpers";
-import { ChainlinkAsset } from "../helpers/types";
+import {ChainDeployFnParams, ChainlinkAsset} from "../helpers/types";
 
 const assets = chapel.assets;
 
@@ -45,8 +45,8 @@ export const deployConfig: ChainDeployConfig = {
   cgId: chapel.specificParams.cgId,
 };
 
-export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Promise<void> => {
-  const { deployer } = await getNamedAccounts();
+export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: ChainDeployFnParams): Promise<void> => {
+  const { upgradesAdmin } = await getNamedAccounts();
   ////
   //// ORACLES
   const chainlinkAssets: ChainlinkAsset[] = [
@@ -99,7 +99,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }): Pr
 
   //// Liquidator Redemption Strategies
   const uniswapLpTokenLiquidator = await deployments.deploy("UniswapLpTokenLiquidator", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,

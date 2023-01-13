@@ -71,11 +71,16 @@ const config: HardhatUserConfig = {
   },
 
   namedAccounts: {
-    deployer: { default: 0 },
-    alice: { default: 1 },
-    bob: { default: 2 },
-    rando: { default: 3 },
-  },
+    upgradesAdmin: { default: 0 },
+    liquidator: { default: 0 },
+    poolsSuperAdmin: { default: 0 },
+    oraclesAdmin: { default: 0 },
+    extrasAdmin: { default: 0 },
+    testConfigAdmin: { default: 0 },
+    // alice: { default: 1 },
+    // bob: { default: 2 },
+    // rando: { default: 3 },
+},
   networks: {
     // This is the unchangeable default network which is started with `hardhat node`
     hardhat: {

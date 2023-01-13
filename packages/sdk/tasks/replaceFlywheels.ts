@@ -11,8 +11,8 @@ task("flywheel:replace:dynamic", "Replaces a flywheel with dynamic rewards")
   .addParam("flywheelToReplaceAddress", "address of flywheel to replace", undefined, types.string)
   .addParam("flywheelName", "name of the deploy artifact of the replacing flywheel", undefined, types.string)
   .addParam("pool", "address of comptroller", undefined, types.string)
-  .setAction(async ({ flywheelToReplaceAddress, flywheelName, pool }, { ethers, getChainId, deployments }) => {
-    const deployer = await ethers.getNamedSigner("deployer");
+  .setAction(async ({ flywheelToReplaceAddress, flywheelName, pool }, { ethers, getNamedAccounts, getChainId, deployments }) => {
+    const { upgradesAdmin, poolsSuperAdmin, extrasAdmin } = await getNamedAccounts();
 
     if (flywheelToReplaceAddress == "0xC6431455AeE17a08D6409BdFB18c4bc73a4069E4") {
       if (flywheelName != "EPX") throw new Error(`name EPX`);
@@ -27,14 +27,13 @@ task("flywheel:replace:dynamic", "Replaces a flywheel with dynamic rewards")
       const flywheelToReplace = (await ethers.getContractAt(
         "MidasFlywheel",
         flywheelToReplaceAddress,
-        deployer
+        extrasAdmin
       )) as MidasFlywheel;
 
       const oldRewardsAddress = await flywheelToReplace.callStatic.flywheelRewards();
       const oldRewards = (await ethers.getContractAt(
         "FuseFlywheelDynamicRewardsPlugin",
-        oldRewardsAddress,
-        deployer
+        oldRewardsAddress
       )) as FuseFlywheelDynamicRewardsPlugin;
 
       const rewardToken = flywheelToReplace.callStatic.rewardToken();
@@ -43,13 +42,13 @@ task("flywheel:replace:dynamic", "Replaces a flywheel with dynamic rewards")
       //// deploy a replacing flywheel
       const replacingFw = await deployments.deploy(flywheelContractName, {
         contract: "MidasReplacingFlywheel",
-        from: deployer.address,
+        from: upgradesAdmin,
         log: true,
         proxy: {
           execute: {
             init: {
               methodName: "initialize",
-              args: [rewardToken, constants.AddressZero, booster, deployer.address],
+              args: [rewardToken, constants.AddressZero, booster, extrasAdmin],
             },
             onUpgrade: {
               methodName: "reinitialize",
@@ -57,7 +56,7 @@ task("flywheel:replace:dynamic", "Replaces a flywheel with dynamic rewards")
             },
           },
           proxyContract: "OpenZeppelinTransparentProxy",
-          owner: deployer.address,
+          owner: upgradesAdmin,
         },
         waitConfirmations: 1,
       });
@@ -69,7 +68,7 @@ task("flywheel:replace:dynamic", "Replaces a flywheel with dynamic rewards")
       const replacingFlywheel = (await ethers.getContractAt(
         "MidasReplacingFlywheel",
         replacingFw.address,
-        deployer
+        extrasAdmin
       )) as MidasReplacingFlywheel;
 
       let tx = await replacingFlywheel.reinitialize(flywheelToReplaceAddress);
@@ -79,7 +78,7 @@ task("flywheel:replace:dynamic", "Replaces a flywheel with dynamic rewards")
       const oldRewardsCycleLen = await oldRewards.callStatic.rewardsCycleLength();
 
       const replacingRewards = await deployments.deploy("ReplacingFlywheelDynamicRewards", {
-        from: deployer.address,
+        from: extrasAdmin,
         log: true,
         args: [flywheelToReplaceAddress, replacingFw.address, oldRewardsCycleLen],
       });
@@ -99,10 +98,10 @@ task("flywheel:replace:dynamic", "Replaces a flywheel with dynamic rewards")
       const comptrollerAsExtension = (await ethers.getContractAt(
         "ComptrollerFirstExtension",
         pool,
-        deployer
+        poolsSuperAdmin
       )) as ComptrollerFirstExtension;
 
-      const comptroller = (await ethers.getContractAt("Comptroller", pool, deployer)) as Comptroller;
+      const comptroller = (await ethers.getContractAt("Comptroller", pool, poolsSuperAdmin)) as Comptroller;
 
       tx = await comptroller._addRewardsDistributor(replacingFlywheel.address);
       await tx.wait();

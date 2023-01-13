@@ -19,9 +19,9 @@ task("liquidate:take-bad-debt", "liquidate a debt position by borrowing the same
   .setAction(
     async (
       { debtMarket, collateralMarket, stableCollateralMarket, repayAmount, borrower },
-      { deployments, ethers, getChainId }
+      { deployments, ethers, getChainId, getNamedAccounts }
     ) => {
-      const deployer = await ethers.getNamedSigner("deployer");
+      const { upgradesAdmin, liquidator, oraclesAdmin } = await ethers.getNamedSigners();
 
       const chainId = parseInt(await getChainId());
 
@@ -32,13 +32,13 @@ task("liquidate:take-bad-debt", "liquidate a debt position by borrowing the same
       console.log("chainDeployParams: ", chainDeployParams);
 
       const msl = await deployments.deploy("MidasSafeLiquidator", {
-        from: deployer.address,
+        from: upgradesAdmin.address,
         contract: "MidasSafeLiquidator",
         log: true,
         waitConfirmations: 1,
         proxy: {
           proxyContract: "OpenZeppelinTransparentProxy",
-          owner: deployer.address,
+          owner: upgradesAdmin.address,
           execute: {
             init: {
               methodName: "initialize",
@@ -58,12 +58,12 @@ task("liquidate:take-bad-debt", "liquidate a debt position by borrowing the same
       if (msl.transactionHash) await ethers.provider.waitForTransaction(msl.transactionHash);
       console.log("MidasSafeLiquidator: ", msl.address);
 
-      const midasSafeLiquidator = (await ethers.getContract("MidasSafeLiquidator", deployer)) as MidasSafeLiquidator;
+      const midasSafeLiquidator = (await ethers.getContract("MidasSafeLiquidator", liquidator)) as MidasSafeLiquidator;
       const fslOwner = await midasSafeLiquidator.callStatic.owner();
       console.log(`MidasSafeLiquidator owner is ${fslOwner}`);
 
       const univ2Liquidator = await deployments.deploy("UniswapV2Liquidator", {
-        from: deployer.address,
+        from: upgradesAdmin.address,
         log: true,
         args: [],
         waitConfirmations: 1,
@@ -72,7 +72,7 @@ task("liquidate:take-bad-debt", "liquidate a debt position by borrowing the same
       if (univ2Liquidator.transactionHash) await ethers.provider.waitForTransaction(univ2Liquidator.transactionHash);
       console.log("UniswapV2Liquidator: ", univ2Liquidator.address);
 
-      const redemptionStrategy = await ethers.getContractAt("UniswapV2Liquidator", univ2Liquidator.address, deployer);
+      const redemptionStrategy = await ethers.getContractAt("UniswapV2Liquidator", univ2Liquidator.address);
 
       const whitelisted = await midasSafeLiquidator.callStatic.redemptionStrategiesWhitelist(
         redemptionStrategy.address
@@ -90,7 +90,7 @@ task("liquidate:take-bad-debt", "liquidate a debt position by borrowing the same
       const repayAmountBN = BigNumber.from(repayAmount);
 
       // estimate funding amount
-      const mpo = (await ethers.getContract("MasterPriceOracle", deployer)) as MasterPriceOracle;
+      const mpo = (await ethers.getContract("MasterPriceOracle", oraclesAdmin)) as MasterPriceOracle;
       const debtAssetPrice = await mpo.getUnderlyingPrice(debtMarket);
       const stableCollateralAssetPrice = await mpo.getUnderlyingPrice(stableCollateralMarket);
 
@@ -104,29 +104,22 @@ task("liquidate:take-bad-debt", "liquidate a debt position by borrowing the same
 
       const stableCollateralCTokenExtension = (await ethers.getContractAt(
         "CTokenFirstExtension",
-        stableCollateralMarket,
-        deployer
+        stableCollateralMarket
       )) as CTokenFirstExtension;
 
-      const collateralCToken = (await ethers.getContractAt("CErc20", collateralMarket, deployer)) as CErc20;
+      const collateralCToken = (await ethers.getContractAt("CErc20", collateralMarket)) as CErc20;
 
-      const stableCollateralCToken = (await ethers.getContractAt("CErc20", stableCollateralMarket, deployer)) as CErc20;
+      const stableCollateralCToken = (await ethers.getContractAt("CErc20", stableCollateralMarket)) as CErc20;
 
       const stableCollateralAssetAddress = await stableCollateralCToken.callStatic.underlying();
-
-      const stableCollateralAsset = (await ethers.getContractAt(
-        "ERC20",
-        stableCollateralAssetAddress,
-        deployer
-      )) as ERC20;
 
       const currentStableCollateral = await stableCollateralCTokenExtension.callStatic.balanceOfUnderlying(
         midasSafeLiquidator.address
       );
       if (currentStableCollateral < additionalCollateralRequired) {
-        const wNative = (await ethers.getContractAt("WETH", stableCollateralAsset.address, deployer)) as WETH;
+        const wNative = (await ethers.getContractAt("WETH", stableCollateralAssetAddress, liquidator)) as WETH;
 
-        const currentWNativeBalance = await wNative.callStatic.balanceOf(deployer.address);
+        const currentWNativeBalance = await wNative.callStatic.balanceOf(liquidator.address);
 
         const diffNeeded = additionalCollateralRequired.sub(currentStableCollateral);
 
@@ -160,8 +153,7 @@ task("liquidate:take-bad-debt", "liquidate a debt position by borrowing the same
 
       const factory = (await ethers.getContractAt(
         "IUniswapV2Factory",
-        chainDeployParams.uniswap.uniswapV2FactoryAddress,
-        deployer
+        chainDeployParams.uniswap.uniswapV2FactoryAddress
       )) as IUniswapV2Factory;
 
       const flashSwapPair = await factory.callStatic.getPair(stableCollateralAssetAddress, usdc);
@@ -179,7 +171,7 @@ task("liquidate:take-bad-debt", "liquidate a debt position by borrowing the same
         minProfitAmount: 0,
         redemptionStrategies,
         redemptionStrategiesData,
-        repayAmountBN,
+        repayAmount: repayAmountBN,
         stableCollateralMarket,
         uniswapV2RouterForBorrow: chainDeployParams.uniswap.uniswapV2RouterAddress,
         uniswapV2RouterForCollateral: chainDeployParams.uniswap.uniswapV2RouterAddress,

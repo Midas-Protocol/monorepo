@@ -8,13 +8,13 @@ export const deployCurveLpOracle = async ({
   deployments,
   curvePools,
 }: CurveLpFnParams): Promise<void> => {
-  const { deployer } = await getNamedAccounts();
+  const { upgradesAdmin, oraclesAdmin } = await getNamedAccounts();
   let tx: providers.TransactionResponse;
   let receipt: providers.TransactionReceipt;
 
   //// CurveLpTokenPriceOracleNoRegistry
   const cpo = await deployments.deploy("CurveLpTokenPriceOracleNoRegistry", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     proxy: {
@@ -24,14 +24,14 @@ export const deployCurveLpOracle = async ({
           args: [[], [], []],
         },
       },
-      owner: deployer,
+      owner: upgradesAdmin,
       proxyContract: "OpenZeppelinTransparentProxy",
     },
   });
   if (cpo.transactionHash) await ethers.provider.waitForTransaction(cpo.transactionHash);
   console.log("CurveLpTokenPriceOracleNoRegistry: ", cpo.address);
 
-  const curveOracle = await ethers.getContract("CurveLpTokenPriceOracleNoRegistry", deployer);
+  const curveOracle = await ethers.getContract("CurveLpTokenPriceOracleNoRegistry", oraclesAdmin);
 
   for (const pool of curvePools) {
     const registered = await curveOracle.poolOf(pool.lpToken);
@@ -50,7 +50,7 @@ export const deployCurveLpOracle = async ({
   const underlyings = curvePools.map((c) => c.lpToken);
   const oracles = Array(curvePools.length).fill(curveOracle.address);
 
-  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  const mpo = await ethers.getContract("MasterPriceOracle", oraclesAdmin);
   tx = await mpo.add(underlyings, oracles);
   await tx.wait();
 
@@ -63,15 +63,15 @@ export const deployCurveV2LpOracle = async ({
   deployments,
   curveV2Pools,
 }: CurveV2LpFnParams): Promise<void> => {
-  const { deployer } = await getNamedAccounts();
+  const { upgradesAdmin, oraclesAdmin } = await getNamedAccounts();
   let tx: providers.TransactionResponse;
   let receipt: providers.TransactionReceipt;
 
-  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  const mpo = await ethers.getContract("MasterPriceOracle", oraclesAdmin);
 
   //// CurveLpTokenPriceOracleNoRegistry
   const cpo = await deployments.deploy("CurveV2LpTokenPriceOracleNoRegistry", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     proxy: {
@@ -81,14 +81,14 @@ export const deployCurveV2LpOracle = async ({
           args: [[], []],
         },
       },
-      owner: deployer,
+      owner: upgradesAdmin,
       proxyContract: "OpenZeppelinTransparentProxy",
     },
   });
   if (cpo.transactionHash) await ethers.provider.waitForTransaction(cpo.transactionHash);
   console.log("CurveV2LpTokenPriceOracleNoRegistry: ", cpo.address);
 
-  const curveOracle = await ethers.getContract("CurveV2LpTokenPriceOracleNoRegistry", deployer);
+  const curveOracle = await ethers.getContract("CurveV2LpTokenPriceOracleNoRegistry", oraclesAdmin);
 
   for (const pool of curveV2Pools) {
     const registered = await curveOracle.poolOf(pool.lpToken);

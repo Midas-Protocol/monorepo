@@ -3,7 +3,6 @@ import { task, types } from "hardhat/config";
 
 import { AddressesProvider } from "../../typechain/AddressesProvider";
 import { CErc20PluginDelegate } from "../../typechain/CErc20PluginDelegate";
-import { Comptroller } from "../../typechain/Comptroller";
 import { ComptrollerFirstExtension } from "../../typechain/ComptrollerFirstExtension";
 import { DiaPriceOracle } from "../../typechain/DiaPriceOracle";
 import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
@@ -14,6 +13,8 @@ import { Ownable } from "../../typechain/Ownable";
 import { OwnableUpgradeable } from "../../typechain/OwnableUpgradeable";
 import { SafeOwnableUpgradeable } from "../../typechain/SafeOwnableUpgradeable";
 import { Unitroller } from "../../typechain/Unitroller";
+import { SaddleLpPriceOracle } from "../../typechain/SaddleLpPriceOracle";
+import { AdrastiaPriceOracle } from "../../typechain/AdrastiaPriceOracle";
 
 // TODO add ERC20Wrapper from CErc20WrappingDelegate
 export default task("system:admin:change", "Changes the system admin to a new address")
@@ -428,6 +429,231 @@ task("system:admin:accept", "Accepts the pending admin/owner roles as the new ad
           await tx.wait();
           console.log(`curveOracle._acceptOwner tx mined ${tx.hash}`);
         }
+      }
+    }
+  });
+
+task("system:admins:split", "Split the contracts admin to different roles")
+  .addParam("currentDeployer", "The address of the current deployer", undefined, types.string)
+  .addParam("newDeployer", "The address of the new deployer", undefined, types.string)
+  .setAction(async ({ currentDeployer }, { ethers, getNamedAccounts }) => {
+    let tx: providers.TransactionResponse;
+
+    const deployer = await ethers.getSigner(currentDeployer);
+
+    // TODO probably hardcode these
+    const { upgradesAdmin, liquidator, poolsSuperAdmin, testConfigAdmin, oraclesAdmin, extrasAdmin } = await getNamedAccounts();
+
+    // OwnableUpgradeable - transferOwnership(newDeployer)
+    const fsl = (await ethers.getContract("FuseSafeLiquidator", deployer)) as OwnableUpgradeable;
+    const currentOwnerFSL = await fsl.callStatic.owner();
+    console.log(`current FSL owner ${currentOwnerFSL}`);
+
+    if (currentOwnerFSL == currentDeployer) {
+      tx = await fsl.transferOwnership(liquidator);
+      await tx.wait();
+      console.log(`fsl.transferOwnership tx mined ${tx.hash}`);
+    } else if (currentOwnerFSL != liquidator) {
+      console.error(`unknown  owner ${currentOwnerFSL}`);
+    }
+
+    const saddleLpOracle = await ethers.getContractOrNull("SaddleLpPriceOracle", deployer) as SafeOwnableUpgradeable;
+    if (saddleLpOracle) {
+      const currentOwner = await saddleLpOracle.callStatic.owner();
+      if (currentOwner == currentDeployer) {
+        const currentPendingOwner = await saddleLpOracle.callStatic.pendingOwner();
+        console.log(`current pending owner ${currentPendingOwner}`);
+        if (currentPendingOwner != oraclesAdmin) {
+          tx = await saddleLpOracle._setPendingOwner(oraclesAdmin);
+          await tx.wait();
+          console.log(`saddleLpOracle._setPendingOwner tx mined ${tx.hash}`);
+        }
+      } else if (currentOwner != oraclesAdmin) {
+        console.error(`unknown  owner ${currentOwner}`);
+      }
+    }
+
+    const adrastiaPriceOracle = (await ethers.getContractOrNull("AdrastiaPriceOracle", deployer)) as SafeOwnableUpgradeable;
+    if (adrastiaPriceOracle) {
+      const currentOwner = await adrastiaPriceOracle.callStatic.owner();
+      if (currentOwner == currentDeployer) {
+        const currentPendingOwner = await adrastiaPriceOracle.callStatic.pendingOwner();
+        console.log(`current pending owner ${currentPendingOwner}`);
+        if (currentPendingOwner != oraclesAdmin) {
+          tx = await adrastiaPriceOracle._setPendingOwner(oraclesAdmin);
+          await tx.wait();
+          console.log(`adrastiaPriceOracle._setPendingOwner tx mined ${tx.hash}`);
+        }
+      } else if (currentOwner != oraclesAdmin) {
+        console.error(`unknown  owner ${currentOwner}`);
+      }
+    }
+
+    const ankrCertificateTokenPriceOracle = (await ethers.getContractOrNull("AnkrCertificateTokenPriceOracle", deployer)) as SafeOwnableUpgradeable;
+    if (ankrCertificateTokenPriceOracle) {
+      const currentOwner = await ankrCertificateTokenPriceOracle.callStatic.owner();
+      if (currentOwner == currentDeployer) {
+        const currentPendingOwner = await ankrCertificateTokenPriceOracle.callStatic.pendingOwner();
+        console.log(`current pending owner ${currentPendingOwner}`);
+        if (currentPendingOwner != oraclesAdmin) {
+          tx = await ankrCertificateTokenPriceOracle._setPendingOwner(oraclesAdmin);
+          await tx.wait();
+          console.log(`ankrCertificateTokenPriceOracle._setPendingOwner tx mined ${tx.hash}`);
+        }
+      } else if (currentOwner != oraclesAdmin) {
+        console.error(`unknown  owner ${currentOwner}`);
+      }
+    }
+
+    const blpo = (await ethers.getContractOrNull("BalancerLpTokenPriceOracle", deployer)) as SafeOwnableUpgradeable;
+    if (blpo) {
+      const currentOwner = await blpo.callStatic.owner();
+      if (currentOwner == currentDeployer) {
+        const currentPendingOwner = await blpo.callStatic.pendingOwner();
+        console.log(`current pending owner ${currentPendingOwner}`);
+        if (currentPendingOwner != oraclesAdmin) {
+          tx = await blpo._setPendingOwner(oraclesAdmin);
+          await tx.wait();
+          console.log(`blpo._setPendingOwner tx mined ${tx.hash}`);
+        }
+      } else if (currentOwner != oraclesAdmin) {
+        console.error(`unknown  owner ${currentOwner}`);
+      }
+    }
+
+    const curveOracle = (await ethers.getContractOrNull("CurveLpTokenPriceOracleNoRegistry", oraclesAdmin)) as SafeOwnableUpgradeable;
+    if (curveOracle) {
+      const currentOwner = await curveOracle.callStatic.owner();
+      if (currentOwner == currentDeployer) {
+        const currentPendingOwner = await curveOracle.callStatic.pendingOwner();
+        console.log(`current pending owner ${currentPendingOwner}`);
+        if (currentPendingOwner != oraclesAdmin) {
+          tx = await curveOracle._setPendingOwner(oraclesAdmin);
+          await tx.wait();
+          console.log(`curveOracle._setPendingOwner tx mined ${tx.hash}`);
+        }
+      } else if (currentOwner != oraclesAdmin) {
+        console.error(`unknown  owner ${currentOwner}`);
+      }
+    }
+
+    const curveV2Oracle = (await ethers.getContractOrNull("CurveV2LpTokenPriceOracleNoRegistry", deployer)) as SafeOwnableUpgradeable;
+    if (curveV2Oracle) {
+      const currentOwner = await curveV2Oracle.callStatic.owner();
+      if (currentOwner == currentDeployer) {
+        const currentPendingOwner = await curveV2Oracle.callStatic.pendingOwner();
+        console.log(`current pending owner ${currentPendingOwner}`);
+        if (currentPendingOwner != oraclesAdmin) {
+          tx = await curveV2Oracle._setPendingOwner(oraclesAdmin);
+          await tx.wait();
+          console.log(`curveV2Oracle._setPendingOwner tx mined ${tx.hash}`);
+        }
+      } else if (currentOwner != oraclesAdmin) {
+        console.error(`unknown owner ${currentOwner}`);
+      }
+    }
+
+    const diaPriceOracle = (await ethers.getContractOrNull("DiaPriceOracle", deployer)) as DiaPriceOracle;
+    if (diaPriceOracle) {
+      const currentAdmin = await diaPriceOracle.callStatic.admin();
+      if (currentAdmin == oraclesAdmin) {
+        tx = await diaPriceOracle.changeAdmin(oraclesAdmin);
+        await tx.wait();
+        console.log(`diaPriceOracle.changeAdmin tx mined ${tx.hash}`);
+      } else if (currentAdmin != oraclesAdmin) {
+        console.error(`unknown owner ${currentAdmin}`);
+      }
+    }
+
+    const dspo = (await ethers.getContractOrNull("DiaStDotPriceOracle", deployer)) as SafeOwnableUpgradeable;
+    if (dspo) {
+      const currentOwner = await dspo.callStatic.owner();
+      if (currentOwner == currentDeployer) {
+        const currentPendingOwner = await dspo.callStatic.pendingOwner();
+        console.log(`current pending owner ${currentPendingOwner}`);
+        if (currentPendingOwner != oraclesAdmin) {
+          tx = await dspo._setPendingOwner(oraclesAdmin);
+          await tx.wait();
+          console.log(`dspo._setPendingOwner tx mined ${tx.hash}`);
+        }
+      } else if (currentOwner != oraclesAdmin) {
+        console.error(`unknown owner ${currentOwner}`);
+      }
+    }
+
+    const flux = (await ethers.getContractOrNull("FluxPriceOracle", deployer)) as SafeOwnableUpgradeable;
+    if (flux) {
+      const currentOwner = await flux.callStatic.owner();
+      if (currentOwner == currentDeployer) {
+        const currentPendingOwner = await flux.callStatic.pendingOwner();
+        console.log(`current pending owner ${currentPendingOwner}`);
+        if (currentPendingOwner != oraclesAdmin) {
+          tx = await flux._setPendingOwner(oraclesAdmin);
+          await tx.wait();
+          console.log(`flux._setPendingOwner tx mined ${tx.hash}`);
+        }
+      } else if (currentOwner != oraclesAdmin) {
+        console.error(`unknown owner ${currentOwner}`);
+      }
+    }
+
+    const nativeUsdPriceOracle = (await ethers.getContractOrNull("NativeUSDPriceOracle", deployer)) as SafeOwnableUpgradeable;
+    if (nativeUsdPriceOracle) {
+      const currentOwner = await nativeUsdPriceOracle.callStatic.owner();
+      if (currentOwner == currentDeployer) {
+        const currentPendingOwner = await nativeUsdPriceOracle.callStatic.pendingOwner();
+        console.log(`current pending owner ${currentPendingOwner}`);
+        if (currentPendingOwner != oraclesAdmin) {
+          tx = await nativeUsdPriceOracle._setPendingOwner(oraclesAdmin);
+          await tx.wait();
+          console.log(`nativeUsdPriceOracle._setPendingOwner tx mined ${tx.hash}`);
+        }
+      } else if (currentOwner != oraclesAdmin) {
+        console.error(`unknown owner ${currentOwner}`);
+      }
+    }
+
+    const stkBNBOracle = (await ethers.getContractOrNull("StkBNBPriceOracle", deployer)) as SafeOwnableUpgradeable;
+    if (stkBNBOracle) {
+      const currentOwner = await stkBNBOracle.callStatic.owner();
+      if (currentOwner == currentDeployer) {
+        const currentPendingOwner = await stkBNBOracle.callStatic.pendingOwner();
+        console.log(`current pending owner ${currentPendingOwner}`);
+        if (currentPendingOwner != oraclesAdmin) {
+          tx = await stkBNBOracle._setPendingOwner(oraclesAdmin);
+          await tx.wait();
+          console.log(`stkBNBOracle._setPendingOwner tx mined ${tx.hash}`);
+        }
+      } else if (currentOwner != oraclesAdmin) {
+        console.error(`unknown owner ${currentOwner}`);
+      }
+    }
+
+    const twapPriceOracleResolver = (await ethers.getContractOrNull("UniswapTwapPriceOracleV2Resolver", deployer)) as Ownable;
+    if (twapPriceOracleResolver) {
+      const currentOwner = await twapPriceOracleResolver.callStatic.owner();
+      if (currentOwner == currentDeployer) {
+        tx = await twapPriceOracleResolver.transferOwnership(oraclesAdmin);
+        await tx.wait();
+        console.log(`twapPriceOracleResolver._setPendingOwner tx mined ${tx.hash}`);
+      } else if (currentOwner != oraclesAdmin) {
+        console.error(`unknown owner ${currentOwner}`);
+      }
+    }
+
+    const midasSafeLiquidator = (await ethers.getContractOrNull("MidasSafeLiquidator", deployer)) as SafeOwnableUpgradeable;
+    if (midasSafeLiquidator) {
+      const currentOwner = await midasSafeLiquidator.callStatic.owner();
+      if (currentOwner == currentDeployer) {
+        const currentPendingOwner = await midasSafeLiquidator.callStatic.pendingOwner();
+        console.log(`current pending owner ${currentPendingOwner}`);
+        if (currentPendingOwner != oraclesAdmin) {
+          tx = await midasSafeLiquidator._setPendingOwner(oraclesAdmin);
+          await tx.wait();
+          console.log(`midasSafeLiquidator._setPendingOwner tx mined ${tx.hash}`);
+        }
+      } else if (currentOwner != oraclesAdmin) {
+        console.error(`unknown owner ${currentOwner}`);
       }
     }
   });

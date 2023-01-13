@@ -8,11 +8,11 @@ export const deployNativeUsdPriceFeed = async ({
   nativeUsdOracleAddress,
   quoteAddress,
 }: NativeUsdDeployFnParams): Promise<{ nativeUsdPriceOracle: NativeUSDPriceOracle }> => {
-  const { deployer } = await getNamedAccounts();
+  const { upgradesAdmin, oraclesAdmin } = await getNamedAccounts();
 
   //// NativeUSDPriceOracle
   const nativeUsd = await deployments.deploy("NativeUSDPriceOracle", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     proxy: {
@@ -22,7 +22,7 @@ export const deployNativeUsdPriceFeed = async ({
           args: [nativeUsdOracleAddress, quoteAddress],
         },
       },
-      owner: deployer,
+      owner: upgradesAdmin,
       proxyContract: "OpenZeppelinTransparentProxy",
     },
   });
@@ -30,6 +30,6 @@ export const deployNativeUsdPriceFeed = async ({
   if (nativeUsd.transactionHash) await ethers.provider.waitForTransaction(nativeUsd.transactionHash);
   console.log("NativeUSDPriceOracle: ", nativeUsd.address);
 
-  const nativeUsdPriceOracle = (await ethers.getContract("NativeUSDPriceOracle", deployer)) as NativeUSDPriceOracle;
+  const nativeUsdPriceOracle = (await ethers.getContract("NativeUSDPriceOracle", oraclesAdmin)) as NativeUSDPriceOracle;
   return { nativeUsdPriceOracle };
 };

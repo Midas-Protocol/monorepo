@@ -3,6 +3,7 @@ import { assetSymbols, underlying } from "@midas-capital/types";
 import { ethers } from "ethers";
 
 import { ChainDeployConfig } from "../helpers";
+import {ChainDeployFnParams} from "../helpers/types";
 
 const assets = neondevnet.assets;
 const BN = ethers.utils.parseEther("1");
@@ -28,11 +29,11 @@ export const deployConfig: ChainDeployConfig = {
   cgId: neondevnet.specificParams.cgId,
 };
 
-export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
-  const { deployer } = await getNamedAccounts();
+export const deploy = async ({ ethers, getNamedAccounts, deployments }: ChainDeployFnParams): Promise<void> => {
+  const { upgradesAdmin, oraclesAdmin } = await getNamedAccounts();
 
   const pyth = await deployments.deploy("Pyth", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -41,8 +42,8 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise
 
   const _assets = assets.filter((a) => a.symbol !== assetSymbols.WNEON);
 
-  const masterPriceOracle = await ethers.getContract("MasterPriceOracle", deployer);
-  const simplePriceOracle = await ethers.getContract("SimplePriceOracle", deployer);
+  const masterPriceOracle = await ethers.getContract("MasterPriceOracle", oraclesAdmin);
+  const simplePriceOracle = await ethers.getContract("SimplePriceOracle", oraclesAdmin);
   let tx;
 
   for (const a of _assets) {

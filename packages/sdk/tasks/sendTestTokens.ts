@@ -1,21 +1,19 @@
-import { BigNumber, constants, providers } from "ethers";
+import { BigNumber, providers } from "ethers";
 import { task, types } from "hardhat/config";
 
-export default task("send-tokens", "Edit deployers")
+export default task("send-tokens", "send tokens")
   .addParam("tokens", "Comma-separated symbols")
-  .addOptionalParam("sendTo", "Address to which the minted tokens should be sent to")
+  .addParam("sendFrom", "Account to send from", undefined, types.string)
+  .addParam("sendTo", "Address to which the minted tokens should be sent to", undefined, types.string)
   .addOptionalParam("sendAmount", "Amount to be sent", "10", types.string)
-  .setAction(async ({ tokens: _tokens, sendTo: _sendTo, sendAmount: _sendAmount }, { getNamedAccounts, ethers }) => {
-    // @ts-ignore
-    const { deployer } = await getNamedAccounts();
+  .setAction(async ({ tokens: _tokens, sendTo: _sendTo, sendAmount: _sendAmount, sendFrom: _sendFrom }, { getNamedAccounts, ethers }) => {
     const tokens = _tokens.split(",");
     let tx: providers.TransactionResponse;
     for (const tokenName of tokens) {
-      const token = await ethers.getContract(`${tokenName}Token`, await ethers.getSigner(deployer));
-      tx = await token.approve(deployer, constants.MaxUint256);
-      tx = await token.transferFrom(deployer, _sendTo, BigNumber.from(_sendAmount).mul(BigNumber.from(10).pow(18)));
+      const token = await ethers.getContract(`${tokenName}Token`, await ethers.getSigner(_sendFrom));
+      tx = await token.transfer(_sendTo, BigNumber.from(_sendAmount).mul(BigNumber.from(10).pow(18)));
       console.log(await tx.wait());
-      const balance = await token.balanceOf(deployer);
+      const balance = await token.balanceOf(_sendFrom);
       console.log(balance.toString());
     }
   });

@@ -12,16 +12,22 @@ const forkMainnet: DeployFunction = async (hre): Promise<void> => {
   if (!chainDeployConfig[chainId]) {
     throw new Error(`Config invalid for ${chainId}`);
   }
+  const { config: chainDeployParams }: { config: ChainDeployConfig } = chainDeployConfig[chainId];
   const fundingValue = hre.ethers.utils.parseEther("10");
-
-  const { deployer } = await hre.getNamedAccounts();
+  let whale = chainDeployParams.wtoken;
+  const balanceOfWToken = await ethers.provider.getBalance(whale);
+  if (balanceOfWToken < fundingValue) {
+    whale = (await hre.getNamedAccounts())["alice"];
+  }
+  console.log("whale: ", whale);
+  const { upgradesAdmin } = await hre.getNamedAccounts();
 
   // in case hardhat_impersonateAccount is failing, make sure to be running `hardhat node` instead of deploy
   await hre.network.provider.send("evm_setAutomine", [true]);
-  await hre.ethers.provider.send("hardhat_impersonateAccount", [deployer]);
+  await hre.ethers.provider.send("hardhat_impersonateAccount", [whale]);
 
-  const signer = hre.ethers.provider.getSigner(deployer);
-  await signer.sendTransaction({ to: deployer, value: fundingValue });
+  const signer = hre.ethers.provider.getSigner(whale);
+  await signer.sendTransaction({ to: upgradesAdmin, value: fundingValue });
   await func(hre);
 };
 forkMainnet.tags = ["simulate", "fork", "local"];

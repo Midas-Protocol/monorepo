@@ -13,16 +13,16 @@ export default task("add-chainlink-feeds", "Add Chainlink Feeds")
 
     console.log("baseCurrency: ", baseCurrency);
 
-    const { deployer } = await getNamedAccounts();
+    const { oraclesAdmin } = await getNamedAccounts();
 
-    const cpo = await ethers.getContract("ChainlinkPriceOracleV2", deployer);
+    const cpo = await ethers.getContract("ChainlinkPriceOracleV2", oraclesAdmin);
     let tx = await cpo.setPriceFeeds(underlyings, feeds, baseCurrency);
 
     console.log("setPriceFeeds tx: ", tx);
     let receipt = await tx.wait();
     console.log("setPriceFeeds tx mined: ", receipt.transactionHash);
 
-    const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+    const mpo = await ethers.getContract("MasterPriceOracle", oraclesAdmin);
     tx = await mpo.add(underlyings, Array(underlyings.length).fill(cpo.address));
 
     console.log("add tx: ", tx);

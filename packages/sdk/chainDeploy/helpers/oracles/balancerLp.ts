@@ -8,12 +8,12 @@ export const deployBalancerLpPriceOracle = async ({
   deployments,
   balancerLpAssets,
 }: BalancerLpFnParams): Promise<void> => {
-  const { deployer } = await getNamedAccounts();
+  const { upgradesAdmin, oraclesAdmin } = await getNamedAccounts();
 
-  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  const mpo = await ethers.getContract("MasterPriceOracle", oraclesAdmin);
 
   const blpo = await deployments.deploy("BalancerLpTokenPriceOracle", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     proxy: {
@@ -23,7 +23,7 @@ export const deployBalancerLpPriceOracle = async ({
           args: [mpo.address],
         },
       },
-      owner: deployer,
+      owner: upgradesAdmin,
       proxyContract: "OpenZeppelinTransparentProxy",
     },
   });

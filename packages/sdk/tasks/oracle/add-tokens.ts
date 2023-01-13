@@ -4,12 +4,12 @@ task("oracle:add-tokens", "Initialize MasterPriceOracle with underlying oracle f
   .addOptionalParam("underlyings", "Token for which to set the price", undefined, types.string)
   .addOptionalParam("oracles", "Token address for which to set the price", undefined, types.string)
   .setAction(async ({ underlyings: _underlyings, oracles: _oracles }, { ethers }) => {
-    const { deployer } = await ethers.getNamedSigners();
+    const { oraclesAdmin } = await ethers.getNamedSigners();
     // @ts-ignore
     const midasSdkModule = await import("../../tests/utils/midasSdk");
     const sdk = await midasSdkModule.getOrCreateMidas();
 
-    const mpo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, deployer);
+    const mpo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, oraclesAdmin);
     const underlyingTokens = _underlyings.split(",");
     const underlyingOracleInput = _oracles.split(",");
 

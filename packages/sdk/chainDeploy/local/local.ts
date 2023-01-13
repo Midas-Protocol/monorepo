@@ -38,12 +38,12 @@ export const deployConfig: ChainDeployConfig = {
 };
 
 export const deploy = async ({ ethers, getNamedAccounts, deployments, run }: ChainDeployFnParams): Promise<void> => {
-  const { deployer, alice, bob } = await getNamedAccounts();
+  const { upgradesAdmin, alice, bob } = await getNamedAccounts();
 
   ////
   //// TOKENS
   const weth = await deployments.deploy("WETH", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -51,46 +51,46 @@ export const deploy = async ({ ethers, getNamedAccounts, deployments, run }: Cha
 
   console.log("WETH", weth.address);
   const tribe = await deployments.deploy("TRIBEToken", {
-    from: deployer,
-    args: [ethers.utils.parseEther("1250000000"), deployer],
+    from: upgradesAdmin,
+    args: [ethers.utils.parseEther("1250000000"), upgradesAdmin],
     log: true,
     waitConfirmations: 1,
   });
   console.log("TRIBEToken: ", tribe.address);
-  const tribeToken = await ethers.getContractAt("TRIBEToken", tribe.address, deployer);
-  let tx = await tribeToken.transfer(alice, ethers.utils.parseEther("100000"), { from: deployer });
+  const tribeToken = await ethers.getContractAt("TRIBEToken", tribe.address, upgradesAdmin);
+  let tx = await tribeToken.transfer(alice, ethers.utils.parseEther("100000"), { from: upgradesAdmin });
   await tx.wait();
 
-  tx = await tribeToken.transfer(bob, ethers.utils.parseEther("100000"), { from: deployer });
+  tx = await tribeToken.transfer(bob, ethers.utils.parseEther("100000"), { from: upgradesAdmin });
   await tx.wait();
   const touch = await deployments.deploy("TOUCHToken", {
-    from: deployer,
-    args: [ethers.utils.parseEther("2250000000"), deployer],
+    from: upgradesAdmin,
+    args: [ethers.utils.parseEther("2250000000"), upgradesAdmin],
     log: true,
     waitConfirmations: 1,
   });
   console.log("TOUCHToken: ", touch.address);
-  const touchToken = await ethers.getContractAt("TOUCHToken", touch.address, deployer);
-  tx = await touchToken.transfer(alice, ethers.utils.parseEther("100000"), { from: deployer });
+  const touchToken = await ethers.getContractAt("TOUCHToken", touch.address, upgradesAdmin);
+  tx = await touchToken.transfer(alice, ethers.utils.parseEther("100000"), { from: upgradesAdmin });
   await tx.wait();
 
-  tx = await touchToken.transfer(alice, ethers.utils.parseEther("100000"), { from: deployer });
+  tx = await touchToken.transfer(alice, ethers.utils.parseEther("100000"), { from: upgradesAdmin });
   await tx.wait();
 
-  tx = await touchToken.transfer(bob, ethers.utils.parseEther("100000"), { from: deployer });
+  tx = await touchToken.transfer(bob, ethers.utils.parseEther("100000"), { from: upgradesAdmin });
   await tx.wait();
   ////
 
   // rewards
   deployConfig.dynamicFlywheels[0].rewardToken = touchToken.address;
 
-  const masterPriceOracle = (await ethers.getContract("MasterPriceOracle", deployer)) as MasterPriceOracle;
+  const masterPriceOracle = (await ethers.getContract("MasterPriceOracle", upgradesAdmin)) as MasterPriceOracle;
 
   const fixedNativePriceOracle = (await ethers.getContract(
     "FixedNativePriceOracle",
-    deployer
+    upgradesAdmin
   )) as FixedNativePriceOracle;
-  const simplePriceOracle = await ethers.getContract("SimplePriceOracle", deployer);
+  const simplePriceOracle = await ethers.getContract("SimplePriceOracle", upgradesAdmin);
 
   // get the ERC20 address of deployed cERC20
   const underlyings = [tribe.address, touch.address, weth.address];

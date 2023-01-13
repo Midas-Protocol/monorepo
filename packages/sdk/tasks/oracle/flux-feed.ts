@@ -2,9 +2,6 @@ import { BigNumber, utils } from "ethers";
 import { task } from "hardhat/config";
 
 export default task("get-flux-price", "Get Flux price").setAction(async ({}, { ethers }) => {
-  const { deployer } = await ethers.getNamedSigners();
-  console.log("deployer: ", deployer.address);
-
   const iface = new utils.Interface(["function latestAnswer() external view returns (int256)"]);
   const data = iface.encodeFunctionData("latestAnswer", []);
   console.log("data: ", data);

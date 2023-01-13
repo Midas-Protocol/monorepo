@@ -151,7 +151,6 @@ const saddlePools: CurvePoolConfig[] = [
 ];
 
 export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: ChainDeployFnParams): Promise<void> => {
-  const { deployer } = await getNamedAccounts();
   const { nativeUsdPriceOracle } = await deployNativeUsdPriceFeed({
     run,
     ethers,

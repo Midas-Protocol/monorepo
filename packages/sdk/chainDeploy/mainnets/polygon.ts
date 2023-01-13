@@ -470,7 +470,7 @@ const balancerLpAssets: BalancerLpAsset[] = [
 ];
 
 export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: ChainDeployFnParams): Promise<void> => {
-  const { deployer } = await getNamedAccounts();
+  const { upgradesAdmin, testConfigAdmin } = await getNamedAccounts();
   ////
   //// ORACLES
 
@@ -559,7 +559,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   // Quoter
   const quoter = await deployments.deploy("Quoter", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [deployConfig.uniswap.uniswapV3FactoryAddress],
     log: true,
     waitConfirmations: 1,
@@ -568,7 +568,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   //// UniswapLpTokenLiquidator
   const uniswapLpTokenLiquidator = await deployments.deploy("UniswapLpTokenLiquidator", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -580,7 +580,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   //// CurveLPLiquidator
   const curveLpTokenLiquidatorNoRegistry = await deployments.deploy("CurveLpTokenLiquidatorNoRegistry", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -591,7 +591,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   // CurveSwapLiquidator
   const curveSwapLiquidator = await deployments.deploy("CurveSwapLiquidator", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -602,7 +602,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   // curve swap liquidator funder - TODO replace the CurveSwapLiquidator above
   const curveSwapLiquidatorFunder = await deployments.deploy("CurveSwapLiquidatorFunder", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -623,7 +623,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   //// Gelato GUNI Liquidator
   const gelatoGUniLiquidator = await deployments.deploy("GelatoGUniLiquidator", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -635,7 +635,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   //// JarvisLiquidatorFunder
   const jarvisLiquidatorFunder = await deployments.deploy("JarvisLiquidatorFunder", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -646,7 +646,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   //// Uniswap V3 Liquidator Funder
   const uniswapV3LiquidatorFunder = await deployments.deploy("UniswapV3LiquidatorFunder", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -654,7 +654,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
   console.log("UniswapV3LiquidatorFunder: ", uniswapV3LiquidatorFunder.address);
 
   /// Addresses Provider - set bUSD
-  const addressesProvider = (await ethers.getContract("AddressesProvider", deployer)) as AddressesProvider;
+  const addressesProvider = (await ethers.getContract("AddressesProvider", testConfigAdmin)) as AddressesProvider;
   const busdAddress = underlying(assets, assetSymbols.BUSD);
   const busdAddressAp = await addressesProvider.callStatic.getAddress("bUSD");
   if (busdAddressAp !== busdAddress) {

@@ -17,7 +17,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   const chainId = await getChainId();
   console.log("chainId: ", chainId);
   const MIN_BORROW_USD = chainId === "97" ? 0 : 100;
-  const { upgradesAdmin, liquidator, poolsSuperAdmin, testConfigAdmin, oraclesAdmin, extrasAdmin } = await getNamedAccounts();
+  const { upgradesAdmin, liquidator, poolsSuperAdmin, oraclesAdmin, extrasAdmin, testConfigAdmin } = await getNamedAccounts();
   console.log("upgradesAdmin: ", upgradesAdmin);
   console.log("accounts", {
     upgradesAdmin, liquidator, poolsSuperAdmin, testConfigAdmin, oraclesAdmin, extrasAdmin
@@ -435,7 +435,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   console.log("FixedNativePriceOracle: ", fixedNativePO.address);
 
   const simplePO = await deployments.deploy("SimplePriceOracle", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
