@@ -14,9 +14,9 @@ import { FuseFeeDistributor } from "../typechain/FuseFeeDistributor";
 
 const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments, getChainId }): Promise<void> => {
   console.log("RPC URL: ", ethers.provider.connection.url);
-  const chainId = await getChainId();
+  const chainId = parseInt(await getChainId());
   console.log("chainId: ", chainId);
-  const MIN_BORROW_USD = chainId === "97" ? 0 : 100;
+  const MIN_BORROW_USD = chainId === 97 ? 0 : 100;
   const { upgradesAdmin, liquidator, poolsSuperAdmin, oraclesAdmin, extrasAdmin, testConfigAdmin } =
     await getNamedAccounts();
   console.log("upgradesAdmin: ", upgradesAdmin);
