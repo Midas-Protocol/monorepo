@@ -181,3 +181,31 @@ export const FEATURE_REQUESTS_URL = 'https://midascapital.canny.io/feature-reque
 export const COINGECKO_API = 'https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=';
 export const DEFI_LLAMA_API = 'https://coins.llama.fi/prices/current/';
 export const HIGH_RISK_RATIO = 0.8;
+export const ALL_POOLS_INFO: {
+  [chainId: string]: {
+    [comptrollerAddress: string]: {
+      markets: {
+        [marketAddress: string]: {
+          name?: string;
+        };
+      };
+    };
+  };
+} = {
+  '56': {
+    // BOMB Pool
+    '0x5373C052Df65b317e48D6CAD8Bb8AC50995e9459': {
+      markets: {
+        '0x3D8E799D9cE63b7c9096dd53b0d3E1b73c8D148b': {
+          name: 'BTCB',
+        },
+        '0x34ea4cbb464E6D120B081661464d4635Ca237FA7': {
+          name: 'BOMB',
+        },
+        '0x4cF3D3ca995beEeEd83f67A5C0456A13e038f7b8': {
+          name: 'BTCB-BOMB',
+        },
+      },
+    },
+  },
+};
