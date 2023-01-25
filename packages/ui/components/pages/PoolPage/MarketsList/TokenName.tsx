@@ -8,7 +8,7 @@ import { PopoverTooltip } from '@ui/components/shared/PopoverTooltip';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
 import { useAssetClaimableRewards } from '@ui/hooks/rewards/useAssetClaimableRewards';
-import { usePoolInfo } from '@ui/hooks/usePoolInfo';
+import { useAPIComptroller } from '@ui/hooks/useAPIComptroller';
 import { useTokenData } from '@ui/hooks/useTokenData';
 import { MarketData } from '@ui/types/TokensDataMap';
 
@@ -26,7 +26,7 @@ export const TokenName = ({
     poolAddress,
     assetAddress: asset.cToken,
   });
-  const { data: poolInfo } = usePoolInfo(poolChainId.toString(), poolAddress);
+  const { data: poolInfo } = useAPIComptroller(poolChainId.toString(), poolAddress);
 
   return (
     <Row className="marketName" mainAxisAlignment="flex-start" crossAxisAlignment="center">

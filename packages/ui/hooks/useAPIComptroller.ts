@@ -1,16 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
-export type usePoolInfoData = {
+export type GetComptrollerResponse = {
   markets: {
     [marketAddress: string]: {
       name?: string;
     };
   };
 };
-export function usePoolInfo(chainId?: string, comptrollerAddress?: string) {
-  return useQuery<usePoolInfoData>(
-    ['usePoolInfo', chainId, comptrollerAddress],
+export function useAPIComptroller(chainId?: string, comptrollerAddress?: string) {
+  return useQuery<GetComptrollerResponse>(
+    ['useAPIComptroller', chainId, comptrollerAddress],
     async () => {
       if (chainId && comptrollerAddress) {
         return axios

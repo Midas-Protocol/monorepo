@@ -3,7 +3,7 @@ import * as yup from 'yup';
 
 import { ALL_POOLS_INFO, SUPPORTED_NETWORKS_REGEX, VALID_ADDRESS_REGEX } from '@ui/constants/index';
 
-export type ResponseType = {
+export type GetComptrollerResponse = {
   markets: {
     [marketAddress: string]: {
       name?: string;
@@ -20,7 +20,10 @@ const querySchema = yup.object().shape({
 });
 type Query = yup.InferType<typeof querySchema>;
 
-const handler = async (request: NextApiRequest, response: NextApiResponse<ResponseType>) => {
+const handler = async (
+  request: NextApiRequest,
+  response: NextApiResponse<GetComptrollerResponse>
+) => {
   let validatedQuery: Query | null = null;
   try {
     querySchema.validateSync(request.query);
