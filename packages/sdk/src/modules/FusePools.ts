@@ -6,13 +6,12 @@ import {
   SupportedAsset,
   SupportedChains,
 } from "@midas-capital/types";
-import { BigNumberish, CallOverrides, utils } from "ethers";
+import { BigNumberish, CallOverrides, constants, utils } from "ethers";
 
 import { MidasBaseConstructor } from "..";
-import { CErc20Delegate } from "../../lib/contracts/typechain/CErc20Delegate";
-import { FusePoolDirectory } from "../../lib/contracts/typechain/FusePoolDirectory";
-import { FusePoolLens } from "../../lib/contracts/typechain/FusePoolLens";
-import { filterOnlyObjectProperties, filterPoolName, getContract } from "../MidasSdk/utils";
+import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
+import { FusePoolLens } from "../../typechain/FusePoolLens";
+import { filterOnlyObjectProperties, filterPoolName } from "../MidasSdk/utils";
 
 export type LensPoolsWithData = [
   ids: BigNumberish[],
@@ -35,7 +34,7 @@ const ChainSupportedAssets: ChainSupportedAssetsType = {
 
 export function withFusePools<TBase extends MidasBaseConstructor>(Base: TBase) {
   return class FusePools extends Base {
-    async fetchFusePoolData(poolId: string, overrides: CallOverrides = {}): Promise<FusePoolData> {
+    async fetchFusePoolData(poolId: string, overrides: CallOverrides = {}): Promise<FusePoolData | null> {
       const {
         comptroller,
         name: _unfiliteredName,
@@ -43,6 +42,9 @@ export function withFusePools<TBase extends MidasBaseConstructor>(Base: TBase) {
         blockPosted,
         timestampPosted,
       } = await this.contracts.FusePoolDirectory.callStatic.pools(Number(poolId), overrides);
+      if (comptroller === constants.AddressZero) {
+        return null;
+      }
       const name = filterPoolName(_unfiliteredName);
 
       const assets: NativePricedFuseAsset[] = (
@@ -74,6 +76,7 @@ export function withFusePools<TBase extends MidasBaseConstructor>(Base: TBase) {
 
         if (_asset) {
           asset.underlyingSymbol = _asset.symbol;
+          asset.logoUrl = "https://d1912tcoux65lj.cloudfront.net/token/96x96/" + _asset.symbol.toLowerCase() + ".png";
         }
 
         asset.supplyBalanceNative =
@@ -153,14 +156,14 @@ export function withFusePools<TBase extends MidasBaseConstructor>(Base: TBase) {
     }
 
     async fetchPoolsManual(overrides: CallOverrides = {}): Promise<(FusePoolData | null)[] | undefined> {
-      const res = await this.contracts.FusePoolDirectory.callStatic.getAllPools(overrides);
+      const [poolIndexes, pools] = await this.contracts.FusePoolDirectory.callStatic.getActivePools(overrides);
 
-      if (!res.length) {
+      if (!pools.length || !poolIndexes.length) {
         return undefined;
       }
 
       const poolData = await Promise.all(
-        res.map((_, poolId) => {
+        poolIndexes.map((poolId) => {
           return this.fetchFusePoolData(poolId.toString(), overrides).catch((error) => {
             this.logger.error(`Pool ID ${poolId} wasn't able to be fetched from FusePoolLens without error.`, error);
             return null;
@@ -209,25 +212,7 @@ export function withFusePools<TBase extends MidasBaseConstructor>(Base: TBase) {
       const whitelistedIds = whitelistedPools.map((pool) => pool?.id);
       const filteredPools = pools.filter((pool) => !whitelistedIds.includes(pool?.id));
 
-      return [...filteredPools, ...whitelistedPools];
+      return [...filteredPools, ...whitelistedPools].filter((p) => !!p) as FusePoolData[];
     }
-
-    getAssetInstance = <T extends CErc20Delegate = CErc20Delegate>(
-      address: string,
-      implementation:
-        | "CErc20Delegate"
-        | "CErc20PluginDelegate"
-        | "CErc20WrappingDelegate"
-        | "CErc20PluginRewardsDelegate" = "CErc20Delegate"
-    ): T => {
-      switch (implementation) {
-        case "CErc20PluginDelegate":
-          return getContract(address, this.chainDeployment[implementation].abi, this.provider) as T;
-        case "CErc20PluginRewardsDelegate":
-          return getContract(address, this.chainDeployment[implementation].abi, this.provider) as T;
-        default:
-          return getContract(address, this.chainDeployment[implementation].abi, this.provider) as T;
-      }
-    };
   };
 }

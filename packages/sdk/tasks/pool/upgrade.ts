@@ -1,10 +1,11 @@
 import { constants, Contract } from "ethers";
 import { task, types } from "hardhat/config";
 
-import { Comptroller } from "../../lib/contracts/typechain/Comptroller";
-import { FuseFeeDistributor } from "../../lib/contracts/typechain/FuseFeeDistributor";
-import { FusePoolDirectory } from "../../lib/contracts/typechain/FusePoolDirectory";
-import { Unitroller } from "../../lib/contracts/typechain/Unitroller";
+import { Comptroller } from "../../typechain/Comptroller";
+import { ComptrollerFirstExtension } from "../../typechain/ComptrollerFirstExtension";
+import { FuseFeeDistributor } from "../../typechain/FuseFeeDistributor";
+import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
+import { Unitroller } from "../../typechain/Unitroller";
 
 export default task("comptroller:implementation:whitelist", "Whitelists a new comptroller implementation upgrade")
   .addParam("oldImplementation", "The address of the old comptroller implementation", undefined, types.string)
@@ -16,10 +17,6 @@ export default task("comptroller:implementation:whitelist", "Whitelists a new co
       const currentLatestComptroller = await ethers.getContract("Comptroller");
       newImplementation = currentLatestComptroller.address;
     }
-
-    // @ts-ignoreutils/fuseSdk
-    const midasSdkModule = await import("../../tests/utils/midasSdk");
-    const sdk = await midasSdkModule.getOrCreateMidas();
 
     const fuseFeeDistributor = (await ethers.getContract("FuseFeeDistributor", deployer)) as FuseFeeDistributor;
 
@@ -60,17 +57,13 @@ task("pools:all:upgrade", "Upgrades all pools comptroller implementations whose 
     constants.AddressZero,
     types.string
   )
-  .setAction(async ({ oldFirstExtension }, { ethers, deployments }) => {
+  .setAction(async ({ oldFirstExtension }, { ethers }) => {
     const deployer = await ethers.getNamedSigner("deployer");
-
-    // @ts-ignoreutils/fuseSdk
-    const midasSdkModule = await import("../../tests/utils/midasSdk");
-    const sdk = await midasSdkModule.getOrCreateMidas();
 
     const fusePoolDirectory = (await ethers.getContract("FusePoolDirectory", deployer)) as FusePoolDirectory;
     const fuseFeeDistributor = (await ethers.getContract("FuseFeeDistributor", deployer)) as FuseFeeDistributor;
 
-    const pools = await fusePoolDirectory.callStatic.getAllPools();
+    const [, pools] = await fusePoolDirectory.callStatic.getActivePools();
     for (let i = 0; i < pools.length; i++) {
       const pool = pools[i];
       console.log("pool", { name: pool.name, address: pool.comptroller });
@@ -124,33 +117,38 @@ task("pools:all:upgrade", "Upgrades all pools comptroller implementations whose 
         // check the extensions if the latest impl
         const implAfter = await unitroller.callStatic.comptrollerImplementation();
         if (implAfter == latestImpl) {
-          const firstExtension = await ethers.getContractOrNull("ComptrollerFirstExtension");
-          if (firstExtension) {
-            const extensions = await asComptroller.callStatic._listExtensions();
-            console.log(`current extensions ${extensions}`);
-
-            if (!extensions.find((e) => e == firstExtension.address)) {
-              const extensionToReplace = extensions.find((e) => e == oldFirstExtension)
-                ? oldFirstExtension
-                : constants.AddressZero;
-
-              if (firstExtension.address != extensionToReplace) {
-                console.log(`registering ext ${firstExtension.address} replacing ${extensionToReplace}`);
-                const tx = await fuseFeeDistributor._registerComptrollerExtension(
-                  pool.comptroller,
-                  firstExtension.address,
-                  extensionToReplace
-                );
-                await tx.wait();
-                console.log(`registered the first extension for pool ${pool.comptroller} with tx ${tx.hash}`);
-              } else {
-                console.log(`not replacing the same extension`);
+          const comptrollerExtensions = await fuseFeeDistributor.callStatic.getComptrollerExtensions(latestImpl);
+          const currentExtensions = await asComptroller.callStatic._listExtensions();
+          let different = false;
+          for (let j = 0; j < currentExtensions.length; j++) {
+            let found = false;
+            for (let k = 0; k < comptrollerExtensions.length; k++) {
+              if (currentExtensions[j] == comptrollerExtensions[k]) {
+                found = true;
+                break;
               }
-            } else {
-              console.log(`latest first extension already registered`);
             }
+            if (!found) {
+              different = true;
+              break;
+            }
+          }
+
+          if (different) {
+            if (currentExtensions.length > 1)
+              throw new Error(`implement fn to remove extensions for ${pool.comptroller}`);
+            console.log(
+              `replacing extension ${currentExtensions[0]} with ${comptrollerExtensions[0]} for pool ${pool.comptroller}`
+            );
+            const tx = await fuseFeeDistributor._registerComptrollerExtension(
+              pool.comptroller,
+              comptrollerExtensions[0],
+              currentExtensions[0]
+            );
+            await tx.wait();
+            console.log(`replaced the first extension for pool ${pool.comptroller} with tx ${tx.hash}`);
           } else {
-            console.log(`no first extension deployed for the comptroller`);
+            console.log(`no need to replace all extensions`);
           }
         } else {
           console.log(`FAILED TO UPGRADE ${pool.comptroller} FROM ${implBefore} TO ${latestImpl}`);
@@ -165,19 +163,16 @@ task("pools:all:autoimpl", "Toggle the autoimplementations flag of all managed p
   .addParam("enable", "If autoimplementations should be on or off", true, types.boolean)
   .addOptionalParam("admin", "Named account that is an admin of the pool", "deployer", types.string)
   .setAction(async ({ enable, admin }, { ethers }) => {
-    // @ts-ignore
-    const midasSdkModule = await import("../../tests/utils/midasSdk");
-    const sdk = await midasSdkModule.getOrCreateMidas();
     const signer = await ethers.getNamedSigner(admin);
 
     const fusePoolDirectory = (await ethers.getContract("FusePoolDirectory", signer)) as FusePoolDirectory;
-    const pools = await fusePoolDirectory.callStatic.getAllPools();
+    const [, pools] = await fusePoolDirectory.callStatic.getActivePools();
     for (let i = 0; i < pools.length; i++) {
       const pool = pools[i];
       console.log(`pool address ${pool.comptroller}`);
-      const comptroller = (await new Contract(
+      const comptroller = (await ethers.getContractAt(
+        "Comptroller.sol:Comptroller",
         pool.comptroller,
-        sdk.chainDeployment.Comptroller.abi,
         signer
       )) as Comptroller;
       const admin = await comptroller.callStatic.admin();
@@ -194,6 +189,37 @@ task("pools:all:autoimpl", "Toggle the autoimplementations flag of all managed p
         }
       } else {
         console.log(`autoimplementations for the pool is ${autoImplOn}`);
+      }
+    }
+  });
+
+task("pools:all:pause-guardian", "Sets the pause guardian for all pools that have a different address for it")
+  .addParam("replacingGuardian", "Address of the replacing pause guardian", undefined, types.string)
+  .addOptionalParam("admin", "Named account that is an admin of the pool", "deployer", types.string)
+  .setAction(async ({ replacingGuardian, admin }, { ethers }) => {
+    const signer = await ethers.getNamedSigner(admin);
+
+    const fusePoolDirectory = (await ethers.getContract("FusePoolDirectory", signer)) as FusePoolDirectory;
+    const [, pools] = await fusePoolDirectory.callStatic.getActivePools();
+    for (let i = 0; i < pools.length; i++) {
+      const pool = pools[i];
+      console.log(`pool address ${pool.comptroller}`);
+      const comptroller = (await ethers.getContractAt(
+        "ComptrollerFirstExtension",
+        pool.comptroller,
+        signer
+      )) as ComptrollerFirstExtension;
+      const pauseGuardian = await comptroller.callStatic.pauseGuardian();
+      console.log(`pool name ${pool.name} pause guardian ${pauseGuardian}`);
+      if (pauseGuardian != constants.AddressZero && pauseGuardian != replacingGuardian) {
+        const error = await comptroller.callStatic._setPauseGuardian(replacingGuardian);
+        if (error.isZero()) {
+          const tx = await comptroller._setPauseGuardian(replacingGuardian);
+          await tx.wait();
+          console.log(`set replacing guardian with tx ${tx.hash}`);
+        } else {
+          console.error(`will fail to set the pause guardian due to error ${error}`);
+        }
       }
     }
   });

@@ -2,11 +2,11 @@ import { ganache } from "@midas-capital/chains";
 import { BigNumber, constants, Contract, ContractReceipt, providers, Signer, utils } from "ethers";
 import { createStubInstance, restore, SinonStub, SinonStubbedInstance, stub } from "sinon";
 
-import { Comptroller, FusePoolDirectory, Unitroller } from "../../lib/contracts/typechain";
-import { ARTIFACTS } from "../../src/Artifacts";
+import JumpRateModelArtifact from "../../artifacts/JumpRateModel.json";
 import { MidasBase } from "../../src/MidasSdk/index";
 import JumpRateModel from "../../src/MidasSdk/irm/JumpRateModel";
 import * as utilsFns from "../../src/MidasSdk/utils";
+import { Comptroller, FusePoolDirectory, Unitroller } from "../../typechain";
 import { expect } from "../globalTestHook";
 import { mkAddress } from "../helpers";
 
@@ -21,7 +21,10 @@ describe("Fuse Index", () => {
     mockContract.connect.returns(mockContract);
     Object.defineProperty(mockContract, "callStatic", {
       value: {
-        getAllPools: stub().resolves({ length: 2 }),
+        getActivePools: stub().resolves([
+          [0, 1],
+          ["0", "1"],
+        ]),
       },
     });
     mockContract.deployPool = stub().resolves({
@@ -150,7 +153,7 @@ describe("Fuse Index", () => {
     });
 
     it("should return new IRM when model address hash matches", async () => {
-      interestRateModelAddress = ARTIFACTS.JumpRateModel.deployedBytecode.object;
+      interestRateModelAddress = JumpRateModelArtifact.deployedBytecode.object;
       model = await fuseBase.identifyInterestRateModel(interestRateModelAddress);
       expect(model).not.to.be.null;
     });
@@ -179,7 +182,7 @@ describe("Fuse Index", () => {
 
     it("should init interest Rate Model when model is not null ", async () => {
       const initStub = stub(JumpRateModel.prototype, "init");
-      const interestRateModelAddress = ARTIFACTS.JumpRateModel.deployedBytecode.object;
+      const interestRateModelAddress = JumpRateModelArtifact.deployedBytecode.object;
       Object.defineProperty(mockAssetContract, "callStatic", {
         value: {
           interestRateModel: () => Promise.resolve(interestRateModelAddress),

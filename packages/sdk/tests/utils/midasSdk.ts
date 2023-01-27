@@ -4,8 +4,8 @@ import { ChainConfig, ChainDeployment, SupportedChains } from "@midas-capital/ty
 import { Signer } from "ethers";
 import { deployments, ethers } from "hardhat";
 
-import { WETH } from "../../lib/contracts/typechain/WETH";
 import { MidasSdk } from "../../src";
+import { WETH } from "../../typechain/WETH";
 
 let midasSdk: MidasSdk;
 
@@ -79,12 +79,6 @@ export const getCommonDeployments = async (chainDeployment: ChainDeployment) => 
   const MasterPriceOracle = await ethers.getContract("MasterPriceOracle");
   const MasterPriceOracleArtifact = await deployments.getArtifact("MasterPriceOracle");
   chainDeployment.MasterPriceOracle = { abi: MasterPriceOracleArtifact.abi, address: MasterPriceOracle.address };
-  const RewardsDistributorDelegate = await ethers.getContract("RewardsDistributorDelegate");
-  const RewardsDistributorDelegateArtifact = await deployments.getArtifact("RewardsDistributorDelegate");
-  chainDeployment.RewardsDistributorDelegate = {
-    abi: RewardsDistributorDelegateArtifact.abi,
-    address: RewardsDistributorDelegate.address,
-  };
   const SimplePriceOracle = await ethers.getContract("SimplePriceOracle");
   const SimplePriceOracleArtifact = await deployments.getArtifact("SimplePriceOracle");
   chainDeployment.SimplePriceOracle = { abi: SimplePriceOracleArtifact.abi, address: SimplePriceOracle.address };

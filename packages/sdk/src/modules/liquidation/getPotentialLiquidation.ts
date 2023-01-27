@@ -1,9 +1,9 @@
 import { LiquidationStrategy } from "@midas-capital/types";
 import { BigNumber, BytesLike, constants, utils } from "ethers";
 
-import { CErc20Delegate } from "../../../lib/contracts/typechain/CErc20Delegate";
-import { IUniswapV2Factory__factory } from "../../../lib/contracts/typechain/factories/IUniswapV2Factory__factory";
-import { MidasBase } from "../../MidasSdk";
+import { CErc20Delegate } from "../../../typechain/CErc20Delegate";
+import { IUniswapV2Factory__factory } from "../../../typechain/factories/IUniswapV2Factory__factory";
+import { MidasSdk } from "../../MidasSdk";
 
 import { ChainLiquidationConfig } from "./config";
 import encodeLiquidateTx from "./encodeLiquidateTx";
@@ -25,7 +25,7 @@ async function getLiquidationPenalty(collateralCToken: CErc20Delegate, liquidati
 }
 
 export default async function getPotentialLiquidation(
-  sdk: MidasBase,
+  sdk: MidasSdk,
   borrower: FusePoolUserWithAssets,
   closeFactor: BigNumber,
   liquidationIncentive: BigNumber,
@@ -42,6 +42,11 @@ export default async function getPotentialLiquidation(
     if (asset.membership && asset.supplyBalance.gt(0)) borrower.collateral.push(asset);
   }
 
+  if (!borrower.collateral!.length) {
+    sdk.logger.error(`Borrower has no collateral ${borrower.account}`);
+    return null;
+  }
+
   // Sort debt and collateral from highest to lowest ETH value
   borrower.debt.sort((a, b) => (b.borrowBalanceWei.gt(a.borrowBalanceWei) ? 1 : -1));
   borrower.collateral.sort((a, b) => (b.supplyBalanceWei.gt(a.supplyBalanceWei) ? 1 : -1));
@@ -52,19 +57,13 @@ export default async function getPotentialLiquidation(
   )
     return null;
 
-  let outputPrice: BigNumber;
-  let outputDecimals: BigNumber;
   let exchangeToTokenAddress: string;
 
   // Check SUPPORTED_OUTPUT_CURRENCIES: replace EXCHANGE_TO_TOKEN_ADDRESS with underlying collateral if underlying collateral is in SUPPORTED_OUTPUT_CURRENCIES
   if (chainLiquidationConfig.SUPPORTED_OUTPUT_CURRENCIES.indexOf(borrower.collateral[0].underlyingToken) >= 0) {
     exchangeToTokenAddress = borrower.collateral[0].underlyingToken;
-    outputPrice = borrower.collateral[0].underlyingPrice;
-    outputDecimals = borrower.collateral[0].underlyingDecimals;
   } else {
     exchangeToTokenAddress = sdk.chainSpecificAddresses.W_TOKEN;
-    outputPrice = utils.parseEther("1");
-    outputDecimals = BigNumber.from(18);
   }
 
   const debtAsset = borrower.debt[0];
@@ -83,7 +82,10 @@ export default async function getPotentialLiquidation(
 
   // USDC: 6 decimals
   let repayAmount = debtAsset.borrowBalance.mul(closeFactor).div(SCALE_FACTOR_ONE_18_WEI);
-  const penalty = await getLiquidationPenalty(sdk.getCTokenInstance(collateralAsset.cToken), liquidationIncentive);
+  const penalty = await getLiquidationPenalty(
+    sdk.createCTokenWithExtensions(collateralAsset.cToken),
+    liquidationIncentive
+  );
 
   // Scale to 18 decimals
   let liquidationValue = repayAmount.mul(debtAssetUnderlyingPrice).div(BigNumber.from(10).pow(debtAssetDecimals));

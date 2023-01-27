@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 nextConfig = {
   reactStrictMode: true,
   productionBrowserSourceMaps: true,
@@ -20,10 +24,7 @@ nextConfig = {
     SUPABASE_PLUGIN_TABLE_NAME: process.env.SUPABASE_PLUGIN_TABLE_NAME,
     SUPABASE_PLUGIN_REWARDS_TABLE_NAME: process.env.SUPABASE_PLUGIN_REWARDS_TABLE_NAME,
     SUPABASE_ASSET_APY_TABLE_NAME: process.env.SUPABASE_ASSET_APY_TABLE_NAME,
-    HIDE_POOLS_56: process.env.HIDE_POOLS_56,
-    HIDE_POOLS_97: process.env.HIDE_POOLS_97,
-    HIDE_POOLS_137: process.env.HIDE_POOLS_137,
   },
 };
 
-module.exports = nextConfig;
+module.exports = withBundleAnalyzer(nextConfig);

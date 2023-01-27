@@ -54,6 +54,7 @@ export type DynamicFlywheelConfig = {
   name: string;
   rewardToken: string;
   cycleLength: number;
+  flywheelToReplace?: string;
 };
 
 export type PluginConfig = {
@@ -127,7 +128,7 @@ export type LiquidatorDeployFnParams = ChainDeployFnParams & {
 export type LiquidatorConfigFnParams = {
   ethers: HardhatRuntimeEnvironment["ethers"];
   getNamedAccounts: HardhatRuntimeEnvironment["getNamedAccounts"];
-  chainId: string;
+  chainId: number;
 };
 
 export type IrmDeployFnParams = ChainDeployFnParams & {
@@ -206,7 +207,7 @@ export type FuseFlywheelDeployFnParams = ChainDeployFnParams & {
 
 export type aXXXcDeployParams = ChainDeployFnParams & {
   assets: SupportedAsset[];
-  certificateAssetSymbol: assetSymbols.aBNBc | assetSymbols.aFTMc | assetSymbols.aMATICc;
+  certificateAssetSymbol: assetSymbols.ankrBNB | assetSymbols.aFTMc | assetSymbols.aMATICc;
 };
 
 export type stkBNBOracleDeployParams = ChainDeployFnParams & {

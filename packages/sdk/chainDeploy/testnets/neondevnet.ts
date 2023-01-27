@@ -19,7 +19,7 @@ export const deployConfig: ChainDeployConfig = {
     hardcoded: [],
     uniswapData: [],
     pairInitHashCode: ethers.utils.hexlify("0x1f475d88284b09799561ca05d87dc757c1ff4a9f48983cdb84d1dd6e209d3ae2"),
-    uniswapV2RouterAddress: "0x696d73D7262223724d60B2ce9d6e20fc31DfC56B",
+    uniswapV2RouterAddress: "0x491FFC6eE42FEfB4Edab9BA7D5F3e639959E081B",
     uniswapV2FactoryAddress: "0x6dcDD1620Ce77B595E6490701416f6Dbf20D2f67",
     uniswapOracleLpTokens: [],
     uniswapOracleInitialDeployTokens: [],
@@ -30,14 +30,6 @@ export const deployConfig: ChainDeployConfig = {
 
 export const deploy = async ({ ethers, getNamedAccounts, deployments }): Promise<void> => {
   const { deployer } = await getNamedAccounts();
-  //// ORACLES
-  const simplePO = await deployments.deploy("SimplePriceOracle", {
-    from: deployer,
-    args: [],
-    log: true,
-    waitConfirmations: 1,
-  });
-  console.log("SimplePriceOracle: ", simplePO.address);
 
   const pyth = await deployments.deploy("Pyth", {
     from: deployer,

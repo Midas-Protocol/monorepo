@@ -58,15 +58,14 @@ export enum OracleTypes {
   WombatLpTokenPriceOracle = "WombatLpTokenPriceOracle",
   AdrastiaPriceOracle = "AdrastiaPriceOracle",
   NativeUSDPriceOracle = "NativeUSDPriceOracle",
-  SaddleLpTokenPriceOracle = "SaddleLpTokenPriceOracle",
+  SaddleLpPriceOracle = "SaddleLpPriceOracle",
 }
 
 export enum IrmTypes {
   JumpRateModel = "JumpRateModel",
   WhitePaperInterestRateModel = "WhitePaperInterestRateModel",
+  AnkrFTMInterestRateModel = "AnkrFTMInterestRateModel",
   AnkrBNBInterestRateModel = "AnkrBNBInterestRateModel",
-  JumpRateModel_MIMO_2_004_4_08 = "JumpRateModel_MIMO_2_004_4_08",
-  JumpRateModel_JARVIS_2_004_4_08 = "JumpRateModel_JARVIS_2_004_4_08",
   AdjustableJumpRateModel_PSTAKE_WBNB = "AdjustableJumpRateModel_PSTAKE_WBNB",
   AdjustableJumpRateModel_MIXBYTES_XCDOT = "AdjustableJumpRateModel_MIXBYTES_XCDOT",
   AdjustableJumpRateModel_TRANSFERO_BRZ = "AdjustableJumpRateModel_TRANSFERO_BRZ",
@@ -188,7 +187,7 @@ export enum assetSymbols {
   BRZw = "BRZw",
   BOMB = "BOMB",
   xBOMB = "xBOMB",
-  aBNBc = "aBNBc",
+  ankrBNB = "ankrBNB",
   stkBNB = "stkBNB",
   SAFEMOON = "SAFEMOON",
   HAY = "HAY",
@@ -220,23 +219,29 @@ export enum assetSymbols {
   "WOMBATLP-WBNB" = "WOMBATLP-WBNB",
 
   // evmos
+  kinesisUSDC = "kinesisUSDC",
+  kinesisUSDT = "kinesisUSDT",
   saddleOptFraxUSD = "saddleOptFraxUSD",
   saddleOptUSD = "saddleOptUSD",
   WEVMOS = "WEVMOS",
   ATOM = "ATOM",
+  OSMO = "OSMO",
+  JUNO = "JUNO",
+  // USD X
   gUSDC = "gUSDC",
   axlUSDC = "axlUSDC",
   ceUSDC = "ceUSDC",
-  OSMO = "OSMO",
-  JUNO = "JUNO",
-  axlWETH = "axlWETH",
   gUSDT = "gUSDT",
+  axlUSDT = "axlUSDT",
   ceUSDT = "ceUSDT",
   gDAI = "gDAI",
+  // WETH / BTC
   ceWETH = "ceWETH",
+  axlWETH = "axlWETH",
   gWBTC = "gWBTC",
   gWETH = "gWETH",
   axlWBTC = "axlWBTC",
+
   DIFF = "DIFF",
   GRAV = "GRAV",
   "WEVMOS-JUNO" = "WEVMOS-JUNO",
@@ -261,6 +266,8 @@ export enum assetSymbols {
   CELR = "CELR",
   LDO = "LDO",
   "LDO-GLMR" = "LDO-GLMR",
+  "wstDOT-DOT.xc" = "wstDOT-DOT.xc",
+  "base4pool" = "base4pool",
 
   // BeamSwap
   "GLMR-USDC" = "GLMR-USDC",
@@ -280,6 +287,8 @@ export enum assetSymbols {
   USDC_wh = "USDC.wh",
   multiUSDT = "multiUSDT",
   multiDAI = "multiDAI",
+  USDT_xc = "USDT.xc",
+  BUSD_wh = "BUSD.wh",
   "3pool" = "3pool",
   "xcDOT-stDOT" = "xcDOT-stDOT",
 

@@ -1,15 +1,13 @@
+import { LogLevel } from "@ethersproject/logger";
 import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 import {
   ChainAddresses,
   ChainConfig,
   ChainDeployment,
   ChainParams,
-  DelegateContractName,
   DeployedPlugins,
   FundingStrategyContract,
   InterestRateModel,
-  IrmConfig,
-  OracleConfig,
   RedemptionStrategyContract,
   SupportedAsset,
   SupportedChains,
@@ -17,21 +15,25 @@ import {
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber, Contract, Signer, utils } from "ethers";
 
-import { CErc20Delegate } from "../../lib/contracts/typechain/CErc20Delegate";
-import { CErc20PluginDelegate } from "../../lib/contracts/typechain/CErc20PluginDelegate";
-import { CErc20PluginRewardsDelegate } from "../../lib/contracts/typechain/CErc20PluginRewardsDelegate";
-import { CErc20WrappingDelegate } from "../../lib/contracts/typechain/CErc20WrappingDelegate";
-import { Comptroller } from "../../lib/contracts/typechain/Comptroller";
-import { EIP20Interface } from "../../lib/contracts/typechain/EIP20Interface";
-import { FuseFeeDistributor } from "../../lib/contracts/typechain/FuseFeeDistributor";
-import { FusePoolDirectory } from "../../lib/contracts/typechain/FusePoolDirectory";
-import { FusePoolLens } from "../../lib/contracts/typechain/FusePoolLens";
-import { FusePoolLensSecondary } from "../../lib/contracts/typechain/FusePoolLensSecondary";
-import { FuseSafeLiquidator } from "../../lib/contracts/typechain/FuseSafeLiquidator";
-import { MidasERC4626 } from "../../lib/contracts/typechain/MidasERC4626";
-import { MidasFlywheelLensRouter } from "../../lib/contracts/typechain/MidasFlywheelLensRouter.sol";
-import { Unitroller } from "../../lib/contracts/typechain/Unitroller";
-import { ARTIFACTS, Artifacts, irmConfig, oracleConfig } from "../Artifacts";
+import CTokenInterfaceABI from "../../abis/CTokenInterface";
+import EIP20InterfaceABI from "../../abis/EIP20Interface";
+import FuseFeeDistributorABI from "../../abis/FuseFeeDistributor";
+import FusePoolDirectoryABI from "../../abis/FusePoolDirectory";
+import FusePoolLensABI from "../../abis/FusePoolLens";
+import FusePoolLensSecondaryABI from "../../abis/FusePoolLensSecondary";
+import FuseSafeLiquidatorABI from "../../abis/FuseSafeLiquidator";
+import MidasERC4626ABI from "../../abis/MidasERC4626";
+import MidasFlywheelLensRouterABI from "../../abis/MidasFlywheelLensRouter";
+import UnitrollerABI from "../../abis/Unitroller";
+import { EIP20Interface } from "../../typechain/EIP20Interface";
+import { FuseFeeDistributor } from "../../typechain/FuseFeeDistributor";
+import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
+import { FusePoolLens } from "../../typechain/FusePoolLens";
+import { FusePoolLensSecondary } from "../../typechain/FusePoolLensSecondary";
+import { FuseSafeLiquidator } from "../../typechain/FuseSafeLiquidator";
+import { MidasERC4626 } from "../../typechain/MidasERC4626";
+import { MidasFlywheelLensRouter } from "../../typechain/MidasFlywheelLensRouter";
+import { Unitroller } from "../../typechain/Unitroller";
 import { withAsset } from "../modules/Asset";
 import { withConvertMantissa } from "../modules/ConvertMantissa";
 import { withCreateContracts } from "../modules/CreateContracts";
@@ -44,11 +46,13 @@ import { withSafeLiquidator } from "../modules/liquidation/SafeLiquidator";
 
 import { CTOKEN_ERROR_CODES } from "./config";
 import AdjustableJumpRateModel from "./irm/AdjustableJumpRateModel";
-import AnkrBNBInterestRateModel from "./irm/AnkrBnbInterestRateModel";
-import DAIInterestRateModelV2 from "./irm/DAIInterestRateModelV2";
+import AnkrBNBInterestRateModel from "./irm/AnkrBNBInterestRateModel";
+import AnkrFTMInterestRateModel from "./irm/AnkrFTMInterestRateModel";
 import JumpRateModel from "./irm/JumpRateModel";
 import WhitePaperInterestRateModel from "./irm/WhitePaperInterestRateModel";
 import { getContract, getPoolAddress, getPoolComptroller, getPoolUnitroller } from "./utils";
+
+utils.Logger.setLogLevel(LogLevel.OFF);
 
 export type SupportedProvider = JsonRpcProvider | Web3Provider;
 export type SupportedSigners = Signer | SignerWithAddress;
@@ -76,27 +80,23 @@ export class MidasBase {
   static CTOKEN_ERROR_CODES = CTOKEN_ERROR_CODES;
   public _provider: SupportedProvider;
   public _signer: SupportedSigners | null;
-  static isSupportedProvider(provider): provider is SupportedProvider {
+  static isSupportedProvider(provider: unknown): provider is SupportedProvider {
     return SignerWithAddress.isSigner(provider) || Signer.isSigner(provider);
   }
-  static isSupportedSigner(signer): signer is SupportedSigners {
+  static isSupportedSigner(signer: unknown): signer is SupportedSigners {
     return SignerWithAddress.isSigner(signer) || Signer.isSigner(signer);
   }
-  static isSupportedSignerOrProvider(signerOrProvider): signerOrProvider is SignerOrProvider {
+  static isSupportedSignerOrProvider(signerOrProvider: unknown): signerOrProvider is SignerOrProvider {
     return MidasBase.isSupportedSigner(signerOrProvider) || MidasBase.isSupportedProvider(signerOrProvider);
   }
 
   public _contracts: StaticContracts | undefined;
   public chainConfig: ChainConfig;
   public availableOracles: Array<string>;
-  public availableIrms: Array<string>;
   public chainId: SupportedChains;
   public chainDeployment: ChainDeployment;
-  public oracles: OracleConfig;
   public chainSpecificAddresses: ChainAddresses;
   public chainSpecificParams: ChainParams;
-  public artifacts: Artifacts;
-  public irms: IrmConfig;
   public deployedPlugins: DeployedPlugins;
   public marketToPlugin: Record<string, string>;
   public liquidationConfig: ChainLiquidationConfig;
@@ -125,32 +125,32 @@ export class MidasBase {
     return {
       FusePoolDirectory: new Contract(
         this.chainDeployment.FusePoolDirectory.address,
-        this.chainDeployment.FusePoolDirectory.abi,
+        FusePoolDirectoryABI,
         this.provider
       ) as FusePoolDirectory,
       FusePoolLens: new Contract(
         this.chainDeployment.FusePoolLens.address,
-        this.chainDeployment.FusePoolLens.abi,
+        FusePoolLensABI,
         this.provider
       ) as FusePoolLens,
       FusePoolLensSecondary: new Contract(
         this.chainDeployment.FusePoolLensSecondary.address,
-        this.chainDeployment.FusePoolLensSecondary.abi,
+        FusePoolLensSecondaryABI,
         this.provider
       ) as FusePoolLensSecondary,
       FuseSafeLiquidator: new Contract(
         this.chainDeployment.FuseSafeLiquidator.address,
-        this.chainDeployment.FuseSafeLiquidator.abi,
+        FuseSafeLiquidatorABI,
         this.provider
       ) as FuseSafeLiquidator,
       FuseFeeDistributor: new Contract(
         this.chainDeployment.FuseFeeDistributor.address,
-        this.chainDeployment.FuseFeeDistributor.abi,
+        FuseFeeDistributorABI,
         this.provider
       ) as FuseFeeDistributor,
       MidasFlywheelLensRouter: new Contract(
         this.chainDeployment.MidasFlywheelLensRouter.address,
-        this.chainDeployment.MidasFlywheelLensRouter.abi,
+        MidasFlywheelLensRouterABI,
         this.provider
       ) as MidasFlywheelLensRouter,
       ...this._contracts,
@@ -199,24 +199,13 @@ export class MidasBase {
     }, {});
     this.redemptionStrategies = chainConfig.redemptionStrategies;
     this.fundingStrategies = chainConfig.fundingStrategies;
-    this.artifacts = ARTIFACTS;
-
-    this.availableIrms = chainConfig.irms.filter((o) => {
-      if (this.artifacts[o] === undefined || this.chainDeployment[o] === undefined) {
-        this.logger.warn(`Irm ${o} not deployed to chain ${this.chainId}`);
-        return false;
-      }
-      return true;
-    });
     this.availableOracles = chainConfig.oracles.filter((o) => {
-      if (this.artifacts[o] === undefined || this.chainDeployment[o] === undefined) {
+      if (this.chainDeployment[o] === undefined) {
         this.logger.warn(`Oracle ${o} not deployed to chain ${this.chainId}`);
         return false;
       }
       return true;
     });
-    this.oracles = oracleConfig(this.chainDeployment, this.artifacts, this.availableOracles);
-    this.irms = irmConfig(this.chainDeployment, this.artifacts, this.availableIrms);
   }
 
   async deployPool(
@@ -257,7 +246,7 @@ export class MidasBase {
       } catch (e) {
         this.logger.warn("Unable to retrieve pool ID from receipt events", e);
       }
-      const existingPools = await contract.callStatic.getAllPools();
+      const [, existingPools] = await contract.callStatic.getActivePools();
       // Compute Unitroller address
       const addressOfSigner = await this.signer.getAddress();
       const poolAddress = getPoolAddress(
@@ -287,7 +276,7 @@ export class MidasBase {
 
       return [poolAddress, implementationAddress, priceOracle, poolId];
     } catch (error) {
-      throw Error(`Deployment of new Fuse pool failed:  ${error.message ? error.message : error}`);
+      throw Error(`Deployment of new Fuse pool failed:  ${error instanceof Error ? error.message : error}`);
     }
   }
 
@@ -295,13 +284,10 @@ export class MidasBase {
     // Get interest rate model type from runtime bytecode hash and init class
     const interestRateModels: { [key: string]: any } = {
       JumpRateModel: JumpRateModel,
-      DAIInterestRateModelV2: DAIInterestRateModelV2,
       WhitePaperInterestRateModel: WhitePaperInterestRateModel,
       AnkrBNBInterestRateModel: AnkrBNBInterestRateModel,
-      JumpRateModel_MIMO_002_004_4_08: JumpRateModel,
-      JumpRateModel_JARVIS_002_004_4_08: JumpRateModel,
-      AdjustableJumpRateModel_PSTAKE_WBNB: AdjustableJumpRateModel,
-      AdjustableJumpRateModel_MIXBYTES_XCDOT: AdjustableJumpRateModel,
+      AnkrFTMInterestRateModel: AnkrFTMInterestRateModel,
+      AdjustableJumpRateModel: AdjustableJumpRateModel,
     };
     const runtimeBytecodeHash = utils.keccak256(await this.provider.getCode(interestRateModelAddress));
 
@@ -321,7 +307,7 @@ export class MidasBase {
 
   async getInterestRateModel(assetAddress: string): Promise<InterestRateModel> {
     // Get interest rate model address from asset address
-    const assetContract = getContract(assetAddress, this.artifacts.CTokenInterface.abi, this.provider);
+    const assetContract = getContract(assetAddress, CTokenInterfaceABI, this.provider);
     const interestRateModelAddress: string = await assetContract.callStatic.interestRateModel();
 
     const interestRateModel = await this.identifyInterestRateModel(interestRateModelAddress);
@@ -342,71 +328,20 @@ export class MidasBase {
     return oracle;
   }
 
-  identifyInterestRateModelName = (irmAddress: string): string | null => {
-    let irmName: string | null = null;
-    for (const [name, irm] of Object.entries(this.irms)) {
-      if (irm.address === irmAddress) {
-        irmName = name;
-        return irmName;
-      }
-    }
-    return irmName;
-  };
-
-  getComptrollerInstance(address: string, signerOrProvider: SignerOrProvider = this.provider) {
-    return new Contract(address, this.artifacts.Comptroller.abi, signerOrProvider) as Comptroller;
-  }
-
-  getCTokenInstance(address: string, signerOrProvider = this.provider) {
-    return new Contract(
-      address,
-      this.chainDeployment[DelegateContractName.CErc20Delegate].abi,
-      signerOrProvider
-    ) as CErc20Delegate;
-  }
-
-  getCErc20PluginRewardsInstance(address: string, signerOrProvider: SignerOrProvider = this.provider) {
-    return new Contract(
-      address,
-      this.chainDeployment[DelegateContractName.CErc20PluginRewardsDelegate].abi,
-      signerOrProvider
-    ) as CErc20PluginRewardsDelegate;
-  }
-
-  getCErc20PluginInstance(address: string, signerOrProvider: SignerOrProvider = this.provider) {
-    return new Contract(
-      address,
-      this.chainDeployment[DelegateContractName.CErc20PluginDelegate].abi,
-      signerOrProvider
-    ) as CErc20PluginDelegate;
-  }
-
-  getCErc20WrappingInstance(address: string, signerOrProvider: SignerOrProvider = this.provider) {
-    return new Contract(
-      address,
-      this.chainDeployment[DelegateContractName.CErc20WrappingDelegate].abi,
-      signerOrProvider
-    ) as CErc20WrappingDelegate;
-  }
-
   getEIP20RewardTokenInstance(address: string, signerOrProvider: SignerOrProvider = this.provider) {
-    return new Contract(address, this.artifacts.EIP20Interface.abi, signerOrProvider) as EIP20Interface;
+    return new Contract(address, EIP20InterfaceABI, signerOrProvider) as EIP20Interface;
   }
 
   getUnitrollerInstance(address: string, signerOrProvider: SignerOrProvider = this.provider) {
-    return new Contract(address, this.artifacts.Unitroller.abi, signerOrProvider) as Unitroller;
+    return new Contract(address, UnitrollerABI, signerOrProvider) as Unitroller;
   }
 
   getFusePoolDirectoryInstance(signerOrProvider: SignerOrProvider = this.provider) {
-    return new Contract(
-      this.chainDeployment.FusePoolDirectory.address,
-      this.chainDeployment.FusePoolDirectory.abi,
-      signerOrProvider
-    );
+    return new Contract(this.chainDeployment.FusePoolDirectory.address, FusePoolDirectoryABI, signerOrProvider);
   }
 
   getMidasErc4626PluginInstance(address: string, signerOrProvider: SignerOrProvider = this.provider) {
-    return new Contract(address, this.artifacts.MidasERC4626.abi, signerOrProvider) as MidasERC4626;
+    return new Contract(address, MidasERC4626ABI, signerOrProvider) as MidasERC4626;
   }
 }
 
@@ -415,4 +350,5 @@ const MidasBaseWithModules = withFusePoolLens(
     withSafeLiquidator(withFusePools(withAsset(withFlywheel(withCreateContracts(withConvertMantissa(MidasBase))))))
   )
 );
-export default class MidasSdk extends MidasBaseWithModules {}
+export class MidasSdk extends MidasBaseWithModules {}
+export default MidasSdk;

@@ -3,15 +3,30 @@ import { useQuery } from '@tanstack/react-query';
 
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
 
-export const usePoolClaimableRewards = ({ poolAddress }: { poolAddress: string }) => {
-  const { currentSdk, address } = useMultiMidas();
+export const usePoolClaimableRewards = ({
+  poolAddress,
+  poolChainId,
+}: {
+  poolAddress: string;
+  poolChainId: number;
+}) => {
+  const { getSdk, address } = useMultiMidas();
 
-  return useQuery<FlywheelClaimableRewards[] | undefined>(
-    ['usePoolClaimableRewards', poolAddress, address, currentSdk?.chainId],
+  return useQuery<FlywheelClaimableRewards[] | null | undefined>(
+    ['usePoolClaimableRewards', poolAddress, address, poolChainId],
     () => {
-      if (currentSdk && address)
-        return currentSdk.getFlywheelClaimableRewardsForPool(poolAddress, address);
+      const sdk = getSdk(poolChainId);
+
+      if (sdk && address && poolChainId) {
+        return sdk.getFlywheelClaimableRewardsForPool(poolAddress, address);
+      }
+
+      return null;
     },
-    { enabled: !!poolAddress && !!address && !!currentSdk }
+    {
+      cacheTime: Infinity,
+      staleTime: Infinity,
+      enabled: !!poolAddress && !!address && !!poolChainId,
+    }
   );
 };

@@ -1,5 +1,6 @@
 export interface AbstractReward {
   apy?: number;
+  status?: "active" | "eol" | "paused" | "unknown";
   updated_at: string;
 }
 
@@ -39,11 +40,11 @@ export interface FlywheelReward extends AbstractReward {
 }
 
 export function isFlywheelReward(reward: any): reward is FlywheelReward {
-  return reward.flywheel !== undefined && reward.token === undefined;
+  return reward.flywheel !== undefined && reward.token === undefined && reward.plugin === undefined;
 }
 
 export function isPluginWithFlywheelReward(reward: any): reward is PluginWithFlywheelReward {
-  return reward.flywheel !== undefined && reward.token !== undefined;
+  return reward.flywheel !== undefined && reward.token !== undefined && reward.plugin !== undefined;
 }
 
 export type Reward = PluginReward | PluginWithFlywheelReward | FlywheelReward | AssetReward;

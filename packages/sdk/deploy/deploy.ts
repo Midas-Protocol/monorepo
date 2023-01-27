@@ -9,14 +9,14 @@ import {
   configureFuseSafeLiquidator,
   deployFuseSafeLiquidator,
 } from "../chainDeploy/helpers/liquidators/fuseSafeLiquidator";
-import { AddressesProvider } from "../lib/contracts/typechain/AddressesProvider";
-import { FuseFeeDistributor } from "../lib/contracts/typechain/FuseFeeDistributor";
+import { AddressesProvider } from "../typechain/AddressesProvider";
+import { FuseFeeDistributor } from "../typechain/FuseFeeDistributor";
 
 const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments, getChainId }): Promise<void> => {
   console.log("RPC URL: ", ethers.provider.connection.url);
-  const chainId = await getChainId();
+  const chainId = parseInt(await getChainId());
   console.log("chainId: ", chainId);
-  const MIN_BORROW_USD = chainId === "97" ? 0 : 100;
+  const MIN_BORROW_USD = chainId === 97 ? 0 : 100;
   const { deployer } = await getNamedAccounts();
   console.log("deployer: ", deployer);
   const balance = await ethers.provider.getBalance(deployer);
@@ -63,14 +63,23 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
 
     const feeAfter = await fuseFeeDistributor.callStatic.defaultInterestFeeRate();
     console.log(`ffd fee updated to ${feeAfter}`);
+  } else {
+    console.log(`not updating the ffd fee`);
   }
 
   const cgPrice = await getCgPrice(chainDeployParams.cgId);
   const minBorrow = utils.parseUnits((MIN_BORROW_USD / cgPrice).toFixed(18));
 
-  tx = await fuseFeeDistributor._setPoolLimits(minBorrow, ethers.constants.MaxUint256, ethers.constants.MaxUint256);
-  await tx.wait();
-  console.log("FuseFeeDistributor pool limits set", tx.hash);
+  try {
+    console.log(
+      `setting the pool limits to ${minBorrow} ${ethers.constants.MaxUint256} ${ethers.constants.MaxUint256}`
+    );
+    tx = await fuseFeeDistributor._setPoolLimits(minBorrow, ethers.constants.MaxUint256, ethers.constants.MaxUint256);
+    await tx.wait();
+    console.log("FuseFeeDistributor pool limits set", tx.hash);
+  } catch (e) {
+    console.log("error setting the pool limits", e);
+  }
 
   const oldComptroller = await ethers.getContractOrNull("Comptroller");
   const oldFirstExtension = await ethers.getContractOrNull("ComptrollerFirstExtension");
@@ -139,16 +148,6 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     log: true,
   });
   if (erc20WrappingDel.transactionHash) await ethers.provider.waitForTransaction(erc20WrappingDel.transactionHash);
-
-  const rewards = await deployments.deploy("RewardsDistributorDelegate", {
-    from: deployer,
-    args: [],
-    log: true,
-    waitConfirmations: 1,
-  });
-  if (rewards.transactionHash) await ethers.provider.waitForTransaction(rewards.transactionHash);
-  console.log("RewardsDistributorDelegate: ", rewards.address);
-  ////
 
   ////
   //// FUSE CORE CONTRACTS
@@ -385,14 +384,14 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     console.log("FusePoolLensSecondary already initialized");
   }
 
-  const fflrReceipt = await deployments.deploy("MidasFlywheelLensRouter", {
+  const mflrReceipt = await deployments.deploy("MidasFlywheelLensRouter", {
     from: deployer,
     args: [],
     log: true,
     waitConfirmations: 1,
   });
-  if (fflrReceipt.transactionHash) await ethers.provider.waitForTransaction(fflrReceipt.transactionHash);
-  console.log("MidasFlywheelLensRouter: ", fflrReceipt.address);
+  if (mflrReceipt.transactionHash) await ethers.provider.waitForTransaction(mflrReceipt.transactionHash);
+  console.log("MidasFlywheelLensRouter: ", mflrReceipt.address);
 
   const erc20Delegate = await ethers.getContract("CErc20Delegate", deployer);
   const erc20PluginDelegate = await ethers.getContract("CErc20PluginDelegate", deployer);
@@ -413,8 +412,6 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   ];
   const arrayOfFalse = [false, false, false, false];
   const arrayOfTrue = [true, true, true, true];
-
-  let receipt: providers.TransactionReceipt;
 
   if (oldErc20Delegate) {
     oldImplementations.push(oldErc20Delegate.address);
@@ -475,6 +472,15 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     log: true,
   });
   console.log("FixedNativePriceOracle: ", fixedNativePO.address);
+
+  const simplePO = await deployments.deploy("SimplePriceOracle", {
+    from: deployer,
+    args: [],
+    log: true,
+    waitConfirmations: 1,
+  });
+  if (simplePO.transactionHash) await ethers.provider.waitForTransaction(simplePO.transactionHash);
+  console.log("SimplePriceOracle: ", simplePO.address);
 
   const masterPO = await deployments.deploy("MasterPriceOracle", {
     from: deployer,
@@ -655,16 +661,14 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   // upgrade any of the markets if necessary
   await run("markets:all:upgrade");
 
+  const gasUsed = deployments.getGasUsed();
+
   const gasPrice = await ethers.provider.getGasPrice();
 
   console.log(`gas price ${gasPrice}`);
-  console.log(`gas used ${deployments.getGasUsed()}`);
+  console.log(`gas used ${gasUsed}`);
   console.log(`cg price ${cgPrice}`);
-  console.log(
-    `total $ value gas used for deployments ${
-      cgPrice * gasPrice.mul(deployments.getGasUsed()).div(1e9).div(1e9).toNumber()
-    }`
-  );
+  console.log(`total $ value gas used for deployments ${(gasPrice.toNumber() * gasUsed * cgPrice) / 1e18}`);
 };
 
 func.tags = ["prod"];

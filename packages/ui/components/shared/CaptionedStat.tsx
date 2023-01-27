@@ -8,6 +8,7 @@ import { CaptionedStatProps } from '@ui/types/ComponentPropsType';
 
 const CaptionedStat = ({
   stat,
+  secondStat,
   caption,
   spacing,
   crossAxisAlignment,
@@ -30,15 +31,26 @@ const CaptionedStat = ({
           </SimpleTooltip>
         )}
       </HStack>
-      <Stat text={stat} />
+      <HStack>
+        <Stat text={stat} />
+        {secondStat && <SecondStat text={secondStat} />}
+      </HStack>
     </Column>
   );
 };
 
 const Stat = ({ text }: { text: string }) => {
   return (
-    <Text size="md" fontWeight="bold">
+    <Text variant="tnumber" size="sm" fontWeight="bold">
       {text}
+    </Text>
+  );
+};
+
+const SecondStat = ({ text }: { text: string }) => {
+  return (
+    <Text variant="tnumber" size="sm" fontWeight="bold" opacity={0.6}>
+      {'/'} {text}
     </Text>
   );
 };
@@ -48,7 +60,7 @@ const Caption = ({ textAlign, children, ...restOfProps }: TextProps) => {
     <Text
       textTransform="capitalize"
       letterSpacing="wide"
-      size="md"
+      size="sm"
       textAlign={textAlign}
       {...restOfProps}
     >
