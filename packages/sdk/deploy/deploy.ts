@@ -104,6 +104,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
 
   const oldErc20Delegate = await ethers.getContractOrNull("CErc20Delegate");
   const oldErc20PluginDelegate = await ethers.getContractOrNull("CErc20PluginDelegate");
+  const oldErc20WrappingDelegate = await ethers.getContractOrNull("CErc20WrappingDelegate");
   const oldErc20PluginRewardsDelegate = await ethers.getContractOrNull("CErc20PluginRewardsDelegate");
 
   const cTokenFirstExtension = await deployments.deploy("CTokenFirstExtension", {
@@ -140,6 +141,14 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     waitConfirmations: 1,
   });
   console.log("CErc20PluginRewardsDelegate: ", erc20PluginRewardsDel.address);
+
+  const erc20WrappingDel = await deployments.deploy("CErc20WrappingDelegate", {
+    from: deployer,
+    args: [],
+    log: true,
+  });
+  if (erc20WrappingDel.transactionHash) await ethers.provider.waitForTransaction(erc20WrappingDel.transactionHash);
+
   ////
   //// FUSE CORE CONTRACTS
   const fpd = await deployments.deploy("FusePoolDirectory", {
@@ -263,6 +272,29 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     }
   }
 
+  if (oldErc20WrappingDelegate) {
+    const [latestCErc20WrappingDelegate] = await fuseFeeDistributor.latestCErc20Delegate(
+      oldErc20WrappingDelegate.address
+    );
+    if (
+      latestCErc20WrappingDelegate === constants.AddressZero ||
+      latestCErc20WrappingDelegate !== erc20WrappingDel.address
+    ) {
+      tx = await fuseFeeDistributor._setLatestCErc20Delegate(
+        oldErc20WrappingDelegate.address,
+        erc20WrappingDel.address,
+        false,
+        becomeImplementationData
+      );
+      await tx.wait();
+      console.log(
+        `Set the latest CErc20WrappingDelegate implementation from ${latestCErc20WrappingDelegate} to ${erc20WrappingDel.address}`
+      );
+    } else {
+      console.log(`No change in the latest CErc20WrappingDelegate implementation ${erc20WrappingDel.address}`);
+    }
+  }
+
   const erc20PluginRewardsDelExtensions = await fuseFeeDistributor.callStatic.getCErc20DelegateExtensions(
     erc20PluginRewardsDel.address
   );
@@ -361,24 +393,25 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   if (mflrReceipt.transactionHash) await ethers.provider.waitForTransaction(mflrReceipt.transactionHash);
   console.log("MidasFlywheelLensRouter: ", mflrReceipt.address);
 
-  const booster = await deployments.deploy("LooplessFlywheelBooster", {
-    from: deployer,
-    log: true,
-    args: [],
-    waitConfirmations: 1,
-  });
-  if (booster.transactionHash) await ethers.provider.waitForTransaction(booster.transactionHash);
-  console.log("LooplessFlywheelBooster: ", booster.address);
-
-  await tx.wait();
   const erc20Delegate = await ethers.getContract("CErc20Delegate", deployer);
   const erc20PluginDelegate = await ethers.getContract("CErc20PluginDelegate", deployer);
+  const erc20WrappingDelegate = await ethers.getContract("CErc20WrappingDelegate", deployer);
   const erc20PluginRewardsDelegate = await ethers.getContract("CErc20PluginRewardsDelegate", deployer);
 
-  const oldImplementations = [constants.AddressZero, constants.AddressZero, constants.AddressZero];
-  const newImplementations = [erc20Delegate.address, erc20PluginDelegate.address, erc20PluginRewardsDelegate.address];
-  const arrayOfFalse = [false, false, false];
-  const arrayOfTrue = [true, true, true];
+  const oldImplementations = [
+    constants.AddressZero,
+    constants.AddressZero,
+    constants.AddressZero,
+    constants.AddressZero,
+  ];
+  const newImplementations = [
+    erc20Delegate.address,
+    erc20PluginDelegate.address,
+    erc20PluginRewardsDelegate.address,
+    erc20WrappingDelegate.address,
+  ];
+  const arrayOfFalse = [false, false, false, false];
+  const arrayOfTrue = [true, true, true, true];
 
   if (oldErc20Delegate) {
     oldImplementations.push(oldErc20Delegate.address);
@@ -405,6 +438,15 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     arrayOfTrue.push(true);
   } else {
     console.log(`No old CErc20PluginRewardsDelegate to whitelist the upgrade for`);
+  }
+
+  if (oldErc20WrappingDelegate) {
+    oldImplementations.push(oldErc20WrappingDelegate.address);
+    newImplementations.push(erc20WrappingDelegate.address);
+    arrayOfFalse.push(false);
+    arrayOfTrue.push(true);
+  } else {
+    console.log(`No old CErc20WrappingDelegate to whitelist the upgrade for`);
   }
 
   if (oldImplementations.length) {

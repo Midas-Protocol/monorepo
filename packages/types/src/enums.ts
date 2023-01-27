@@ -35,6 +35,7 @@ export enum DelegateContractName {
   CErc20Delegate = "CErc20Delegate",
   CErc20PluginDelegate = "CErc20PluginDelegate",
   CErc20PluginRewardsDelegate = "CErc20PluginRewardsDelegate",
+  CErc20WrappingDelegate = "CErc20WrappingDelegate",
 }
 
 export enum OracleTypes {
