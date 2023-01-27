@@ -105,12 +105,16 @@ interface AssetSettingsProps {
   selectedAsset: NativePricedFuseAsset;
   tokenData: TokenData;
   poolChainId: number;
+  setSelectedAsset: (value: NativePricedFuseAsset) => void;
+  assets: NativePricedFuseAsset[];
 }
 
 export const AssetSettings = ({
   comptrollerAddress,
   selectedAsset,
   poolChainId,
+  setSelectedAsset,
+  assets,
 }: AssetSettingsProps) => {
   const { cToken: cTokenAddress, isBorrowPaused: isPaused } = selectedAsset;
   const { currentSdk, currentChain } = useMultiMidas();
@@ -155,7 +159,7 @@ export const AssetSettings = ({
 
   const { data: pluginInfo } = usePluginInfo(poolChainId, selectedAsset.plugin);
 
-  const cTokenData = useCTokenData(comptrollerAddress, cTokenAddress, poolChainId);
+  const { data: cTokenData } = useCTokenData(comptrollerAddress, cTokenAddress, poolChainId);
   useEffect(() => {
     if (cTokenData) {
       setValue(
@@ -172,7 +176,7 @@ export const AssetSettings = ({
   const updateSupplyCaps = async ({ supplyCaps }: { supplyCaps: number }) => {
     if (!cTokenAddress || !currentSdk) return;
     setIsUpdating(true);
-    const comptroller = currentSdk.createComptroller(comptrollerAddress);
+    const comptroller = currentSdk.createComptroller(comptrollerAddress, currentSdk.signer);
     try {
       const tx = await comptroller._setMarketSupplyCaps(
         [cTokenAddress],
@@ -195,7 +199,7 @@ export const AssetSettings = ({
   const updateCollateralFactor = async ({ collateralFactor }: { collateralFactor: number }) => {
     if (!cTokenAddress || !currentSdk) return;
     setIsUpdating(true);
-    const comptroller = currentSdk.createComptroller(comptrollerAddress);
+    const comptroller = currentSdk.createComptroller(comptrollerAddress, currentSdk.signer);
 
     // 70% -> 0.7 * 1e18
     const bigCollateralFactor = utils.parseUnits((collateralFactor / 100).toString());
@@ -311,7 +315,7 @@ export const AssetSettings = ({
     if (!cTokenAddress || !currentSdk) return;
     setIsUpdating(true);
 
-    const comptroller = currentSdk.createComptroller(comptrollerAddress);
+    const comptroller = currentSdk.createComptroller(comptrollerAddress, currentSdk.signer);
     try {
       if (!cTokenAddress) throw new Error('Missing token address');
       const tx = await comptroller._setBorrowPaused(cTokenAddress, !isPaused);
@@ -319,7 +323,7 @@ export const AssetSettings = ({
       await tx.wait();
       await queryClient.refetchQueries();
 
-      LogRocket.track('Fuse-UpdateCollateralFactor');
+      LogRocket.track('Midas-setBorrowingStatus');
     } catch (e) {
       handleGenericError(e, errorToast);
     } finally {
@@ -873,6 +877,8 @@ export const AssetSettings = ({
               comptrollerAddress={comptrollerAddress}
               asset={selectedAsset}
               poolChainId={poolChainId}
+              setSelectedAsset={setSelectedAsset}
+              assets={assets}
             />
           </ConfigRow>
         </>

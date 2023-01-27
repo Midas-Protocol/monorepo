@@ -9,7 +9,7 @@ task("oracle:add-tokens", "Initialize MasterPriceOracle with underlying oracle f
     const midasSdkModule = await import("../../tests/utils/midasSdk");
     const sdk = await midasSdkModule.getOrCreateMidas();
 
-    const mpo = await ethers.getContractAt("MasterPriceOracle", sdk.oracles.MasterPriceOracle.address, oraclesAdmin);
+    const mpo = sdk.createMasterPriceOracle(oraclesAdmin);
     const underlyingTokens = _underlyings.split(",");
     const underlyingOracleInput = _oracles.split(",");
 

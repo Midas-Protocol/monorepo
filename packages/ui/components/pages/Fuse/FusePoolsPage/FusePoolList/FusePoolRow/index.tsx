@@ -550,9 +550,10 @@ const PoolsRowList = ({
                           <Td
                             key={cell.id}
                             border="none"
-                            px={{ base: 1, lg: 2 }}
+                            px={{ base: cell.column.id === 'Pool Name' ? 0 : 2 }}
                             py={0}
                             height={16}
+                            minW={10}
                           >
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                           </Td>
@@ -642,7 +643,7 @@ const PoolsRowList = ({
                 aria-label="toPrevious"
                 icon={<ChevronLeftIcon fontSize={30} />}
                 onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
+                isDisabled={!table.getCanPreviousPage()}
                 isRound
               />
               <CIconButton
@@ -650,7 +651,7 @@ const PoolsRowList = ({
                 aria-label="toNext"
                 icon={<ChevronRightIcon fontSize={30} />}
                 onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
+                isDisabled={!table.getCanNextPage()}
                 isRound
               />
             </HStack>

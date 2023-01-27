@@ -1,9 +1,14 @@
 import { Contract, ContractInterface } from "ethers";
-import { Fragment } from "ethers/lib/utils";
 
 import { MidasBaseConstructor } from "..";
+import CErc20DelegateABI from "../../abis/CErc20Delegate";
+import CErc20PluginRewardsDelegateABI from "../../abis/CErc20PluginRewardsDelegate";
+import ComptrollerABI from "../../abis/Comptroller";
+import ComptrollerFirstExtensionABI from "../../abis/ComptrollerFirstExtension";
+import CTokenFirstExtensionABI from "../../abis/CTokenFirstExtension";
 import FlywheelStaticRewardsABI from "../../abis/FlywheelStaticRewards";
 import JumpRateModelABI from "../../abis/JumpRateModel";
+import MasterPriceOracleABI from "../../abis/MasterPriceOracle";
 import MidasFlywheelABI from "../../abis/MidasFlywheel";
 import UnitrollerABI from "../../abis/Unitroller";
 import { CErc20Delegate } from "../../typechain/CErc20Delegate";
@@ -33,43 +38,46 @@ export function withCreateContracts<TBase extends MidasBaseConstructor>(Base: TB
     createFlywheelStaticRewards = this.createContractInstance<FlywheelStaticRewards>(FlywheelStaticRewardsABI);
     createJumpRateModel = this.createContractInstance<JumpRateModel>(JumpRateModelABI);
 
-    createComptroller(comptrollerAddress: string, signerOrProvider: SignerOrProvider = this.signer) {
-      const comptrollerABI: Array<Fragment> = this.chainDeployment.Comptroller.abi;
-
+    createComptroller(comptrollerAddress: string, signerOrProvider: SignerOrProvider = this.provider) {
       if (this.chainDeployment.ComptrollerFirstExtension) {
-        comptrollerABI.push(...this.chainDeployment.ComptrollerFirstExtension.abi);
+        return new Contract(
+          comptrollerAddress,
+          [...ComptrollerABI, ...ComptrollerFirstExtensionABI],
+          signerOrProvider
+        ) as ComptrollerWithExtensions;
       }
 
-      return new Contract(comptrollerAddress, comptrollerABI, signerOrProvider) as ComptrollerWithExtensions;
-    }
-
-    createOracle(oracleAddress: string, type: string, signerOrProvider: SignerOrProvider = this.signer) {
-      return new Contract(oracleAddress, this.chainDeployment[type].abi, signerOrProvider);
+      return new Contract(comptrollerAddress, ComptrollerABI, signerOrProvider) as ComptrollerWithExtensions;
     }
 
     createCTokenWithExtensions(address: string, signerOrProvider: SignerOrProvider = this.provider) {
-      const cTokenABI: Array<Fragment> = this.chainDeployment.CErc20Delegate.abi;
       if (this.chainDeployment.CTokenFirstExtension) {
-        cTokenABI.push(...this.chainDeployment.CTokenFirstExtension.abi);
+        return new Contract(
+          address,
+          [...CErc20DelegateABI, ...CTokenFirstExtensionABI],
+          signerOrProvider
+        ) as CTokenWithExtensions;
       }
 
-      return new Contract(address, cTokenABI, signerOrProvider) as CTokenWithExtensions;
+      return new Contract(address, CErc20DelegateABI, signerOrProvider) as CTokenWithExtensions;
     }
 
-    createCErc20PluginRewardsDelegate(cTokenAddress: string, signerOrProvider: SignerOrProvider = this.signer) {
+    createCErc20PluginRewardsDelegate(cTokenAddress: string, signerOrProvider: SignerOrProvider = this.provider) {
       return new Contract(
         cTokenAddress,
-        this.chainDeployment.CErc20PluginRewardsDelegate.abi,
+        CErc20PluginRewardsDelegateABI,
         signerOrProvider
       ) as CErc20PluginRewardsDelegate;
     }
 
-    createMasterPriceOracle(signerOrProvider: SignerOrProvider = this.signer) {
+    createMasterPriceOracle(signerOrProvider: SignerOrProvider = this.provider) {
       return new Contract(
-        this.chainDeployment.MasterPriceOracle.address!,
-        this.chainDeployment.MasterPriceOracle.abi,
+        this.chainDeployment.MasterPriceOracle.address,
+        MasterPriceOracleABI,
         signerOrProvider
       ) as MasterPriceOracle;
     }
   };
 }
+
+export type CreateContractsModule = ReturnType<typeof withCreateContracts<MidasBaseConstructor>>;

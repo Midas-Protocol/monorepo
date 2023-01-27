@@ -444,6 +444,16 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     from: upgradesAdmin,
     args: [],
     log: true,
+    proxy: {
+      execute: {
+        init: {
+          methodName: "initialize",
+          args: [],
+        },
+      },
+      proxyContract: "OpenZeppelinTransparentProxy",
+      owner: deployer,
+    },
     waitConfirmations: 1,
   });
   if (simplePO.transactionHash) await ethers.provider.waitForTransaction(simplePO.transactionHash);
