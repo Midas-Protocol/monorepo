@@ -2,6 +2,9 @@ import { bsc, evmos, moonbeam, polygon } from "@midas-capital/chains";
 import { underlying } from "@midas-capital/types";
 import { task, types } from "hardhat/config";
 
+import { CErc20PluginRewardsDelegate } from "../../typechain/CErc20PluginRewardsDelegate";
+import { MidasFlywheel } from "../../typechain/MidasFlywheel";
+
 const underlyingsMapping = {
   [bsc.chainId]: bsc.assets,
   [moonbeam.chainId]: moonbeam.assets,
@@ -136,3 +139,38 @@ task("deploy-dynamic-rewards-market", "deploy dynamic rewards plugin with flywhe
       }
     }
   });
+
+task("approve-market-flywheel").setAction(async ({}, { ethers, getChainId }) => {
+  const deployer = await ethers.getNamedSigner("deployer");
+  const chainId = parseInt(await getChainId());
+
+  let pairs: [string, string][];
+
+  if (chainId == 137) {
+    pairs = [
+      ["0x5ff63e442ac4724ec342f4a3d26924233832ecbb", "0x4ded2939a2a8912e9cc9eaefabecc43cc9864723"],
+      ["0x5ff63e442ac4724ec342f4a3d26924233832ecbb", "0xa5a14c3814d358230a56e8f011b8fc97a508e890"],
+      ["0x5ff63e442ac4724ec342f4a3d26924233832ecbb", "0xcb67bd2ae0597edb2426802cdf34bb4085d9483a"],
+    ];
+  } else if (chainId == 56) {
+    pairs = [["0xf2e46295c684c541d618243558a0af17fb4a6862", "0xf0a2852958ad041a9fb35c312605482ca3ec17ba"]];
+  }
+
+  for (let i = 0; i < pairs.length; i++) {
+    const flywheelAddress = pairs[i][0];
+    const marketAddress = pairs[i][1];
+
+    const flywheel = (await ethers.getContractAt("MidasFlywheel", flywheelAddress, deployer)) as MidasFlywheel;
+    const market = (await ethers.getContractAt(
+      "CErc20PluginDelegate",
+      marketAddress,
+      deployer
+    )) as CErc20PluginRewardsDelegate;
+
+    const rewardToken = flywheel.callStatic.rewardToken();
+    const tx = await market.approve(rewardToken, flywheelAddress);
+    console.log(`mining tx ${tx.hash}`);
+    await tx.wait();
+    console.log(`approved flywheel ${flywheelAddress} to pull reward tokens from market ${marketAddress}`);
+  }
+});
