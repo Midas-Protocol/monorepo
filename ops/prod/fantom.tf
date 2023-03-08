@@ -6,24 +6,20 @@ locals {
 }
 
 
-module "fantom_mainnet_liquidation_cron" {
-  source                  = "../modules/cron"
-  service_security_groups = module.network.ecs_task_sg
-  execution_role_arn      = module.iam.execution_role_arn
-  cluster_id              = module.ecs.ecs_cluster_id
-  docker_image            = "ghcr.io/midas-protocol/liquidator:${var.bots_image_tag}"
-  region                  = var.region
-  environment             = "mainnet"
-  container_family        = "liquidation-cron"
-  chain_id                = local.fantom_mainnet_chain_id
-  cpu                     = 256
-  memory                  = 512
-  instance_count          = 1
-  subnets                 = module.network.public_subnets
-  provider_urls           = [local.fantom_mainnet_rpc_1]
-  runtime_env_vars = concat(local.liquidation_variables, [
-    { name = "TARGET_CHAIN_ID", value = local.fantom_mainnet_chain_id },
-  ])
-  ecs_cluster_arn     = module.ecs.ecs_cluster_arn
+module "fantom_mainnet_liquidation_rpc_1" {
+  source              = "../modules/lambda"
+  ecr_repository_name = "liquidator"
+  docker_image_tag    = var.bots_image_tag
+  container_family    = "liquidator-rpc-1"
+  environment         = "mainnet"
+  chain_id            = local.fantom_mainnet_chain_id
+  container_env_vars = merge(
+    local.liquidation_variables,
+    { WEB3_HTTP_PROVIDER_URL = local.fantom_mainnet_rpc_1 }
+  )
   schedule_expression = "rate(2 minutes)"
+  timeout             = 250
+  memory_size         = 128
 }
+
+

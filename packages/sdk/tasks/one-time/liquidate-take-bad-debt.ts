@@ -4,7 +4,6 @@ import { task, types } from "hardhat/config";
 import { ChainDeployConfig, chainDeployConfig } from "../../chainDeploy";
 import { CErc20 } from "../../typechain/CErc20";
 import { CTokenFirstExtension } from "../../typechain/CTokenFirstExtension";
-import { ERC20 } from "../../typechain/ERC20";
 import { IUniswapV2Factory } from "../../typechain/IUniswapV2Factory";
 import { MasterPriceOracle } from "../../typechain/MasterPriceOracle";
 import { MidasSafeLiquidator } from "../../typechain/MidasSafeLiquidator";

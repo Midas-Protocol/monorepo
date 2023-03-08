@@ -1,15 +1,19 @@
 import { task, types } from "hardhat/config";
 
-task("flywheel:deploy-static-rewards", "Deploy static rewards flywheel for LM rewards")
+  task("flywheel:deploy-static-rewards-fw", "Deploy static rewards flywheel for LM rewards")
   .addParam("name", "String to append to the flywheel contract name", undefined, types.string)
   .addParam("rewardToken", "Reward token of flywheel", undefined, types.string)
-  .addParam("strategy", "address of strategy for which to enable the flywheel", undefined, types.string)
+  .addParam("strategies", "address of strategy for which to enable the flywheel", undefined, types.string)
   .addParam("pool", "comptroller to which to add the flywheel", undefined, types.string)
-  .setAction(async ({ name, rewardToken, strategy, pool }, { ethers, deployments, run }) => {
+  .setAction(async ({ name, rewardToken, strategies, pool }, { ethers, deployments, run }) => {
     const { extrasAdmin } = await ethers.getNamedSigners();
+    // @ts-ignore
+    const midasSdkModule = await import("../../tests/utils/midasSdk");
+    const sdk = await midasSdkModule.getOrCreateMidas(extrasAdmin);
 
     const flywheelBooster = await ethers.getContract("LooplessFlywheelBooster");
 
+    console.log({ extrasAdmin, name, rewardToken, strategies, pool });
     const flywheel = await deployments.deploy(`MidasFlywheel_${name}`, {
       contract: "MidasFlywheel",
       from: extrasAdmin.address,
@@ -27,12 +31,34 @@ task("flywheel:deploy-static-rewards", "Deploy static rewards flywheel for LM re
       waitConfirmations: 1,
     });
 
-    const rewards = await deployments.deploy(`FlywheelStaticRewards_${name}`, {
-      contract: "FlywheelStaticRewards",
+    console.log(`Deployed flywheel: ${flywheel.address}`);
+    const rewards = await run("flywheel:deploy-static-rewards", { flywheel: flywheel.address, signer: extrasAdmin.address, name });
+    console.log(`Deployed rewards: ${rewards.address}`);
+    const tx = await sdk.setFlywheelRewards(flywheel.address, rewards.address);
+    await tx.wait();
+
+    console.log(`Set rewards (${rewards.address}) to flywheel (${flywheel.address})`);
+    const strategyAddresses = strategies.split(",");
+    for (const strategy of strategyAddresses) {
+      console.log(`Adding strategy ${strategy} to flywheel ${flywheel.address}`);
+      await run("flywheel:add-strategy-for-rewards", { flywheel: flywheel.address, strategy });
+      console.log(`Added strategy (${strategy}) to flywheel (${flywheel.address})`);
+    }
+    await run("flywheel:add-to-pool", { flywheel: flywheel.address, pool });
+    console.log(`Added flywheel (${flywheel.address}) to pool (${pool})`);
+  });
+
+task("flywheel:deploy-static-rewards", "Deploy static rewards flywheel for LM rewards")
+  .addParam("name", "String to append to the flywheel contract name", undefined, types.string)
+  .addParam("flywheel", "flywheel to which to add the rewards contract", undefined, types.string)
+  .setAction(async ({ name, flywheel }, { ethers, deployments }) => {
+    const { extrasAdmin } = await ethers.getNamedSigners();
+    const rewards = await deployments.deploy(`WithdrawableFlywheelStaticRewards_${name}`, {
+      contract: "WithdrawableFlywheelStaticRewards",
       from: extrasAdmin.address,
       log: true,
       args: [
-        flywheel.address, // flywheel
+        flywheel, // flywheel
         extrasAdmin.address, // owner
         ethers.constants.AddressZero, // Authority
       ],
@@ -42,10 +68,9 @@ task("flywheel:deploy-static-rewards", "Deploy static rewards flywheel for LM re
     const midasSdkModule = await import("../../tests/utils/midasSdk");
     const sdk = await midasSdkModule.getOrCreateMidas(extrasAdmin);
 
-    await sdk.setFlywheelRewards(flywheel.address, rewards.address);
-
-    await run("flywheel:add-strategy-for-rewards", { flywheel: flywheel.address, strategy });
-    await run("flywheel:add-to-pool", { flywheel: flywheel.address, pool });
+    const tx = await sdk.setFlywheelRewards(flywheel, rewards.address);
+    await tx.wait();
+    return rewards;
   });
 
 task("flywheel:add-strategy-for-rewards", "Create pool if does not exist")
@@ -73,10 +98,8 @@ task("flywheel:add-strategy-for-rewards", "Create pool if does not exist")
     const sdk = await midasSdkModule.getOrCreateMidas(extrasAdmin);
 
     const addTx = await sdk.addStrategyForRewardsToFlywheelCore(flywheelAddress, strategyAddress);
-    console.log(addTx);
-
     const receipt = await addTx.wait();
-    console.log(receipt);
+    console.log(receipt.transactionHash);
   });
 
 task("flywheel:add-to-pool", "Create pool if does not exist")
@@ -102,7 +125,6 @@ task("flywheel:add-to-pool", "Create pool if does not exist")
     // @ts-ignore
     const midasSdkModule = await import("../../tests/utils/midasSdk");
     const sdk = await midasSdkModule.getOrCreateMidas(extrasAdmin);
-    console.log({ sdk });
 
     const addTx = await sdk.addFlywheelCoreToComptroller(flywheelAddress, poolAddress);
     console.log({ addTx });

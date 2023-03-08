@@ -1,8 +1,8 @@
 import { MidasSdk } from "@midas-capital/sdk";
 import { LiquidatablePool } from "@midas-capital/sdk/dist/cjs/src/modules/liquidation/utils";
 
-import { config, logger } from "..";
-import { EXCLUDED_ERROR_CODES } from "../config";
+import config, { EXCLUDED_ERROR_CODES } from "../config";
+import { logger } from "../logger";
 
 import { DiscordService } from "./discord";
 
@@ -21,7 +21,9 @@ export class Liquidator {
         (pool) => !Object.values(EXCLUDED_ERROR_CODES).includes(pool.error.code)
       );
       if (filteredErroredPools.length > 0) {
-        const msg = erroredPools.map((pool) => `Comptroller: ${pool.comptroller} - msg: ${pool.msg}`).join("\n");
+        const msg = erroredPools
+          .map((pool) => `Comptroller: ${pool.comptroller} - msg: ${pool.msg} ${JSON.stringify(pool.error.stack)}`)
+          .join("\n");
         logger.error(`Errored fetching liquidations from pools: ${msg}`);
         this.alert.sendLiquidationFetchingFailure(erroredPools, msg);
       }

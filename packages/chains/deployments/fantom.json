@@ -23,29 +23,68 @@
     "AnkrFTMInterestRateModel": {
       "address": "0x6c66030a8431C7e2973D63340F5fF95889dce5f9"
     },
+    "BalancerLpTokenLiquidator": {
+      "address": "0xEB63CE86Caf06CbB6387F9822c13c629B31b6064"
+    },
+    "BalancerLpTokenPriceOracle": {
+      "address": "0x70B6f26755e2594a714a931f21C3d29bcb424757"
+    },
+    "BalancerLpTokenPriceOracle_Implementation": {
+      "address": "0x61E91F52103f91C29c629DE62850a9b85AB9Fb74"
+    },
+    "BalancerLpTokenPriceOracle_Proxy": {
+      "address": "0x70B6f26755e2594a714a931f21C3d29bcb424757"
+    },
     "CErc20Delegate": {
-      "address": "0x7F90F0E96909513c80334bC7e3Fc6E92cca3CDCe"
+      "address": "0xC8cfBfCE1D07b8017659AED821836a4Fafb4CF4E"
     },
     "CErc20PluginDelegate": {
-      "address": "0x5a6dB8ACA7BF203e5c87a3f239cf7E4d87aaA3f4"
+      "address": "0x535CFc504C37C74948430392dC3E18d90d63e8e2"
     },
     "CErc20PluginRewardsDelegate": {
-      "address": "0x4c818340e841969a5EAcDe5DE17F61a64f636f2E"
+      "address": "0xF2dcd9116Ef2974C1536be3C9a0Cb5EC3CaB9D60"
     },
     "CTokenFirstExtension": {
-      "address": "0xee9762ec89BEB419CcB89F83eDbe6c8395efC8e0"
+      "address": "0x1421d167d38f01c66215F3c5e10649059f2F2e86"
     },
     "ChainlinkPriceOracleV2": {
       "address": "0x8E9f21C59A6E63e5F08a6688a02b55042158f0B5"
     },
     "Comptroller": {
-      "address": "0xE9D392817e82a6237449f2a2C9f4d3a53f272dd9"
+      "address": "0xc107D4D1662bf610607B00E1FCD1bb1CEd945936"
     },
     "ComptrollerFirstExtension": {
-      "address": "0xB7BA7ACf9Fc2923C3d431fc6df8D7734af0155BF"
+      "address": "0x52e6C832c0ca520492526429BCa394E4051Bd79a"
+    },
+    "CurveLpTokenLiquidatorNoRegistry": {
+      "address": "0x239218130dCBe0298d7ec4d2F96f4696Fe118624"
+    },
+    "CurveLpTokenPriceOracleNoRegistry": {
+      "address": "0xbF60bDf4bc95d84fB9a6b40792C5465D491B2023"
+    },
+    "CurveLpTokenPriceOracleNoRegistry_Implementation": {
+      "address": "0x8A180Fd239E15652CE574e3601e43621FB9C0D94"
+    },
+    "CurveLpTokenPriceOracleNoRegistry_Proxy": {
+      "address": "0xbF60bDf4bc95d84fB9a6b40792C5465D491B2023"
+    },
+    "CurveSwapLiquidator": {
+      "address": "0x2a664207F499496498546aDc9B73d5663171e5D4"
+    },
+    "CurveV2LpTokenPriceOracleNoRegistry": {
+      "address": "0x506E21A470ff22dF5DDAb03C0149b3234b4B0d4A"
+    },
+    "CurveV2LpTokenPriceOracleNoRegistry_Implementation": {
+      "address": "0xB5ea8d2913ccF26380a6690fA59C7631403c7d65"
+    },
+    "CurveV2LpTokenPriceOracleNoRegistry_Proxy": {
+      "address": "0x506E21A470ff22dF5DDAb03C0149b3234b4B0d4A"
     },
     "DefaultProxyAdmin": {
       "address": "0xA21eB35869C4aafeB55a931Db7F56267a59dB620"
+    },
+    "DiaPriceOracle": {
+      "address": "0x55a92B017C2235988e2bcD7085e6a19110d08b38"
     },
     "FixedNativePriceOracle": {
       "address": "0xd4D0cA503E8befAbE4b75aAC36675Bc1cFA533D1"
@@ -54,7 +93,7 @@
       "address": "0xA2938d28D26F5D0aA86ffdC9BED815F184A7b1bD"
     },
     "FuseFeeDistributor_Implementation": {
-      "address": "0xC6D57300974368BE5B979e62EA76cab5C6bc3130"
+      "address": "0xE9217d14850153CD878Fb1Ac1277Ee2Cd38961cC"
     },
     "FuseFeeDistributor_Proxy": {
       "address": "0xA2938d28D26F5D0aA86ffdC9BED815F184A7b1bD"
@@ -69,7 +108,7 @@
       "address": "0xE622c2967E2885ED04436075889C88696328aBE8"
     },
     "FusePoolLens": {
-      "address": "0xC7E832210f2A818cF51D6e43a740f93AaB9B2F68"
+      "address": "0x51Fc4413D3d32129a7C56c72fC8d273Cfe8306e6"
     },
     "FusePoolLensSecondary": {
       "address": "0x6537110273d79184205395cfd852dcF3DA6861Ed"
@@ -102,7 +141,13 @@
       "address": "0x34022232C0233Ee05FDe3383FcEC52248Dd84b91"
     },
     "SimplePriceOracle": {
-      "address": "0x684873B5c1DA3AE5474BEE8C8e0Dd1d25ddedA09"
+      "address": "0x863D4F7FA3618fb1D4A94F28B5b74a30c337b9C7"
+    },
+    "SimplePriceOracle_Implementation": {
+      "address": "0x0e9AF6E9211d643fBF7413a65dB240f2cBfC5299"
+    },
+    "SimplePriceOracle_Proxy": {
+      "address": "0x863D4F7FA3618fb1D4A94F28B5b74a30c337b9C7"
     },
     "WhitePaperInterestRateModel": {
       "address": "0xf053FC4634B8683a583E962ebb2C7C419B6Eb7Aa"

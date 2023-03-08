@@ -8,7 +8,6 @@ import {
   deployCurveLpOracle,
   deploySaddleLpOracle,
   deployUniswapLpOracle,
-  deployUniswapOracle,
   deployUniswapV3Oracle,
 } from "../helpers";
 import {
@@ -35,15 +34,7 @@ export const deployConfig: ChainDeployConfig = {
     uniswapV2RouterAddress: "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506",
     uniswapV2FactoryAddress: "0xc35DADB65012eC5796536bD9864eD8773aBc74C4",
     uniswapV3FactoryAddress: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
-    uniswapOracleInitialDeployTokens: [
-      {
-        token: underlying(assets, assetSymbols.GOHM),
-        pair: "0xaa5bD49f2162ffdC15634c87A77AC67bD51C6a6D", // WETH-GOHM
-        baseToken: underlying(assets, assetSymbols.WETH),
-        minPeriod: 1800,
-        deviationThreshold: "10000000000000000", // 1%
-      },
-    ],
+    uniswapOracleInitialDeployTokens: [],
     uniswapOracleLpTokens: [],
     flashSwapFee: 25,
     uniswapV3OracleTokens: [
@@ -118,7 +109,7 @@ const chainlinkAssets: ChainlinkAsset[] = [
   },
   {
     symbol: assetSymbols.WBTC,
-    aggregator: "0xc5a90A6d7e4Af242dA238FFe279e9f2BA0c64B2e",
+    aggregator: "0x6ce185860a4963106506C203335A2910413708e9",
     feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
   },
   {
@@ -175,7 +166,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   //// ORACLES
   //// Uniswap Oracle
-  await deployUniswapOracle({ run, ethers, getNamedAccounts, deployments, deployConfig });
+  // await deployUniswapOracle({ run, ethers, getNamedAccounts, deployments, deployConfig });
 
   //// ChainLinkV2 Oracle
   await deployChainlinkOracle({

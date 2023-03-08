@@ -1,31 +1,45 @@
 import { useQuery } from '@tanstack/react-query';
 import { utils } from 'ethers';
+import { useMemo } from 'react';
 
 import { DEFAULT_DECIMALS } from '@ui/constants/index';
-import { useCgId } from '@ui/hooks/useChainConfig';
-import { useUSDPrice } from '@ui/hooks/useUSDPrice';
+import { useAllUsdPrices } from '@ui/hooks/useAllUsdPrices';
+import { useBorrowCap } from '@ui/hooks/useBorrowCap';
 import { MarketData } from '@ui/types/TokensDataMap';
 
 export const useBorrowLimitMarket = (
   asset: MarketData,
   assets: MarketData[],
   poolChainId: number,
+  comptrollerAddress: string,
   options?: { ignoreIsEnabledCheckFor?: string }
 ) => {
-  const coingeckoId = useCgId(poolChainId);
-  const { data: usdPrice } = useUSDPrice(coingeckoId);
+  const { data: usdPrices } = useAllUsdPrices();
+  const usdPrice = useMemo(() => {
+    if (usdPrices && usdPrices[poolChainId.toString()]) {
+      return usdPrices[poolChainId.toString()].value;
+    } else {
+      return undefined;
+    }
+  }, [usdPrices, poolChainId]);
+  const { data: borrowCaps } = useBorrowCap({
+    comptroller: comptrollerAddress,
+    market: asset,
+    chainId: poolChainId,
+  });
 
   return useQuery(
     [
       'useBorrowLimitMarket',
       poolChainId,
       asset,
-      assets.sort((a, b) => a.cToken.localeCompare(b.cToken)),
+      assets,
       options?.ignoreIsEnabledCheckFor,
       usdPrice,
+      borrowCaps,
     ],
     async () => {
-      if (!usdPrice) return null;
+      if (!usdPrice) return undefined;
 
       let _maxBorrow = 0;
 
@@ -43,7 +57,7 @@ export const useBorrowLimitMarket = (
         }
       }
 
-      return _maxBorrow;
+      return borrowCaps && borrowCaps.usdCap < _maxBorrow ? borrowCaps.usdCap : _maxBorrow;
     },
     { cacheTime: Infinity, staleTime: Infinity, enabled: !!usdPrice }
   );

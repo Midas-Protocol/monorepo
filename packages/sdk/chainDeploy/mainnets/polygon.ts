@@ -11,7 +11,6 @@ import {
   deployCurveLpOracle,
   deployDiaOracle,
   deployUniswapLpOracle,
-  deployUniswapOracle,
 } from "../helpers";
 import { deployFlywheelWithDynamicRewards } from "../helpers/dynamicFlywheels";
 import { deployBalancerLpPriceOracle } from "../helpers/oracles/balancerLp";
@@ -61,15 +60,7 @@ export const deployConfig: ChainDeployConfig = {
     uniswapV2RouterAddress: "0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff",
     uniswapV2FactoryAddress: "0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32",
     uniswapV3FactoryAddress: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
-    uniswapOracleInitialDeployTokens: [
-      {
-        token: underlying(assets, assetSymbols.JRT),
-        pair: "0x17F54d87B54B0F4BDc2Eb1E24C99f72a49c417CF", // USDC-JRT
-        baseToken: underlying(assets, assetSymbols.USDC),
-        minPeriod: 1800,
-        deviationThreshold: "10000000000000000",
-      },
-    ],
+    uniswapOracleInitialDeployTokens: [],
     uniswapOracleLpTokens: [
       underlying(assets, assetSymbols["WMATIC-USDC"]),
       underlying(assets, assetSymbols["WMATIC-ETH"]),
@@ -238,11 +229,6 @@ const chainlinkAssets: ChainlinkAsset[] = [
     feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
   },
   {
-    symbol: assetSymbols.PAR,
-    aggregator: "0x73366Fe0AA0Ded304479862808e02506FE556a98",
-    feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
-  },
-  {
     symbol: assetSymbols.EURT,
     aggregator: "0x73366Fe0AA0Ded304479862808e02506FE556a98",
     feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
@@ -335,6 +321,16 @@ const chainlinkAssets: ChainlinkAsset[] = [
   {
     symbol: assetSymbols.JPHP,
     aggregator: "0x218231089Bebb2A31970c3b77E96eCfb3BA006D1",
+    feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
+  },
+  {
+    symbol: assetSymbols.jBRL,
+    aggregator: "0xB90DA3ff54C3ED09115abf6FbA0Ff4645586af2c",
+    feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
+  },
+  {
+    symbol: assetSymbols.BRZ,
+    aggregator: "0xB90DA3ff54C3ED09115abf6FbA0Ff4645586af2c",
     feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
   },
 ];
@@ -450,6 +446,12 @@ const diaAssets: DiaAsset[] = [
     feed: "0xd3709072C338689F94a4072a26Bb993559D9a026",
     key: "MIMO/USD",
   },
+  {
+    symbol: assetSymbols.PAR,
+    underlying: underlying(assets, assetSymbols.PAR),
+    feed: "0xd3709072C338689F94a4072a26Bb993559D9a026",
+    key: "PAR/USD",
+  },
 ];
 
 const balancerLpAssets: BalancerLpAsset[] = [
@@ -482,13 +484,13 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
   ////
 
   //// Uniswap Oracle
-  await deployUniswapOracle({
-    run,
-    ethers,
-    getNamedAccounts,
-    deployments,
-    deployConfig,
-  });
+  // await deployUniswapOracle({
+  //   run,
+  //   ethers,
+  //   getNamedAccounts,
+  //   deployments,
+  //   deployConfig,
+  // });
 
   //// Uniswap LP Oracle
   await deployUniswapLpOracle({
@@ -659,6 +661,19 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
   });
   console.log("UniswapV3LiquidatorFunder: ", uniswapV3LiquidatorFunder.address);
 
+  //// custom uniswap v2 redemptions and funding
+  const uniswapV2LiquidatorFunder = await deployments.deploy("UniswapV2LiquidatorFunder", {
+    from: upgradesAdmin,
+    args: [],
+    log: true,
+    waitConfirmations: 1,
+  });
+  if (uniswapV2LiquidatorFunder.transactionHash) {
+    await ethers.provider.waitForTransaction(uniswapV2LiquidatorFunder.transactionHash);
+  }
+  console.log("UniswapV2LiquidatorFunder: ", uniswapV2LiquidatorFunder.address);
+
+  /// Addresses Provider
   /// Addresses Provider - set bUSD
   const addressesProvider = (await ethers.getContract("AddressesProvider", testConfigAdmin)) as AddressesProvider;
   const busdAddress = underlying(assets, assetSymbols.BUSD);
@@ -667,6 +682,23 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
     const tx = await addressesProvider.setAddress("bUSD", busdAddress);
     await tx.wait();
     console.log("setAddress bUSD: ", tx.hash);
+  }
+  /// set BalancerLpStablePoolPriceOracle
+  const balancerLpStablePoolPriceOracle = await ethers.getContractOrNull("BalancerLpStablePoolPriceOracle");
+  const balancerLpStablePoolPriceOracleAp = await addressesProvider.callStatic.getAddress(
+    "BalancerLpStablePoolPriceOracle"
+  );
+  if (
+    balancerLpStablePoolPriceOracle &&
+    balancerLpStablePoolPriceOracleAp !== balancerLpStablePoolPriceOracle.address
+  ) {
+    const tx = await addressesProvider.setAddress(
+      "BalancerLpStablePoolPriceOracle",
+      balancerLpStablePoolPriceOracle.address
+    );
+    console.log("setAddress BalancerLpStablePoolPriceOracle: ", tx.hash);
+    await tx.wait();
+    console.log("mined setAddress BalancerLpStablePoolPriceOracle: ", tx.hash);
   }
   ////
 };

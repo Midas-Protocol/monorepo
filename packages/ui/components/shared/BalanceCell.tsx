@@ -1,7 +1,9 @@
 import { Divider, HStack, Progress, Text, VStack } from '@chakra-ui/react';
 import { BigNumber, utils } from 'ethers';
+import { useMemo } from 'react';
 
 import { PopoverTooltip } from '@ui/components/shared/PopoverTooltip';
+import { Cap } from '@ui/hooks/useBorrowCap';
 import { useColors } from '@ui/hooks/useColors';
 import { midFormat, smallFormatter } from '@ui/utils/bigUtils';
 
@@ -14,25 +16,23 @@ interface BalanceCellProps {
     decimals: number;
     symbol: string;
   };
-  supplyCaps?: { usdCap: number; nativeCap: number } | null;
+  cap?: Cap | null;
 }
 
-export const BalanceCell = ({ primary, secondary, supplyCaps }: BalanceCellProps) => {
+export const BalanceCell = ({ primary, secondary, cap }: BalanceCellProps) => {
   const { cCard } = useColors();
-  const ratio =
-    supplyCaps && supplyCaps.usdCap
-      ? parseInt(((primary.value * 100) / supplyCaps.usdCap).toString())
-      : undefined;
-
+  const capRatio = useMemo(
+    () =>
+      cap && cap.usdCap ? parseInt(((primary.value * 100) / cap.usdCap).toString()) : undefined,
+    [cap, primary]
+  );
   return (
     <PopoverTooltip
       body={
         <VStack alignItems="flex-start">
           <HStack>
             <Text variant="tnumber">$ {smallFormatter.format(primary.value)}</Text>
-            {supplyCaps && (
-              <Text variant="tnumber">/ $ {smallFormatter.format(supplyCaps.usdCap)}</Text>
-            )}
+            {cap && <Text variant="tnumber">/ $ {smallFormatter.format(cap.usdCap)}</Text>}
           </HStack>
           {secondary && (
             <HStack>
@@ -41,69 +41,70 @@ export const BalanceCell = ({ primary, secondary, supplyCaps }: BalanceCellProps
                   parseFloat(utils.formatUnits(secondary.value, secondary.decimals))
                 )} ${secondary.symbol}`}
               </Text>
-              {supplyCaps && (
-                <Text variant="tnumber">{`/ ${smallFormatter.format(supplyCaps.nativeCap)} ${
+              {cap && (
+                <Text variant="tnumber">{`/ ${smallFormatter.format(cap.tokenCap)} ${
                   secondary.symbol
                 }`}</Text>
               )}
             </HStack>
           )}
 
-          {supplyCaps ? (
+          {cap ? (
             <>
               <Divider />
               <Text mb={4}>
-                This asset has a restricted supply amount for security reasons.
-                {ratio && ` As of now, ${ratio}% are already supplied to this market.`}
+                This asset has a restricted amount for security reasons.
+                {cap &&
+                  ` As of now, ${capRatio}% are already ${
+                    cap.type === 'borrow' ? 'borrowed' : 'supplied'
+                  } in this market.`}
               </Text>
             </>
           ) : null}
         </VStack>
       }
-      maxWidth="400px"
-      placement="top-end"
-      hideArrow={true}
+      popoverProps={{ placement: 'top-end' }}
     >
       <VStack alignItems="flex-end" spacing={1}>
         <HStack spacing={2}>
           <HStack spacing={0.5}>
-            <Text color={cCard.txtColor} size="sm" fontWeight={'medium'} variant="tnumber">
+            <Text color={cCard.txtColor} fontWeight={'medium'} size="sm" variant="tnumber">
               {'$'}
             </Text>
-            <Text color={cCard.txtColor} size="sm" fontWeight={'medium'} variant="tnumber">
+            <Text color={cCard.txtColor} fontWeight={'medium'} size="sm" variant="tnumber">
               {smallFormatter.format(primary.value)}
             </Text>
           </HStack>
-          {supplyCaps && (
+          {cap && (
             <Text
               color={cCard.txtColor}
-              size="sm"
               fontWeight={'medium'}
-              variant="tnumber"
               opacity={0.6}
+              size="sm"
+              variant="tnumber"
             >
               {'/'}
             </Text>
           )}
-          {supplyCaps && (
+          {cap && (
             <HStack spacing={0.5}>
               <Text
                 color={cCard.txtColor}
-                size="xs"
                 fontWeight={'medium'}
-                variant="tnumber"
                 opacity={0.6}
+                size="xs"
+                variant="tnumber"
               >
                 {'$'}
               </Text>
               <Text
                 color={cCard.txtColor}
-                size="xs"
                 fontWeight={'medium'}
-                variant="tnumber"
                 opacity={0.6}
+                size="xs"
+                variant="tnumber"
               >
-                {midFormat(supplyCaps.usdCap)}
+                {midFormat(cap.usdCap)}
               </Text>
             </HStack>
           )}
@@ -111,48 +112,48 @@ export const BalanceCell = ({ primary, secondary, supplyCaps }: BalanceCellProps
         {secondary && (
           <HStack spacing={1}>
             <HStack spacing={0.5}>
-              <Text variant="tnumber" size="xs" opacity={0.6}>
+              <Text opacity={0.6} size="xs" variant="tnumber">
                 {midFormat(Number(utils.formatUnits(secondary.value, secondary.decimals)))}
               </Text>
               <Text
-                variant="tnumber"
+                align="right"
+                maxWidth={'55px'}
+                opacity={0.6}
+                overflow="hidden"
                 size="xs"
                 textOverflow="ellipsis"
-                align="right"
+                variant="tnumber"
                 whiteSpace="nowrap"
-                maxWidth={'55px'}
-                overflow="hidden"
-                opacity={0.6}
               >
                 {secondary.symbol}
               </Text>
             </HStack>
 
-            {supplyCaps && (
+            {cap && (
               <Text
                 color={cCard.txtColor}
-                size="sm"
                 fontWeight={'medium'}
-                variant="tnumber"
                 opacity={0.6}
+                size="sm"
+                variant="tnumber"
               >
                 {'/'}
               </Text>
             )}
-            {supplyCaps && (
+            {cap && (
               <HStack spacing={0.5}>
-                <Text variant="tnumber" size="xs" opacity={0.6}>
-                  {midFormat(supplyCaps.nativeCap)}
+                <Text opacity={0.6} size="xs" variant="tnumber">
+                  {midFormat(cap.tokenCap)}
                 </Text>
                 <Text
-                  variant="tnumber"
+                  align="right"
+                  maxWidth={'55px'}
+                  opacity={0.6}
+                  overflow="hidden"
                   size="xs"
                   textOverflow="ellipsis"
-                  align="right"
+                  variant="tnumber"
                   whiteSpace="nowrap"
-                  maxWidth={'55px'}
-                  overflow="hidden"
-                  opacity={0.6}
                 >
                   {secondary.symbol}
                 </Text>
@@ -161,13 +162,13 @@ export const BalanceCell = ({ primary, secondary, supplyCaps }: BalanceCellProps
           </HStack>
         )}
 
-        {ratio ? (
+        {capRatio != undefined ? (
           <Progress
-            width="100%"
-            height={1}
             borderRadius="2px"
-            value={ratio}
-            colorScheme={ratio <= 75 ? 'green' : ratio <= 90 ? 'yellow' : 'red'}
+            colorScheme={capRatio <= 75 ? 'green' : capRatio <= 90 ? 'yellow' : 'red'}
+            height={1}
+            value={capRatio}
+            width="100%"
           />
         ) : null}
       </VStack>

@@ -10,7 +10,7 @@ export const useCTokenData = (
   const sdk = useSdk(poolChainId);
 
   return useQuery(
-    ['CTokenData', cTokenAddress, comptrollerAddress, sdk?.chainId],
+    ['useCTokenData', cTokenAddress, comptrollerAddress, sdk?.chainId],
     async () => {
       if (comptrollerAddress && cTokenAddress && sdk) {
         const comptroller = sdk.createComptroller(comptrollerAddress);
@@ -19,22 +19,28 @@ export const useCTokenData = (
           adminFeeMantissa,
           reserveFactorMantissa,
           interestRateModelAddress,
+          decimals,
           { collateralFactorMantissa },
-          supplyCaps,
+          supplyCap,
+          borrowCap,
         ] = await Promise.all([
           cToken.callStatic.adminFeeMantissa(),
           cToken.callStatic.reserveFactorMantissa(),
           cToken.callStatic.interestRateModel(),
+          cToken.callStatic.decimals(),
           comptroller.callStatic.markets(cTokenAddress),
           comptroller.callStatic.supplyCaps(cTokenAddress),
+          comptroller.callStatic.borrowCaps(cTokenAddress),
         ]);
 
         return {
           reserveFactorMantissa,
           adminFeeMantissa,
+          decimals,
           collateralFactorMantissa,
           interestRateModelAddress,
-          supplyCaps,
+          supplyCap,
+          borrowCap,
         };
       } else {
         return null;

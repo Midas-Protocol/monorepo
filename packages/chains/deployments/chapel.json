@@ -24,16 +24,16 @@
       "address": "0x909ED97ed24300CCe7af4533D74312b6fE0DA665"
     },
     "CTokenFirstExtension": {
-      "address": "0x728bA61465BA5d90DC5E51dFdA522AC912868306"
+      "address": "0xa0CCF94FD5eaC93269988a5f610D5e2A3Bf0Ba24"
     },
     "ChainlinkPriceOracleV2": {
       "address": "0x9c55d77E1f46622f5171Dc0eB03461FdCCD92836"
     },
     "Comptroller": {
-      "address": "0xee9084Fac4C3B14dFEC532e07FBe76a48e8107CE"
+      "address": "0x939321650F2a112d51B29d0445cd828749ac46f4"
     },
     "ComptrollerFirstExtension": {
-      "address": "0xdA4b73c0E3d12803065F9668da936A4A935460e0"
+      "address": "0xF073bc39fC443d13F402D559cF115768Faff7a47"
     },
     "DefaultProxyAdmin": {
       "address": "0x0C64dEFA0125678C77dDa2287FDD6000699737Cc"
@@ -45,7 +45,7 @@
       "address": "0xFc1f56C58286E7215701A773b61bFf2e18A177dE"
     },
     "FuseFeeDistributor_Implementation": {
-      "address": "0x94864122268aa0BA528ABbF9CFc59564359C1CA7"
+      "address": "0x1Fe3e112fC2CbB0f45436F056f83019B138B3575"
     },
     "FuseFeeDistributor_Proxy": {
       "address": "0xFc1f56C58286E7215701A773b61bFf2e18A177dE"
@@ -69,7 +69,7 @@
       "address": "0x295d7347606F4bd810C8296bb8d75D657001fcf7"
     },
     "FusePoolLens": {
-      "address": "0x07f196040A64A17F3438e273C72484A7428cb922"
+      "address": "0xeAA782fA732FEf5A5B127EA70d1b656216717353"
     },
     "FusePoolLensSecondary": {
       "address": "0x8c70FDE00F64E5F3835D247E6742447074017128"
@@ -117,7 +117,13 @@
       "address": "0x865058A4aF2f70671C10333f21e2B3A8Ce9fB032"
     },
     "SimplePriceOracle": {
-      "address": "0xB537BCFd6E6Ab1a91da42c1a5BbF539e75D627C0"
+      "address": "0xDdD3cf9407a12A6360281d244cb100ABe7fB561f"
+    },
+    "SimplePriceOracle_Implementation": {
+      "address": "0xa3cf8e3603B7bdf99DB179e378e8883a5d3dd5cb"
+    },
+    "SimplePriceOracle_Proxy": {
+      "address": "0xDdD3cf9407a12A6360281d244cb100ABe7fB561f"
     },
     "UniswapLpTokenLiquidator": {
       "address": "0x6f2928475E15D49B2467126146A866b509789946"

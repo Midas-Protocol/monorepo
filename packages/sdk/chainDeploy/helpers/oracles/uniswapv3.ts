@@ -15,9 +15,19 @@ export const deployUniswapV3Oracle = async ({
   //// Uniswap Oracle
   const utpo = await deployments.deploy("UniswapV3PriceOracle", {
     from: upgradesAdmin,
-    args: [oraclesAdmin, true],
     log: true,
+    proxy: {
+      execute: {
+        init: {
+          methodName: "initialize",
+          args: [deployConfig.wtoken, deployConfig.stableToken],
+        },
+      },
+      owner: upgradesAdmin,
+      proxyContract: "OpenZeppelinTransparentProxy",
+    },
   });
+
   if (utpo.transactionHash) await ethers.provider.waitForTransaction(utpo.transactionHash);
   console.log("UniswapV3PriceOracle: ", utpo.address);
 

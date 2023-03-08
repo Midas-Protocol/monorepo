@@ -44,8 +44,18 @@ export const ADMIN_FEE = {
   MAX: 30,
 };
 
-export const SUPPLY_CAPS = {
+export const SUPPLY_CAP = {
   MIN: 0,
+  DEFAULT: 0,
+};
+
+export const BORROW_CAP = {
+  MIN: 0,
+  DEFAULT: 0,
+};
+
+export const DEBT_CEILING = {
+  MIN: -1, // -1: blacklisted, 0: unlimited
   DEFAULT: 0,
 };
 
@@ -73,11 +83,14 @@ export const UP_LIMIT = 0.005;
 export const DOWN_LIMIT = 0;
 
 // for additional APR for ankrBNB in Ankr
-export const ankrBNBContractAddress = '0xBb1Aa6e59E5163D8722a122cd66EBA614b59df0d';
+export const ankrBNBContractAddress = '0xCb0006B31e6b403fEeEC257A8ABeE0817bEd7eBa';
 export const aprDays = 7;
 export const ankrBNBContractABI = [
   {
-    inputs: [{ internalType: 'uint256', name: 'day', type: 'uint256' }],
+    inputs: [
+      { internalType: 'address', name: 'addr', type: 'address' },
+      { internalType: 'uint256', name: 'day', type: 'uint256' },
+    ],
     name: 'averagePercentageRate',
     outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
     stateMutability: 'view',
@@ -108,6 +121,8 @@ export const PERFORMANCE_FEE_TOOLTIP =
   'The fee taken by Midas Capital, as a percentage of the rewards earned by this strategy';
 export const ASSET_SUPPLIED_TOOLTIP =
   'Total Supply of this asset is limited for the overall safety of this pool';
+export const ASSET_BORROWED_TOOLTIP =
+  'Total Borrow of this asset is limited for the overall safety of this pool';
 export const MIDAS_LOCALSTORAGE_KEYS = 'midas_localstorage_keys';
 export const SHRINK_ASSETS = 10;
 export const MIDAS_T_AND_C_ACCEPTED = 'MidasTandCAccepted';
@@ -159,7 +174,6 @@ export const MARKET_COLUMNS = [
   TOTAL_SUPPLY,
   TOTAL_BORROW,
   LIQUIDITY,
-  COLLATERAL,
 ];
 
 export const POOL_NAME = 'Pool Name';

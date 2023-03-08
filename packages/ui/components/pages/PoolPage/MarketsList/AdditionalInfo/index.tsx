@@ -32,6 +32,7 @@ import { PopoverTooltip } from '@ui/components/shared/PopoverTooltip';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
 import {
   ADMIN_FEE_TOOLTIP,
+  ASSET_BORROWED_TOOLTIP,
   ASSET_SUPPLIED_TOOLTIP,
   LOAN_TO_VALUE_TOOLTIP,
   MIDAS_SECURITY_DOCS_URL,
@@ -44,6 +45,7 @@ import { useMultiMidas } from '@ui/context/MultiMidasContext';
 import { useIRM } from '@ui/hooks/fuse/useIRM';
 import { useOracle } from '@ui/hooks/fuse/useOracle';
 import { useStrategyRating } from '@ui/hooks/fuse/useStrategyRating';
+import { useBorrowCap } from '@ui/hooks/useBorrowCap';
 import { useChartData } from '@ui/hooks/useChartData';
 import { useColors } from '@ui/hooks/useColors';
 import { usePerformanceFee } from '@ui/hooks/usePerformanceFee';
@@ -106,112 +108,116 @@ export const AdditionalInfo = ({
   };
 
   const { data: performanceFee } = usePerformanceFee(poolChainId, asset.plugin);
-  const { data: supplyCaps } = useSupplyCap(
-    comptrollerAddress,
-    asset.cToken,
-    asset.underlyingPrice,
-    poolChainId
-  );
+  const { data: supplyCaps } = useSupplyCap({
+    comptroller: comptrollerAddress,
+    chainId: poolChainId,
+    market: asset,
+  });
+  const { data: borrowCaps } = useBorrowCap({
+    comptroller: comptrollerAddress,
+    chainId: poolChainId,
+    market: asset,
+  });
   const { data: oracle } = useOracle(asset.underlyingToken, poolChainId);
   const { data: irm } = useIRM(asset.cToken, poolChainId);
 
   return (
-    <Box width={{ base: windowWidth.width * 0.9, md: 'auto' }} minWidth="400px">
+    <Box minWidth="400px" width={{ base: windowWidth.width * 0.9, md: 'auto' }}>
       <Flex
-        gap={4}
-        justifyContent="flex-end"
         alignItems="center"
         flexDirection={{ base: 'column', lg: 'row' }}
+        gap={4}
+        justifyContent="flex-end"
       >
         {!currentChain ? (
           <Box>
-            <Button variant="_solid" onClick={openConnectModal}>
+            <Button onClick={openConnectModal} variant="_solid">
               Connect Wallet
             </Button>
           </Box>
         ) : currentChain.unsupported || currentChain.id !== poolChainId ? (
           <Box>
-            <Button variant="_solid" onClick={handleSwitch}>
+            <Button onClick={handleSwitch} variant="_solid">
               Switch {chainConfig ? ` to ${chainConfig.specificParams.metadata.name}` : ' Network'}
             </Button>
           </Box>
         ) : (
           <HStack>
             <ClaimAssetRewardsButton
-              poolAddress={comptrollerAddress}
               assetAddress={asset.cToken}
+              poolAddress={comptrollerAddress}
               poolChainId={poolChainId}
             />
             <FundButton
-              mode={FundOperationMode.SUPPLY}
-              comptrollerAddress={comptrollerAddress}
-              assets={assets}
               asset={asset}
+              assets={assets}
+              comptrollerAddress={comptrollerAddress}
               isDisabled={asset.isSupplyPaused}
+              mode={FundOperationMode.SUPPLY}
               poolChainId={poolChainId}
             />
             <FundButton
-              mode={FundOperationMode.WITHDRAW}
-              comptrollerAddress={comptrollerAddress}
-              assets={assets}
               asset={asset}
+              assets={assets}
+              comptrollerAddress={comptrollerAddress}
               isDisabled={asset.supplyBalanceFiat === 0}
+              mode={FundOperationMode.WITHDRAW}
               poolChainId={poolChainId}
             />
             <FundButton
-              mode={FundOperationMode.BORROW}
-              comptrollerAddress={comptrollerAddress}
-              assets={assets}
               asset={asset}
-              isDisabled={asset.isBorrowPaused || supplyBalanceFiat === 0}
-              poolChainId={poolChainId}
+              assets={assets}
               borrowBalanceFiat={borrowBalanceFiat}
+              comptrollerAddress={comptrollerAddress}
+              isDisabled={asset.isBorrowPaused || supplyBalanceFiat === 0}
+              mode={FundOperationMode.BORROW}
+              poolChainId={poolChainId}
             />
             <FundButton
-              mode={FundOperationMode.REPAY}
-              comptrollerAddress={comptrollerAddress}
-              assets={assets}
               asset={asset}
+              assets={assets}
+              comptrollerAddress={comptrollerAddress}
               isDisabled={asset.borrowBalanceFiat === 0}
+              mode={FundOperationMode.REPAY}
               poolChainId={poolChainId}
             />
             <Collateral
-              comptrollerAddress={comptrollerAddress}
-              assets={assets}
               asset={asset}
+              assets={assets}
+              comptrollerAddress={comptrollerAddress}
               poolChainId={poolChainId}
             />
           </HStack>
         )}
       </Flex>
       <Grid
+        alignItems="stretch"
+        gap={4}
+        mt={4}
         templateColumns={{
           base: 'repeat(1, 1fr)',
           lg: 'repeat(2, 1fr)',
         }}
         w="100%"
-        gap={4}
-        alignItems="stretch"
-        mt={4}
       >
         {strategyScore !== undefined && (
           <GridItem rowSpan={2}>
-            <VStack width="100%" spacing={0} borderRadius="20">
+            <VStack borderRadius="20" spacing={0} width="100%">
               <Box
-                width="100%"
-                px={4}
                 background={cCard.headingBgColor}
-                borderWidth={2}
                 borderColor={cCard.headingBgColor}
+                borderWidth={2}
                 height={14}
+                px={4}
+                width="100%"
               >
-                <Flex justifyContent="space-between" alignItems="center" height="100%">
-                  <Flex gap={2} alignSelf="center">
+                <Flex alignItems="center" height="100%" justifyContent="space-between">
+                  <Flex alignSelf="center" gap={2}>
                     <Text>Strategy Safety Score:</Text>
                     <Text
+                      color={setColorByScore(strategyScore.totalScore)}
                       fontWeight="bold"
                       size="md"
-                      color={setColorByScore(strategyScore.totalScore)}
                     >
                       {(strategyScore.totalScore * SCORE_RANGE_MAX).toFixed(2)}
                     </Text>
@@ -227,14 +233,14 @@ export const AdditionalInfo = ({
                   <HStack>
                     {asset.plugin && (
                       <Link href={`${scanUrl}/address/${asset.plugin}`} isExternal rel="noreferrer">
-                        <Button variant={'external'} size="xs" rightIcon={<ExternalLinkIcon />}>
+                        <Button rightIcon={<ExternalLinkIcon />} size="xs" variant={'external'}>
                           Strategy Address
                         </Button>
                       </Link>
                     )}
                     {vaultUrl && (
                       <Link href={vaultUrl} isExternal rel="noreferrer">
-                        <Button variant={'external'} size="xs" rightIcon={<ExternalLinkIcon />}>
+                        <Button rightIcon={<ExternalLinkIcon />} size="xs" variant={'external'}>
                           Vault
                         </Button>
                       </Link>
@@ -242,21 +248,21 @@ export const AdditionalInfo = ({
                   </HStack>
                 </Flex>
               </Box>
-              <Box width="100%" height="100%" borderWidth={2} borderColor={cCard.headingBgColor}>
-                <VStack alignItems="flex-start" p={4} gap={2}>
+              <Box borderColor={cCard.headingBgColor} borderWidth={2} height="100%" width="100%">
+                <VStack alignItems="flex-start" gap={2} p={4}>
                   <Flex gap={2}>
                     {strategyScore.complexityScore >= SCORE_LIMIT ? (
                       <Center>
                         <BsTriangleFill
-                          size={14}
                           color={setColorByScore(strategyScore.complexityScore)}
+                          size={14}
                         />
                       </Center>
                     ) : (
                       <Center>
                         <BsTriangleFill
-                          size={12}
                           color={setColorByScore(strategyScore.complexityScore)}
+                          size={12}
                           style={{ transform: 'rotate(180deg)' }}
                         />
                       </Center>
@@ -293,15 +299,15 @@ export const AdditionalInfo = ({
                     {strategyScore.timeInMarketScore >= SCORE_LIMIT ? (
                       <Center>
                         <BsTriangleFill
-                          size={14}
                           color={setColorByScore(strategyScore.timeInMarketScore)}
+                          size={14}
                         />
                       </Center>
                     ) : (
                       <Center>
                         <BsTriangleFill
-                          size={12}
                           color={setColorByScore(strategyScore.timeInMarketScore)}
+                          size={12}
                           style={{ transform: 'rotate(180deg)' }}
                         />
                       </Center>
@@ -337,15 +343,15 @@ export const AdditionalInfo = ({
                     {strategyScore.assetRiskILScore >= SCORE_LIMIT ? (
                       <Center>
                         <BsTriangleFill
-                          size={14}
                           color={setColorByScore(strategyScore.assetRiskILScore)}
+                          size={14}
                         />
                       </Center>
                     ) : (
                       <Center>
                         <BsTriangleFill
-                          size={12}
                           color={setColorByScore(strategyScore.assetRiskILScore)}
+                          size={12}
                           style={{ transform: 'rotate(180deg)' }}
                         />
                       </Center>
@@ -383,15 +389,15 @@ export const AdditionalInfo = ({
                     {strategyScore.assetRiskLiquidityScore >= SCORE_LIMIT ? (
                       <Center>
                         <BsTriangleFill
-                          size={14}
                           color={setColorByScore(strategyScore.assetRiskLiquidityScore)}
+                          size={14}
                         />
                       </Center>
                     ) : (
                       <Center>
                         <BsTriangleFill
-                          size={12}
                           color={setColorByScore(strategyScore.assetRiskLiquidityScore)}
+                          size={12}
                           style={{ transform: 'rotate(180deg)' }}
                         />
                       </Center>
@@ -428,15 +434,15 @@ export const AdditionalInfo = ({
                     {strategyScore.assetRiskMktCapScore >= SCORE_LIMIT ? (
                       <Center>
                         <BsTriangleFill
-                          size={14}
                           color={setColorByScore(strategyScore.assetRiskMktCapScore)}
+                          size={14}
                         />
                       </Center>
                     ) : (
                       <Center>
                         <BsTriangleFill
-                          size={12}
                           color={setColorByScore(strategyScore.assetRiskMktCapScore)}
+                          size={12}
                           style={{ transform: 'rotate(180deg)' }}
                         />
                       </Center>
@@ -473,15 +479,15 @@ export const AdditionalInfo = ({
                     {strategyScore.assetRiskSupplyScore >= SCORE_LIMIT ? (
                       <Center>
                         <BsTriangleFill
-                          size={14}
                           color={setColorByScore(strategyScore.assetRiskSupplyScore)}
+                          size={14}
                         />
                       </Center>
                     ) : (
                       <Center>
                         <BsTriangleFill
-                          size={12}
                           color={setColorByScore(strategyScore.assetRiskSupplyScore)}
+                          size={12}
                           style={{ transform: 'rotate(180deg)' }}
                         />
                       </Center>
@@ -517,15 +523,15 @@ export const AdditionalInfo = ({
                     {strategyScore.platformRiskReputationScore >= SCORE_LIMIT ? (
                       <Center>
                         <BsTriangleFill
-                          size={14}
                           color={setColorByScore(strategyScore.platformRiskReputationScore)}
+                          size={14}
                         />
                       </Center>
                     ) : (
                       <Center>
                         <BsTriangleFill
-                          size={12}
                           color={setColorByScore(strategyScore.platformRiskReputationScore)}
+                          size={12}
                           style={{ transform: 'rotate(180deg)' }}
                         />
                       </Center>
@@ -562,15 +568,15 @@ export const AdditionalInfo = ({
                     {strategyScore.platformRiskAuditScore >= SCORE_LIMIT ? (
                       <Center>
                         <BsTriangleFill
-                          size={14}
                           color={setColorByScore(strategyScore.platformRiskAuditScore)}
+                          size={14}
                         />
                       </Center>
                     ) : (
                       <Center>
                         <BsTriangleFill
-                          size={12}
                           color={setColorByScore(strategyScore.platformRiskAuditScore)}
+                          size={12}
                           style={{ transform: 'rotate(180deg)' }}
                         />
                       </Center>
@@ -607,15 +613,15 @@ export const AdditionalInfo = ({
                     {strategyScore.platformRiskContractsVerifiedScore >= SCORE_LIMIT ? (
                       <Center>
                         <BsTriangleFill
-                          size={14}
                           color={setColorByScore(strategyScore.platformRiskContractsVerifiedScore)}
+                          size={14}
                         />
                       </Center>
                     ) : (
                       <Center>
                         <BsTriangleFill
-                          size={12}
                           color={setColorByScore(strategyScore.platformRiskContractsVerifiedScore)}
+                          size={12}
                           style={{ transform: 'rotate(180deg)' }}
                         />
                       </Center>
@@ -652,15 +658,15 @@ export const AdditionalInfo = ({
                     {strategyScore.platformRiskAdminWithTimelockScore >= SCORE_LIMIT ? (
                       <Center>
                         <BsTriangleFill
-                          size={14}
                           color={setColorByScore(strategyScore.platformRiskAdminWithTimelockScore)}
+                          size={14}
                         />
                       </Center>
                     ) : (
                       <Center>
                         <BsTriangleFill
-                          size={12}
                           color={setColorByScore(strategyScore.platformRiskAdminWithTimelockScore)}
+                          size={12}
                           style={{ transform: 'rotate(180deg)' }}
                         />
                       </Center>
@@ -699,21 +705,21 @@ export const AdditionalInfo = ({
           </GridItem>
         )}
         <GridItem>
-          <VStack width="100%" spacing={0} borderRadius="20">
+          <VStack borderRadius="20" spacing={0} width="100%">
             <Box
-              width="100%"
-              px={4}
               background={cCard.headingBgColor}
-              borderWidth={2}
               borderColor={cCard.headingBgColor}
+              borderWidth={2}
               height={14}
+              px={4}
+              width="100%"
             >
-              <Flex justifyContent="space-between" alignItems="center" height="100%">
+              <Flex alignItems="center" height="100%" justifyContent="space-between">
                 <Text>Market Details</Text>
                 <HStack>
                   {oracle && (
                     <Link href={`${scanUrl}/address/${oracle}`} isExternal rel="noreferrer">
-                      <Button variant={'external'} size="xs" rightIcon={<ExternalLinkIcon />}>
+                      <Button rightIcon={<ExternalLinkIcon />} size="xs" variant={'external'}>
                         Oracle Contract
                       </Button>
                     </Link>
@@ -723,66 +729,72 @@ export const AdditionalInfo = ({
                     isExternal
                     rel="noreferrer"
                   >
-                    <Button variant={'external'} size="xs" rightIcon={<ExternalLinkIcon />}>
+                    <Button rightIcon={<ExternalLinkIcon />} size="xs" variant={'external'}>
                       Token Contract
                     </Button>
                   </Link>
                   <Link href={`${scanUrl}/address/${asset.cToken}`} isExternal rel="noreferrer">
-                    <Button variant={'external'} size="xs" rightIcon={<ExternalLinkIcon />}>
+                    <Button rightIcon={<ExternalLinkIcon />} size="xs" variant={'external'}>
                       Market Contract
                     </Button>
                   </Link>
                 </HStack>
               </Flex>
             </Box>
-            <Box width="100%" height="250px" borderWidth={2} borderColor={cCard.headingBgColor}>
+            <Box borderColor={cCard.headingBgColor} borderWidth={2} height="250px" width="100%">
               <Grid
-                templateColumns={{ base: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }}
                 gap={0}
-                width="100%"
                 height="100%"
+                templateColumns={{ base: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }}
+                width="100%"
               >
                 <CaptionedStat
-                  stat={midUsdFormatter(asset.totalSupplyFiat)}
-                  secondStat={supplyCaps ? midUsdFormatter(supplyCaps.usdCap) : undefined}
                   caption={'Asset Supplied'}
                   crossAxisAlignment="center"
+                  secondStat={supplyCaps ? midUsdFormatter(supplyCaps.usdCap) : undefined}
+                  stat={midUsdFormatter(asset.totalSupplyFiat)}
                   tooltip={supplyCaps ? ASSET_SUPPLIED_TOOLTIP : undefined}
                 />
                 <CaptionedStat
-                  stat={asset.isBorrowPaused ? '-' : midUsdFormatter(asset.totalBorrowFiat)}
                   caption={'Asset Borrowed'}
                   crossAxisAlignment="center"
+                  secondStat={
+                    !asset.isBorrowPaused && borrowCaps
+                      ? midUsdFormatter(borrowCaps.usdCap)
+                      : undefined
+                  }
+                  stat={asset.isBorrowPaused ? '-' : midUsdFormatter(asset.totalBorrowFiat)}
+                  tooltip={borrowCaps ? ASSET_BORROWED_TOOLTIP : undefined}
                 />
                 <CaptionedStat
-                  stat={asset.isBorrowPaused ? '-' : asset.utilization.toFixed(0) + '%'}
                   caption={'Asset Utilization'}
                   crossAxisAlignment="center"
+                  stat={asset.isBorrowPaused ? '-' : asset.utilization.toFixed(0) + '%'}
                 />
                 <CaptionedStat
-                  stat={Number(utils.formatUnits(asset.collateralFactor, 16)).toFixed(0) + '%'}
                   caption={'Loan-to-Value'}
                   crossAxisAlignment="center"
+                  stat={Number(utils.formatUnits(asset.collateralFactor, 16)).toFixed(0) + '%'}
                   tooltip={LOAN_TO_VALUE_TOOLTIP}
                 />
 
                 <CaptionedStat
-                  stat={Number(utils.formatUnits(asset.reserveFactor, 16)).toFixed(0) + '%'}
                   caption={'Reserve Factor'}
                   crossAxisAlignment="center"
+                  stat={Number(utils.formatUnits(asset.reserveFactor, 16)).toFixed(0) + '%'}
                   tooltip={RESERVE_FACTOR_TOOLTIP}
                 />
                 <CaptionedStat
-                  stat={Number(utils.formatUnits(asset.adminFee, 16)).toFixed(1) + '%'}
                   caption={'Admin Fee'}
                   crossAxisAlignment="center"
+                  stat={Number(utils.formatUnits(asset.adminFee, 16)).toFixed(1) + '%'}
                   tooltip={ADMIN_FEE_TOOLTIP}
                 />
                 {performanceFee !== undefined ? (
                   <CaptionedStat
-                    stat={`${performanceFee}%`}
                     caption={'Performance Fee'}
                     crossAxisAlignment="center"
+                    stat={`${performanceFee}%`}
                     tooltip={PERFORMANCE_FEE_TOOLTIP}
                   />
                 ) : null}
@@ -791,20 +803,20 @@ export const AdditionalInfo = ({
           </VStack>
         </GridItem>
         <GridItem>
-          <VStack width="100%" spacing={0} borderRadius="20">
+          <VStack borderRadius="20" spacing={0} width="100%">
             <Box
-              width="100%"
-              px={4}
               background={cCard.headingBgColor}
-              borderWidth={2}
               borderColor={cCard.headingBgColor}
+              borderWidth={2}
               height={14}
+              px={4}
+              width="100%"
             >
-              <Flex justifyContent="space-between" alignItems="center" height="100%">
+              <Flex alignItems="center" height="100%" justifyContent="space-between">
                 <Text py={0.5}>Utilization Rate</Text>
                 {irm && (!asset.isBorrowPaused || !asset.totalBorrow.isZero()) && (
                   <Link href={`${scanUrl}/address/${irm}`} isExternal rel="noreferrer">
-                    <Button variant={'external'} size="xs" rightIcon={<ExternalLinkIcon />}>
+                    <Button rightIcon={<ExternalLinkIcon />} size="xs" variant={'external'}>
                       IRM Contract
                     </Button>
                   </Link>
@@ -812,11 +824,11 @@ export const AdditionalInfo = ({
               </Flex>
             </Box>
             <Box
-              width="100%"
-              height="250px"
-              borderWidth={2}
               borderColor={cCard.headingBgColor}
+              borderWidth={2}
+              height="250px"
               pb={4}
+              width="100%"
             >
               {asset.isBorrowPaused && asset.totalBorrow.isZero() ? (
                 <Center height="100%">
@@ -831,8 +843,8 @@ export const AdditionalInfo = ({
                   </Center>
                 ) : (
                   <UtilizationChart
-                    irmToCurve={data}
                     currentUtilization={asset.utilization.toFixed(0)}
+                    irmToCurve={data}
                   />
                 )
               ) : (
