@@ -478,7 +478,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
         },
       },
       proxyContract: "OpenZeppelinTransparentProxy",
-      owner: deployer,
+      owner: upgradesAdmin,
     },
     waitConfirmations: 1,
   });
