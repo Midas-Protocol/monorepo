@@ -1,6 +1,6 @@
 import { task, types } from "hardhat/config";
 
-  task("flywheel:deploy-static-rewards-fw", "Deploy static rewards flywheel for LM rewards")
+task("flywheel:deploy-static-rewards-fw", "Deploy static rewards flywheel for LM rewards")
   .addParam("name", "String to append to the flywheel contract name", undefined, types.string)
   .addParam("rewardToken", "Reward token of flywheel", undefined, types.string)
   .addParam("strategies", "address of strategy for which to enable the flywheel", undefined, types.string)
@@ -32,7 +32,11 @@ import { task, types } from "hardhat/config";
     });
 
     console.log(`Deployed flywheel: ${flywheel.address}`);
-    const rewards = await run("flywheel:deploy-static-rewards", { flywheel: flywheel.address, signer: extrasAdmin.address, name });
+    const rewards = await run("flywheel:deploy-static-rewards", {
+      flywheel: flywheel.address,
+      signer: extrasAdmin.address,
+      name,
+    });
     console.log(`Deployed rewards: ${rewards.address}`);
     const tx = await sdk.setFlywheelRewards(flywheel.address, rewards.address);
     await tx.wait();
