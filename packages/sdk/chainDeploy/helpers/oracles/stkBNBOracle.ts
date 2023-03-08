@@ -9,14 +9,14 @@ export const deployStkBNBOracle = async ({
   deployments,
   assets,
 }: stkBNBOracleDeployParams): Promise<{ stkBNBOracle: any }> => {
-  const { deployer } = await getNamedAccounts();
+  const { upgradesAdmin, oraclesAdmin } = await getNamedAccounts();
 
-  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  const mpo = await ethers.getContract("MasterPriceOracle", oraclesAdmin);
 
   const stkBNB = underlying(assets, assetSymbols.stkBNB);
 
   const stkBNBOracle = await deployments.deploy("StkBNBPriceOracle", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     proxy: {
@@ -26,7 +26,7 @@ export const deployStkBNBOracle = async ({
           args: [],
         },
       },
-      owner: deployer,
+      owner: upgradesAdmin,
       proxyContract: "OpenZeppelinTransparentProxy",
     },
   });

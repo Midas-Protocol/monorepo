@@ -122,7 +122,7 @@ const curvePools: CurvePoolConfig[] = [
 ];
 
 export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: ChainDeployFnParams): Promise<void> => {
-  const { deployer } = await getNamedAccounts();
+  const { upgradesAdmin } = await getNamedAccounts();
   //// ChainLinkV2 Oracle
   await deployChainlinkOracle({
     run,
@@ -187,7 +187,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
   ////
   //// deploy ankr certificate interest rate model
   const afirm = await deployments.deploy("AnkrFTMInterestRateModel", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [
       deployConfig.blocksPerYear,
       "5000000000000000",

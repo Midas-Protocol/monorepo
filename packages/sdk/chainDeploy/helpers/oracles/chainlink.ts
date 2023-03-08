@@ -12,13 +12,13 @@ export const deployChainlinkOracle = async ({
   assets,
   chainlinkAssets,
 }: ChainlinkDeployFnParams): Promise<{ cpo: any; chainLinkv2: any }> => {
-  const { deployer } = await getNamedAccounts();
+  const { upgradesAdmin, oraclesAdmin, testConfigAdmin } = await getNamedAccounts();
   let tx: providers.TransactionResponse;
 
   //// Chainlink Oracle
   const cpo = await deployments.deploy("ChainlinkPriceOracleV2", {
-    from: deployer,
-    args: [deployer, true, deployConfig.wtoken, deployConfig.nativeTokenUsdChainlinkFeed],
+    from: upgradesAdmin,
+    args: [oraclesAdmin, true, deployConfig.wtoken, deployConfig.nativeTokenUsdChainlinkFeed],
     log: true,
   });
   if (cpo.transactionHash) await ethers.provider.waitForTransaction(cpo.transactionHash);
@@ -27,7 +27,7 @@ export const deployChainlinkOracle = async ({
   const usdBasedFeeds = chainlinkAssets.filter((asset) => asset.feedBaseCurrency === ChainlinkFeedBaseCurrency.USD);
   const ethBasedFeeds = chainlinkAssets.filter((asset) => asset.feedBaseCurrency === ChainlinkFeedBaseCurrency.ETH);
 
-  const chainLinkv2 = await ethers.getContract("ChainlinkPriceOracleV2", deployer);
+  const chainLinkv2 = await ethers.getContract("ChainlinkPriceOracleV2", oraclesAdmin);
   if (usdBasedFeeds.length > 0) {
     const feedCurrency = ChainlinkFeedBaseCurrency.USD;
     tx = await chainLinkv2.setPriceFeeds(
@@ -54,13 +54,13 @@ export const deployChainlinkOracle = async ({
   const underlyings = chainlinkAssets.map((c) => underlying(assets, c.symbol));
   const oracles = Array(chainlinkAssets.length).fill(chainLinkv2.address);
 
-  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  const mpo = await ethers.getContract("MasterPriceOracle", oraclesAdmin);
   tx = await mpo.add(underlyings, oracles);
   await tx.wait();
 
   console.log(`Master Price Oracle updated for tokens ${underlyings.join(", ")}`);
 
-  const addressesProvider = (await ethers.getContract("AddressesProvider", deployer)) as AddressesProvider;
+  const addressesProvider = (await ethers.getContract("AddressesProvider", testConfigAdmin)) as AddressesProvider;
   const chainLinkv2Address = await addressesProvider.callStatic.getAddress("ChainlinkPriceOracleV2");
   if (chainLinkv2Address !== chainLinkv2.address) {
     tx = await addressesProvider.setAddress("ChainlinkPriceOracleV2", chainLinkv2.address);

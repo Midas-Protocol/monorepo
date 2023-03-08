@@ -10,16 +10,16 @@ export const deployDiaWstDotPriceOracle = async ({
   deployments,
   deployConfig,
 }: DiaStDotFnParams): Promise<void> => {
-  const { deployer } = await getNamedAccounts();
+  const { upgradesAdmin, oraclesAdmin } = await getNamedAccounts();
 
-  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  const mpo = await ethers.getContract("MasterPriceOracle", oraclesAdmin);
 
   const stDot = underlying(moonbeam.assets, assetSymbols.stDOT);
   const wstDot = underlying(moonbeam.assets, assetSymbols.wstDOT);
   const diaOracleAddress = "0xFEfe38321199e016c8d5e734A40eCCC0DBeC3711";
 
   const dspo = await deployments.deploy("DiaStDotPriceOracle", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     proxy: {
@@ -29,7 +29,7 @@ export const deployDiaWstDotPriceOracle = async ({
           args: [mpo.address, diaOracleAddress, deployConfig.stableToken],
         },
       },
-      owner: deployer,
+      owner: upgradesAdmin,
       proxyContract: "OpenZeppelinTransparentProxy",
     },
   });

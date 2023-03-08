@@ -10,14 +10,14 @@ export const deployAnkrCertificateTokenPriceOracle = async ({
   assets,
   certificateAssetSymbol,
 }: aXXXcDeployParams): Promise<{ ankrCertificateTokenPriceOracle: any }> => {
-  const { deployer } = await getNamedAccounts();
+  const { upgradesAdmin, oraclesAdmin } = await getNamedAccounts();
 
-  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  const mpo = await ethers.getContract("MasterPriceOracle", oraclesAdmin);
 
   const aXXXc = underlying(assets, certificateAssetSymbol);
 
   const ankrCertificateTokenPriceOracle = await deployments.deploy("AnkrCertificateTokenPriceOracle", {
-    from: deployer,
+    from: upgradesAdmin,
     proxy: {
       execute: {
         init: {
@@ -26,7 +26,7 @@ export const deployAnkrCertificateTokenPriceOracle = async ({
         },
       },
       proxyContract: "OpenZeppelinTransparentProxy",
-      owner: deployer,
+      owner: upgradesAdmin,
     },
     log: true,
     waitConfirmations: 1,

@@ -3,7 +3,7 @@ import { task, types } from "hardhat/config";
 task("oracle:update-twap", "Call update on twap oracle to update the last price observation")
   .addParam("pair", "pair address for which to run the update", undefined, types.string)
   .setAction(async ({ pair: _pair }, { ethers }) => {
-    const { deployer } = await ethers.getNamedSigners();
+    const { oraclesAdmin } = await ethers.getNamedSigners();
 
     // @ts-ignore
     const midasSdkModule = await import("../../tests/utils/midasSdk");
@@ -12,7 +12,7 @@ task("oracle:update-twap", "Call update on twap oracle to update the last price 
     const uniswapTwapRoot = await ethers.getContractAt(
       "UniswapTwapPriceOracleV2Root",
       sdk.chainDeployment.UniswapTwapPriceOracleV2Root.address,
-      deployer
+      oraclesAdmin
     );
 
     const tx = await uniswapTwapRoot["update(address)"](_pair);
@@ -22,7 +22,7 @@ task("oracle:update-twap", "Call update on twap oracle to update the last price 
 task("oracle:remove-twap-pair", "Call update on twap oracle to update the last price observation")
   .addParam("pairIndex", "pair address for which to run the update", undefined, types.string)
   .setAction(async ({ pairIndex: _pairIndex }, { ethers }) => {
-    const { deployer } = await ethers.getNamedSigners();
+    const { oraclesAdmin } = await ethers.getNamedSigners();
 
     // @ts-ignore
     const midasSdkModule = await import("../../tests/utils/midasSdk");
@@ -31,7 +31,7 @@ task("oracle:remove-twap-pair", "Call update on twap oracle to update the last p
     const uniswapTwapRoot = await ethers.getContractAt(
       "UniswapTwapPriceOracleV2Resolver",
       sdk.chainDeployment.UniswapTwapPriceOracleV2Resolver.address,
-      deployer
+      oraclesAdmin
     );
     const existingPairs = await uniswapTwapRoot.callStatic.getPairs();
     console.log("Existing Pairs", existingPairs);

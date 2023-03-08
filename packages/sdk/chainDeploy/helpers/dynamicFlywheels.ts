@@ -9,7 +9,7 @@ export const deployFlywheelWithDynamicRewards = async ({
   deployments,
   deployConfig,
 }: FuseFlywheelDeployFnParams): Promise<Array<string>> => {
-  const { deployer } = await getNamedAccounts();
+  const { upgradesAdmin, extrasAdmin } = await getNamedAccounts();
 
   const dynamicFlywheels = [];
 
@@ -18,19 +18,19 @@ export const deployFlywheelWithDynamicRewards = async ({
       console.log(
         `Deploying MidasReplacingFlywheel & ReplacingFlywheelDynamicRewards for ${config.rewardToken} reward token`
       );
-      const flywheelBooster = await ethers.getContract("LooplessFlywheelBooster", deployer);
+      const flywheelBooster = await ethers.getContract("LooplessFlywheelBooster", upgradesAdmin);
       const flywheelToReplace = config.flywheelToReplace ? config.flywheelToReplace : constants.AddressZero;
 
       //// MidasFlywheelCore with Dynamic Rewards
       const fwc = await deployments.deploy(`MidasFlywheel_${config.name}`, {
         contract: "MidasReplacingFlywheel",
-        from: deployer,
+        from: upgradesAdmin,
         log: true,
         proxy: {
           execute: {
             init: {
               methodName: "initialize",
-              args: [config.rewardToken, constants.AddressZero, flywheelBooster.address, deployer],
+              args: [config.rewardToken, constants.AddressZero, flywheelBooster.address, extrasAdmin],
             },
             onUpgrade: {
               methodName: "reinitialize",
@@ -38,7 +38,7 @@ export const deployFlywheelWithDynamicRewards = async ({
             },
           },
           proxyContract: "OpenZeppelinTransparentProxy",
-          owner: deployer,
+          owner: upgradesAdmin,
         },
         waitConfirmations: 1,
       });
@@ -49,7 +49,7 @@ export const deployFlywheelWithDynamicRewards = async ({
 
       const fdr = await deployments.deploy(`ReplacingFlywheelDynamicRewards_${config.name}`, {
         contract: "ReplacingFlywheelDynamicRewards",
-        from: deployer,
+        from: upgradesAdmin,
         args: [flywheelToReplace, fwc.address, config.cycleLength],
         log: true,
         waitConfirmations: 1,
@@ -59,7 +59,7 @@ export const deployFlywheelWithDynamicRewards = async ({
       }
       console.log("ReplacingFlywheelDynamicRewards: ", fdr.address);
 
-      const flywheelCore = (await ethers.getContract(`MidasFlywheel_${config.name}`, deployer)) as MidasFlywheel;
+      const flywheelCore = (await ethers.getContract(`MidasFlywheel_${config.name}`, extrasAdmin)) as MidasFlywheel;
       const currentRewards = await flywheelCore.callStatic.flywheelRewards();
       if (currentRewards != fdr.address) {
         const tx = await flywheelCore.setFlywheelRewards(fdr.address);

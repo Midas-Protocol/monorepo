@@ -8,13 +8,13 @@ export const deploySaddleLpOracle = async ({
   deployments,
   saddlePools,
 }: SaddleLpFnParams): Promise<void> => {
-  const { deployer } = await getNamedAccounts();
+  const { upgradesAdmin, oraclesAdmin } = await getNamedAccounts();
   let tx: providers.TransactionResponse;
   let receipt: providers.TransactionReceipt;
 
   //// SaddleLpPriceOracle
   const spo = await deployments.deploy("SaddleLpPriceOracle", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     proxy: {
@@ -24,14 +24,14 @@ export const deploySaddleLpOracle = async ({
           args: [[], [], []],
         },
       },
-      owner: deployer,
+      owner: upgradesAdmin,
       proxyContract: "OpenZeppelinTransparentProxy",
     },
   });
   if (spo.transactionHash) await ethers.provider.waitForTransaction(spo.transactionHash);
   console.log("SaddleLpPriceOracle: ", spo.address);
 
-  const saddleLpOracle = await ethers.getContract("SaddleLpPriceOracle", deployer);
+  const saddleLpOracle = await ethers.getContract("SaddleLpPriceOracle", oraclesAdmin);
 
   for (const pool of saddlePools) {
     const registered = await saddleLpOracle.poolOf(pool.lpToken);
@@ -50,7 +50,7 @@ export const deploySaddleLpOracle = async ({
   const underlyings = saddlePools.map((c) => c.lpToken);
   const oracles = Array(saddlePools.length).fill(saddleLpOracle.address);
 
-  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  const mpo = await ethers.getContract("MasterPriceOracle", oraclesAdmin);
   tx = await mpo.add(underlyings, oracles);
   await tx.wait();
 

@@ -9,16 +9,16 @@ export const deployUniswapLpOracle = async ({
   deployments,
   deployConfig,
 }: UniswapDeployFnParams): Promise<void> => {
-  const { deployer } = await getNamedAccounts();
+  const { upgradesAdmin, oraclesAdmin } = await getNamedAccounts();
   const lpTokenPriceOralce = await deployments.deploy("UniswapLpTokenPriceOracle", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [deployConfig.wtoken],
     log: true,
     waitConfirmations: 1,
   });
   console.log("UniswapLpTokenPriceOracle: ", lpTokenPriceOralce.address);
 
-  const mpo = (await ethers.getContract("MasterPriceOracle", deployer)) as MasterPriceOracle;
+  const mpo = (await ethers.getContract("MasterPriceOracle", oraclesAdmin)) as MasterPriceOracle;
   const oracles = [];
   const underlyings = [];
   for (const lpToken of deployConfig.uniswap.uniswapOracleLpTokens) {

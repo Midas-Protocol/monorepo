@@ -9,13 +9,12 @@ export const deployUniswapV3Oracle = async ({
   deployments,
   deployConfig,
 }: UniswaV3DeployFnParams): Promise<void> => {
-  const { deployer } = await getNamedAccounts();
-  const mpo = (await ethers.getContract("MasterPriceOracle", deployer)) as MasterPriceOracle;
+  const { upgradesAdmin, oraclesAdmin, testConfigAdmin } = await getNamedAccounts();
+  const mpo = (await ethers.getContract("MasterPriceOracle", oraclesAdmin)) as MasterPriceOracle;
 
   //// Uniswap Oracle
   const utpo = await deployments.deploy("UniswapV3PriceOracle", {
-    from: deployer,
-    args: [],
+    from: upgradesAdmin,
     log: true,
     proxy: {
       execute: {
@@ -24,7 +23,7 @@ export const deployUniswapV3Oracle = async ({
           args: [deployConfig.wtoken, deployConfig.stableToken],
         },
       },
-      owner: deployer,
+      owner: upgradesAdmin,
       proxyContract: "OpenZeppelinTransparentProxy",
     },
   });
@@ -32,7 +31,7 @@ export const deployUniswapV3Oracle = async ({
   if (utpo.transactionHash) await ethers.provider.waitForTransaction(utpo.transactionHash);
   console.log("UniswapV3PriceOracle: ", utpo.address);
 
-  const uniswapV3Oracle = (await ethers.getContract("UniswapV3PriceOracle", deployer)) as UniswapV3PriceOracle;
+  const uniswapV3Oracle = (await ethers.getContract("UniswapV3PriceOracle", oraclesAdmin)) as UniswapV3PriceOracle;
 
   const assetsToAdd = [];
   for (const assetConfig of deployConfig.uniswap.uniswapV3OracleTokens) {
@@ -68,7 +67,7 @@ export const deployUniswapV3Oracle = async ({
   await tx.wait();
   console.log(`Master Price Oracle updated for tokens: ${underlyings.join(",")}`);
 
-  const addressesProvider = (await ethers.getContract("AddressesProvider", deployer)) as AddressesProvider;
+  const addressesProvider = (await ethers.getContract("AddressesProvider", testConfigAdmin)) as AddressesProvider;
   const uniswapV3PriceOracleAddress = await addressesProvider.callStatic.getAddress("UniswapV3PriceOracle");
   if (uniswapV3PriceOracleAddress !== uniswapV3Oracle.address) {
     const tx = await addressesProvider.setAddress("UniswapV3PriceOracle", uniswapV3Oracle.address);

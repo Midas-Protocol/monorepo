@@ -5,7 +5,7 @@ export default task("oracle:set-price", "Set price of token")
   .addOptionalParam("address", "Token address for which to set the price", undefined, types.string)
   .addParam("price", "Price to set in the SPO for the token")
   .setAction(async ({ token: _token, address: _address, price: _price }, { getNamedAccounts, ethers }) => {
-    const { deployer } = await ethers.getNamedSigners();
+    const { oraclesAdmin } = await ethers.getNamedSigners();
     // @ts-ignore
     const oracleModule = await import("../../tests/utils/oracle");
 
@@ -13,7 +13,7 @@ export default task("oracle:set-price", "Set price of token")
     const underlyingOracle = await ethers.getContractAt(
       "SimplePriceOracle",
       await oracle.callStatic.oracles(tokenAddress),
-      deployer
+      oraclesAdmin
     );
     const tx = await underlyingOracle.setDirectPrice(tokenAddress, ethers.utils.parseEther(_price));
     await tx.wait();

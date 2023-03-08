@@ -14,13 +14,14 @@ export default task("comptroller:implementation:whitelist", "Whitelists a new co
   .addFlag("setLatest", "Set the new implementation as the latest for the autoimplementations")
   .setAction(async ({ oldImplementation, newImplementation, setLatest }, { ethers }) => {
     let tx;
-    const deployer = await ethers.getNamedSigner("deployer");
+    const { poolsSuperAdmin } = await ethers.getNamedSigners();
+
     if (!newImplementation) {
       const currentLatestComptroller = await ethers.getContract("Comptroller");
       newImplementation = currentLatestComptroller.address;
     }
-    const fuseFeeDistributor = (await ethers.getContract("FuseFeeDistributor", deployer)) as FuseFeeDistributor;
 
+    const fuseFeeDistributor = (await ethers.getContract("FuseFeeDistributor", poolsSuperAdmin)) as FuseFeeDistributor;
     const whitelisted = await fuseFeeDistributor.callStatic.comptrollerImplementationWhitelist(
       oldImplementation,
       newImplementation
@@ -63,20 +64,20 @@ export default task("comptroller:implementation:whitelist", "Whitelists a new co
 
 task("pools:all:upgrade", "Upgrades all pools comptroller implementations whose autoimplementatoins are on").setAction(
   async ({}, { ethers }) => {
-    const deployer = await ethers.getNamedSigner("deployer");
+    const { poolsSuperAdmin } = await ethers.getNamedSigners();
 
-    const fusePoolDirectory = (await ethers.getContract("FusePoolDirectory", deployer)) as FusePoolDirectory;
-    const fuseFeeDistributor = (await ethers.getContract("FuseFeeDistributor", deployer)) as FuseFeeDistributor;
+    const fusePoolDirectory = (await ethers.getContract("FusePoolDirectory", poolsSuperAdmin)) as FusePoolDirectory;
+    const fuseFeeDistributor = (await ethers.getContract("FuseFeeDistributor", poolsSuperAdmin)) as FuseFeeDistributor;
 
     const [, pools] = await fusePoolDirectory.callStatic.getActivePools();
     for (let i = 0; i < pools.length; i++) {
       const pool = pools[i];
       console.log("pool", { name: pool.name, address: pool.comptroller });
-      const unitroller = (await ethers.getContractAt("Unitroller", pool.comptroller, deployer)) as Unitroller;
+      const unitroller = (await ethers.getContractAt("Unitroller", pool.comptroller, poolsSuperAdmin)) as Unitroller;
       const asComptroller = (await ethers.getContractAt(
         "Comptroller.sol:Comptroller",
         pool.comptroller,
-        deployer
+        poolsSuperAdmin
       )) as Comptroller;
 
       const admin = await unitroller.callStatic.admin();
@@ -92,7 +93,7 @@ task("pools:all:upgrade", "Upgrades all pools comptroller implementations whose 
           const comptrollerAsExtension = (await ethers.getContractAt(
             "ComptrollerFirstExtension",
             pool.comptroller,
-            deployer
+            poolsSuperAdmin
           )) as ComptrollerFirstExtension;
           const markets = await comptrollerAsExtension.callStatic.getAllMarkets();
           for (let j = 0; j < markets.length; j++) {
@@ -166,11 +167,10 @@ task("pools:all:upgrade", "Upgrades all pools comptroller implementations whose 
 
 task("pools:all:autoimpl", "Toggle the autoimplementations flag of all managed pools")
   .addParam("enable", "If autoimplementations should be on or off", true, types.boolean)
-  .addOptionalParam("admin", "Named account that is an admin of the pool", "deployer", types.string)
-  .setAction(async ({ enable, admin }, { ethers }) => {
-    const signer = await ethers.getNamedSigner(admin);
+  .setAction(async ({ enable }, { ethers }) => {
+    const { poolsSuperAdmin } = await ethers.getNamedSigners();
 
-    const fusePoolDirectory = (await ethers.getContract("FusePoolDirectory", signer)) as FusePoolDirectory;
+    const fusePoolDirectory = (await ethers.getContract("FusePoolDirectory", poolsSuperAdmin)) as FusePoolDirectory;
     const [, pools] = await fusePoolDirectory.callStatic.getActivePools();
     for (let i = 0; i < pools.length; i++) {
       const pool = pools[i];
@@ -178,20 +178,20 @@ task("pools:all:autoimpl", "Toggle the autoimplementations flag of all managed p
       const comptroller = (await ethers.getContractAt(
         "Comptroller.sol:Comptroller",
         pool.comptroller,
-        signer
+        poolsSuperAdmin
       )) as Comptroller;
       const admin = await comptroller.callStatic.admin();
       console.log(`pool name ${pool.name} admin ${admin}`);
 
       const autoImplOn = await comptroller.callStatic.autoImplementation();
       if (autoImplOn != enable) {
-        if (admin === signer.address) {
+        if (admin === poolsSuperAdmin.address) {
           const tx = await comptroller._toggleAutoImplementations(enable);
           console.log(`_toggleAutoImplementations ${tx.hash}`);
           const receipt = await tx.wait();
           console.log(`toggled to ${enable} with ${receipt.transactionHash}`);
         } else {
-          console.log(`signer is not the admin`);
+          console.log(`poolsSuperAdmin is not the admin`);
         }
       } else {
         console.log(`autoimplementations for the pool is ${autoImplOn}`);
@@ -201,11 +201,10 @@ task("pools:all:autoimpl", "Toggle the autoimplementations flag of all managed p
 
 task("pools:all:pause-guardian", "Sets the pause guardian for all pools that have a different address for it")
   .addParam("replacingGuardian", "Address of the replacing pause guardian", undefined, types.string)
-  .addOptionalParam("admin", "Named account that is an admin of the pool", "deployer", types.string)
-  .setAction(async ({ replacingGuardian, admin }, { ethers }) => {
-    const signer = await ethers.getNamedSigner(admin);
+  .setAction(async ({ replacingGuardian }, { ethers }) => {
+    const { poolsSuperAdmin } = await ethers.getNamedSigners();
 
-    const fusePoolDirectory = (await ethers.getContract("FusePoolDirectory", signer)) as FusePoolDirectory;
+    const fusePoolDirectory = (await ethers.getContract("FusePoolDirectory", poolsSuperAdmin)) as FusePoolDirectory;
     const [, pools] = await fusePoolDirectory.callStatic.getActivePools();
     for (let i = 0; i < pools.length; i++) {
       const pool = pools[i];
@@ -213,7 +212,7 @@ task("pools:all:pause-guardian", "Sets the pause guardian for all pools that hav
       const comptroller = (await ethers.getContractAt(
         "ComptrollerFirstExtension",
         pool.comptroller,
-        signer
+        poolsSuperAdmin
       )) as ComptrollerFirstExtension;
       const pauseGuardian = await comptroller.callStatic.pauseGuardian();
       console.log(`pool name ${pool.name} pause guardian ${pauseGuardian}`);

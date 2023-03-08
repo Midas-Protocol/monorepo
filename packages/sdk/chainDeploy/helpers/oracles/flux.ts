@@ -10,14 +10,14 @@ export const deployFluxOracle = async ({
   fluxAssets,
   nativeUsdFeed,
 }: FluxDeployFnParams): Promise<{ fluxOracle: FluxPriceOracle }> => {
-  const { deployer } = await getNamedAccounts();
+  const { upgradesAdmin, oraclesAdmin } = await getNamedAccounts();
   let tx: providers.TransactionResponse;
 
-  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  const mpo = await ethers.getContract("MasterPriceOracle", oraclesAdmin);
 
   //// Flux Oracle
   const flux = await deployments.deploy("FluxPriceOracle", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     proxy: {
@@ -27,7 +27,7 @@ export const deployFluxOracle = async ({
           args: [nativeUsdFeed],
         },
       },
-      owner: deployer,
+      owner: upgradesAdmin,
       proxyContract: "OpenZeppelinTransparentProxy",
     },
   });
@@ -35,7 +35,7 @@ export const deployFluxOracle = async ({
   if (flux.transactionHash) await ethers.provider.waitForTransaction(flux.transactionHash);
   console.log("FluxPriceOracle: ", flux.address);
 
-  const fluxOracle = (await ethers.getContract("FluxPriceOracle", deployer)) as FluxPriceOracle;
+  const fluxOracle = (await ethers.getContract("FluxPriceOracle", oraclesAdmin)) as FluxPriceOracle;
   tx = await fluxOracle.setPriceFeeds(
     fluxAssets.map((f) => f.underlying),
     fluxAssets.map((f) => f.feed)

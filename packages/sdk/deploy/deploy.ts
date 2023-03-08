@@ -17,10 +17,19 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   const chainId = parseInt(await getChainId());
   console.log("chainId: ", chainId);
   const MIN_BORROW_USD = chainId === 97 || chainId === 245022926 ? 0 : 100;
-  const { deployer } = await getNamedAccounts();
-  console.log("deployer: ", deployer);
-  const balance = await ethers.provider.getBalance(deployer);
-  console.log("balance: ", balance.toString());
+  const { upgradesAdmin, liquidator, poolsSuperAdmin, oraclesAdmin, extrasAdmin, testConfigAdmin } =
+    await getNamedAccounts();
+  console.log("upgradesAdmin: ", upgradesAdmin);
+  console.log("accounts", {
+    upgradesAdmin,
+    liquidator,
+    poolsSuperAdmin,
+    testConfigAdmin,
+    oraclesAdmin,
+    extrasAdmin,
+  });
+  const balance = await ethers.provider.getBalance(upgradesAdmin);
+  console.log("upgradesAdmin balance: ", balance.toString());
   const price = await ethers.provider.getGasPrice();
   console.log("gas price: ", ethers.utils.formatUnits(price, "gwei"));
 
@@ -36,7 +45,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   let tx: providers.TransactionResponse;
 
   const ffd = await deployments.deploy("FuseFeeDistributor", {
-    from: deployer,
+    from: upgradesAdmin,
     log: true,
     proxy: {
       proxyContract: "OpenZeppelinTransparentProxy",
@@ -46,13 +55,13 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
           args: [ethers.utils.parseEther("0.1")],
         },
       },
-      owner: deployer,
+      owner: upgradesAdmin,
     },
   });
   if (ffd.transactionHash) await ethers.provider.waitForTransaction(ffd.transactionHash);
 
   console.log("FuseFeeDistributor: ", ffd.address);
-  const fuseFeeDistributor = (await ethers.getContract("FuseFeeDistributor", deployer)) as FuseFeeDistributor;
+  const fuseFeeDistributor = (await ethers.getContract("FuseFeeDistributor", poolsSuperAdmin)) as FuseFeeDistributor;
 
   const ffdFee = await fuseFeeDistributor.callStatic.defaultInterestFeeRate();
   console.log(`ffd fee ${ffdFee}`);
@@ -93,16 +102,17 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
 
   const comp = await deployments.deploy("Comptroller", {
     contract: "Comptroller.sol:Comptroller",
-    from: deployer,
+    from: upgradesAdmin,
     args: [ffd.address],
     log: true,
   });
   if (comp.transactionHash) await ethers.provider.waitForTransaction(comp.transactionHash);
-  console.log("Comptroller ", comp.address);
+  const comptrollerAddress = comp.address;
+  console.log("Comptroller ", comptrollerAddress);
 
   const compFirstExtension = await deployments.deploy("ComptrollerFirstExtension", {
     contract: "ComptrollerFirstExtension",
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
   });
@@ -115,7 +125,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
 
   const cTokenFirstExtension = await deployments.deploy("CTokenFirstExtension", {
     contract: "CTokenFirstExtension",
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
   });
@@ -124,7 +134,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   console.log("CTokenFirstExtension", cTokenFirstExtension.address);
 
   const erc20Del = await deployments.deploy("CErc20Delegate", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -133,7 +143,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   console.log("CErc20Delegate: ", erc20Del.address);
 
   const erc20PluginDel = await deployments.deploy("CErc20PluginDelegate", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -141,7 +151,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   console.log("CErc20PluginDelegate: ", erc20PluginDel.address);
 
   const erc20PluginRewardsDel = await deployments.deploy("CErc20PluginRewardsDelegate", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -150,7 +160,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   ////
   //// FUSE CORE CONTRACTS
   const fpd = await deployments.deploy("FusePoolDirectory", {
-    from: deployer,
+    from: upgradesAdmin,
     log: true,
     proxy: {
       proxyContract: "OpenZeppelinTransparentProxy",
@@ -160,21 +170,20 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
           args: [false, []],
         },
       },
-      owner: deployer,
+      owner: upgradesAdmin,
     },
     waitConfirmations: 1,
   });
   if (fpd.transactionHash) await ethers.provider.waitForTransaction(fpd.transactionHash);
   console.log("FusePoolDirectory: ", fpd.address);
-  const fusePoolDirectory = await ethers.getContract("FusePoolDirectory", deployer);
+  const fusePoolDirectory = await ethers.getContract("FusePoolDirectory", poolsSuperAdmin);
 
-  const comptroller = await ethers.getContract("Comptroller", deployer);
   const oldComptrollerImplementations = [constants.AddressZero];
-  const newComptrollerImplementations = [comptroller.address];
+  const newComptrollerImplementations = [comptrollerAddress];
   const comptrollerArrayOfTrue = [true];
   if (oldComptroller && oldComptroller.address != comptroller.address) {
     oldComptrollerImplementations.push(oldComptroller.address);
-    newComptrollerImplementations.push(comptroller.address);
+    newComptrollerImplementations.push(comptrollerAddress);
     comptrollerArrayOfTrue.push(true);
   }
 
@@ -210,21 +219,21 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
     );
     if (
       latestComptrollerImplementation === constants.AddressZero ||
-      latestComptrollerImplementation !== comptroller.address
+      latestComptrollerImplementation !== comptrollerAddress
     ) {
-      tx = await fuseFeeDistributor._setLatestComptrollerImplementation(oldComptroller.address, comptroller.address);
+      tx = await fuseFeeDistributor._setLatestComptrollerImplementation(oldComptroller.address, comptrollerAddress);
       await tx.wait();
-      console.log(`Set the latest Comptroller implementation for ${oldComptroller.address} to ${comptroller.address}`);
+      console.log(`Set the latest Comptroller implementation for ${oldComptroller.address} to ${comptrollerAddress}`);
     } else {
-      console.log(`No change in the latest Comptroller implementation ${comptroller.address}`);
+      console.log(`No change in the latest Comptroller implementation ${comptrollerAddress}`);
     }
   }
 
-  const comptrollerExtensions = await fuseFeeDistributor.callStatic.getComptrollerExtensions(comptroller.address);
+  const comptrollerExtensions = await fuseFeeDistributor.callStatic.getComptrollerExtensions(comptrollerAddress);
   if (comptrollerExtensions.length != 1 || comptrollerExtensions[0] != compFirstExtension.address) {
-    tx = await fuseFeeDistributor._setComptrollerExtensions(comptroller.address, [compFirstExtension.address]);
+    tx = await fuseFeeDistributor._setComptrollerExtensions(comptrollerAddress, [compFirstExtension.address]);
     await tx.wait();
-    console.log(`configured the extensions for comptroller ${comptroller.address}`);
+    console.log(`configured the extensions for comptroller ${comptrollerAddress}`);
   } else {
     console.log(`comptroller extensions already configured`);
   }
@@ -332,14 +341,14 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   }
 
   const fplDeployment = await deployments.deploy("FusePoolLens", {
-    from: deployer,
+    from: upgradesAdmin,
     log: true,
     waitConfirmations: 1,
   });
 
   if (fplDeployment.transactionHash) await ethers.provider.waitForTransaction(fplDeployment.transactionHash);
   console.log("FusePoolLens: ", fplDeployment.address);
-  const fusePoolLens = await ethers.getContract("FusePoolLens", deployer);
+  const fusePoolLens = await ethers.getContract("FusePoolLens", upgradesAdmin);
   let directory = await fusePoolLens.directory();
   if (directory === constants.AddressZero) {
     tx = await fusePoolLens.initialize(
@@ -360,7 +369,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   }
 
   const fpls = await deployments.deploy("FusePoolLensSecondary", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -368,7 +377,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   if (fpls.transactionHash) await ethers.provider.waitForTransaction(fpls.transactionHash);
   console.log("FusePoolLensSecondary: ", fpls.address);
 
-  const fusePoolLensSecondary = await ethers.getContract("FusePoolLensSecondary", deployer);
+  const fusePoolLensSecondary = await ethers.getContract("FusePoolLensSecondary", upgradesAdmin);
   directory = await fusePoolLensSecondary.directory();
   if (directory === constants.AddressZero) {
     tx = await fusePoolLensSecondary.initialize(fusePoolDirectory.address);
@@ -379,7 +388,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   }
 
   const mflrReceipt = await deployments.deploy("MidasFlywheelLensRouter", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -388,7 +397,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   console.log("MidasFlywheelLensRouter: ", mflrReceipt.address);
 
   const booster = await deployments.deploy("LooplessFlywheelBooster", {
-    from: deployer,
+    from: upgradesAdmin,
     log: true,
     args: [],
     waitConfirmations: 1,
@@ -396,9 +405,10 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   if (booster.transactionHash) await ethers.provider.waitForTransaction(booster.transactionHash);
   console.log("LooplessFlywheelBooster: ", booster.address);
 
-  const erc20Delegate = await ethers.getContract("CErc20Delegate", deployer);
-  const erc20PluginDelegate = await ethers.getContract("CErc20PluginDelegate", deployer);
-  const erc20PluginRewardsDelegate = await ethers.getContract("CErc20PluginRewardsDelegate", deployer);
+  await tx.wait();
+  const erc20Delegate = await ethers.getContract("CErc20Delegate");
+  const erc20PluginDelegate = await ethers.getContract("CErc20PluginDelegate");
+  const erc20PluginRewardsDelegate = await ethers.getContract("CErc20PluginRewardsDelegate");
 
   const oldImplementations = [constants.AddressZero, constants.AddressZero, constants.AddressZero];
   const newImplementations = [erc20Delegate.address, erc20PluginDelegate.address, erc20PluginRewardsDelegate.address];
@@ -450,14 +460,14 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   ////
   //// ORACLES
   const fixedNativePO = await deployments.deploy("FixedNativePriceOracle", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
   });
   console.log("FixedNativePriceOracle: ", fixedNativePO.address);
 
   const simplePO = await deployments.deploy("SimplePriceOracle", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     proxy: {
@@ -468,7 +478,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
         },
       },
       proxyContract: "OpenZeppelinTransparentProxy",
-      owner: deployer,
+      owner: upgradesAdmin,
     },
     waitConfirmations: 1,
   });
@@ -476,7 +486,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   console.log("SimplePriceOracle: ", simplePO.address);
 
   const masterPO = await deployments.deploy("MasterPriceOracle", {
-    from: deployer,
+    from: upgradesAdmin,
     log: true,
     proxy: {
       execute: {
@@ -486,14 +496,14 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
             [constants.AddressZero, chainDeployParams.wtoken],
             [fixedNativePO.address, fixedNativePO.address],
             constants.AddressZero,
-            deployer,
+            oraclesAdmin,
             true,
             chainDeployParams.wtoken,
           ],
         },
       },
       proxyContract: "OpenZeppelinTransparentProxy",
-      owner: deployer,
+      owner: upgradesAdmin,
     },
     waitConfirmations: 1,
   });
@@ -504,17 +514,17 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   ////
   //// HELPERS - ADDRESSES PROVIDER
   await deployments.deploy("AddressesProvider", {
-    from: deployer,
+    from: upgradesAdmin,
     log: true,
     proxy: {
       execute: {
         init: {
           methodName: "initialize",
-          args: [deployer],
+          args: [testConfigAdmin],
         },
       },
       proxyContract: "OpenZeppelinTransparentProxy",
-      owner: deployer,
+      owner: upgradesAdmin,
     },
     waitConfirmations: 1,
   });
@@ -550,7 +560,7 @@ const func: DeployFunction = async ({ run, ethers, getNamedAccounts, deployments
   });
   ///
 
-  const addressesProvider = (await ethers.getContract("AddressesProvider", deployer)) as AddressesProvider;
+  const addressesProvider = (await ethers.getContract("AddressesProvider", testConfigAdmin)) as AddressesProvider;
 
   /// EXTERNAL ADDRESSES
   const uniswapV2FactoryAddress = await addressesProvider.callStatic.getAddress("IUniswapV2Factory");

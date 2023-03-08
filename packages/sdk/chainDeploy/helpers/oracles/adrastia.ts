@@ -10,14 +10,14 @@ export const deployAdrastiaOracle = async ({
   adrastiaAssets,
   nativeUsdFeed,
 }: AdrastiaDeployFnParams): Promise<{ adrastiaPriceOracle: AdrastiaPriceOracle }> => {
-  const { deployer } = await getNamedAccounts();
+  const { upgradesAdmin, oraclesAdmin } = await getNamedAccounts();
   let tx: providers.TransactionResponse;
 
-  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  const mpo = await ethers.getContract("MasterPriceOracle", oraclesAdmin);
 
   //// Adrastia Oracle
   const adrastia = await deployments.deploy("AdrastiaPriceOracle", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     proxy: {
@@ -27,7 +27,7 @@ export const deployAdrastiaOracle = async ({
           args: [nativeUsdFeed],
         },
       },
-      owner: deployer,
+      owner: upgradesAdmin,
       proxyContract: "OpenZeppelinTransparentProxy",
     },
   });
@@ -35,7 +35,7 @@ export const deployAdrastiaOracle = async ({
   if (adrastia.transactionHash) await ethers.provider.waitForTransaction(adrastia.transactionHash);
   console.log("AdrastiaPriceOracle: ", adrastia.address);
 
-  const adrastiaPriceOracle = (await ethers.getContract("AdrastiaPriceOracle", deployer)) as AdrastiaPriceOracle;
+  const adrastiaPriceOracle = (await ethers.getContract("AdrastiaPriceOracle", oraclesAdmin)) as AdrastiaPriceOracle;
   tx = await adrastiaPriceOracle.setPriceFeeds(
     adrastiaAssets.map((f) => f.underlying),
     adrastiaAssets.map((f) => f.feed)

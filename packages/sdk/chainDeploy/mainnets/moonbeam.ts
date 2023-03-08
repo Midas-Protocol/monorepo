@@ -204,7 +204,7 @@ const saddlePools: CurvePoolConfig[] = [
 ];
 
 export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: ChainDeployFnParams): Promise<void> => {
-  const { deployer } = await getNamedAccounts();
+  const { upgradesAdmin } = await getNamedAccounts();
 
   //// ORACLES
   //// Uniswap Oracle
@@ -266,7 +266,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   //// CurveLPLiquidator
   const curveLpTokenLiquidatorNoRegistry = await deployments.deploy("CurveLpTokenLiquidatorNoRegistry", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -277,7 +277,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   // CurveSwapLiquidator
   const curveSwapLiquidator = await deployments.deploy("CurveSwapLiquidator", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,
@@ -288,7 +288,7 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
 
   //// Uniswap Lp token liquidator
   const uniswapLpTokenLiquidator = await deployments.deploy("UniswapLpTokenLiquidator", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
     waitConfirmations: 1,

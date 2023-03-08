@@ -11,16 +11,16 @@ export const deployDiaOracle = async ({
   diaAssets,
   diaNativeFeed,
 }: DiaDeployFnParams): Promise<{ diaOracle: DiaPriceOracle }> => {
-  const { deployer } = await getNamedAccounts();
+  const { upgradesAdmin, oraclesAdmin } = await getNamedAccounts();
   let tx: providers.TransactionResponse;
 
-  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  const mpo = await ethers.getContract("MasterPriceOracle", oraclesAdmin);
 
   //// Dia Oracle
   const dia = await deployments.deploy("DiaPriceOracle", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [
-      deployer,
+      oraclesAdmin,
       true,
       deployConfig.wtoken,
       diaNativeFeed.feed,
@@ -33,7 +33,7 @@ export const deployDiaOracle = async ({
   if (dia.transactionHash) await ethers.provider.waitForTransaction(dia.transactionHash);
   console.log("DiaPriceOracle: ", dia.address);
 
-  const diaOracle = (await ethers.getContract("DiaPriceOracle", deployer)) as DiaPriceOracle;
+  const diaOracle = (await ethers.getContract("DiaPriceOracle", oraclesAdmin)) as DiaPriceOracle;
   tx = await diaOracle.setPriceFeeds(
     diaAssets.map((d) => d.underlying),
     diaAssets.map((d) => d.feed),

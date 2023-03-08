@@ -9,13 +9,13 @@ export const deployWombatOracle = async ({
   deployments,
   wombatAssets,
 }: WombatDeployFnParams): Promise<{ wombatOracle: WombatLpTokenPriceOracle }> => {
-  const { deployer } = await getNamedAccounts();
+  const { upgradesAdmin, oraclesAdmin } = await getNamedAccounts();
 
-  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  const mpo = await ethers.getContract("MasterPriceOracle", oraclesAdmin);
 
   ///// Wombat Lp Token Price Oracle
   const wombat = await deployments.deploy("WombatLpTokenPriceOracle", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [],
     log: true,
   });

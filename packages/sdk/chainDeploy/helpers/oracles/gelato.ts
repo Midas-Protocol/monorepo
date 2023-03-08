@@ -10,13 +10,13 @@ export const deployGelatoGUniPriceOracle = async ({
   deployConfig,
   gelatoAssets,
 }: gelatoGUniPriceOracleDeployParams): Promise<{ gUniOracle: GelatoGUniPriceOracle }> => {
-  const { deployer } = await getNamedAccounts();
+  const { upgradesAdmin, oraclesAdmin } = await getNamedAccounts();
 
-  const mpo = await ethers.getContract("MasterPriceOracle", deployer);
+  const mpo = await ethers.getContract("MasterPriceOracle", oraclesAdmin);
 
   //// Gelato GUni Price Oracle
   const gelatoGUniPriceOracle = await deployments.deploy("GelatoGUniPriceOracle", {
-    from: deployer,
+    from: upgradesAdmin,
     args: [deployConfig.wtoken],
     log: true,
   });
@@ -26,7 +26,7 @@ export const deployGelatoGUniPriceOracle = async ({
 
   console.log("GelatoGUniPriceOracle: ", gelatoGUniPriceOracle.address);
 
-  const gUniOracle = (await ethers.getContract("GelatoGUniPriceOracle", deployer)) as GelatoGUniPriceOracle;
+  const gUniOracle = (await ethers.getContract("GelatoGUniPriceOracle")) as GelatoGUniPriceOracle;
 
   const underlyings = gelatoAssets.map((d) => d.vaultAddress);
   const oracles = Array(gelatoAssets.length).fill(gUniOracle.address);
