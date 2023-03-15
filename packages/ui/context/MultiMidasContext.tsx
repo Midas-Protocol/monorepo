@@ -5,7 +5,7 @@ import Security from '@midas-capital/security';
 import { SupportedChains } from '@midas-capital/types';
 import * as Sentry from '@sentry/browser';
 import { FetchSignerResult, Signer } from '@wagmi/core';
-import { create as createConnextSdk, SdkBase as ConnextSdk, SdkConfig as ConnextSdkConfig } from "@connext/sdk";
+import { SdkBase as ConnextSdk, SdkConfig as ConnextSdkConfig } from "@connext/sdk";
 import {
   createContext,
   Dispatch,
