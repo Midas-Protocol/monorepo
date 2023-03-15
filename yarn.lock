@@ -4094,7 +4094,6 @@ __metadata:
   resolution: "@midas-capital/sdk@workspace:packages/sdk"
   dependencies:
     "@abimate/core": ^0.2.1
-    "@connext/sdk": ^1.0.3-alpha.0
     "@keydonix/uniswap-oracle-sdk": ^1.0.7
     "@keydonix/uniswap-oracle-sdk-adapter": ^1.0.7
     "@midas-capital/chains": "workspace:*"
@@ -4200,6 +4199,7 @@ __metadata:
     "@chakra-ui/cli": ^2.3.0
     "@chakra-ui/icons": ^2.0.17
     "@chakra-ui/react": ^2.5.1
+    "@connext/sdk": ^1.0.3-alpha.0
     "@emotion/react": ^11.10.6
     "@emotion/styled": ^11.10.6
     "@ethersproject/contracts": ^5.7.0
