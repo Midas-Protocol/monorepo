@@ -705,6 +705,7 @@ export const FundedMarketsList = ({
                         borrowBalanceFiat={row.original.market.totalBorrowBalanceFiat}
                         comptrollerAddress={row.original.market.comptroller}
                         poolChainId={Number(row.original.market.chainId)}
+                        rewards={rewards}
                         row={row}
                         rows={table.getCoreRowModel().rows}
                         supplyBalanceFiat={row.original.market.totalSupplyBalanceFiat}
