@@ -195,3 +195,63 @@ export const FEATURE_REQUESTS_URL = 'https://midascapital.canny.io/feature-reque
 export const COINGECKO_API = 'https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=';
 export const DEFI_LLAMA_API = 'https://coins.llama.fi/prices/current/';
 export const HIGH_RISK_RATIO = 0.8;
+
+
+/**
+ * Domain IDs are unique to every bridge and differ from Chain IDs. 
+ * Connext's xcall requires specifying which Domain ID should be the destination of a cross-chain transaction.
+ * Please refer the following link for more details. https://docs.connext.network/resources/supported-chains
+**/
+export const SUPPORTED_CHAINS_BY_CONNEXT: Record<number, {domainId: string, network: string}> = {
+    1: {
+      // Ethereum Mainnet
+      domainId: "6648936",
+      network: "mainnet"
+    },
+    137: {
+      // Polygon
+      domainId: "1886350457",
+      network: "mainnet"
+    },
+    10: {
+      // Optimism
+      domainId: "1869640809",
+      network: "mainnet"
+    },
+    42161: {
+      // Arbitrum One
+      domainId: "1634886255",
+      network: "mainnet"
+    },        
+    100: {
+      // Gnosis Chain
+      domainId: "6778479",
+      network: "mainnet"
+    },        
+    56: {
+      // BNB Chain
+      domainId: "6450786",
+      network: "mainnet"
+    },            
+    5: {
+      // Goerli
+      domainId: "1735353714",
+      network: "testnet"
+    },      
+    420: {
+      // Optimism-Goerli
+      domainId: "1735356532",
+      network: "testnet"
+    },        
+    80001: {
+      // Mumbai
+      domainId: "9991",
+      network: "testnet"
+    },        
+    421613: {
+      // Arbitrum-Goerli
+      domainId: "1734439522",
+      network: "testnet"
+    },        
+}
+
