@@ -5,7 +5,7 @@ import Security from '@midas-capital/security';
 import { SupportedChains } from '@midas-capital/types';
 import * as Sentry from '@sentry/browser';
 import { FetchSignerResult, Signer } from '@wagmi/core';
-import { SdkBase as ConnextSdk, SdkConfig as ConnextSdkConfig } from "@connext/sdk";
+import { SdkConfig as ConnextSdkConfig } from "@connext/sdk";
 import {
   createContext,
   Dispatch,
@@ -33,7 +33,7 @@ export interface MultiMidasContextData {
   };
   currentSdk?: MidasSdk;
   getSdk: (chainId: number) => MidasSdk | undefined;
-  connextSdkConfig?: ConnextSdk;
+  connextSdkConfig?: ConnextSdkConfig;
   address?: string;
   disconnect: () => void;
   isConnected: boolean;

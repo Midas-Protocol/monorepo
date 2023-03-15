@@ -5,6 +5,7 @@ import { useAddRecentTransaction } from '@rainbow-me/rainbowkit';
 import { useQueryClient } from '@tanstack/react-query';
 import { BigNumber, constants } from 'ethers';
 import { useEffect, useMemo, useState } from 'react';
+import { create as createConnextSdk, SdkBase as ConnextSdk} from "@connext/sdk"
 import { getContract } from 'sdk/dist/cjs/src/MidasSdk/utils';
 
 import { StatsColumn } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/StatsColumn';
@@ -48,9 +49,15 @@ export const SupplyModal = ({
   onClose,
   poolChainId,
 }: SupplyModalProps) => {
-  const { currentSdk, address, currentChain } = useMultiMidas();
+  const { currentSdk, address, currentChain, connextSdkConfig } = useMultiMidas();
   const addRecentTransaction = useAddRecentTransaction();
   if (!currentChain || !currentSdk) throw new Error("SDK doesn't exist");
+  const [connextSdk, setConnextSdk] = useState<ConnextSdk>();
+  useEffect(() => {
+    if (connextSdkConfig) {
+      createConnextSdk(connextSdkConfig).then((sdkInstance) => setConnextSdk(sdkInstance.sdkBase)).catch((e) => {console.error("Creating a connext sdk failed!, error: ", e)});
+    }
+  }, [connextSdkConfig]);
 
   const errorToast = useErrorToast();
   const { data: tokenData } = useTokenData(asset.underlyingToken, poolChainId);
