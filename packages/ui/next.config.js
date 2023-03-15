@@ -33,6 +33,10 @@ nextConfig = {
     disableServerWebpackPlugin: true,
     disableClientWebpackPlugin: true,
   },
+  webpack: (config) => {
+    config.resolve.fallback = { fs: false };
+    return config;
+  },
 };
 
 module.exports = withSentryConfig(withBundleAnalyzer(nextConfig));
