@@ -39,6 +39,7 @@ export interface MultiMidasContextData {
   isConnected: boolean;
   signer?: FetchSignerResult<Signer>;
   setAddress: Dispatch<string>;
+  enabledChainsForConnext: SupportedChains[];
 }
 
 export const MultiMidasContext = createContext<MultiMidasContextData | undefined>(undefined);
@@ -102,11 +103,12 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
     [sdks]
   );
 
+  const enabledChainsForConnext = enabledChains.filter((chainId: number) => Object.keys(SUPPORTED_CHAINS_BY_CONNEXT).includes(chainId.toString()));
   const connextSdkConfig = useMemo(() => {
     if (chain && !chain.unsupported) {
       const network = SUPPORTED_CHAINS_BY_CONNEXT[chain]?.network;  
       if (network && enabledChains.includes(chain)) {
-        const enabledChainsForConnext = enabledChains.filter((chainId: number) => Object.keys(SUPPORTED_CHAINS_BY_CONNEXT).includes(chainId.toString()));
+        
         const domainConfig: any = {};
         const chainConfig = chainIdToConfig[chain];
         for (const enabledChainId of enabledChainsForConnext) {
@@ -178,6 +180,7 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
       signer,
       setAddress,
       connextSdkConfig,
+      enabledChainsForConnext
     };
   }, [
     sdks,
@@ -194,7 +197,8 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
     isConnected,
     signer,
     setAddress,
-    connextSdkConfig
+    connextSdkConfig,
+    enabledChainsForConnext
   ]);
 
   return <MultiMidasContext.Provider value={value}>{children}</MultiMidasContext.Provider>;

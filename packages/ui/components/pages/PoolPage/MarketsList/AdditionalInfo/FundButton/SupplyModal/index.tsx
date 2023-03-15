@@ -19,7 +19,7 @@ import { EllipsisText } from '@ui/components/shared/EllipsisText';
 import { Column } from '@ui/components/shared/Flex';
 import { MidasModal } from '@ui/components/shared/Modal';
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
-import { SUPPLY_STEPS } from '@ui/constants/index';
+import { SUPPLY_STEPS, SUPPORTED_CHAINS_BY_CONNEXT } from '@ui/constants/index';
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
 import { useColors } from '@ui/hooks/useColors';
 import { useMaxSupplyAmount } from '@ui/hooks/useMaxSupplyAmount';
@@ -31,6 +31,7 @@ import { TxStep } from '@ui/types/ComponentPropsType';
 import { MarketData } from '@ui/types/TokensDataMap';
 import { smallFormatter } from '@ui/utils/bigUtils';
 import { handleGenericError } from '@ui/utils/errorHandling';
+import { useEnabledChains } from '@ui/hooks/useChainConfig';
 
 interface SupplyModalProps {
   isOpen: boolean;
@@ -49,7 +50,8 @@ export const SupplyModal = ({
   onClose,
   poolChainId,
 }: SupplyModalProps) => {
-  const { currentSdk, address, currentChain, connextSdkConfig } = useMultiMidas();
+  const { currentSdk, address, currentChain, connextSdkConfig, enabledChainsForConnext } = useMultiMidas();
+  const enabledChains = useEnabledChains();
   const addRecentTransaction = useAddRecentTransaction();
   if (!currentChain || !currentSdk) throw new Error("SDK doesn't exist");
   const [connextSdk, setConnextSdk] = useState<ConnextSdk>();
@@ -392,11 +394,7 @@ export const SupplyModal = ({
                   {tokenData?.symbol || asset.underlyingSymbol}
                 </EllipsisText>
                 <Select placeholder="From Chain">
-                  <option value="bnb">BNB</option>
-                  <option value="ethereum">Ethereum</option>
-                  <option value="optimism">Optimism</option>
-                  <option value="arbitrum">Arbitrum</option>
-                  <option value="gnosis">Gnosis</option>
+                  {enabledChainsForConnext.map((chainId: number) => <option value={SUPPORTED_CHAINS_BY_CONNEXT[chainId].name}>{SUPPORTED_CHAINS_BY_CONNEXT[chainId].name}</option>)}
                 </Select>
               </HStack>
 

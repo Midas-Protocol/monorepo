@@ -202,54 +202,64 @@ export const HIGH_RISK_RATIO = 0.8;
  * Connext's xcall requires specifying which Domain ID should be the destination of a cross-chain transaction.
  * Please refer the following link for more details. https://docs.connext.network/resources/supported-chains
 **/
-export const SUPPORTED_CHAINS_BY_CONNEXT: Record<number, {domainId: string, network: string}> = {
+export const SUPPORTED_CHAINS_BY_CONNEXT: Record<number, {name: string, domainId: string, network: string}> = {
     1: {
       // Ethereum Mainnet
+      name: "Ethereum",
       domainId: "6648936",
       network: "mainnet"
     },
     137: {
       // Polygon
+      name: "Polygon",
       domainId: "1886350457",
       network: "mainnet"
     },
     10: {
       // Optimism
+      name: "Optimism",
       domainId: "1869640809",
       network: "mainnet"
     },
     42161: {
       // Arbitrum One
+      name: "Arbitrum",
       domainId: "1634886255",
       network: "mainnet"
     },        
     100: {
       // Gnosis Chain
+      name: "Gnosis",
       domainId: "6778479",
       network: "mainnet"
     },        
     56: {
       // BNB Chain
+      name: "BNB",
       domainId: "6450786",
       network: "mainnet"
     },            
     5: {
       // Goerli
+      name: "Goerli",
       domainId: "1735353714",
       network: "testnet"
     },      
     420: {
       // Optimism-Goerli
+      name: "OptGoerli",
       domainId: "1735356532",
       network: "testnet"
     },        
     80001: {
       // Mumbai
+      name: "Mumbai",
       domainId: "9991",
       network: "testnet"
     },        
     421613: {
       // Arbitrum-Goerli
+      name: "ArbGoerli",
       domainId: "1734439522",
       network: "testnet"
     },        
