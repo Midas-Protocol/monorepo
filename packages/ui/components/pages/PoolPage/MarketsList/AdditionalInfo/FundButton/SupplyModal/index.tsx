@@ -1,4 +1,4 @@
-import { Box, Button, Divider, HStack, Text } from '@chakra-ui/react';
+import { Box, Button, Divider, HStack, Select, Text } from '@chakra-ui/react';
 import { WETHAbi } from '@midas-capital/sdk';
 import { FundOperationMode } from '@midas-capital/types';
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit';
@@ -384,6 +384,13 @@ export const SupplyModal = ({
                 >
                   {tokenData?.symbol || asset.underlyingSymbol}
                 </EllipsisText>
+                <Select placeholder="From Chain">
+                  <option value="bnb">BNB</option>
+                  <option value="ethereum">Ethereum</option>
+                  <option value="optimism">Optimism</option>
+                  <option value="arbitrum">Arbitrum</option>
+                  <option value="gnosis">Gnosis</option>
+                </Select>
               </HStack>
 
               <Divider />
