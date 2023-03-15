@@ -717,6 +717,7 @@ export const MarketsList = ({
                         borrowBalanceFiat={borrowBalanceFiat}
                         comptrollerAddress={comptrollerAddress}
                         poolChainId={poolChainId}
+                        rewards={rewards}
                         row={row}
                         rows={table.getCoreRowModel().rows}
                         supplyBalanceFiat={supplyBalanceFiat}

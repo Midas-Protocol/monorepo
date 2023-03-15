@@ -26,6 +26,7 @@ import { useSwitchNetwork } from 'wagmi';
 import { Market } from '@ui/components/pages/PoolPage/MarketsList';
 import { Collateral } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/Collateral/index';
 import { FundButton } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/index';
+import { Banner } from '@ui/components/shared/Banner';
 import CaptionedStat from '@ui/components/shared/CaptionedStat';
 import ClaimAssetRewardsButton from '@ui/components/shared/ClaimAssetRewardsButton';
 import { PopoverTooltip } from '@ui/components/shared/PopoverTooltip';
@@ -49,6 +50,7 @@ import { useBorrowCap } from '@ui/hooks/useBorrowCap';
 import { useChartData } from '@ui/hooks/useChartData';
 import { useColors } from '@ui/hooks/useColors';
 import { usePerformanceFee } from '@ui/hooks/usePerformanceFee';
+import { UseRewardsData } from '@ui/hooks/useRewards';
 import { useWindowSize } from '@ui/hooks/useScreenSize';
 import { useSupplyCap } from '@ui/hooks/useSupplyCap';
 import { MarketData } from '@ui/types/TokensDataMap';
@@ -66,6 +68,7 @@ export const AdditionalInfo = ({
   supplyBalanceFiat,
   borrowBalanceFiat,
   poolChainId,
+  rewards,
 }: {
   row: Row<Market>;
   rows: Row<Market>[];
@@ -73,6 +76,7 @@ export const AdditionalInfo = ({
   supplyBalanceFiat: number;
   borrowBalanceFiat: number;
   poolChainId: number;
+  rewards: UseRewardsData;
 }) => {
   const scanUrl = useMemo(() => getScanUrlByChainId(poolChainId), [poolChainId]);
   const asset: MarketData = row.original.market;
@@ -120,6 +124,14 @@ export const AdditionalInfo = ({
   });
   const { data: oracle } = useOracle(asset.underlyingToken, poolChainId);
   const { data: irm } = useIRM(asset.cToken, poolChainId);
+
+  const rewardsOfThisMarket = useMemo(() => {
+    if (rewards && asset.cToken && rewards[asset.cToken]) {
+      return rewards[asset.cToken];
+    }
+
+    return [];
+  }, [asset.cToken, rewards]);
 
   return (
     <Box minWidth="400px" width={{ base: windowWidth.width * 0.9, md: 'auto' }}>
@@ -190,6 +202,19 @@ export const AdditionalInfo = ({
           </HStack>
         )}
       </Flex>
+      <VStack>
+        {rewardsOfThisMarket.filter((rewards) => rewards.status === 'eol').length > 0 && (
+          <Banner
+            alertDescriptionProps={{ fontSize: 'md' }}
+            alertProps={{ status: 'warning', mt: 4 }}
+            descriptions={[
+              {
+                text: 'This asset is retired. The underlying platform stopped rewarding.',
+              },
+            ]}
+          />
+        )}
+      </VStack>
       <Grid
         alignItems="stretch"
         gap={4}
