@@ -10,6 +10,7 @@
     "packages/chains",
     "packages/sdk",
     "packages/security",
+    "packages/vaults",
     "packages/types",
     "packages/ui"
   ],
@@ -33,6 +34,7 @@
     "build:types": "yarn workspace @midas-capital/types build",
     "build:chains": "yarn build:types && yarn workspace @midas-capital/chains build",
     "build:security": "yarn build:types && yarn build:chains && yarn workspace @midas-capital/security build",
+    "build:vaults": "yarn build:types && yarn build:chains && yarn workspace @midas-capital/vaults build",
     "build:ui": "yarn workspace @midas-capital/ui build",
     "build:functions": "yarn workspace @midas-capital/functions build",
     "build:liquidator": "yarn workspace @midas-capital/liquidator build",

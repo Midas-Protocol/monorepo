@@ -49,6 +49,9 @@
     },
     {
       "path": "./packages/monitors/liquidity"
+    },
+    {
+      "path": "./packages/vaults"
     }
   ]
 }
