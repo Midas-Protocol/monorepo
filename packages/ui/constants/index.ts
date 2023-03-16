@@ -1,4 +1,5 @@
-import { SupportedChainsArray } from '@midas-capital/types';
+import { bsc, polygon } from '@midas-capital/chains';
+import { assetSymbols, SupportedAsset, SupportedChainsArray } from '@midas-capital/types';
 
 import { TxStep } from '@ui/types/ComponentPropsType';
 
@@ -264,5 +265,43 @@ export const SUPPORTED_CHAINS_BY_CONNEXT: Record<
     name: 'ArbGoerli',
     domainId: '1734439522',
     network: 'testnet',
+  },
+};
+
+export const xMinterContractABI = [
+  {
+    inputs: [
+      { internalType: 'bytes32', name: '_transferId', type: 'bytes32' },
+      { internalType: 'uint256', name: '_amount', type: 'uint256' },
+      { internalType: 'address', name: '_asset', type: 'address' },
+      { internalType: 'address', name: '_originSender', type: 'address' },
+      { internalType: 'uint32', name: '_origin', type: 'uint32' },
+      { internalType: 'bytes', name: '_callData', type: 'bytes' },
+    ],
+    name: 'xReceive',
+    outputs: [{ internalType: 'bytes', name: '', type: 'bytes' }],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+];
+
+export const SUPPORTED_SYMBOLS_BY_CONNEXT: string[] = [
+  assetSymbols.ETH,
+  assetSymbols.WETH,
+  assetSymbols.USDC,
+];
+
+export const SUPPORTED_CHAINS_XMINT: {
+  [chainId: number]: { supported: boolean; assets: SupportedAsset[]; xMinterAddress: string };
+} = {
+  [bsc.chainId]: {
+    supported: true,
+    assets: bsc.assets.filter((a) => SUPPORTED_SYMBOLS_BY_CONNEXT.includes(a.symbol)),
+    xMinterAddress: '0x24A1eb8fAE716EF04DCA073E3F99F5F5C7497137',
+  },
+  [polygon.chainId]: {
+    supported: true,
+    assets: polygon.assets.filter((a) => SUPPORTED_SYMBOLS_BY_CONNEXT.includes(a.symbol)),
+    xMinterAddress: '0xb4aebef3abf043a2056d45ed751524012e20bb0c',
   },
 };

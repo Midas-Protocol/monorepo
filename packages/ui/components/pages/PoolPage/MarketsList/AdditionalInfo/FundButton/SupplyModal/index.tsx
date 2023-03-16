@@ -5,7 +5,7 @@ import { useAddRecentTransaction } from '@rainbow-me/rainbowkit';
 import { useQueryClient } from '@tanstack/react-query';
 import { BigNumber, constants } from 'ethers';
 import { useEffect, useMemo, useState } from 'react';
-import { create as createConnextSdk, SdkBase as ConnextSdk} from "@connext/sdk"
+import { create as createConnextSdk, SdkBase as ConnextSdk } from '@connext/sdk';
 import { getContract } from 'sdk/dist/cjs/src/MidasSdk/utils';
 
 import { StatsColumn } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/StatsColumn';
@@ -50,14 +50,22 @@ export const SupplyModal = ({
   onClose,
   poolChainId,
 }: SupplyModalProps) => {
-  const { currentSdk, address, currentChain, connextSdkConfig, enabledChainsForConnext } = useMultiMidas();
+  const { currentSdk, address, currentChain, connextSdkConfig, enabledChainsForConnext } =
+    useMultiMidas();
   const enabledChains = useEnabledChains();
   const addRecentTransaction = useAddRecentTransaction();
-  if (!currentChain || !currentSdk) throw new Error("SDK doesn't exist");
+  if (!currentChain || !currentSdk) {
+    console.elog(currentChain, currentSdk);
+    throw new Error("SDK doesn't exist");
+  }
   const [connextSdk, setConnextSdk] = useState<ConnextSdk>();
   useEffect(() => {
     if (connextSdkConfig) {
-      createConnextSdk(connextSdkConfig).then((sdkInstance) => setConnextSdk(sdkInstance.sdkBase)).catch((e) => {console.error("Creating a connext sdk failed!, error: ", e)});
+      createConnextSdk(connextSdkConfig)
+        .then((sdkInstance) => setConnextSdk(sdkInstance.sdkBase))
+        .catch((e) => {
+          console.error('Creating a connext sdk failed!, error: ', e);
+        });
     }
   }, [connextSdkConfig]);
 
@@ -393,8 +401,12 @@ export const SupplyModal = ({
                 >
                   {tokenData?.symbol || asset.underlyingSymbol}
                 </EllipsisText>
-                <Select placeholder="From Chain">
-                  {enabledChainsForConnext.map((chainId: number) => <option value={SUPPORTED_CHAINS_BY_CONNEXT[chainId].name}>{SUPPORTED_CHAINS_BY_CONNEXT[chainId].name}</option>)}
+                <Select placeholder="From Chain" w="200" m1="2">
+                  {enabledChainsForConnext.map((chainId: number) => (
+                    <option value={SUPPORTED_CHAINS_BY_CONNEXT[chainId].name}>
+                      {SUPPORTED_CHAINS_BY_CONNEXT[chainId].name}
+                    </option>
+                  ))}
                 </Select>
               </HStack>
 

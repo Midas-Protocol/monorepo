@@ -128,7 +128,7 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
         return connextSdkConfig;
       }
     }
-  }, [chain, enabledChains]);
+  }, [chain, enabledChains, wagmiAddress, enabledChainsForConnext]);
 
   const getSecurity = useCallback(
     (chainId: number) => securities.find((security) => security.chainConfig.chainId === chainId),
