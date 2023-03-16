@@ -5,7 +5,7 @@ import Security from '@midas-capital/security';
 import { SupportedChains } from '@midas-capital/types';
 import * as Sentry from '@sentry/browser';
 import { FetchSignerResult, Signer } from '@wagmi/core';
-import { SdkConfig as ConnextSdkConfig } from "@connext/sdk";
+import { SdkConfig as ConnextSdkConfig } from '@connext/sdk';
 import {
   createContext,
   Dispatch,
@@ -103,31 +103,32 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
     [sdks]
   );
 
-  const enabledChainsForConnext = enabledChains.filter((chainId: number) => Object.keys(SUPPORTED_CHAINS_BY_CONNEXT).includes(chainId.toString()));
+  const enabledChainsForConnext = enabledChains.filter((chainId: number) =>
+    Object.keys(SUPPORTED_CHAINS_BY_CONNEXT).includes(chainId.toString())
+  );
   const connextSdkConfig = useMemo(() => {
     if (chain && !chain.unsupported) {
-      const network = SUPPORTED_CHAINS_BY_CONNEXT[chain]?.network;  
+      const network = SUPPORTED_CHAINS_BY_CONNEXT[chain]?.network;
       if (network && enabledChains.includes(chain)) {
-        
         const domainConfig: any = {};
         const chainConfig = chainIdToConfig[chain];
         for (const enabledChainId of enabledChainsForConnext) {
           const domainId = SUPPORTED_CHAINS_BY_CONNEXT[enabledChainId].domainId;
-          
+
           domainConfig[domainId] = {
-            providers: chainConfig.specificParams.metadata.rpcUrls.default.http
-          }
+            providers: chainConfig.specificParams.metadata.rpcUrls.default.http,
+          };
         }
-  
+
         const connextSdkConfig: ConnextSdkConfig = {
           signerAddress: wagmiAddress,
-          network: network as ("mainnet" | "testnet"),
+          network: network as 'mainnet' | 'testnet',
           chains: domainConfig,
         };
         return connextSdkConfig;
       }
     }
-  }, [chain, enabledChains])
+  }, [chain, enabledChains]);
 
   const getSecurity = useCallback(
     (chainId: number) => securities.find((security) => security.chainConfig.chainId === chainId),
@@ -180,7 +181,7 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
       signer,
       setAddress,
       connextSdkConfig,
-      enabledChainsForConnext
+      enabledChainsForConnext,
     };
   }, [
     sdks,
@@ -198,7 +199,7 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
     signer,
     setAddress,
     connextSdkConfig,
-    enabledChainsForConnext
+    enabledChainsForConnext,
   ]);
 
   return <MultiMidasContext.Provider value={value}>{children}</MultiMidasContext.Provider>;
