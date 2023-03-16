@@ -1,3 +1,4 @@
+import { SdkConfig as ConnextSdkConfig } from '@connext/sdk';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { chainIdToConfig } from '@midas-capital/chains';
 import { MidasSdk } from '@midas-capital/sdk';
@@ -5,7 +6,6 @@ import Security from '@midas-capital/security';
 import { SupportedChains } from '@midas-capital/types';
 import * as Sentry from '@sentry/browser';
 import { FetchSignerResult, Signer } from '@wagmi/core';
-import { SdkConfig as ConnextSdkConfig } from '@connext/sdk';
 import {
   createContext,
   Dispatch,
@@ -18,8 +18,9 @@ import {
 } from 'react';
 import { Chain, useAccount, useDisconnect, useNetwork, useSigner } from 'wagmi';
 
+import { SUPPORTED_CHAINS_XMINT, SUPPORTED_CHAINS_BY_CONNEXT } from '../constants';
 import { useEnabledChains } from '@ui/hooks/useChainConfig';
-import { SUPPORTED_CHAINS_BY_CONNEXT } from '../constants';
+import { getAddress } from 'ethers/lib/utils';
 
 export interface MultiMidasContextData {
   sdks: MidasSdk[];
@@ -40,6 +41,7 @@ export interface MultiMidasContextData {
   signer?: FetchSignerResult<Signer>;
   setAddress: Dispatch<string>;
   enabledChainsForConnext: SupportedChains[];
+  getAvailableFromChains: (chainId: number, underlyingAsset: string) => SupportedChains[];
 }
 
 export const MultiMidasContext = createContext<MultiMidasContextData | undefined>(undefined);
@@ -108,10 +110,10 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
   );
   const connextSdkConfig = useMemo(() => {
     if (chain && !chain.unsupported) {
-      const network = SUPPORTED_CHAINS_BY_CONNEXT[chain]?.network;
-      if (network && enabledChains.includes(chain)) {
+      const network = SUPPORTED_CHAINS_BY_CONNEXT[chain.id]?.network;
+      if (network && enabledChains.includes(chain.id)) {
         const domainConfig: any = {};
-        const chainConfig = chainIdToConfig[chain];
+        const chainConfig = chainIdToConfig[chain.id];
         for (const enabledChainId of enabledChainsForConnext) {
           const domainId = SUPPORTED_CHAINS_BY_CONNEXT[enabledChainId].domainId;
 
@@ -129,6 +131,24 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
       }
     }
   }, [chain, enabledChains, wagmiAddress, enabledChainsForConnext]);
+
+  const getAvailableFromChains = useCallback(
+    (chainId: number, underlyingAsset: string) => {
+      const xMintChain = SUPPORTED_CHAINS_XMINT[chainId];
+      if (
+        !xMintChain ||
+        !xMintChain.supported ||
+        !xMintChain.assets
+          .map((a) => getAddress(a.underlying))
+          .includes(getAddress(underlyingAsset))
+      ) {
+        return [];
+      }
+
+      return enabledChainsForConnext.filter((c) => c != chainId);
+    },
+    [enabledChainsForConnext]
+  );
 
   const getSecurity = useCallback(
     (chainId: number) => securities.find((security) => security.chainConfig.chainId === chainId),
@@ -182,6 +202,7 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
       setAddress,
       connextSdkConfig,
       enabledChainsForConnext,
+      getAvailableFromChains,
     };
   }, [
     sdks,
@@ -200,6 +221,7 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
     setAddress,
     connextSdkConfig,
     enabledChainsForConnext,
+    getAvailableFromChains,
   ]);
 
   return <MultiMidasContext.Provider value={value}>{children}</MultiMidasContext.Provider>;

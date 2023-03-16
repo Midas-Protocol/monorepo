@@ -10,7 +10,7 @@ import {
   neondevnet,
   polygon,
 } from '@midas-capital/chains';
-import { FusePoolData } from '@midas-capital/types';
+import { FusePoolData, SupportedAsset } from '@midas-capital/types';
 
 import { config } from '@ui/config/index';
 
@@ -41,3 +41,9 @@ export const supportedChainIdToConfig: {
 export interface FusePoolsPerChain {
   [chainId: string]: FusePoolData[];
 }
+
+export type ChainXMintData = {
+  supported: boolean;
+  assets: SupportedAsset[];
+  xMinterAddress: string;
+};

@@ -1,5 +1,6 @@
 import { bsc, polygon } from '@midas-capital/chains';
-import { assetSymbols, SupportedAsset, SupportedChainsArray } from '@midas-capital/types';
+import { assetSymbols, SupportedChainsArray } from '@midas-capital/types';
+import { ChainXMintData } from '@ui/types/ChainMetaData';
 
 import { TxStep } from '@ui/types/ComponentPropsType';
 
@@ -292,7 +293,7 @@ export const SUPPORTED_SYMBOLS_BY_CONNEXT: string[] = [
 ];
 
 export const SUPPORTED_CHAINS_XMINT: {
-  [chainId: number]: { supported: boolean; assets: SupportedAsset[]; xMinterAddress: string };
+  [chainId: number]: ChainXMintData;
 } = {
   [bsc.chainId]: {
     supported: true,

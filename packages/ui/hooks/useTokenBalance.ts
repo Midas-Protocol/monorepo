@@ -10,7 +10,6 @@ export const fetchTokenBalance = async (
   address?: string
 ): Promise<BigNumber> => {
   let balance: BigNumber;
-
   if (!address) {
     balance = BigNumber.from(0);
   } else if (tokenAddress === 'NO_ADDRESS_HERE_USE_WETH_FOR_ADDRESS') {
@@ -19,20 +18,21 @@ export const fetchTokenBalance = async (
     const contract = sdk.createCTokenWithExtensions(tokenAddress);
     balance = (await contract.callStatic.balanceOf(address)) as BigNumber;
   }
-
   return balance;
 };
 
-export function useTokenBalance(tokenAddress: string, customAddress?: string) {
+export function useTokenBalance(tokenAddress: string, customAddress?: string, sdk?: MidasSdk) {
   const { currentSdk, currentChain, address } = useMultiMidas();
 
   const addressToCheck = customAddress ?? address;
+  const chainId = sdk?.chainId ?? currentChain?.id;
+  const midasSdk = sdk ?? currentSdk;
 
   return useQuery(
-    ['TokenBalance', currentChain?.id, tokenAddress, addressToCheck, currentSdk?.chainId],
+    ['TokenBalance', chainId, tokenAddress, addressToCheck, midasSdk?.chainId],
     async () => {
-      if (currentSdk) {
-        return await fetchTokenBalance(tokenAddress, currentSdk, addressToCheck);
+      if (midasSdk) {
+        return await fetchTokenBalance(tokenAddress, midasSdk, addressToCheck);
       } else {
         return null;
       }
@@ -40,7 +40,7 @@ export function useTokenBalance(tokenAddress: string, customAddress?: string) {
     {
       cacheTime: Infinity,
       staleTime: Infinity,
-      enabled: !!currentChain && !!tokenAddress && !!addressToCheck && !!currentSdk,
+      enabled: !!chainId && !!tokenAddress && !!addressToCheck && !!midasSdk,
     }
   );
 }

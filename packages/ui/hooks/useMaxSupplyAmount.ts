@@ -5,14 +5,16 @@ import { BigNumber, constants, utils } from 'ethers';
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
 import { useSdk } from '@ui/hooks/fuse/useSdk';
 import { fetchTokenBalance } from '@ui/hooks/useTokenBalance';
+import { useXMintAsset } from './useXMintAsset';
 
 export function useMaxSupplyAmount(
   asset: NativePricedFuseAsset,
   comptrollerAddress: string,
   chainId: number
 ) {
-  const { address } = useMultiMidas();
+  const { address, currentChain, currentSdk } = useMultiMidas();
   const sdk = useSdk(chainId);
+  const xMintAsset = useXMintAsset(asset);
 
   return useQuery(
     [
@@ -23,10 +25,15 @@ export function useMaxSupplyAmount(
       asset.totalSupply,
       sdk?.chainId,
       address,
+      currentChain.id,
+      xMintAsset.underlying,
     ],
     async () => {
-      if (sdk && address) {
-        const tokenBalance = await fetchTokenBalance(asset.underlyingToken, sdk, address);
+      if (sdk && address && currentChain && currentSdk) {
+        const isXMint = currentChain.id !== chainId;
+        const tokenBalance = !isXMint
+          ? await fetchTokenBalance(asset.underlyingToken, sdk, address)
+          : await fetchTokenBalance(xMintAsset.underlying, currentSdk, address);
 
         const comptroller = sdk.createComptroller(comptrollerAddress);
         const supplyCap = await comptroller.callStatic.supplyCaps(asset.cToken);
@@ -46,9 +53,11 @@ export function useMaxSupplyAmount(
           bigNumber = tokenBalance;
         }
 
+        const decimals = !isXMint ? asset.underlyingDecimals : xMintAsset.decimals;
         return {
           bigNumber: bigNumber,
-          number: Number(utils.formatUnits(bigNumber, asset.underlyingDecimals)),
+          number: Number(utils.formatUnits(bigNumber, decimals)),
+          decimals,
         };
       } else {
         return null;
@@ -57,7 +66,7 @@ export function useMaxSupplyAmount(
     {
       cacheTime: Infinity,
       staleTime: Infinity,
-      enabled: !!address && !!asset && !!sdk && !!comptrollerAddress,
+      enabled: !!address && !!asset && !!sdk && !!comptrollerAddress && !!xMintAsset,
     }
   );
 }

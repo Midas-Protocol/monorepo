@@ -3,9 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { BigNumber } from 'ethers';
 import { useMemo } from 'react';
 
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
 import { useAllUsdPrices } from '@ui/hooks/useAllUsdPrices';
 import { MarketData } from '@ui/types/TokensDataMap';
+import { useSdk } from './useSdk';
 
 // TODO Write proper tests and fix `Native` naming issue for values in Fiat USD.
 interface UseUpdatedUserAssetsResult<T> {
@@ -22,7 +22,8 @@ const useUpdatedUserAssets = <T extends MarketData>({
   amount,
   poolChainId,
 }: UseUpdatedUserAssetsResult<T>) => {
-  const { currentSdk, currentChain } = useMultiMidas();
+  const currentSdk = useSdk(poolChainId);
+
   const { data: usdPrices } = useAllUsdPrices();
   const usdPrice = useMemo(() => {
     if (usdPrices && usdPrices[poolChainId.toString()]) {
@@ -35,7 +36,7 @@ const useUpdatedUserAssets = <T extends MarketData>({
   return useQuery(
     [
       'useUpdatedUserAssets',
-      currentChain?.id,
+      poolChainId,
       mode,
       index,
       assets?.map((a) => a.cToken).sort(),

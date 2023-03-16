@@ -1,9 +1,10 @@
 import { Box, Button, Divider, HStack, Select, Text } from '@chakra-ui/react';
 import { WETHAbi } from '@midas-capital/sdk';
-import { FundOperationMode } from '@midas-capital/types';
+import { FundOperationMode, SupportedChains } from '@midas-capital/types';
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit';
 import { useQueryClient } from '@tanstack/react-query';
-import { BigNumber, constants } from 'ethers';
+import { BigNumber, constants, utils } from 'ethers';
+import { useSwitchNetwork } from 'wagmi';
 import { useEffect, useMemo, useState } from 'react';
 import { create as createConnextSdk, SdkBase as ConnextSdk } from '@connext/sdk';
 import { getContract } from 'sdk/dist/cjs/src/MidasSdk/utils';
@@ -19,7 +20,11 @@ import { EllipsisText } from '@ui/components/shared/EllipsisText';
 import { Column } from '@ui/components/shared/Flex';
 import { MidasModal } from '@ui/components/shared/Modal';
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
-import { SUPPLY_STEPS, SUPPORTED_CHAINS_BY_CONNEXT } from '@ui/constants/index';
+import {
+  SUPPLY_STEPS,
+  SUPPORTED_CHAINS_BY_CONNEXT,
+  SUPPORTED_CHAINS_XMINT,
+} from '@ui/constants/index';
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
 import { useColors } from '@ui/hooks/useColors';
 import { useMaxSupplyAmount } from '@ui/hooks/useMaxSupplyAmount';
@@ -31,7 +36,8 @@ import { TxStep } from '@ui/types/ComponentPropsType';
 import { MarketData } from '@ui/types/TokensDataMap';
 import { smallFormatter } from '@ui/utils/bigUtils';
 import { handleGenericError } from '@ui/utils/errorHandling';
-import { useEnabledChains } from '@ui/hooks/useChainConfig';
+import { useSdk } from '@ui/hooks/fuse/useSdk';
+import { useXMintAsset } from '@ui/hooks/useXMintAsset';
 
 interface SupplyModalProps {
   isOpen: boolean;
@@ -50,15 +56,30 @@ export const SupplyModal = ({
   onClose,
   poolChainId,
 }: SupplyModalProps) => {
-  const { currentSdk, address, currentChain, connextSdkConfig, enabledChainsForConnext } =
+  const { address, currentChain, currentSdk, connextSdkConfig, getAvailableFromChains } =
     useMultiMidas();
-  const enabledChains = useEnabledChains();
   const addRecentTransaction = useAddRecentTransaction();
   if (!currentChain || !currentSdk) {
-    console.elog(currentChain, currentSdk);
     throw new Error("SDK doesn't exist");
   }
+
+  const availableFromChains = useMemo(() => {
+    if (poolChainId && asset) {
+      return [poolChainId, ...getAvailableFromChains(poolChainId, asset.underlyingToken)];
+    }
+    return [];
+  }, [asset, getAvailableFromChains, poolChainId]);
+
+  const { switchNetworkAsync } = useSwitchNetwork();
+  const handleSwitch = async (e) => {
+    if (switchNetworkAsync) {
+      await switchNetworkAsync(+e.target.value);
+    }
+  };
+  const isXMint = useMemo(() => currentChain.id !== poolChainId, [currentChain, poolChainId]);
+  const xMintAsset = useXMintAsset(asset);
   const [connextSdk, setConnextSdk] = useState<ConnextSdk>();
+
   useEffect(() => {
     if (connextSdkConfig) {
       createConnextSdk(connextSdkConfig)
@@ -139,6 +160,14 @@ export const SupplyModal = ({
   const onConfirm = async () => {
     if (!currentSdk || !address) return;
 
+    if (!isXMint) {
+      handleSupply();
+    } else {
+      handleXSupply();
+    }
+  };
+
+  const handleSupply = async () => {
     const sentryProperties = {
       token: asset.cToken,
       chainId: currentSdk.chainId,
@@ -329,6 +358,164 @@ export const SupplyModal = ({
     setIsSupplying(false);
   };
 
+  const handleXSupply = async () => {
+    if (!connextSdk || !xMintAsset) return;
+
+    const origin = SUPPORTED_CHAINS_BY_CONNEXT[currentChain.id].domainId;
+    const destination = SUPPORTED_CHAINS_BY_CONNEXT[poolChainId].domainId;
+    const connext = await connextSdk.getConnext(origin);
+
+    if (!connext) {
+      return;
+    }
+
+    const sentryProperties = {
+      connext: connext,
+      chainId: currentSdk.chainId,
+      comptroller: comptrollerAddress,
+    };
+
+    setIsConfirmed(true);
+    setConfirmedSteps([...steps]);
+    const _steps = [...steps];
+
+    setIsSupplying(true);
+    setActiveStep(0);
+    setFailedStep(0);
+
+    const xcallAmount = utils.parseUnits(
+      amount.toString(),
+      maxSupplyAmount.decimals - asset.underlyingDecimals
+    );
+
+    try {
+      setActiveStep(optionToWrap ? 2 : 1);
+      const token = currentSdk.getEIP20RewardTokenInstance(
+        xMintAsset.underlying,
+        currentSdk.signer
+      );
+
+      const hasApprovedEnough = (await token.callStatic.allowance(address, connext.address)).gte(
+        xcallAmount
+      );
+
+      if (!hasApprovedEnough) {
+        const tx = await currentSdk.approve(connext.address, xMintAsset.underlying);
+
+        addRecentTransaction({
+          hash: tx.hash,
+          description: `Approve ${xMintAsset.symbol}`,
+        });
+        _steps[optionToWrap ? 1 : 0] = {
+          ..._steps[optionToWrap ? 1 : 0],
+          txHash: tx.hash,
+        };
+        setConfirmedSteps([..._steps]);
+
+        await tx.wait();
+
+        _steps[optionToWrap ? 1 : 0] = {
+          ..._steps[optionToWrap ? 1 : 0],
+          done: true,
+          txHash: tx.hash,
+        };
+        setConfirmedSteps([..._steps]);
+        successToast({
+          id: 'approved',
+          description: 'Successfully Approved!',
+        });
+      } else {
+        _steps[optionToWrap ? 1 : 0] = {
+          ..._steps[optionToWrap ? 1 : 0],
+          desc: 'Already approved!',
+          done: true,
+        };
+        setConfirmedSteps([..._steps]);
+      }
+    } catch (error) {
+      const sentryInfo = {
+        contextName: 'Supply - Approving',
+        properties: sentryProperties,
+      };
+      handleGenericError({ error, toast: errorToast, sentryInfo });
+      setFailedStep(optionToWrap ? 2 : 1);
+    }
+
+    try {
+      setActiveStep(
+        optionToWrap && enableAsCollateral ? 4 : optionToWrap || enableAsCollateral ? 3 : 2
+      );
+
+      const signerAddress = await currentSdk.signer.getAddress();
+      // Calculate relayer fee
+      const estimateRelayerFeeParams = {
+        originDomain: origin,
+        destinationDomain: destination,
+        isHighPriority: true,
+      };
+      const relayerFee = await connextSdk.estimateRelayerFee(estimateRelayerFeeParams);
+      const callData = utils.defaultAbiCoder.encode(
+        ['address', 'address'],
+        [asset.cToken, signerAddress]
+      );
+      const xMintContract = SUPPORTED_CHAINS_XMINT[poolChainId].xMinterAddress;
+      const xcallParams = {
+        origin: origin,
+        destination: destination,
+        asset: xMintAsset.underlying,
+        to: xMintContract,
+        delegate: signerAddress,
+        amount: xcallAmount.toString(),
+        slippage: '300',
+        receiveLocal: false,
+        callData: callData,
+        relayerFee: relayerFee.toString(),
+      };
+
+      const xcall_request = await connextSdk.xcall(xcallParams);
+
+      const tx = await currentSdk.signer.sendTransaction(xcall_request);
+
+      addRecentTransaction({
+        hash: tx.hash,
+        description: `${asset.underlyingSymbol} Token Supply`,
+      });
+      _steps[optionToWrap && enableAsCollateral ? 3 : optionToWrap || enableAsCollateral ? 2 : 1] =
+        {
+          ..._steps[
+            optionToWrap && enableAsCollateral ? 3 : optionToWrap || enableAsCollateral ? 2 : 1
+          ],
+          txHash: tx.hash,
+        };
+      setConfirmedSteps([..._steps]);
+
+      await currentSdk.signer.provider.waitForTransaction(tx.hash);
+
+      await queryClient.refetchQueries();
+
+      _steps[optionToWrap && enableAsCollateral ? 3 : optionToWrap || enableAsCollateral ? 2 : 1] =
+        {
+          ..._steps[
+            optionToWrap && enableAsCollateral ? 3 : optionToWrap || enableAsCollateral ? 2 : 1
+          ],
+          done: true,
+          txHash: tx.hash,
+        };
+      setConfirmedSteps([..._steps]);
+    } catch (error) {
+      const sentryInfo = {
+        contextName: 'Supply - Minting',
+        properties: sentryProperties,
+      };
+      handleGenericError({ error, toast: errorToast, sentryInfo });
+      setFailedStep(
+        optionToWrap && enableAsCollateral ? 4 : optionToWrap || enableAsCollateral ? 3 : 2
+      );
+    }
+
+    setIsSupplying(false);
+  };
+
   const onModalClose = () => {
     onClose();
 
@@ -384,7 +571,7 @@ export const SupplyModal = ({
               asset={asset}
               failedStep={failedStep}
               isSupplying={isSupplying}
-              poolChainId={poolChainId}
+              poolChainId={currentChain.id}
               steps={confirmedSteps}
             />
           ) : (
@@ -401,9 +588,17 @@ export const SupplyModal = ({
                 >
                   {tokenData?.symbol || asset.underlyingSymbol}
                 </EllipsisText>
-                <Select placeholder="From Chain" w="200" m1="2">
-                  {enabledChainsForConnext.map((chainId: number) => (
-                    <option value={SUPPORTED_CHAINS_BY_CONNEXT[chainId].name}>
+                <Select
+                  ml="2"
+                  onChange={(e) => {
+                    handleSwitch(e);
+                  }}
+                  placeholder="From Chain"
+                  value={currentChain.id}
+                  w="200"
+                >
+                  {availableFromChains.map((chainId: number) => (
+                    <option key={chainId} value={chainId}>
                       {SUPPORTED_CHAINS_BY_CONNEXT[chainId].name}
                     </option>
                   ))}
@@ -431,7 +626,7 @@ export const SupplyModal = ({
                         setAmount={setAmount}
                       />
 
-                      <Balance asset={asset} />
+                      <Balance asset={asset} poolChainId={poolChainId} />
                     </Column>
                     <StatsColumn
                       amount={amount}
@@ -442,7 +637,7 @@ export const SupplyModal = ({
                       mode={FundOperationMode.SUPPLY}
                       poolChainId={poolChainId}
                     />
-                    {!asset.membership && (
+                    {!asset.membership && !isXMint && (
                       <EnableCollateral
                         enableAsCollateral={enableAsCollateral}
                         setEnableAsCollateral={setEnableAsCollateral}

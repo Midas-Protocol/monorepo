@@ -79,7 +79,7 @@ export const AdditionalInfo = ({
   const assets: MarketData[] = rows.map((row) => row.original.market);
 
   const { data } = useChartData(asset.cToken, poolChainId);
-  const { currentChain } = useMultiMidas();
+  const { currentChain, getAvailableFromChains } = useMultiMidas();
   const windowWidth = useWindowSize();
   const chainConfig = useMemo(() => getChainConfig(poolChainId), [poolChainId]);
   const { openConnectModal } = useConnectModal();
@@ -121,6 +121,12 @@ export const AdditionalInfo = ({
   const { data: oracle } = useOracle(asset.underlyingToken, poolChainId);
   const { data: irm } = useIRM(asset.cToken, poolChainId);
 
+  const availableFromChains = useMemo(() => {
+    if (poolChainId && asset) {
+      return getAvailableFromChains(poolChainId, asset.underlyingToken);
+    }
+  }, [asset, getAvailableFromChains, poolChainId]);
+
   return (
     <Box minWidth="400px" width={{ base: windowWidth.width * 0.9, md: 'auto' }}>
       <Flex
@@ -135,7 +141,8 @@ export const AdditionalInfo = ({
               Connect Wallet
             </Button>
           </Box>
-        ) : currentChain.unsupported || currentChain.id !== poolChainId ? (
+        ) : currentChain.unsupported ||
+          (currentChain.id !== poolChainId && availableFromChains?.length == 0) ? (
           <Box>
             <Button onClick={handleSwitch} variant="_solid">
               Switch {chainConfig ? ` to ${chainConfig.specificParams.metadata.name}` : ' Network'}

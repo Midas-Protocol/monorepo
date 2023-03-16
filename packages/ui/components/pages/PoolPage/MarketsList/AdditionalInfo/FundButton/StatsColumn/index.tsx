@@ -16,6 +16,7 @@ import { useBorrowLimitMarket } from '@ui/hooks/useBorrowLimitMarket';
 import { useBorrowLimitTotal } from '@ui/hooks/useBorrowLimitTotal';
 import { MarketData } from '@ui/types/TokensDataMap';
 import { getBlockTimePerMinuteByChainId } from '@ui/utils/networkData';
+import { useSdk } from '@ui/hooks/fuse/useSdk';
 
 interface StatsColumnProps {
   mode: FundOperationMode;
@@ -47,7 +48,8 @@ export const StatsColumn = ({
 
   const updatedAsset = updatedAssets ? updatedAssets[index] : undefined;
 
-  const { currentSdk, currentChain } = useMultiMidas();
+  const { currentChain } = useMultiMidas();
+  const currentSdk = useSdk(poolChainId);
   if (!currentSdk || !currentChain) throw new Error("SDK doesn't exist!");
 
   const {
