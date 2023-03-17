@@ -55,8 +55,14 @@ export const SupplyModal = ({
   onClose,
   poolChainId,
 }: SupplyModalProps) => {
-  const { address, currentChain, currentSdk, connextSdkConfig, getAvailableFromChains } =
-    useMultiMidas();
+  const {
+    address: _address,
+    currentChain,
+    currentSdk,
+    connextSdkConfig,
+    getAvailableFromChains,
+  } = useMultiMidas();
+  const address = _address ?? constants.AddressZero;
   const addRecentTransaction = useAddRecentTransaction();
   if (!currentChain || !currentSdk) {
     throw new Error("SDK doesn't exist");
@@ -70,9 +76,9 @@ export const SupplyModal = ({
   }, [asset, getAvailableFromChains, poolChainId]);
 
   const { switchNetworkAsync } = useSwitchNetwork();
-  const handleSwitch = async (e) => {
+  const handleSwitch = async (chainId: number) => {
     if (switchNetworkAsync) {
-      await switchNetworkAsync(+e.target.value);
+      await switchNetworkAsync(chainId);
     }
   };
   const isXMint = useMemo(() => currentChain.id !== poolChainId, [currentChain, poolChainId]);
@@ -590,7 +596,7 @@ export const SupplyModal = ({
                 <Select
                   ml="2"
                   onChange={(e) => {
-                    handleSwitch(e);
+                    handleSwitch(+e.target.value);
                   }}
                   placeholder="From Chain"
                   value={currentChain.id}
