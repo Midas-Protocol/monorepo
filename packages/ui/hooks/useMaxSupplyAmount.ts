@@ -26,15 +26,16 @@ export function useMaxSupplyAmount(
       asset.totalSupply,
       sdk?.chainId,
       address,
-      currentChain.id,
-      xMintAsset.underlying,
+      currentChain?.id,
+      xMintAsset?.underlying,
     ],
     async () => {
       if (sdk && address && currentChain && currentSdk) {
         const isXMint = currentChain.id !== chainId;
-        const tokenBalance = !isXMint
-          ? await fetchTokenBalance(asset.underlyingToken, sdk, address)
-          : await fetchTokenBalance(xMintAsset.underlying, currentSdk, address);
+        const assetToken = isXMint ? xMintAsset?.underlying : asset.underlyingToken;
+        const tokenBalance = !assetToken
+          ? BigNumber.from(0)
+          : await fetchTokenBalance(assetToken, !isXMint ? sdk : currentSdk, address);
 
         const comptroller = sdk.createComptroller(comptrollerAddress);
         const supplyCap = await comptroller.callStatic.supplyCaps(asset.cToken);
@@ -54,7 +55,11 @@ export function useMaxSupplyAmount(
           bigNumber = tokenBalance;
         }
 
-        const decimals = !isXMint ? asset.underlyingDecimals : xMintAsset.decimals;
+        const decimals = !isXMint
+          ? asset.underlyingDecimals.toNumber()
+          : xMintAsset
+          ? xMintAsset.decimals
+          : 18;
         return {
           bigNumber: bigNumber,
           number: Number(utils.formatUnits(bigNumber, decimals)),

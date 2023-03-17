@@ -364,7 +364,7 @@ export const SupplyModal = ({
   };
 
   const handleXSupply = async () => {
-    if (!connextSdk || !xMintAsset) return;
+    if (!connextSdk || !xMintAsset || !maxSupplyAmount) return;
 
     const origin = SUPPORTED_CHAINS_BY_CONNEXT[currentChain.id].domainId;
     const destination = SUPPORTED_CHAINS_BY_CONNEXT[poolChainId].domainId;
@@ -390,7 +390,7 @@ export const SupplyModal = ({
 
     const xcallAmount = utils.parseUnits(
       amount.toString(),
-      maxSupplyAmount.decimals - asset.underlyingDecimals
+      maxSupplyAmount.decimals - asset.underlyingDecimals.toNumber()
     );
 
     try {
@@ -494,7 +494,7 @@ export const SupplyModal = ({
         };
       setConfirmedSteps([..._steps]);
 
-      await currentSdk.signer.provider.waitForTransaction(tx.hash);
+      await tx.wait(1);
 
       await queryClient.refetchQueries();
 
