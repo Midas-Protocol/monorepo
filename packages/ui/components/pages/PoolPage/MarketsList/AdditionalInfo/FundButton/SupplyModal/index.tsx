@@ -485,9 +485,9 @@ export const SupplyModal = ({
         };
       setConfirmedSteps([..._steps]);
 
-      await tx.wait(1);
+      await tx.wait();
 
-      await queryClient.refetchQueries();
+      //await queryClient.refetchQueries();
 
       _steps[optionToWrap && enableAsCollateral ? 3 : optionToWrap || enableAsCollateral ? 2 : 1] =
         {
