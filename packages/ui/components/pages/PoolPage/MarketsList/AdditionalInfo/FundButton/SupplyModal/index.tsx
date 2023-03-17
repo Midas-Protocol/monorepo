@@ -576,6 +576,7 @@ export const SupplyModal = ({
               asset={asset}
               failedStep={failedStep}
               isSupplying={isSupplying}
+              isXSupply={isXMint}
               poolChainId={currentChain.id}
               steps={confirmedSteps}
             />
