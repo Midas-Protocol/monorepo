@@ -1,10 +1,10 @@
 import { Box, Button, Divider, HStack, Select, Text } from '@chakra-ui/react';
-import { SdkBase as ConnextSdk, create as createConnextSdk } from '@connext/sdk';
 import { WETHAbi } from '@midas-capital/sdk';
 import { FundOperationMode } from '@midas-capital/types';
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit';
 import { useQueryClient } from '@tanstack/react-query';
 import { BigNumber, constants, utils } from 'ethers';
+import { formatEther, formatUnits } from 'ethers/lib/utils.js';
 import { useEffect, useMemo, useState } from 'react';
 import { getContract } from 'sdk/dist/cjs/src/MidasSdk/utils';
 import { useSwitchNetwork } from 'wagmi';
@@ -59,7 +59,7 @@ export const SupplyModal = ({
     address: _address,
     currentChain,
     currentSdk,
-    connextSdkConfig,
+    connextSdk,
     getAvailableFromChains,
   } = useMultiMidas();
   const address = _address ?? constants.AddressZero;
@@ -83,17 +83,6 @@ export const SupplyModal = ({
   };
   const isXMint = useMemo(() => currentChain.id !== poolChainId, [currentChain, poolChainId]);
   const xMintAsset = useXMintAsset(asset);
-  const [connextSdk, setConnextSdk] = useState<ConnextSdk>();
-
-  useEffect(() => {
-    if (connextSdkConfig) {
-      createConnextSdk(connextSdkConfig)
-        .then((sdkInstance) => setConnextSdk(sdkInstance.sdkBase))
-        .catch((e) => {
-          console.error('Creating a connext sdk failed!, error: ', e);
-        });
-    }
-  }, [connextSdkConfig]);
 
   const errorToast = useErrorToast();
   const { data: tokenData } = useTokenData(asset.underlyingToken, poolChainId);
@@ -143,10 +132,12 @@ export const SupplyModal = ({
     if (amount.isZero() || !maxSupplyAmount) {
       setIsAmountValid(false);
     } else {
-      const max = optionToWrap ? (myNativeBalance as BigNumber) : maxSupplyAmount.bigNumber;
-      setIsAmountValid(amount.lte(max));
+      const max = optionToWrap
+        ? +formatEther(myNativeBalance as BigNumber)
+        : maxSupplyAmount.number;
+      setIsAmountValid(+formatUnits(amount, asset.underlyingDecimals) <= max);
     }
-  }, [amount, maxSupplyAmount, optionToWrap, myNativeBalance]);
+  }, [amount, maxSupplyAmount, optionToWrap, myNativeBalance, asset.underlyingDecimals]);
 
   useEffect(() => {
     if (amount.isZero()) {
@@ -389,8 +380,8 @@ export const SupplyModal = ({
     setFailedStep(0);
 
     const xcallAmount = utils.parseUnits(
-      amount.toString(),
-      maxSupplyAmount.decimals - asset.underlyingDecimals.toNumber()
+      utils.formatUnits(amount.toString(), asset.underlyingDecimals.toNumber()),
+      maxSupplyAmount.decimals
     );
 
     try {

@@ -1,4 +1,8 @@
-import { SdkConfig as ConnextSdkConfig } from '@connext/sdk';
+import {
+  SdkBase as ConnextSdk,
+  SdkConfig as ConnextSdkConfig,
+  create as createConnextSdk,
+} from '@connext/sdk';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { chainIdToConfig } from '@midas-capital/chains';
 import { MidasSdk } from '@midas-capital/sdk';
@@ -35,6 +39,7 @@ export interface MultiMidasContextData {
   };
   currentSdk?: MidasSdk;
   getSdk: (chainId: number) => MidasSdk | undefined;
+  connextSdk?: ConnextSdk;
   connextSdkConfig?: ConnextSdkConfig;
   address?: string;
   disconnect: () => void;
@@ -68,6 +73,7 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
     | undefined
   >();
   const [isGlobalLoading, setGlobalLoading] = useState<boolean>(false);
+  const [connextSdk, setConnextSdk] = useState<ConnextSdk>();
 
   const [sdks, securities, chainIds] = useMemo(() => {
     const _sdks: MidasSdk[] = [];
@@ -132,6 +138,16 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
       }
     }
   }, [chain, enabledChains, wagmiAddress, enabledChainsForConnext]);
+
+  useEffect(() => {
+    if (connextSdkConfig) {
+      createConnextSdk(connextSdkConfig)
+        .then((sdkInstance) => setConnextSdk(sdkInstance.sdkBase))
+        .catch((e) => {
+          console.error('Creating a connext sdk failed!, error: ', e);
+        });
+    }
+  }, [connextSdkConfig]);
 
   const getAvailableFromChains = useCallback(
     (chainId: number, underlyingAsset: string) => {
@@ -201,6 +217,7 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
       isConnected,
       signer,
       setAddress,
+      connextSdk,
       connextSdkConfig,
       enabledChainsForConnext,
       getAvailableFromChains,
@@ -220,6 +237,7 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
     isConnected,
     signer,
     setAddress,
+    connextSdk,
     connextSdkConfig,
     enabledChainsForConnext,
     getAvailableFromChains,

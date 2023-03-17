@@ -8,10 +8,10 @@ export const useXMintAsset = (asset: NativePricedFuseAsset) => {
   const { currentChain } = useMultiMidas();
 
   return useMemo(() => {
-    return !currentChain
-      ? null
-      : ChainSupportedAssets[currentChain.id as SupportedChains].find((a) => {
-          return a.symbol === asset.underlyingSymbol;
-        });
+    if (!currentChain) return null;
+
+    return ChainSupportedAssets[currentChain.id as SupportedChains].find((a) => {
+      return a.symbol === (asset.underlyingSymbol === 'ETH' ? 'WETH' : asset.underlyingSymbol);
+    });
   }, [currentChain, asset]);
 };
