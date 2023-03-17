@@ -5,12 +5,9 @@ import { Column, Row } from '@ui/components/shared/Flex';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
 import { useTokenBalance } from '@ui/hooks/useTokenBalance';
-import { MarketData } from '@ui/types/TokensDataMap';
-import { useMemo } from 'react';
-import { ChainSupportedAssets } from '@ui/utils/networkData';
-import { SupportedChains } from '@midas-capital/types';
-import { tokenFormatter } from '@ui/utils/bigUtils';
 import { useXMintAsset } from '@ui/hooks/useXMintAsset';
+import { MarketData } from '@ui/types/TokensDataMap';
+import { tokenFormatter } from '@ui/utils/bigUtils';
 
 export const Balance = ({ asset, poolChainId }: { asset: MarketData; poolChainId: number }) => {
   const { currentChain, currentSdk } = useMultiMidas();

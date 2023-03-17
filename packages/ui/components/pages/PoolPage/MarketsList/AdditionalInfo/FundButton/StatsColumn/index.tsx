@@ -11,12 +11,12 @@ import { SupplyAPY } from '@ui/components/pages/PoolPage/MarketsList/AdditionalI
 import { MidasBox } from '@ui/components/shared/Box';
 import { Column } from '@ui/components/shared/Flex';
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useSdk } from '@ui/hooks/fuse/useSdk';
 import useUpdatedUserAssets from '@ui/hooks/fuse/useUpdatedUserAssets';
 import { useBorrowLimitMarket } from '@ui/hooks/useBorrowLimitMarket';
 import { useBorrowLimitTotal } from '@ui/hooks/useBorrowLimitTotal';
 import { MarketData } from '@ui/types/TokensDataMap';
 import { getBlockTimePerMinuteByChainId } from '@ui/utils/networkData';
-import { useSdk } from '@ui/hooks/fuse/useSdk';
 
 interface StatsColumnProps {
   mode: FundOperationMode;

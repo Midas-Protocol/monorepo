@@ -1,13 +1,13 @@
 import { Box, Button, Divider, HStack, Select, Text } from '@chakra-ui/react';
+import { SdkBase as ConnextSdk, create as createConnextSdk } from '@connext/sdk';
 import { WETHAbi } from '@midas-capital/sdk';
-import { FundOperationMode, SupportedChains } from '@midas-capital/types';
+import { FundOperationMode } from '@midas-capital/types';
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit';
 import { useQueryClient } from '@tanstack/react-query';
 import { BigNumber, constants, utils } from 'ethers';
-import { useSwitchNetwork } from 'wagmi';
 import { useEffect, useMemo, useState } from 'react';
-import { create as createConnextSdk, SdkBase as ConnextSdk } from '@connext/sdk';
 import { getContract } from 'sdk/dist/cjs/src/MidasSdk/utils';
+import { useSwitchNetwork } from 'wagmi';
 
 import { StatsColumn } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/StatsColumn';
 import { AmountInput } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/SupplyModal/AmountInput';
@@ -32,12 +32,11 @@ import { useSupplyCap } from '@ui/hooks/useSupplyCap';
 import { useErrorToast, useSuccessToast } from '@ui/hooks/useToast';
 import { useTokenBalance } from '@ui/hooks/useTokenBalance';
 import { useTokenData } from '@ui/hooks/useTokenData';
+import { useXMintAsset } from '@ui/hooks/useXMintAsset';
 import { TxStep } from '@ui/types/ComponentPropsType';
 import { MarketData } from '@ui/types/TokensDataMap';
 import { smallFormatter } from '@ui/utils/bigUtils';
 import { handleGenericError } from '@ui/utils/errorHandling';
-import { useSdk } from '@ui/hooks/fuse/useSdk';
-import { useXMintAsset } from '@ui/hooks/useXMintAsset';
 
 interface SupplyModalProps {
   isOpen: boolean;
