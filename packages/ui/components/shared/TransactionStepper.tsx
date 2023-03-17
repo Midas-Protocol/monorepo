@@ -27,15 +27,20 @@ const TransactionStepper = ({
   failedStep,
   isLoading,
   poolChainId,
+  isCross,
 }: {
   steps: TxStep[];
   activeStep: number;
   failedStep: number;
   isLoading: boolean;
   poolChainId: number;
+  isCross?: boolean | false;
 }) => {
   const { cCard } = useColors();
-  const scanUrl = useMemo(() => getScanUrlByChainId(poolChainId), [poolChainId]);
+  const scanUrl = useMemo(
+    () => (isCross ? `https://connextscan.io` : getScanUrlByChainId(poolChainId)),
+    [poolChainId, isCross]
+  );
 
   return (
     <>
