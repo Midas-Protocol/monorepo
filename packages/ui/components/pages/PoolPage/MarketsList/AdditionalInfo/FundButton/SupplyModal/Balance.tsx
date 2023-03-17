@@ -14,8 +14,10 @@ export const Balance = ({ asset }: { asset: MarketData }) => {
 
   if (!currentChain || !currentSdk) throw new Error('Connect your wallet');
   const xMintAsset = useXMintAsset(asset);
+  const xMintAssetDecimals = xMintAsset?.decimals ?? 18;
+  const xMintAssetSymbol = xMintAsset?.symbol ?? '';
 
-  const { data: myBalance } = useTokenBalance(xMintAsset?.underlying, undefined, currentSdk);
+  const { data: myBalance } = useTokenBalance(xMintAsset?.underlying ?? '', undefined, currentSdk);
   const { data: myNativeBalance } = useTokenBalance(
     'NO_ADDRESS_HERE_USE_WETH_FOR_ADDRESS',
     undefined,
@@ -34,12 +36,12 @@ export const Balance = ({ asset }: { asset: MarketData }) => {
           Wallet Balance:
         </Text>
         <SimpleTooltip
-          label={`${myBalance ? tokenFormatter(myBalance, xMintAsset.decimals) : 0} ${
-            xMintAsset.symbol
-          }`}
+          label={`${
+            myBalance ? tokenFormatter(myBalance, xMintAssetDecimals) : 0
+          } ${xMintAssetSymbol}`}
         >
           <Text maxWidth="300px" overflow="hidden" textOverflow={'ellipsis'} whiteSpace="nowrap">
-            {myBalance ? tokenFormatter(myBalance, xMintAsset.decimals) : 0} {xMintAsset.symbol}
+            {myBalance ? tokenFormatter(myBalance, xMintAssetDecimals) : 0} {xMintAssetSymbol}
           </Text>
         </SimpleTooltip>
       </Row>
