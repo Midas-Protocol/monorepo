@@ -1,7 +1,7 @@
 import { bsc, polygon } from '@midas-capital/chains';
 import { assetSymbols, SupportedChainsArray } from '@midas-capital/types';
-import { ChainXMintData } from '@ui/types/ChainMetaData';
 
+import { ChainXMintData } from '@ui/types/ChainMetaData';
 import { TxStep } from '@ui/types/ComponentPropsType';
 
 export const SUPPORTED_NETWORKS_REGEX = new RegExp(SupportedChainsArray.join('|'));

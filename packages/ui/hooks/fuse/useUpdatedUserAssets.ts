@@ -3,9 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 import { BigNumber } from 'ethers';
 import { useMemo } from 'react';
 
+import { useSdk } from './useSdk';
+
 import { useAllUsdPrices } from '@ui/hooks/useAllUsdPrices';
 import { MarketData } from '@ui/types/TokensDataMap';
-import { useSdk } from './useSdk';
 
 // TODO Write proper tests and fix `Native` naming issue for values in Fiat USD.
 interface UseUpdatedUserAssetsResult<T> {

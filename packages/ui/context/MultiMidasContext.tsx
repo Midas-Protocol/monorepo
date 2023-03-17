@@ -6,6 +6,7 @@ import Security from '@midas-capital/security';
 import { SupportedChains } from '@midas-capital/types';
 import * as Sentry from '@sentry/browser';
 import { FetchSignerResult, Signer } from '@wagmi/core';
+import { getAddress } from 'ethers/lib/utils';
 import {
   createContext,
   Dispatch,
@@ -18,9 +19,9 @@ import {
 } from 'react';
 import { Chain, useAccount, useDisconnect, useNetwork, useSigner } from 'wagmi';
 
-import { SUPPORTED_CHAINS_XMINT, SUPPORTED_CHAINS_BY_CONNEXT } from '../constants';
+import { SUPPORTED_CHAINS_BY_CONNEXT, SUPPORTED_CHAINS_XMINT } from '../constants';
+
 import { useEnabledChains } from '@ui/hooks/useChainConfig';
-import { getAddress } from 'ethers/lib/utils';
 
 export interface MultiMidasContextData {
   sdks: MidasSdk[];
@@ -112,7 +113,7 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
     if (chain && !chain.unsupported) {
       const network = SUPPORTED_CHAINS_BY_CONNEXT[chain.id]?.network;
       if (network && enabledChains.includes(chain.id)) {
-        const domainConfig: any = {};
+        const domainConfig: { [domainId: string]: { providers: string[] } } = {};
         const chainConfig = chainIdToConfig[chain.id];
         for (const enabledChainId of enabledChainsForConnext) {
           const domainId = SUPPORTED_CHAINS_BY_CONNEXT[enabledChainId].domainId;
