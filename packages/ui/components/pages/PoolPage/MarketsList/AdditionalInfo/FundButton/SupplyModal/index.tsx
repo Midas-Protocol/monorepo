@@ -625,7 +625,7 @@ export const SupplyModal = ({
                         setAmount={setAmount}
                       />
 
-                      <Balance asset={asset} poolChainId={poolChainId} />
+                      <Balance asset={asset} />
                     </Column>
                     <StatsColumn
                       amount={amount}

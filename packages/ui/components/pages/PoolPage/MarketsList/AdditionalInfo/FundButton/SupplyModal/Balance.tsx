@@ -9,7 +9,7 @@ import { useXMintAsset } from '@ui/hooks/useXMintAsset';
 import { MarketData } from '@ui/types/TokensDataMap';
 import { tokenFormatter } from '@ui/utils/bigUtils';
 
-export const Balance = ({ asset, poolChainId }: { asset: MarketData; poolChainId: number }) => {
+export const Balance = ({ asset }: { asset: MarketData }) => {
   const { currentChain, currentSdk } = useMultiMidas();
 
   if (!currentChain || !currentSdk) throw new Error('Connect your wallet');
