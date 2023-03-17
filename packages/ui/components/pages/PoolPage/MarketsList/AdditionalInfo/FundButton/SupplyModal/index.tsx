@@ -594,7 +594,7 @@ export const SupplyModal = ({
                 >
                   {tokenData?.symbol || asset.underlyingSymbol}
                 </EllipsisText>
-                <Text variant="title">From</Text>
+                <Text variant="title">from</Text>
                 <Select
                   ml="2"
                   onChange={(e) => {
