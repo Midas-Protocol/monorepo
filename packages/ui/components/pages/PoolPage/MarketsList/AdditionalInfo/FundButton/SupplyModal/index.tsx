@@ -661,26 +661,28 @@ export const SupplyModal = ({
                         setEnableAsCollateral={setEnableAsCollateral}
                       />
                     )}
-                    <Column
-                      crossAxisAlignment="flex-start"
-                      mainAxisAlignment="flex-start"
-                      width="100%"
-                    >
-                      <Row crossAxisAlignment="center" mainAxisAlignment="flex-end" width="100%">
-                        <Text mr={2} size="sm">
-                          Relayer Fee:
-                        </Text>
-                        <Text
-                          maxWidth="300px"
-                          overflow="hidden"
-                          textOverflow={'ellipsis'}
-                          whiteSpace="nowrap"
-                        >
-                          {(+formatEther(relayerFee)).toFixed(6)}{' '}
-                          {currentChain ? currentChain.nativeCurrency.symbol : 'ETH'}
-                        </Text>
-                      </Row>
-                    </Column>
+                    {isXMint && (
+                      <Column
+                        crossAxisAlignment="flex-start"
+                        mainAxisAlignment="flex-start"
+                        width="100%"
+                      >
+                        <Row crossAxisAlignment="center" mainAxisAlignment="flex-end" width="100%">
+                          <Text mr={2} size="sm">
+                            Relayer Fee:
+                          </Text>
+                          <Text
+                            maxWidth="300px"
+                            overflow="hidden"
+                            textOverflow={'ellipsis'}
+                            whiteSpace="nowrap"
+                          >
+                            {(+formatEther(relayerFee)).toFixed(6)}{' '}
+                            {currentChain ? currentChain.nativeCurrency.symbol : 'ETH'}
+                          </Text>
+                        </Row>
+                      </Column>
+                    )}
                     <Button
                       height={16}
                       id="confirmFund"
