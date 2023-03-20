@@ -17,7 +17,7 @@ import { PendingTransaction } from '@ui/components/pages/PoolPage/MarketsList/Ad
 import { SupplyError } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/SupplyModal/SupplyError';
 import { Banner } from '@ui/components/shared/Banner';
 import { EllipsisText } from '@ui/components/shared/EllipsisText';
-import { Column } from '@ui/components/shared/Flex';
+import { Column, Row } from '@ui/components/shared/Flex';
 import { MidasModal } from '@ui/components/shared/Modal';
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
 import {
@@ -83,6 +83,7 @@ export const SupplyModal = ({
   };
   const isXMint = useMemo(() => currentChain.id !== poolChainId, [currentChain, poolChainId]);
   const xMintAsset = useXMintAsset(asset);
+  const [relayerFee, setRelayerFee] = useState<BigNumber>(constants.Zero);
 
   const errorToast = useErrorToast();
   const { data: tokenData } = useTokenData(asset.underlyingToken, poolChainId);
@@ -152,6 +153,25 @@ export const SupplyModal = ({
       }
     }
   }, [amount, isLoading, isAmountValid, asset.underlyingSymbol]);
+
+  useEffect(() => {
+    if (!currentChain || !connextSdk) {
+      setRelayerFee(constants.Zero);
+    } else {
+      const origin = SUPPORTED_CHAINS_BY_CONNEXT[currentChain.id].domainId;
+      const destination = SUPPORTED_CHAINS_BY_CONNEXT[poolChainId].domainId;
+
+      // Calculate relayer fee
+      const estimateRelayerFeeParams = {
+        originDomain: origin,
+        destinationDomain: destination,
+        isHighPriority: true,
+      };
+      connextSdk.estimateRelayerFee(estimateRelayerFeeParams).then((res) => {
+        setRelayerFee(res);
+      });
+    }
+  }, [connextSdk, currentChain, poolChainId]);
 
   const onConfirm = async () => {
     if (!currentSdk || !address) return;
@@ -641,6 +661,26 @@ export const SupplyModal = ({
                         setEnableAsCollateral={setEnableAsCollateral}
                       />
                     )}
+                    <Column
+                      crossAxisAlignment="flex-start"
+                      mainAxisAlignment="flex-start"
+                      width="100%"
+                    >
+                      <Row crossAxisAlignment="center" mainAxisAlignment="flex-end" width="100%">
+                        <Text mr={2} size="sm">
+                          Relayer Fee:
+                        </Text>
+                        <Text
+                          maxWidth="300px"
+                          overflow="hidden"
+                          textOverflow={'ellipsis'}
+                          whiteSpace="nowrap"
+                        >
+                          {(+formatEther(relayerFee)).toFixed(6)}{' '}
+                          {currentChain ? currentChain.nativeCurrency.symbol : 'ETH'}
+                        </Text>
+                      </Row>
+                    </Column>
                     <Button
                       height={16}
                       id="confirmFund"
