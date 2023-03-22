@@ -1414,7 +1414,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@chakra-ui/react@npm:^2.5.1":
+"@chakra-ui/react@npm:^2.5.2":
   version: 2.5.2
   resolution: "@chakra-ui/react@npm:2.5.2"
   dependencies:
@@ -3586,7 +3586,7 @@ __metadata:
     "@chainsafe/dappeteer": ^5.0.1
     "@chakra-ui/cli": ^2.3.0
     "@chakra-ui/icons": ^2.0.17
-    "@chakra-ui/react": ^2.5.1
+    "@chakra-ui/react": ^2.5.2
     "@emotion/react": ^11.10.6
     "@emotion/styled": ^11.10.6
     "@ethersproject/contracts": ^5.7.0
@@ -3597,25 +3597,25 @@ __metadata:
     "@midas-capital/types": "workspace:*"
     "@netlify/plugin-nextjs": latest
     "@next/bundle-analyzer": ^13.2.4
-    "@rainbow-me/rainbowkit": ^0.12.1
-    "@sentry/nextjs": ^7.43.0
-    "@supabase/supabase-js": ^2.10.0
-    "@tanstack/react-query": ^4.26.1
-    "@tanstack/react-query-devtools": ^4.26.1
+    "@rainbow-me/rainbowkit": ^0.12.2
+    "@sentry/nextjs": ^7.44.2
+    "@supabase/supabase-js": ^2.12.0
+    "@tanstack/react-query": ^4.28.0
+    "@tanstack/react-query-devtools": ^4.28.0
     "@tanstack/react-table": 8.7.9
     "@testing-library/jest-dom": ^5.16.5
     "@testing-library/react": ^14.0.0
-    "@types/node": 18.15.3
+    "@types/node": 18.15.5
     "@types/react": ^18.0.28
     "@types/react-datepicker": ^4.10.0
     "@types/react-dom": ^18.0.11
     "@types/testing-library__jest-dom": ^5
-    "@typescript-eslint/eslint-plugin": ^5.55.0
-    "@typescript-eslint/parser": ^5.55.0
+    "@typescript-eslint/eslint-plugin": ^5.56.0
+    "@typescript-eslint/parser": ^5.56.0
     axios: ^1.3.4
     eslint: 8.36.0
     eslint-config-next: 13.2.4
-    eslint-config-prettier: ^8.7.0
+    eslint-config-prettier: ^8.8.0
     eslint-import-resolver-typescript: ^3.5.3
     eslint-plugin-import: ^2.27.5
     eslint-plugin-prettier: ^4.2.1
@@ -3624,27 +3624,27 @@ __metadata:
     eslint-plugin-typescript-sort-keys: ^2.3.0
     eslint-plugin-unused-imports: ^2.0.0
     ethers: ^5.7.2
-    framer-motion: ^10.3.1
+    framer-motion: ^10.8.5
     fuse.js: ^6.6.2
-    i18next: ^22.4.11
+    i18next: ^22.4.13
     jest: ^29.5.0
     jest-environment-jsdom: ^29.5.0
-    mathjs: ^11.6.0
+    mathjs: ^11.7.0
     next: ^13.2.4
     next-i18next: ^13.2.2
-    prettier: 2.8.4
+    prettier: 2.8.6
     puppeteer: ^19.7.5
     react: ^18.2.0
     react-datepicker: ^4.10.0
     react-dom: ^18.2.0
-    react-error-boundary: ^3.1.4
-    react-hook-form: ^7.43.5
+    react-error-boundary: ^4.0.1
+    react-hook-form: ^7.43.7
     react-i18next: ^12.2.0
     react-icons: ^4.8.0
     react-jazzicon: ^1.0.4
-    recharts: ^2.4.3
-    typescript: 4.9.5
-    wagmi: ^0.12.1
+    recharts: ^2.5.0
+    typescript: 5.0.2
+    wagmi: ^0.12.6
     yup: ^1.0.2
   languageName: unknown
   linkType: soft
@@ -5143,7 +5143,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rainbow-me/rainbowkit@npm:^0.12.1":
+"@rainbow-me/rainbowkit@npm:^0.12.2":
   version: 0.12.2
   resolution: "@rainbow-me/rainbowkit@npm:0.12.2"
   dependencies:
@@ -5440,7 +5440,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/nextjs@npm:^7.43.0":
+"@sentry/nextjs@npm:^7.44.2":
   version: 7.44.2
   resolution: "@sentry/nextjs@npm:7.44.2"
   dependencies:
@@ -6018,7 +6018,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@supabase/supabase-js@npm:^2.10.0, @supabase/supabase-js@npm:^2.7.1":
+"@supabase/supabase-js@npm:^2.12.0, @supabase/supabase-js@npm:^2.7.1":
   version: 2.12.0
   resolution: "@supabase/supabase-js@npm:2.12.0"
   dependencies:
@@ -6211,7 +6211,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/react-query-devtools@npm:^4.26.1":
+"@tanstack/react-query-devtools@npm:^4.28.0":
   version: 4.28.0
   resolution: "@tanstack/react-query-devtools@npm:4.28.0"
   dependencies:
@@ -6237,7 +6237,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/react-query@npm:^4.14.5, @tanstack/react-query@npm:^4.26.1":
+"@tanstack/react-query@npm:^4.14.5, @tanstack/react-query@npm:^4.28.0":
   version: 4.28.0
   resolution: "@tanstack/react-query@npm:4.28.0"
   dependencies:
@@ -6902,17 +6902,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^18.0.0, @types/node@npm:^18.7.16":
+"@types/node@npm:*, @types/node@npm:18.15.5, @types/node@npm:^18.0.0, @types/node@npm:^18.7.16":
   version: 18.15.5
   resolution: "@types/node@npm:18.15.5"
   checksum: 5fbf3453bd5ce1402bb2964e55d928fc8a8a7de5451b1b0fe66587fecb8a3eb86854ca9cefa5076a5971e2cff00e1773ceeb5d872a54f6c6ddfbbc1064b4e91a
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:18.15.3":
-  version: 18.15.3
-  resolution: "@types/node@npm:18.15.3"
-  checksum: 31b1d92475a82c30de29aa6c0771b18a276552d191283b4423ba2d61b3f01159bf0d02576c0b7cc834b043997893800db6bb47f246083ed85aa45e79c80875d7
   languageName: node
   linkType: hard
 
@@ -7179,7 +7172,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/eslint-plugin@npm:^5.30.0, @typescript-eslint/eslint-plugin@npm:^5.55.0":
+"@typescript-eslint/eslint-plugin@npm:^5.30.0, @typescript-eslint/eslint-plugin@npm:^5.56.0":
   version: 5.56.0
   resolution: "@typescript-eslint/eslint-plugin@npm:5.56.0"
   dependencies:
@@ -7214,7 +7207,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/parser@npm:^5.30.0, @typescript-eslint/parser@npm:^5.42.0, @typescript-eslint/parser@npm:^5.55.0":
+"@typescript-eslint/parser@npm:^5.30.0, @typescript-eslint/parser@npm:^5.42.0, @typescript-eslint/parser@npm:^5.56.0":
   version: 5.56.0
   resolution: "@typescript-eslint/parser@npm:5.56.0"
   dependencies:
@@ -13617,7 +13610,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-prettier@npm:^8.5.0, eslint-config-prettier@npm:^8.7.0":
+"eslint-config-prettier@npm:^8.5.0, eslint-config-prettier@npm:^8.8.0":
   version: 8.8.0
   resolution: "eslint-config-prettier@npm:8.8.0"
   peerDependencies:
@@ -15655,9 +15648,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"framer-motion@npm:^10.3.1":
-  version: 10.8.4
-  resolution: "framer-motion@npm:10.8.4"
+"framer-motion@npm:^10.8.5":
+  version: 10.8.5
+  resolution: "framer-motion@npm:10.8.5"
   dependencies:
     "@emotion/is-prop-valid": ^0.8.2
     tslib: ^2.4.0
@@ -15672,7 +15665,7 @@ __metadata:
       optional: true
     react-dom:
       optional: true
-  checksum: 08e89025e766278c2ee1dd60c8978a16d03c9cc95169c15b8b10b0f0b0b2fa3ef458e67726aa5153178934bdfd00fcd2f019b579274a6b853449ba21234a4300
+  checksum: d35f017564e35a46d327d010c7a0fdaeb69f3e534b9dc8d83e29aab11b2f27c91fd523de645494cf876ceda835289841d2e21f28148b9bf26a475dc6b9600d45
   languageName: node
   linkType: hard
 
@@ -17220,7 +17213,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:^22.4.11":
+"i18next@npm:^22.4.13":
   version: 22.4.13
   resolution: "i18next@npm:22.4.13"
   dependencies:
@@ -20609,7 +20602,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mathjs@npm:^11.6.0":
+"mathjs@npm:^11.7.0":
   version: 11.7.0
   resolution: "mathjs@npm:11.7.0"
   dependencies:
@@ -21291,11 +21284,11 @@ __metadata:
     "@istanbuljs/nyc-config-typescript": ^1.0.2
     "@resolver-engine/core": ^0.3.3
     "@tsconfig/recommended": ^1.0.2
-    "@typescript-eslint/eslint-plugin": ^5.55.0
-    "@typescript-eslint/parser": ^5.55.0
-    netlify-cli: ^13.1.6
+    "@typescript-eslint/eslint-plugin": ^5.56.0
+    "@typescript-eslint/parser": ^5.56.0
+    netlify-cli: ^13.2.1
     ts-node: ^10.9.1
-    typescript: ^4.9.5
+    typescript: ^5.0.2
   languageName: unknown
   linkType: soft
 
@@ -21556,9 +21549,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"netlify-cli@npm:^13.1.6":
-  version: 13.2.0
-  resolution: "netlify-cli@npm:13.2.0"
+"netlify-cli@npm:^13.2.1":
+  version: 13.2.1
+  resolution: "netlify-cli@npm:13.2.1"
   dependencies:
     "@fastify/static": ^6.6.0
     "@netlify/build": ^29.7.1
@@ -21669,7 +21662,7 @@ __metadata:
   bin:
     netlify: bin/run.mjs
     ntl: bin/run.mjs
-  checksum: 74ce252cfa1dfedb8b7434f3c3011f207c2baf1a6df658ceeb358a03730dfe8ae01fe048e1ecf78fdd03d57f427ae30006dadc83174973b78360b761f4d992fb
+  checksum: 11fa9ce4eebb964689ef40436596f99a1b76e69a6539c6de2684e5bf88535760aeb608c56597f9a325144eb80aa8d35ca4747417736aa40c492488123694e1b3
   languageName: node
   linkType: hard
 
@@ -23737,16 +23730,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:2.8.4":
-  version: 2.8.4
-  resolution: "prettier@npm:2.8.4"
-  bin:
-    prettier: bin-prettier.js
-  checksum: c173064bf3df57b6d93d19aa98753b9b9dd7657212e33b41ada8e2e9f9884066bb9ca0b4005b89b3ab137efffdf8fbe0b462785aba20364798ff4303aadda57e
-  languageName: node
-  linkType: hard
-
-"prettier@npm:^2.0.5, prettier@npm:^2.1.2, prettier@npm:^2.3.1, prettier@npm:^2.7.1":
+"prettier@npm:2.8.6, prettier@npm:^2.0.5, prettier@npm:^2.1.2, prettier@npm:^2.3.1, prettier@npm:^2.7.1":
   version: 2.8.6
   resolution: "prettier@npm:2.8.6"
   bin:
@@ -24411,14 +24395,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-error-boundary@npm:^3.1.4":
-  version: 3.1.4
-  resolution: "react-error-boundary@npm:3.1.4"
+"react-error-boundary@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "react-error-boundary@npm:4.0.1"
   dependencies:
     "@babel/runtime": ^7.12.5
   peerDependencies:
     react: ">=16.13.1"
-  checksum: f36270a5d775a25c8920f854c0d91649ceea417b15b5bc51e270a959b0476647bb79abb4da3be7dd9a4597b029214e8fe43ea914a7f16fa7543c91f784977f1b
+  checksum: b40e83f5fa847f78c5c8b1eba256f04972fac61b77e1a99adfd46d3993509f10d5ba7535889c8c9c2e504103d79d208b478a9a03bd421f52e592960a835b1a29
   languageName: node
   linkType: hard
 
@@ -24456,7 +24440,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-hook-form@npm:^7.43.5":
+"react-hook-form@npm:^7.43.7":
   version: 7.43.7
   resolution: "react-hook-form@npm:7.43.7"
   peerDependencies:
@@ -24858,7 +24842,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"recharts@npm:^2.4.3":
+"recharts@npm:^2.5.0":
   version: 2.5.0
   resolution: "recharts@npm:2.5.0"
   dependencies:
@@ -28175,7 +28159,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:4.9.5, typescript@npm:^4.7.4, typescript@npm:^4.8.2, typescript@npm:^4.8.4, typescript@npm:^4.9.5":
+"typescript@npm:5.0.2, typescript@npm:^5.0.2":
+  version: 5.0.2
+  resolution: "typescript@npm:5.0.2"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: bef1dcd166acfc6934b2ec4d72f93edb8961a5fab36b8dd2aaf6f4f4cd5c0210f2e0850aef4724f3b4913d5aef203a94a28ded731b370880c8bcff7e4ff91fc1
+  languageName: node
+  linkType: hard
+
+"typescript@npm:^4.7.4, typescript@npm:^4.8.2, typescript@npm:^4.8.4, typescript@npm:^4.9.5":
   version: 4.9.5
   resolution: "typescript@npm:4.9.5"
   bin:
@@ -28195,7 +28189,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@4.9.5#~builtin<compat/typescript>, typescript@patch:typescript@^4.7.4#~builtin<compat/typescript>, typescript@patch:typescript@^4.8.2#~builtin<compat/typescript>, typescript@patch:typescript@^4.8.4#~builtin<compat/typescript>, typescript@patch:typescript@^4.9.5#~builtin<compat/typescript>":
+"typescript@patch:typescript@5.0.2#~builtin<compat/typescript>, typescript@patch:typescript@^5.0.2#~builtin<compat/typescript>":
+  version: 5.0.2
+  resolution: "typescript@patch:typescript@npm%3A5.0.2#~builtin<compat/typescript>::version=5.0.2&hash=bda367"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: bdbf3d0aac0d6cf010fbe0536753dc19f278eb4aba88140dcd25487dfe1c56ca8b33abc0dcd42078790a939b08ebc4046f3e9bb961d77d3d2c3cfa9829da4d53
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@^4.7.4#~builtin<compat/typescript>, typescript@patch:typescript@^4.8.2#~builtin<compat/typescript>, typescript@patch:typescript@^4.8.4#~builtin<compat/typescript>, typescript@patch:typescript@^4.9.5#~builtin<compat/typescript>":
   version: 4.9.5
   resolution: "typescript@patch:typescript@npm%3A4.9.5#~builtin<compat/typescript>::version=4.9.5&hash=bda367"
   bin:
@@ -28899,7 +28903,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wagmi@npm:^0.12.1":
+"wagmi@npm:^0.12.6":
   version: 0.12.6
   resolution: "wagmi@npm:0.12.6"
   dependencies:
