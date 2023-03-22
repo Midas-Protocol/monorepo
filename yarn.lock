@@ -21286,7 +21286,7 @@ __metadata:
     "@tsconfig/recommended": ^1.0.2
     "@typescript-eslint/eslint-plugin": ^5.56.0
     "@typescript-eslint/parser": ^5.56.0
-    netlify-cli: ^13.2.0
+    netlify-cli: ^13.2.1
     ts-node: ^10.9.1
     typescript: ^5.0.2
   languageName: unknown
@@ -21549,7 +21549,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"netlify-cli@npm:^13.2.0":
+"netlify-cli@npm:^13.2.1":
   version: 13.2.1
   resolution: "netlify-cli@npm:13.2.1"
   dependencies:
