@@ -3524,7 +3524,7 @@ __metadata:
     ts-mocha: ^10.0.0
     ts-node: ^10.9.1
     typechain: ^8.1.0
-    typescript: ^4.8.2
+    typescript: ^5.0.3
     utf-8-validate: ^5.0.9
   languageName: unknown
   linkType: soft
@@ -7005,14 +7005,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:^17.0.15":
-  version: 17.0.56
-  resolution: "@types/react@npm:17.0.56"
+"@types/react@npm:^18.0.33":
+  version: 18.0.33
+  resolution: "@types/react@npm:18.0.33"
   dependencies:
     "@types/prop-types": "*"
     "@types/scheduler": "*"
     csstype: ^3.0.2
-  checksum: c9e156395c5b97407ae51886659c2ba16a8e62d4fad8ceb29293f76931b58de42a385a179b32da725e72cd04d74c2d60e54cd495c8815b4feee2e4da381b7e52
+  checksum: 4fbd2b2b6a26378bdfde121081a6406ec2d39e4ba87ea5f6897ab7bb2198713165e6fd703ad4ed7ba1d4f23ef54a4c9f108f3105c7ed8e136411ee6bdebc5669
   languageName: node
   linkType: hard
 
