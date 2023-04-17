@@ -34,21 +34,22 @@ COPY package.json /tmp/build/
 COPY packages/sdk/package.json /tmp/build/packages/sdk/
 COPY packages/types/package.json /tmp/build/packages/types/
 COPY packages/chains/package.json /tmp/build/packages/chains/
-COPY packages/bots/liquidator/package.json /tmp/build/packages/bots/liquidator/
+COPY packages/bots/vaults/package.json /tmp/build/packages/bots/vaults/
 COPY yarn.lock /tmp/build/
 
 # ----- Install dependencies -----
 # Install dependencies exactly as in the yarn.lock file - no updates.
 RUN yarn install --inline-builds --mode=skip-build
+# RUN yarn install
 
 # ----- Copy source and all other files that affect lint, test, build -----
 COPY packages/sdk /tmp/build/packages/sdk
 COPY packages/types /tmp/build/packages/types
 COPY packages/chains /tmp/build/packages/chains
-COPY packages/bots/liquidator /tmp/build/packages/bots/liquidator
+COPY packages/bots/vaults /tmp/build/packages/bots/vaults
 
-# ----- build -----
-RUN yarn build:deploy:liquidator
+# # ----- build -----
+RUN yarn build:deploy:vaults
 
 # ----------------------------------------
 # Copy files to the deployment image.
@@ -62,5 +63,5 @@ ENV NODE_ENV=production
 WORKDIR ${LAMBDA_TASK_ROOT}
 COPY --from=build /tmp/build ${LAMBDA_TASK_ROOT}
 
-CMD ["packages/bots/liquidator/build/src/index.handler"]
+CMD ["packages/bots/vaults/build/src/index.handler"]
 
