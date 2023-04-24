@@ -10,13 +10,8 @@ import { useBorrowAPYs } from '@ui/hooks/useBorrowAPYs';
 import { useColors } from '@ui/hooks/useColors';
 import { useRewards } from '@ui/hooks/useRewards';
 import { useTotalSupplyAPYs } from '@ui/hooks/useTotalSupplyAPYs';
-import { PoolData } from '@ui/types/TokensDataMap';
-import {
-  midUsdFormatter,
-  smallFormatter,
-  smallUsdFormatter,
-  tokenFormatter,
-} from '@ui/utils/bigUtils';
+import type { PoolData } from '@ui/types/TokensDataMap';
+import { smallFormatter, smallUsdFormatter, tokenFormatter } from '@ui/utils/bigUtils';
 import { sortTopUserBorrowedAssets, sortTopUserSuppliedAssets } from '@ui/utils/sorts';
 
 export const UserStats = ({ poolData }: { poolData: PoolData }) => {
@@ -33,8 +28,8 @@ export const UserStats = ({ poolData }: { poolData: PoolData }) => {
 
   const { data: assetInfos } = useAssets(poolData.chainId);
   const { data: allRewards } = useRewards({
-    poolId: poolData.id.toString(),
     chainId: poolData.chainId,
+    poolId: poolData.id.toString(),
   });
 
   const { data: totalSupplyApyPerAsset } = useTotalSupplyAPYs(
@@ -49,15 +44,15 @@ export const UserStats = ({ poolData }: { poolData: PoolData }) => {
   const totalSupplyApy = useMemo(() => {
     if (totalSupplyApyPerAsset) {
       if (poolData.totalSupplyBalanceNative === 0)
-        return { totalApy: 0, totalSupplied: 0, estimatedUsd: 0, estimatedPerAsset: [] };
+        return { estimatedPerAsset: [], estimatedUsd: 0, totalApy: 0, totalSupplied: 0 };
 
       let _totalApy = 0;
       const _estimatedPerAsset: {
-        underlying: string;
-        symbol: string;
-        supplied: string;
-        estimated: number;
         apy: number;
+        estimated: number;
+        supplied: string;
+        symbol: string;
+        underlying: string;
       }[] = [];
 
       poolData.assets.map((asset) => {
@@ -71,11 +66,11 @@ export const UserStats = ({ poolData }: { poolData: PoolData }) => {
           );
 
           _estimatedPerAsset.push({
-            underlying: asset.underlyingToken,
-            supplied: smallFormatter.format(suppliedNum),
             apy: totalSupplyApyPerAsset[asset.cToken] * 100,
             estimated: totalSupplyApyPerAsset[asset.cToken] * suppliedNum,
+            supplied: smallFormatter(suppliedNum),
             symbol: asset.underlyingSymbol,
+            underlying: asset.underlyingToken,
           });
         }
       });
@@ -83,10 +78,10 @@ export const UserStats = ({ poolData }: { poolData: PoolData }) => {
       const _estimatedUsd = poolData.totalSupplyBalanceFiat * _totalApy;
 
       return {
+        estimatedPerAsset: _estimatedPerAsset,
+        estimatedUsd: _estimatedUsd,
         totalApy: _totalApy * 100,
         totalSupplied: poolData.totalSupplyBalanceFiat,
-        estimatedUsd: _estimatedUsd,
-        estimatedPerAsset: _estimatedPerAsset,
       };
     }
 
@@ -101,15 +96,15 @@ export const UserStats = ({ poolData }: { poolData: PoolData }) => {
   const totalBorrowApy = useMemo(() => {
     if (borrowApyPerAsset) {
       if (poolData.totalBorrowBalanceNative === 0)
-        return { totalApy: 0, totalBorrowed: 0, estimatedUsd: 0, estimatedPerAsset: [] };
+        return { estimatedPerAsset: [], estimatedUsd: 0, totalApy: 0, totalBorrowed: 0 };
 
       let _totalApy = 0;
       const _estimatedPerAsset: {
-        underlying: string;
-        symbol: string;
+        apy: number;
         borrowed: string;
         estimated: number;
-        apy: number;
+        symbol: string;
+        underlying: string;
       }[] = [];
 
       poolData.assets.map((asset) => {
@@ -122,11 +117,11 @@ export const UserStats = ({ poolData }: { poolData: PoolData }) => {
             utils.formatUnits(asset.borrowBalance, asset.underlyingDecimals.toNumber())
           );
           _estimatedPerAsset.push({
-            underlying: asset.underlyingToken,
-            borrowed: smallFormatter.format(borrowedNum),
             apy: borrowApyPerAsset[asset.cToken] * 100,
+            borrowed: smallFormatter(borrowedNum),
             estimated: borrowApyPerAsset[asset.cToken] * borrowedNum,
             symbol: asset.underlyingSymbol,
+            underlying: asset.underlyingToken,
           });
         }
       });
@@ -134,10 +129,10 @@ export const UserStats = ({ poolData }: { poolData: PoolData }) => {
       const _estimatedUsd = poolData.totalBorrowBalanceFiat * _totalApy;
 
       return {
+        estimatedPerAsset: _estimatedPerAsset,
+        estimatedUsd: _estimatedUsd,
         totalApy: _totalApy * 100,
         totalBorrowed: poolData.totalBorrowBalanceFiat,
-        estimatedUsd: _estimatedUsd,
-        estimatedPerAsset: _estimatedPerAsset,
       };
     }
 
@@ -174,8 +169,11 @@ export const UserStats = ({ poolData }: { poolData: PoolData }) => {
                           {smallUsdFormatter(asset.supplyBalanceFiat)}
                         </Text>
                         <Text>
-                          {tokenFormatter(asset.supplyBalance, asset.underlyingDecimals)}{' '}
-                          {asset.underlyingSymbol}
+                          {tokenFormatter(
+                            asset.supplyBalance,
+                            asset.underlyingDecimals,
+                            asset.underlyingSymbol
+                          )}
                         </Text>
                       </Box>
                     </HStack>
@@ -191,7 +189,7 @@ export const UserStats = ({ poolData }: { poolData: PoolData }) => {
         <Flex>
           <UserStat
             label="Your Supply"
-            value={poolData ? midUsdFormatter(poolData.totalSupplyBalanceFiat) : undefined}
+            value={poolData ? smallUsdFormatter(poolData.totalSupplyBalanceFiat, true) : undefined}
           />
         </Flex>
       </PopoverTooltip>
@@ -217,8 +215,11 @@ export const UserStats = ({ poolData }: { poolData: PoolData }) => {
                           {smallUsdFormatter(asset.borrowBalanceFiat)}
                         </Text>
                         <Text>
-                          {tokenFormatter(asset.borrowBalance, asset.underlyingDecimals)}{' '}
-                          {asset.underlyingSymbol}
+                          {tokenFormatter(
+                            asset.borrowBalance,
+                            asset.underlyingDecimals,
+                            asset.underlyingSymbol
+                          )}
                         </Text>
                       </Box>
                     </HStack>
@@ -234,7 +235,7 @@ export const UserStats = ({ poolData }: { poolData: PoolData }) => {
         <Flex>
           <UserStat
             label="Your Borrow"
-            value={poolData ? midUsdFormatter(poolData?.totalBorrowBalanceFiat) : undefined}
+            value={poolData ? smallUsdFormatter(poolData?.totalBorrowBalanceFiat, true) : undefined}
           />
         </Flex>
       </PopoverTooltip>
@@ -248,10 +249,10 @@ export const UserStats = ({ poolData }: { poolData: PoolData }) => {
               assuming the current variable interest rates on all supplied assets remains constant
             </Text>
             {totalSupplyApy && totalSupplyApy.estimatedPerAsset.length > 0 ? (
-              <VStack pt={2}>
+              <VStack pt={2} width="100%">
                 <Divider bg={cCard.dividerColor} />
 
-                <VStack alignItems="flex-start" pt={2}>
+                <VStack alignItems="flex-start" pt={2} width="100%">
                   {totalSupplyApy.estimatedPerAsset.map((data) => {
                     return (
                       <HStack key={data.underlying}>
@@ -259,7 +260,7 @@ export const UserStats = ({ poolData }: { poolData: PoolData }) => {
                         <Text whiteSpace="nowrap">
                           {data.supplied} {data.symbol} at {data.apy.toFixed(2)}% APY yield{' '}
                           <b>
-                            {smallFormatter.format(data.estimated)} {data.symbol}/year
+                            {smallFormatter(data.estimated)} {data.symbol}/year
                           </b>
                         </Text>
                       </HStack>
@@ -268,9 +269,9 @@ export const UserStats = ({ poolData }: { poolData: PoolData }) => {
                   <Divider bg={cCard.borderColor} />
                   <HStack alignSelf="self-end">
                     <Text whiteSpace="nowrap">
-                      {smallFormatter.format(totalSupplyApy.totalSupplied)} USD at{' '}
+                      {smallFormatter(totalSupplyApy.totalSupplied)} USD at{' '}
                       {totalSupplyApy.totalApy.toFixed(2)}% APY yield{' '}
-                      <b>{smallFormatter.format(totalSupplyApy.estimatedUsd)} USD/year</b>
+                      <b>{smallFormatter(totalSupplyApy.estimatedUsd)} USD/year</b>
                     </Text>
                   </HStack>
                 </VStack>
@@ -300,10 +301,10 @@ export const UserStats = ({ poolData }: { poolData: PoolData }) => {
               assuming the current variable interest rates on all borrowed assets remains constant
             </Text>
             {totalBorrowApy && totalBorrowApy.estimatedPerAsset.length > 0 ? (
-              <VStack pt={2}>
+              <VStack pt={2} width="100%">
                 <Divider bg={cCard.dividerColor} />
 
-                <VStack alignItems="flex-start" pt={2}>
+                <VStack alignItems="flex-start" pt={2} width="100%">
                   {totalBorrowApy.estimatedPerAsset.map((data) => {
                     return (
                       <HStack key={data.underlying}>
@@ -311,7 +312,7 @@ export const UserStats = ({ poolData }: { poolData: PoolData }) => {
                         <Text whiteSpace="nowrap">
                           {data.borrowed} {data.symbol} at {data.apy.toFixed(2)}% APY yield{' '}
                           <b>
-                            {smallFormatter.format(data.estimated)} {data.symbol}/year
+                            {smallFormatter(data.estimated)} {data.symbol}/year
                           </b>
                         </Text>
                       </HStack>
@@ -320,9 +321,9 @@ export const UserStats = ({ poolData }: { poolData: PoolData }) => {
                   <Divider bg={cCard.borderColor} />
                   <HStack alignSelf="self-end">
                     <Text whiteSpace="nowrap">
-                      {smallFormatter.format(totalBorrowApy.totalBorrowed)} USD at{' '}
+                      {smallFormatter(totalBorrowApy.totalBorrowed)} USD at{' '}
                       {totalBorrowApy.totalApy.toFixed(2)}% APY yield{' '}
-                      <b>{smallFormatter.format(totalBorrowApy.estimatedUsd)} USD/year</b>
+                      <b>{smallFormatter(totalBorrowApy.estimatedUsd)} USD/year</b>
                     </Text>
                   </HStack>
                 </VStack>

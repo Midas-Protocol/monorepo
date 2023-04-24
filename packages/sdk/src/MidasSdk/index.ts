@@ -43,8 +43,10 @@ import { withFusePoolLens } from "../modules/FusePoolLens";
 import { withFusePools } from "../modules/FusePools";
 import { ChainLiquidationConfig } from "../modules/liquidation/config";
 import { withSafeLiquidator } from "../modules/liquidation/SafeLiquidator";
+import { withVaults } from "../modules/Vaults";
 
 import { CTOKEN_ERROR_CODES } from "./config";
+import AdjustableAnkrBNBIrm from "./irm/AdjustableAnkrBNBIrm";
 import AdjustableJumpRateModel from "./irm/AdjustableJumpRateModel";
 import AnkrBNBInterestRateModel from "./irm/AnkrBNBInterestRateModel";
 import AnkrFTMInterestRateModel from "./irm/AnkrFTMInterestRateModel";
@@ -288,6 +290,7 @@ export class MidasBase {
       AnkrBNBInterestRateModel: AnkrBNBInterestRateModel,
       AnkrFTMInterestRateModel: AnkrFTMInterestRateModel,
       AdjustableJumpRateModel: AdjustableJumpRateModel,
+      AdjustableAnkrBNBIrm: AdjustableAnkrBNBIrm,
     };
     const runtimeBytecodeHash = utils.keccak256(await this.provider.getCode(interestRateModelAddress));
 
@@ -328,7 +331,7 @@ export class MidasBase {
     return oracle;
   }
 
-  getEIP20RewardTokenInstance(address: string, signerOrProvider: SignerOrProvider = this.provider) {
+  getEIP20TokenInstance(address: string, signerOrProvider: SignerOrProvider = this.provider) {
     return new Contract(address, EIP20InterfaceABI, signerOrProvider) as EIP20Interface;
   }
 
@@ -347,7 +350,9 @@ export class MidasBase {
 
 const MidasBaseWithModules = withFusePoolLens(
   withFundOperations(
-    withSafeLiquidator(withFusePools(withAsset(withFlywheel(withCreateContracts(withConvertMantissa(MidasBase))))))
+    withSafeLiquidator(
+      withFusePools(withAsset(withFlywheel(withVaults(withCreateContracts(withConvertMantissa(MidasBase))))))
+    )
   )
 );
 export class MidasSdk extends MidasBaseWithModules {}

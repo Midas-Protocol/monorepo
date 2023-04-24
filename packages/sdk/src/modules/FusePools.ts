@@ -3,6 +3,7 @@ import {
   basegoerli,
   bsc,
   chapel,
+  ethereum,
   evmos,
   fantom,
   ganache,
@@ -31,7 +32,7 @@ export type LensPoolsWithData = [
   errors: boolean[]
 ];
 
-const ChainSupportedAssets: ChainSupportedAssetsType = {
+export const ChainSupportedAssets: ChainSupportedAssetsType = {
   [SupportedChains.bsc]: bsc.assets,
   [SupportedChains.polygon]: polygon.assets,
   [SupportedChains.ganache]: ganache.assets,
@@ -42,6 +43,7 @@ const ChainSupportedAssets: ChainSupportedAssetsType = {
   [SupportedChains.arbitrum]: arbitrum.assets,
   [SupportedChains.fantom]: fantom.assets,
   [SupportedChains.basegoerli]: basegoerli.assets,
+  [SupportedChains.ethereum]: ethereum.assets,
 };
 
 export function withFusePools<TBase extends MidasBaseConstructor>(Base: TBase) {

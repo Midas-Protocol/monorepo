@@ -1,22 +1,23 @@
 import { Divider, HStack, Progress, Text, VStack } from '@chakra-ui/react';
-import { BigNumber, utils } from 'ethers';
+import type { BigNumber } from 'ethers';
+import { utils } from 'ethers';
 import { useMemo } from 'react';
 
 import { PopoverTooltip } from '@ui/components/shared/PopoverTooltip';
-import { Cap } from '@ui/hooks/useBorrowCap';
+import type { Cap } from '@ui/hooks/useBorrowCap';
 import { useColors } from '@ui/hooks/useColors';
-import { midFormat, smallFormatter } from '@ui/utils/bigUtils';
+import { smallFormatter } from '@ui/utils/bigUtils';
 
 interface BalanceCellProps {
+  cap?: Cap | null;
   primary: {
     value: number;
   };
   secondary?: {
-    value: BigNumber;
     decimals: number;
     symbol: string;
+    value: BigNumber;
   };
-  cap?: Cap | null;
 }
 
 export const BalanceCell = ({ primary, secondary, cap }: BalanceCellProps) => {
@@ -31,18 +32,18 @@ export const BalanceCell = ({ primary, secondary, cap }: BalanceCellProps) => {
       body={
         <VStack alignItems="flex-start">
           <HStack>
-            <Text variant="tnumber">$ {smallFormatter.format(primary.value)}</Text>
-            {cap && <Text variant="tnumber">/ $ {smallFormatter.format(cap.usdCap)}</Text>}
+            <Text variant="tnumber">$ {smallFormatter(primary.value)}</Text>
+            {cap && <Text variant="tnumber">/ $ {smallFormatter(cap.usdCap)}</Text>}
           </HStack>
           {secondary && (
             <HStack>
               <Text variant="tnumber">
-                {`${smallFormatter.format(
+                {`${smallFormatter(
                   parseFloat(utils.formatUnits(secondary.value, secondary.decimals))
                 )} ${secondary.symbol}`}
               </Text>
               {cap && (
-                <Text variant="tnumber">{`/ ${smallFormatter.format(cap.tokenCap)} ${
+                <Text variant="tnumber">{`/ ${smallFormatter(cap.tokenCap)} ${
                   secondary.symbol
                 }`}</Text>
               )}
@@ -72,7 +73,7 @@ export const BalanceCell = ({ primary, secondary, cap }: BalanceCellProps) => {
               {'$'}
             </Text>
             <Text color={cCard.txtColor} fontWeight={'medium'} size="sm" variant="tnumber">
-              {smallFormatter.format(primary.value)}
+              {smallFormatter(primary.value)}
             </Text>
           </HStack>
           {cap && (
@@ -104,7 +105,7 @@ export const BalanceCell = ({ primary, secondary, cap }: BalanceCellProps) => {
                 size="xs"
                 variant="tnumber"
               >
-                {midFormat(cap.usdCap)}
+                {smallFormatter(cap.usdCap, true)}
               </Text>
             </HStack>
           )}
@@ -113,7 +114,10 @@ export const BalanceCell = ({ primary, secondary, cap }: BalanceCellProps) => {
           <HStack spacing={1}>
             <HStack spacing={0.5}>
               <Text opacity={0.6} size="xs" variant="tnumber">
-                {midFormat(Number(utils.formatUnits(secondary.value, secondary.decimals)))}
+                {smallFormatter(
+                  Number(utils.formatUnits(secondary.value, secondary.decimals)),
+                  true
+                )}
               </Text>
               <Text
                 align="right"
@@ -143,7 +147,7 @@ export const BalanceCell = ({ primary, secondary, cap }: BalanceCellProps) => {
             {cap && (
               <HStack spacing={0.5}>
                 <Text opacity={0.6} size="xs" variant="tnumber">
-                  {midFormat(cap.tokenCap)}
+                  {smallFormatter(cap.tokenCap, true)}
                 </Text>
                 <Text
                   align="right"

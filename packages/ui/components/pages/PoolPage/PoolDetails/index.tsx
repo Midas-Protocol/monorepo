@@ -13,8 +13,8 @@ import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
 import { useExtraPoolInfo } from '@ui/hooks/fuse/useExtraPoolInfo';
 import { useColors } from '@ui/hooks/useColors';
-import { MarketData, PoolData } from '@ui/types/TokensDataMap';
-import { midUsdFormatter } from '@ui/utils/bigUtils';
+import type { MarketData, PoolData } from '@ui/types/TokensDataMap';
+import { smallUsdFormatter } from '@ui/utils/bigUtils';
 import { getScanUrlByChainId } from '@ui/utils/networkData';
 import { shortAddress } from '@ui/utils/shortAddress';
 
@@ -22,10 +22,10 @@ const PoolDetails = ({ data: poolData }: { data?: PoolData | null }) => {
   const { assets, totalSuppliedFiat, totalBorrowedFiat, totalAvailableLiquidityFiat, comptroller } =
     poolData || {
       assets: [] as Array<MarketData>,
-      totalSuppliedFiat: 0,
-      totalBorrowedFiat: 0,
-      totalAvailableLiquidityFiat: 0,
       comptroller: '',
+      totalAvailableLiquidityFiat: 0,
+      totalBorrowedFiat: 0,
+      totalSuppliedFiat: 0,
     };
 
   const { cCard } = useColors();
@@ -47,7 +47,7 @@ const PoolDetails = ({ data: poolData }: { data?: PoolData | null }) => {
     setIsLoading(true);
     const unitroller = currentSdk.createUnitroller(comptroller);
     const tx = await unitroller._acceptAdmin();
-    addRecentTransaction({ hash: tx.hash, description: 'Accept ownership' });
+    addRecentTransaction({ description: 'Accept ownership', hash: tx.hash });
     await tx.wait();
     setIsLoading(false);
 
@@ -93,31 +93,31 @@ const PoolDetails = ({ data: poolData }: { data?: PoolData | null }) => {
 
         {poolData ? (
           <Grid
-            gridArea={{ borderTopWidth: 1, borderColor: 'red' }}
+            gridArea={{ borderColor: 'red', borderTopWidth: 1 }}
             templateColumns={{
               base: 'repeat(1, 1fr)',
-              sm: 'repeat(2, 1fr)',
-              md: 'repeat(2, 1fr)',
               lg: 'repeat(4, 1fr)',
+              md: 'repeat(2, 1fr)',
+              sm: 'repeat(2, 1fr)',
             }}
             width="100%"
           >
             <HStack borderColor={cCard.dividerColor} borderTopWidth={1} pb={3} pt={4} px={4}>
               <Text size="md">Total Supplied</Text>
               <Text fontWeight="bold" size="md">
-                {midUsdFormatter(totalSuppliedFiat)}
+                {smallUsdFormatter(totalSuppliedFiat, true)}
               </Text>
             </HStack>
             <HStack borderColor={cCard.dividerColor} borderTopWidth={1} pb={3} pt={4} px={4}>
               <Text size="md">Total Borrowed</Text>
               <Text fontWeight="bold" size="md">
-                {midUsdFormatter(totalBorrowedFiat)}
+                {smallUsdFormatter(totalBorrowedFiat, true)}
               </Text>
             </HStack>
             <HStack borderColor={cCard.dividerColor} borderTopWidth={1} pb={3} pt={4} px={4}>
               <Text size="md">Available Liquidity</Text>
               <Text fontWeight="bold" size="md">
-                {midUsdFormatter(totalAvailableLiquidityFiat)}
+                {smallUsdFormatter(totalAvailableLiquidityFiat, true)}
               </Text>
             </HStack>
             <HStack borderColor={cCard.dividerColor} borderTopWidth={1} pb={3} pt={4} px={4}>
@@ -213,7 +213,7 @@ const PoolDetails = ({ data: poolData }: { data?: PoolData | null }) => {
                 {data ? (data.enforceWhitelist ? 'Yes' : 'No') : '?'}
               </Text>
             </HStack>
-            <GridItem colSpan={{ base: 1, sm: 2, md: 2, lg: 4 }}>
+            <GridItem colSpan={{ base: 1, lg: 4, md: 2, sm: 2 }}>
               <HStack
                 aria-colspan={4}
                 borderColor={cCard.dividerColor}
@@ -253,7 +253,7 @@ const PoolDetails = ({ data: poolData }: { data?: PoolData | null }) => {
             pb={1}
             width="100%"
           >
-            <Skeleton height={200} width="100%"></Skeleton>
+            <Skeleton height={200} width="100%" />
           </Column>
         )}
       </Column>

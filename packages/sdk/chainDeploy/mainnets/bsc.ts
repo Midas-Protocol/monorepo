@@ -6,25 +6,29 @@ import { AddressesProvider } from "../../typechain/AddressesProvider";
 import {
   ChainDeployConfig,
   ChainlinkFeedBaseCurrency,
+  deployAlgebraPriceOracle,
   deployAnkrCertificateTokenPriceOracle,
   deployChainlinkOracle,
   deployCurveLpOracle,
   deployCurveV2LpOracle,
   deployDiaOracle,
+  deployFlywheelWithDynamicRewards,
   deploySolidlyLpOracle,
+  deploySolidlyPriceOracle,
   deployStkBNBOracle,
   deployUniswapLpOracle,
   deployUniswapOracle,
   deployWombatOracle,
 } from "../helpers";
-import { deployFlywheelWithDynamicRewards } from "../helpers/dynamicFlywheels";
 import {
   ChainDeployFnParams,
   ChainlinkAsset,
+  ConcentratedLiquidityOracleConfig,
   CurvePoolConfig,
   CurveV2PoolConfig,
   DiaAsset,
   SolidlyLpAsset,
+  SolidlyOracleAssetConfig,
   WombatAsset,
 } from "../helpers/types";
 
@@ -66,34 +70,6 @@ export const deployConfig: ChainDeployConfig = {
         minPeriod: 1800,
         deviationThreshold: "50000000000000000", // 5%
       },
-      {
-        token: underlying(assets, assetSymbols.pSTAKE),
-        pair: "0x2bF1c14b71C375B35B4C157790bC4D6e557714FE", // WBNB-pSTAKE
-        baseToken: wbnb,
-        minPeriod: 1800,
-        deviationThreshold: "50000000000000000",
-      },
-      {
-        token: underlying(assets, assetSymbols.SD),
-        pair: "0x867EB519b05d9C4798B2EdE0B11197274dfDFcC0", // ApeSwap BUSD-SD
-        baseToken: underlying(assets, assetSymbols.BUSD),
-        minPeriod: 1800,
-        deviationThreshold: "50000000000000000",
-      },
-      {
-        token: underlying(assets, assetSymbols.HAY),
-        pair: "0xb84348b32E5C83856c6e31C227639cd678163719", // WBNB-HAY
-        baseToken: underlying(assets, assetSymbols.WBNB),
-        minPeriod: 1800,
-        deviationThreshold: "10000000000000000",
-      },
-      {
-        token: underlying(assets, assetSymbols.ANKR),
-        pair: "0x3147F98B8f9C53Acdf8F16332eaD12B592a1a4ae", // WBNB-ANKR
-        baseToken: underlying(assets, assetSymbols.WBNB),
-        minPeriod: 1800,
-        deviationThreshold: "70000000000000000",
-      },
     ],
     uniswapOracleLpTokens: [
       underlying(assets, assetSymbols["WBNB-BUSD"]), // WBNB-BUSD PCS LP
@@ -111,6 +87,8 @@ export const deployConfig: ChainDeployConfig = {
       underlying(assets, assetSymbols["BTCB-ETH"]), // BTCB-ETH PCS LP
       underlying(assets, assetSymbols["stkBNB-WBNB"]), // stkBNB-WBNB PCS LP
       underlying(assets, assetSymbols["asBNBx-WBNB"]), // BNBx-WBNB ApeSwap LP
+      underlying(assets, assetSymbols["ANKR-ankrBNB"]), // ANKR-ankrBNB PCS LP
+      underlying(assets, assetSymbols["asANKR-ankrBNB"]), // ANKR-ankrBNB ApeSwap LP
     ],
     flashSwapFee: 25,
   },
@@ -131,6 +109,11 @@ export const deployConfig: ChainDeployConfig = {
       rewardToken: "0xa184088a740c695E156F91f5cC086a06bb78b827",
       cycleLength: 1,
       name: "AUTOv2",
+    },
+    {
+      rewardToken: underlying(assets, assetSymbols.THE),
+      cycleLength: 1,
+      name: "THE",
     },
   ],
   cgId: bsc.specificParams.cgId,
@@ -326,7 +309,40 @@ const wombatAssets: WombatAsset[] = [
   },
 ];
 
-const solidlyLps: SolidlyLpAsset[] = [{ lpTokenAddress: underlying(assets, assetSymbols["sAMM-jBRL/BRZ"]) }];
+const algebraOracleTokens: Array<ConcentratedLiquidityOracleConfig> = [
+  {
+    assetAddress: underlying(assets, assetSymbols.THE),
+    poolAddress: "0x51Bd5e6d3da9064D59BcaA5A76776560aB42cEb8",
+    twapWindow: ethers.BigNumber.from(30 * 60),
+    baseToken: underlying(assets, assetSymbols.WBNB),
+  },
+];
+
+const solidlyLps: SolidlyLpAsset[] = [
+  { lpTokenAddress: underlying(assets, assetSymbols["sAMM-jBRL/BRZ"]) },
+  { lpTokenAddress: underlying(assets, assetSymbols["sAMM-HAY/BUSD"]) },
+  { lpTokenAddress: underlying(assets, assetSymbols["vAMM-ANKR/ankrBNB"]) },
+  { lpTokenAddress: underlying(assets, assetSymbols["vAMM-ANKR/HAY"]) },
+];
+
+const solidlyOracleSupportedStables: string[] = [
+  deployConfig.stableToken!,
+  underlying(assets, assetSymbols.USDC),
+  underlying(assets, assetSymbols.ankrBNB),
+];
+
+const solidlyOracles: SolidlyOracleAssetConfig[] = [
+  {
+    underlying: underlying(assets, assetSymbols.HAY),
+    poolAddress: "0x93B32a8dfE10e9196403dd111974E325219aec24", // sAMM-HAY-BUSD
+    baseToken: underlying(assets, assetSymbols.BUSD),
+  },
+  {
+    underlying: underlying(assets, assetSymbols.ANKR),
+    poolAddress: "0x7ef540f672Cd643B79D2488344944499F7518b1f", // vAMM-ankrBNB-ANKR
+    baseToken: underlying(assets, assetSymbols.ankrBNB),
+  },
+];
 
 export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: ChainDeployFnParams): Promise<void> => {
   const { deployer } = await getNamedAccounts();
@@ -343,6 +359,16 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
     chainlinkAssets,
   });
 
+  //// deploy algebra price oracle
+  await deployAlgebraPriceOracle({
+    run,
+    ethers,
+    getNamedAccounts,
+    deployments,
+    deployConfig,
+    concentratedLiquidityOracleTokens: algebraOracleTokens,
+  });
+
   //// Uniswap Oracle
   await deployUniswapOracle({
     run,
@@ -350,6 +376,17 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
     getNamedAccounts,
     deployments,
     deployConfig,
+  });
+
+  //// Solidly Price Oracle
+  await deploySolidlyPriceOracle({
+    run,
+    ethers,
+    getNamedAccounts,
+    deployments,
+    deployConfig,
+    supportedBaseTokens: solidlyOracleSupportedStables,
+    assets: solidlyOracles,
   });
 
   // set Native BNB price
@@ -534,14 +571,35 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
     await ethers.provider.waitForTransaction(wombatLpTokenLiquidator.transactionHash);
   console.log("WombatLpTokenLiquidator: ", wombatLpTokenLiquidator.address);
 
+  //// deploy ankr bnb adjustable interest rate model
+  const abairm = await deployments.deploy("AdjustableAnkrBNBIrm", {
+    from: deployer,
+    args: [
+      {
+        blocksPerYear: deployConfig.blocksPerYear,
+        multiplierPerYear: ethers.utils.parseEther("0.4").toString(),
+        jumpMultiplierPerYear: ethers.utils.parseEther("4").toString(),
+        kink: ethers.utils.parseEther("0.75").toString(),
+      },
+      {
+        day: 3,
+        rate_provider: "0xCb0006B31e6b403fEeEC257A8ABeE0817bEd7eBa",
+        abond: "0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827",
+      },
+    ],
+    log: true,
+  });
+  if (abairm.transactionHash) await ethers.provider.waitForTransaction(abairm.transactionHash);
+  console.log("AnkrBNBInterestRateModel: ", abairm.address);
+
   //// deploy ankr bnb interest rate model
   const abirm = await deployments.deploy("AnkrBNBInterestRateModel", {
     from: deployer,
     args: [
       deployConfig.blocksPerYear,
-      "5000000000000000",
-      "3000000000000000000",
-      "800000000000000000",
+      ethers.utils.parseEther("0.005").toString(),
+      ethers.utils.parseEther("3").toString(),
+      ethers.utils.parseEther("0.8").toString(),
       3,
       "0xCb0006B31e6b403fEeEC257A8ABeE0817bEd7eBa",
       "0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827",

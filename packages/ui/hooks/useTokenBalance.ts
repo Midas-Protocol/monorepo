@@ -1,4 +1,4 @@
-import { MidasSdk } from '@midas-capital/sdk';
+import type { MidasSdk } from '@midas-capital/sdk';
 import { useQuery } from '@tanstack/react-query';
 import { BigNumber } from 'ethers';
 

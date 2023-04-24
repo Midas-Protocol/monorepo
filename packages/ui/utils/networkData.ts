@@ -4,6 +4,7 @@ import {
   bsc,
   chainIdToConfig,
   chapel,
+  ethereum,
   evmos,
   fantom,
   ganache,
@@ -11,12 +12,12 @@ import {
   neondevnet,
   polygon,
 } from '@midas-capital/chains';
-import {
+import type {
   ChainConfig,
   ChainSupportedAssets as ChainSupportedAssetsType,
   DeployedPlugins as DeployedPluginsType,
-  SupportedChains,
 } from '@midas-capital/types';
+import { SupportedChains } from '@midas-capital/types';
 import { BigNumber } from 'ethers';
 
 import { config } from '@ui/config/index';
@@ -43,7 +44,7 @@ export function getChainConfig(chainId: number): ChainConfig | undefined {
   return chainIdToConfig[chainId];
 }
 
-export function getScanUrlByChainId(chainId: number | SupportedChains): string | null {
+export function getScanUrlByChainId(chainId: SupportedChains | number): string | null {
   const chain = chainIdToConfig[chainId];
 
   return chain && chain.specificParams.metadata.blockExplorerUrls.default
@@ -102,6 +103,7 @@ export const ChainSupportedAssets: ChainSupportedAssetsType = {
   [SupportedChains.arbitrum]: arbitrum.assets,
   [SupportedChains.fantom]: fantom.assets,
   [SupportedChains.basegoerli]: basegoerli.assets,
+  [SupportedChains.ethereum]: ethereum.assets,
 };
 
 export const deployedPlugins: { [chainId: string]: DeployedPluginsType } = {
@@ -115,4 +117,5 @@ export const deployedPlugins: { [chainId: string]: DeployedPluginsType } = {
   [SupportedChains.arbitrum]: arbitrum.deployedPlugins,
   [SupportedChains.fantom]: fantom.deployedPlugins,
   [SupportedChains.basegoerli]: basegoerli.deployedPlugins,
+  [SupportedChains.ethereum]: ethereum.deployedPlugins,
 };

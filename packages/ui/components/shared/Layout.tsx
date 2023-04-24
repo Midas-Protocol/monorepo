@@ -1,5 +1,6 @@
 import { Container } from '@chakra-ui/react';
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import Terms from '@ui/components/pages/Fuse/Modals/Terms';
 import { Column } from '@ui/components/shared/Flex';
@@ -35,7 +36,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
         height="100%"
         mainAxisAlignment="flex-start"
       >
-        <Container maxWidth="8xl" px={{ base: 2, md: 4 }}>
+        <Container maxWidth="100%" px={0}>
           <Column
             crossAxisAlignment="stretch"
             flex={1}
@@ -43,7 +44,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
             mainAxisAlignment="center"
             mx="auto"
             position="relative"
-            width={'98%'}
+            // width={'98%'}
           >
             {isAcceptedTerms !== undefined && <Terms isAcceptedTerms={isAcceptedTerms} />}
             {children}

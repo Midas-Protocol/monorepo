@@ -3,32 +3,6 @@ import { assetSymbols, DeployedPlugins, Strategy, underlying } from "@midas-capi
 import assets from "./assets";
 
 const deployedPlugins: DeployedPlugins = {
-  // No plugin deployment file stored
-  // Can we delete this?
-  "0x10C90bfCFb3D2A7ae814dA1548ae3a7fC31C35A0": {
-    market: "0x34ea4cbb464E6D120B081661464d4635Ca237FA7",
-    name: "Bomb",
-    strategy: Strategy.Bomb,
-    apyDocsUrl: "https://www.bomb.farm/#/bsc/vault/bomb-bomb",
-    strategyDocsUrl:
-      "https://docs.midascapital.xyz/guides/assets-and-strategies-addresses/binance-smart-chain-bsc/bomb",
-    underlying: underlying(assets, assetSymbols.BOMB),
-    otherParams: ["0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b"], // xBOMB
-    icon: "https://d1912tcoux65lj.cloudfront.net/plugin/bomb.png",
-  },
-  // No plugin deployment file stored
-  // Can we delete this?
-  "0x6B8B935dfC9Dcd0754eced708b1b633BF73FE854": {
-    market: "0x4cF3D3ca995beEeEd83f67A5C0456A13e038f7b8",
-    name: "Beefy BTCB-BOMB Vault",
-    strategy: Strategy.Bomb,
-    apyDocsUrl: "https://www.bomb.farm/#/bsc/vault/bomb-bomb-btcb",
-    strategyDocsUrl:
-      "https://docs.midascapital.xyz/guides/assets-and-strategies-addresses/binance-smart-chain-bsc/bomb",
-    underlying: underlying(assets, assetSymbols["BTCB-BOMB"]), // BOMB
-    otherParams: ["0x94E85B8E050F3F281CB9597cc0144F1F7AF1fe9B", "10"], // beefy vault, withdrawal fee
-    icon: "https://d1912tcoux65lj.cloudfront.net/plugin/bomb.png",
-  },
   // DotDotLpERC4626_2brl_0xf0a2852958aD041a9Fb35c312605482Ca3Ec17ba.json
   "0x23bBcF59BF843cD55c4DA9bDB81429695C87f847": {
     market: "0xf0a2852958aD041a9Fb35c312605482Ca3Ec17ba",
@@ -245,6 +219,62 @@ const deployedPlugins: DeployedPlugins = {
     underlying: underlying(assets, assetSymbols.mai3EPS),
     otherParams: ["0x0a1Fd12F73432928C190CAF0810b3B767A59717e"], // JAR
     icon: "https://d1912tcoux65lj.cloudfront.net/plugin/helio.png",
+  },
+  // BeefyERC4626_sAMM-jBRL-BRZ_0x9C170d5c6264b04419a06492bf4FbC65ecd63f4D.json
+  "0x33395bbe8fcA14368003f9aCE2Deb0Ba5103c670": {
+    market: "0x9C170d5c6264b04419a06492bf4FbC65ecd63f4D",
+    name: "Beefy sAMM jBRL-BRZ LP Vault",
+    strategy: Strategy.Beefy,
+    apyDocsUrl: "https://app.beefy.finance/vault/thena-jbrl-brz",
+    strategyDocsUrl:
+      "https://docs.midascapital.xyz/guides/assets-and-strategies-addresses/binance-smart-chain-bsc/transfero-stables-pool",
+    underlying: underlying(assets, assetSymbols["sAMM-jBRL/BRZ"]),
+    otherParams: ["0xb36fffD0174B2eC18D82d21BB2e24b132ecBA5b0", "0"],
+    icon: "https://d1912tcoux65lj.cloudfront.net/plugin/beefy.png",
+  },
+  // ThenaLpERC4626_vAMM-HAY-ankrBNB_0x04b6895d7AD8b10a1a13C749159226249a3b8515
+  "0xE141ce7507656f9b2c45d06d649961Eb84e19f82": {
+    market: "0x04b6895d7AD8b10a1a13C749159226249a3b8515",
+    name: "Thena vAMM-HAY-ankrBNB LP Vault",
+    strategy: Strategy.ThenaERC4626,
+    apyDocsUrl: `https://www.thena.fi/liquidity/manage/${underlying(assets, assetSymbols["vAMM-HAY/ankrBNB"])}`,
+    otherParams: [],
+    underlying: underlying(assets, assetSymbols["vAMM-HAY/ankrBNB"]),
+    flywheel: "0x9f21e2bE2dD52083A5DA90a2BEe817d9F8228A74",
+    icon: "https://d1912tcoux65lj.cloudfront.net/plugin/thena.png",
+  },
+  // ThenaLpERC4626_vAMM-ANKR-HAY_0xbc65FE441545E9e8f97E50F70526B7E8963826bc.json
+  "0x52156377Dbe031706cfAb4e759cA102e58A19953": {
+    market: "0xbc65FE441545E9e8f97E50F70526B7E8963826bc",
+    name: "Thena vAMM-ANKR-HAY LP Vault",
+    strategy: Strategy.ThenaERC4626,
+    apyDocsUrl: `https://www.thena.fi/liquidity/manage/${underlying(assets, assetSymbols["vAMM-ANKR/HAY"])}`,
+    otherParams: [],
+    underlying: underlying(assets, assetSymbols["vAMM-ANKR/HAY"]),
+    flywheel: "0x9f21e2bE2dD52083A5DA90a2BEe817d9F8228A74",
+    icon: "https://d1912tcoux65lj.cloudfront.net/plugin/thena.png",
+  },
+  // ThenaLpERC4626_vAMM-ANKR-ankrBNB_0x71693C84486B37096192c9942852f542543639Bf.json
+  "0x0c0e8ED68a72c31E657Ce5F03A615FB96753C9b5": {
+    market: "0x71693C84486B37096192c9942852f542543639Bf",
+    name: "Thena vAMM-ANKR-ankrBNB LP Vault",
+    strategy: Strategy.ThenaERC4626,
+    apyDocsUrl: `https://www.thena.fi/liquidity/manage/${underlying(assets, assetSymbols["vAMM-ANKR/ankrBNB"])}`,
+    otherParams: [],
+    underlying: underlying(assets, assetSymbols["vAMM-ANKR/ankrBNB"]),
+    flywheel: "0x9f21e2bE2dD52083A5DA90a2BEe817d9F8228A74",
+    icon: "https://d1912tcoux65lj.cloudfront.net/plugin/thena.png",
+  },
+  // ThenaLpERC4626_sAMM-HAY-BUSD_0xF8527Dc5611B589CbB365aCACaac0d1DC70b25cB.json
+  "0x02706A482fc9f6B20238157B56763391a45bE60E": {
+    market: "0xF8527Dc5611B589CbB365aCACaac0d1DC70b25cB",
+    name: "Thena sAMM-HAY-BUSD LP Vault",
+    strategy: Strategy.ThenaERC4626,
+    apyDocsUrl: `https://www.thena.fi/liquidity/manage/${underlying(assets, assetSymbols["sAMM-HAY/BUSD"])}`,
+    otherParams: [],
+    underlying: underlying(assets, assetSymbols["sAMM-HAY/BUSD"]),
+    flywheel: "0x9f21e2bE2dD52083A5DA90a2BEe817d9F8228A74",
+    icon: "https://d1912tcoux65lj.cloudfront.net/plugin/thena.png",
   },
 };
 

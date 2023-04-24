@@ -7,11 +7,6 @@ export enum ChainlinkFeedBaseCurrency {
   USD,
 }
 
-export enum UniswapV3BaseCurrency {
-  NATIVE,
-  USD,
-}
-
 export type TokenPair = {
   token: string;
   baseToken: string;
@@ -25,11 +20,11 @@ export type UniswapOracleDeployConfig = {
   deviationThreshold: string;
 };
 
-export type UniswapV3OracleConfig = {
+export type ConcentratedLiquidityOracleConfig = {
   assetAddress: string;
   poolAddress: string;
-  twapWindowSeconds: BigNumber;
-  baseCurrency: UniswapV3BaseCurrency;
+  twapWindow: BigNumber; // In seconds
+  baseToken: string;
 };
 
 export type ChainDeployConfig = {
@@ -43,7 +38,6 @@ export type ChainDeployConfig = {
     uniswapData: { lpName: string; lpSymbol: string; lpDisplayName: string }[];
     uniswapOracleLpTokens?: Array<string>;
     flashSwapFee: number;
-    uniswapV3OracleTokens?: Array<UniswapV3OracleConfig>;
   };
   wtoken: string;
   nativeTokenUsdChainlinkFeed?: string;
@@ -109,13 +103,21 @@ export type BalancerLpAsset = {
   lpTokenAddress: string;
 };
 
-export type BalancerStableLpAsset = {
-  lpTokenAddress: string;
+export type BalancerStableLpAsset = BalancerLpAsset;
+export type BalancerLinearPoolAsset = BalancerLpAsset;
+
+export type BalancerRateProviderAsset = {
+  tokenAddress: string;
   baseToken: string;
+  rateProviderAddress: string;
 };
 
 export type SolidlyLpAsset = {
   lpTokenAddress: string;
+};
+
+export type ERC4626Asset = {
+  assetAddress: string;
 };
 
 export type CurvePoolConfig = {
@@ -193,8 +195,21 @@ export type SolidlyDeployFnParams = ChainDeployFnParams & {
   solidlyLps: SolidlyLpAsset[];
 };
 
-export type UniswaV3DeployFnParams = ChainDeployFnParams & {
+export type SolidlyOracleAssetConfig = {
+  underlying: string;
+  poolAddress: string;
+  baseToken: string;
+};
+
+export type SolidlyOracleDeployFnParams = ChainDeployFnParams & {
   deployConfig: ChainDeployConfig;
+  supportedBaseTokens: string[];
+  assets: SolidlyOracleAssetConfig[];
+};
+
+export type ConcentratedLiquidityDeployFnParams = ChainDeployFnParams & {
+  deployConfig: ChainDeployConfig;
+  concentratedLiquidityOracleTokens: ConcentratedLiquidityOracleConfig[];
 };
 
 export type CurveLpFnParams = ChainDeployFnParams & {
@@ -218,12 +233,17 @@ export type DiaStDotFnParams = ChainDeployFnParams & {
 
 export type BalancerLpFnParams = ChainDeployFnParams & {
   deployConfig: ChainDeployConfig;
-  balancerLpAssets: BalancerLpAsset[];
+  balancerLpAssets: BalancerLpAsset[] | BalancerStableLpAsset[];
 };
 
-export type BalancerStableLpFnParams = ChainDeployFnParams & {
+export type BalancerRateProviderFnParams = ChainDeployFnParams & {
   deployConfig: ChainDeployConfig;
-  balancerStableLpAssets: BalancerStableLpAsset[];
+  balancerRateProviderAssets: BalancerRateProviderAsset[];
+};
+
+export type BalancerLinearPoolFnParams = ChainDeployFnParams & {
+  deployConfig: ChainDeployConfig;
+  balancerLinerPoolAssets: BalancerLinearPoolAsset[];
 };
 
 export type FuseFlywheelDeployFnParams = ChainDeployFnParams & {
@@ -244,4 +264,8 @@ export type BNBxOracleDeployParams = stkBNBOracleDeployParams;
 export type gelatoGUniPriceOracleDeployParams = ChainDeployFnParams & {
   deployConfig: ChainDeployConfig;
   gelatoAssets: GelatoGUniAsset[];
+};
+
+export type Erc4626OracleFnParams = ChainDeployFnParams & {
+  erc4626Assets: ERC4626Asset[];
 };

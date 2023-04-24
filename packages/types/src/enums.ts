@@ -1,4 +1,5 @@
 export enum SupportedChains {
+  ethereum = 1,
   bsc = 56,
   chapel = 97,
   ganache = 1337,
@@ -25,6 +26,8 @@ export enum RedemptionStrategyContract {
   CurveSwapLiquidator = "CurveSwapLiquidator",
   SaddleLpTokenLiquidator = "SaddleLpTokenLiquidator",
   BalancerLpTokenLiquidator = "BalancerLpTokenLiquidator",
+  BalancerSwapLiquidator = "BalancerSwapLiquidator",
+  ERC4626Liquidator = "ERC4626Liquidator",
 }
 
 export enum FundingStrategyContract {
@@ -52,11 +55,14 @@ export enum OracleTypes {
   UniswapLpTokenPriceOracle = "UniswapLpTokenPriceOracle",
   UniswapTwapPriceOracleV2 = "UniswapTwapPriceOracleV2",
   UniswapV3PriceOracle = "UniswapV3PriceOracle",
+  AlgebraPriceOracle = "AlgebraPriceOracle",
   AnkrCertificateTokenPriceOracle = "AnkrCertificateTokenPriceOracle",
   GelatoGUniPriceOracle = "GelatoGUniPriceOracle",
   DiaStDotPriceOracle = "DiaStDotPriceOracle",
   BalancerLpTokenPriceOracle = "BalancerLpTokenPriceOracle",
   BalancerLpStablePoolPriceOracle = "BalancerLpStablePoolPriceOracle",
+  BalancerRateProviderOracle = "BalancerRateProviderOracle",
+  BalancerLpLinearPoolPriceOracle = "BalancerLpLinearPoolPriceOracle",
   BalancerLpTokenPriceOracleNTokens = "BalancerLpTokenPriceOracleNTokens",
   StkBNBPriceOracle = "StkBNBPriceOracle",
   WombatLpTokenPriceOracle = "WombatLpTokenPriceOracle",
@@ -64,6 +70,8 @@ export enum OracleTypes {
   NativeUSDPriceOracle = "NativeUSDPriceOracle",
   SaddleLpPriceOracle = "SaddleLpPriceOracle",
   SolidlyLpTokenPriceOracle = "SolidlyLpTokenPriceOracle",
+  WSTEthPriceOracle = "WSTEthPriceOracle",
+  ERC4626Oracle = "ERC4626Oracle",
 }
 
 export enum IrmTypes {
@@ -71,6 +79,7 @@ export enum IrmTypes {
   WhitePaperInterestRateModel = "WhitePaperInterestRateModel",
   AnkrFTMInterestRateModel = "AnkrFTMInterestRateModel",
   AnkrBNBInterestRateModel = "AnkrBNBInterestRateModel",
+  AdjustableAnkrBNBIrm = "AdjustableAnkrBNBIrm",
   AdjustableJumpRateModel_PSTAKE_WBNB = "AdjustableJumpRateModel_PSTAKE_WBNB",
   AdjustableJumpRateModel_MIXBYTES_XCDOT = "AdjustableJumpRateModel_MIXBYTES_XCDOT",
   AdjustableJumpRateModel_TRANSFERO_BRZ = "AdjustableJumpRateModel_TRANSFERO_BRZ",
@@ -211,19 +220,27 @@ export enum assetSymbols {
   "BTCB-ETH" = "BTCB-ETH",
 
   "CAKE-WBNB" = "CAKE-WBNB",
+  "ANKR-ankrBNB" = "ANKR-ankrBNB",
+
   "stkBNB-WBNB" = "stkBNB-WBNB",
   BNBx = "BNBx",
   "epsBNBx-BNB" = "epsBNBx-BNB",
   "asBNBx-WBNB" = "ApeSwap BNBx-WBNB LP",
+  "asANKR-ankrBNB" = "ApeSwap ANKR-ankrBNB LP",
 
   DDD = "DDD",
   EPX = "EPX",
   pSTAKE = "pSTAKE",
   ANKR = "ANKR",
   SD = "SD", // stader labs
+  THE = "THE",
 
   // thena
-  "sAMM-jBRL/BRZ" = "sAMM-jBRL/BRZ",
+  "sAMM-jBRL/BRZ" = "sAMM-jBRL-BRZ",
+  "sAMM-HAY/BUSD" = "sAMM-HAY-BUSD",
+  "vAMM-ANKR/ankrBNB" = "vAMM-ANKR-ankrBNB",
+  "vAMM-ANKR/HAY" = "vAMM-ANKR-HAY",
+  "vAMM-HAY/ankrBNB" = "vAMM-HAY-ankrBNB",
   "WOMBATLP-WBNB" = "WOMBATLP-WBNB",
 
   // evmos
@@ -355,14 +372,24 @@ export enum assetSymbols {
   aMATICc = "aMATICc",
   MATICx = "MATICx",
   stMATIC = "stMATIC",
+  csMATIC = "csMATIC",
+  IXT = "IXT",
+  GNS = "GNS",
+  "DAI-GNS" = "DAI-GNS",
+  "IXT-USDT" = "IXT-USDT",
 
   // Balancer
   MIMO_PAR_80_20 = "MIMO80-PAR20 BLP",
   MIMO_PAR_75_25 = "MIMO75-PAR25 BLP",
-  WMATIC_STMATIC_BLP = "WMATIC_STMATIC BLP",
-  WMATIC_MATICX_BLP = "WMATIC_MATICX BLP",
   BRZ_JBRL_STABLE_BLP = "BRZ_JBRL STABLE BLP",
+  JEUR_PAR_STABLE_BLP = "JEUR_PAR STABLE BLP",
   WMATIC_STMATIC_STABLE_BLP = "WMATIC_STMATIC STABLE BLP",
+  WMATIC_CSMATIC_STABLE_BLP = "WMATIC_CSMATIC STABLE BLP",
+  WMATIC_MATICX_STABLE_BLP = "WMATIC_MATICX STABLE BLP",
+  TETU_BOOSTED_STABLE_BLP = "TETU_BOOSTED STABLE BLP",
+  TETU_LINEAR_USDT = "TETU_LINEAR USDT",
+  TETU_LINEAR_USDC = "TETU_LINEAR USDC",
+  TETU_LINEAR_DAI = "TETU_LINEAR DAI",
 
   // Arrakis Vaults [arrakis_pair_fee_tier]
   arrakis_USDC_WETH_005 = "Arrakis Vault V1 USDC-WETH (0.05)",
@@ -398,6 +425,12 @@ export enum assetSymbols {
   PAR_USDC_CURVE = "PAR_USDC CURVE",
   fUSDT = "fUSDT",
   triCrypto = "triCrypto",
+
+  // Mainnet
+  realYieldUSD = "realYieldUSD",
+  ethBtcTrend = "ethBtcTrend",
+  ethBtcMomentum = "ethBtcMomentum",
+  wstETH = "wstETH",
 }
 
 export default assetSymbols;

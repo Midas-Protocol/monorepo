@@ -11,7 +11,7 @@ YARN_CHECKSUM_BEHAVIOR = "update"
 SUPABASE_URL="https://xdjnvsfkwtkwfuayzmtm.supabase.co"
 ICON_SERVER="https://d1912tcoux65lj.cloudfront.net"
 PRODUCT_URL='https://app.midascapital.xyz'
-FEATURE_CREATE_POOL="0x27521eae4eE4153214CaDc3eCD703b9B0326C908,0x2680D8f1ED3BEe1c731cFeedcDa2A74bB7317828"
+FEATURE_CREATE_POOL="0x27521eae4eE4153214CaDc3eCD703b9B0326C908,0x2680D8f1ED3BEe1c731cFeedcDa2A74bB7317828,0x7dB8d33114462e032E5bf636D271f8680619Ba25"
 FEATURE_DEPLOY_FLYWHEEL="false"
 
 [context.preview.environment]
@@ -22,6 +22,7 @@ MOONBEAM = "true"
 POLYGON = "true"
 ARBITRUM = "true"
 FANTOM = "true"
+ETHEREUM = "true"
 IS_SENTRY_ENABLED = "false"
 
 [context.development.environment]
@@ -32,6 +33,7 @@ MOONBEAM = "true"
 POLYGON = "true"
 ARBITRUM = "true"
 FANTOM = "true"
+ETHEREUM = "true"
 IS_SENTRY_ENABLED = "false"
 
 [context.production.environment]
@@ -41,7 +43,7 @@ BSC = "true"
 MOONBEAM = "true"
 POLYGON = "true"
 ARBITRUM = "false"
-FANTOM = "false"
+FANTOM = "true"
 IS_SENTRY_ENABLED = "true"
 
 [functions]
@@ -52,4 +54,10 @@ node_bundler = "esbuild"
 schedule = "@hourly"
 
 [functions."asset-apys-*"]
+schedule = "@hourly"
+
+[functions."vault-data-*"]
+schedule = "@hourly"
+
+[functions."asset-price-*"]
 schedule = "@hourly"

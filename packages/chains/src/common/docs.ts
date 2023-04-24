@@ -41,6 +41,10 @@ export const wrappedAssetDocs = (chainId: SupportedChains) => {
       swapName: "BaseSwap",
       swapAddress: "",
     },
+    [SupportedChains.ethereum]: {
+      swapName: "Uniswap",
+      swapAddress: "https://app.uniswap.org/#/swap?outputCurrency=0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    },
   }[chainId];
 
   return `
@@ -63,6 +67,13 @@ export const ankrCertificateDocs = (variant: string, chain: string) => {
   return `
   <p><b>How to acquire this token</b><p/><br />
   <p>Head over to <a href="https://www.ankr.com/staking/stake/${chain.toLowerCase()}/?token=${variant}" target="_blank" style="color: #BCAC83;">Ankr ${chain} Staking</a>, where you can acquire ${variant} by depositing ${chain}</p>
+  `;
+};
+
+export const clayStackDocs = (tokenName: string, chain: string) => {
+  return `
+  <p><b>How to acquire this token</b><p/><br />
+  <p>Head over to <a href="https://app.claystack.com/stake/${chain.toLowerCase()}" target="_blank" style="color: #BCAC83;">ClayStack ${chain} Staking</a>, where you can acquire cs${tokenName} by depositing ${tokenName}</p>
   `;
 };
 
@@ -275,7 +286,7 @@ export const wombatDocs = (pool: string, tokenName: string) => {
 export const thenaDocs = (poolAddress: string) => {
   return `
   <p><b>How to acquire this token</b><p/><br /><p> 1. Make sure you are connected to BNB Network on your browser wallet.</p><br />
-  <p> 2. Head to the <a href="https://thena.fi/liquidity/manage/${poolAddress}"> Thena.fi Exchange </a> and deposit the desired amount of token pairs.</p>
+  <p> 2. Head to the <a href="https://thena.fi/liquidity/manage/${poolAddress}" target="_blank" style="color: #BCAC83;"> Thena.fi Exchange </a> and deposit the desired amount of token pairs.</p>
   <p><b>NOTE:</b> You might have to convert between tokens and/or have to approve Thena to spend them. </p><br />
   <p> 3. Click on "Add Liquidty".</p>
   <p>This will credit your wallet with the Thena LP Tokens.</p><br />
@@ -289,4 +300,12 @@ export const lidoFinanceDocs = (chainName: string, baseToken: string, returnToke
   <p>You can get <code>${returnToken}</code> by staking your <code>${baseToken}</code> on <a href="https://${chainName}.lido.fi/" target="_blank" style="color: #BCAC83; cursor="pointer">Lido on ${
     chainName.charAt(0).toUpperCase() + chainName.slice(1)
   }</a></p>`;
+};
+
+export const sommFinanceMainnetDocs = (strategyName: string, returnToken: string, supplyTokens: string[]) => {
+  return `
+  <p><b>How to acquire this token</b><p/><br />
+  <p>You can get <code>${returnToken}</code> by supplying any of your on the <code>${supplyTokens.join(
+    ", "
+  )}</code> on <a href="https://app.sommelier.finance/strategies/${strategyName}" target="_blank" style="color: #BCAC83; cursor="pointer">Sommelier strategy</a></p>`;
 };

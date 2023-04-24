@@ -6,8 +6,8 @@ import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
 import { useTokenBalance } from '@ui/hooks/useTokenBalance';
 import { useXMintAsset } from '@ui/hooks/useXMintAsset';
-import { MarketData } from '@ui/types/TokensDataMap';
 import { tokenFormatter } from '@ui/utils/bigUtils';
+import type { MarketData } from '@ui/types/TokensDataMap';
 
 export const Balance = ({ asset }: { asset: MarketData }) => {
   const { currentChain, currentSdk } = useMultiMidas();

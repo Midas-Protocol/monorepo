@@ -11,6 +11,7 @@ export {
   saddleFinanceDocs,
   StaderXDocs,
   stkBNBDocs,
+  clayStackDocs,
   curveFinancePolygonDocs,
   balancerDocs,
   beethovenXDocs,
@@ -24,4 +25,5 @@ export {
   stellaSwapStableDocs,
   thenaDocs,
   wombatDocs,
+  sommFinanceMainnetDocs,
 } from "./docs";

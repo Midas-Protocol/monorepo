@@ -1,6 +1,7 @@
+import type { TextProps } from '@chakra-ui/react';
 import { Text } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import { gradientBackground } from '@ui/components/shared/GradientButton';
 
@@ -8,10 +9,9 @@ export const GradientText = ({
   children,
   isEnabled,
   ...props
-}: {
+}: TextProps & {
   children: ReactNode;
   isEnabled: boolean;
-  [key: string]: ReactNode;
 }) => {
   const MotionText = motion(Text);
 
@@ -20,18 +20,18 @@ export const GradientText = ({
       animate={
         isEnabled
           ? {
-              background: gradientBackground,
-              WebkitTextFillColor: 'transparent',
               WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              background: gradientBackground,
             }
           : {}
       }
       initial={
         isEnabled
           ? {
-              background: gradientBackground[0],
-              WebkitTextFillColor: 'transparent',
               WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              background: gradientBackground[0],
             }
           : {}
       }
