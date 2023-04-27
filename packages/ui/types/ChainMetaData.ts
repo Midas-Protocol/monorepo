@@ -48,5 +48,6 @@ export interface FusePoolsPerChain {
 export type ChainXMintData = {
   supported: boolean;
   assets: SupportedAsset[];
-  xMinterAddress: string;
+  swapAddress: string;
+  targetAddress: string;
 };

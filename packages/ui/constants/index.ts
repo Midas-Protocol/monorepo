@@ -1,4 +1,4 @@
-import { bsc, polygon } from '@midas-capital/chains';
+import { arbitrum, bsc, polygon } from '@midas-capital/chains';
 import { assetSymbols, SupportedChainsArray } from '@midas-capital/types';
 
 import { ChainXMintData } from '@ui/types/ChainMetaData';
@@ -302,14 +302,23 @@ export const SUPPORTED_CHAINS_XMINT: {
   [bsc.chainId]: {
     supported: true,
     assets: bsc.assets.filter((a) => SUPPORTED_SYMBOLS_BY_CONNEXT.includes(a.symbol)),
-    xMinterAddress: '0x24A1eb8fAE716EF04DCA073E3F99F5F5C7497137',
+    swapAddress: '0x6840600Bc9B74fA6B3BDF1503cb31A7AdF061c1D',
+    targetAddress: '0xEF8dd349E32D1fE8691A5fCaFb7faac6DA9b4499',
   },
   [polygon.chainId]: {
     supported: true,
     assets: polygon.assets.filter((a) => SUPPORTED_SYMBOLS_BY_CONNEXT.includes(a.symbol)),
-    xMinterAddress: '0xb4aebef3abf043a2056d45ed751524012e20bb0c',
+    swapAddress: '0x697075f4A3Ce358d125281134e98d594D8Bb472e',
+    targetAddress: '0x5d7663c5483A46e7794b652aF8f155775E4F390C',
+  },
+  [arbitrum.chainId]: {
+    supported: false,
+    assets: arbitrum.assets.filter((a) => SUPPORTED_SYMBOLS_BY_CONNEXT.includes(a.symbol)),
+    swapAddress: '',
+    targetAddress: '',
   },
 };
+
 export const VAULT_SUPPLY_STEPS = (symbol: string) =>
   [
     { desc: 'Allow Midas to use your tokens', done: false, title: 'Approve' },

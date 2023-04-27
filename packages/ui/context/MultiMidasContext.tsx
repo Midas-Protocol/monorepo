@@ -148,17 +148,13 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
   const getAvailableFromChains = useCallback(
     (chainId: number, underlyingAsset: string) => {
       const xMintChain = SUPPORTED_CHAINS_XMINT[chainId];
-      if (
-        !xMintChain ||
-        !xMintChain.supported ||
-        !xMintChain.assets
-          .map((a) => getAddress(a.underlying))
-          .includes(getAddress(underlyingAsset))
-      ) {
+      if (!xMintChain || !xMintChain.supported || !xMintChain.targetAddress) {
         return [];
       }
 
-      return enabledChainsForConnext.filter((c) => c != chainId);
+      return enabledChainsForConnext.filter(
+        (c) => c != chainId && SUPPORTED_CHAINS_XMINT[c].swapAddress
+      );
     },
     [enabledChainsForConnext]
   );

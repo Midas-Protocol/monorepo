@@ -168,7 +168,7 @@ export const AdditionalInfo = ({
               asset={asset}
               assets={assets}
               comptrollerAddress={comptrollerAddress}
-              isDisabled={asset.supplyBalanceFiat === 0}
+              isDisabled={asset.supplyBalanceFiat === 0 || currentChain.id !== poolChainId}
               mode={FundOperationMode.WITHDRAW}
               poolChainId={poolChainId}
             />
@@ -177,7 +177,9 @@ export const AdditionalInfo = ({
               assets={assets}
               borrowBalanceFiat={borrowBalanceFiat}
               comptrollerAddress={comptrollerAddress}
-              isDisabled={asset.isBorrowPaused || supplyBalanceFiat === 0}
+              isDisabled={
+                asset.isBorrowPaused || supplyBalanceFiat === 0 || currentChain.id !== poolChainId
+              }
               mode={FundOperationMode.BORROW}
               poolChainId={poolChainId}
             />
@@ -185,7 +187,7 @@ export const AdditionalInfo = ({
               asset={asset}
               assets={assets}
               comptrollerAddress={comptrollerAddress}
-              isDisabled={asset.borrowBalanceFiat === 0}
+              isDisabled={asset.borrowBalanceFiat === 0 || currentChain.id !== poolChainId}
               mode={FundOperationMode.REPAY}
               poolChainId={poolChainId}
             />
