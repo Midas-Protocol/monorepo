@@ -41,6 +41,7 @@ import { smallFormatter } from '@ui/utils/bigUtils';
 import { handleGenericError } from '@ui/utils/errorHandling';
 import { useTokens } from '@ui/hooks/useTokens';
 import { TokenBalance } from './TokenBalance';
+import { TokenAmountInput } from './TokenAmountInput';
 
 interface SupplyModalProps {
   asset: MarketData;
@@ -134,6 +135,12 @@ export const SupplyModal = ({
   );
 
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!fromAsset && tokens?.length) {
+      setFromAsset(tokens[0]);
+    }
+  }, [tokens, fromAsset]);
 
   useEffect(() => {
     if (amount.isZero() || !maxSupplyAmount) {
@@ -681,18 +688,32 @@ export const SupplyModal = ({
               >
                 {!supplyCap || asset.totalSupplyFiat < supplyCap.usdCap ? (
                   <>
-                    <Column gap={1} w="100%">
-                      <AmountInput
-                        asset={asset}
-                        comptrollerAddress={comptrollerAddress}
-                        optionToWrap={optionToWrap}
-                        poolChainId={poolChainId}
-                        setAmount={setAmount}
-                      />
+                    {!isXMint ? (
+                      <Column gap={1} w="100%">
+                        <AmountInput
+                          asset={asset}
+                          comptrollerAddress={comptrollerAddress}
+                          optionToWrap={optionToWrap}
+                          poolChainId={poolChainId}
+                          setAmount={setAmount}
+                        />
 
-                      {!isXMint && <Balance asset={asset} />}
-                      {isXMint && fromAsset && <TokenBalance asset={fromAsset} />}
-                    </Column>
+                        <Balance asset={asset} />
+                      </Column>
+                    ) : (
+                      <Column gap={1} w="100%">
+                        <TokenAmountInput
+                          asset={asset}
+                          token={fromAsset}
+                          comptrollerAddress={comptrollerAddress}
+                          optionToWrap={optionToWrap}
+                          poolChainId={poolChainId}
+                          setAmount={setAmount}
+                        />
+
+                        {fromAsset && <TokenBalance asset={fromAsset} />}
+                      </Column>
+                    )}
                     <StatsColumn
                       amount={amount}
                       asset={asset}

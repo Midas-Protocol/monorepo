@@ -1,6 +1,6 @@
 import type { NativePricedFuseAsset } from '@midas-capital/types';
 import { useQuery } from '@tanstack/react-query';
-import type { BigNumber } from 'ethers';
+import { BigNumber } from 'ethers';
 import { constants, utils } from 'ethers';
 
 import { useXMintAsset } from './useXMintAsset';
@@ -8,15 +8,16 @@ import { useXMintAsset } from './useXMintAsset';
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
 import { useSdk } from '@ui/hooks/fuse/useSdk';
 import { fetchTokenBalance } from '@ui/hooks/useTokenBalance';
+import { TokenData } from '@ui/types/ComponentPropsType';
+import { MarketData } from '@ui/types/TokensDataMap';
 
 export function useMaxSupplyAmount(
   asset: NativePricedFuseAsset,
   comptrollerAddress: string,
   chainId: number
 ) {
-  const { address, currentChain, currentSdk } = useMultiMidas();
+  const { address } = useMultiMidas();
   const sdk = useSdk(chainId);
-  const xMintAsset = useXMintAsset(asset);
 
   return useQuery(
     [
@@ -27,16 +28,10 @@ export function useMaxSupplyAmount(
       asset.totalSupply,
       sdk?.chainId,
       address,
-      currentChain?.id,
-      xMintAsset?.underlying,
     ],
     async () => {
-      if (sdk && address && currentChain && currentSdk) {
-        const isXMint = currentChain.id !== chainId;
-        const assetToken = isXMint ? xMintAsset?.underlying : asset.underlyingToken;
-        const tokenBalance = !assetToken
-          ? BigNumber.from(0)
-          : await fetchTokenBalance(assetToken, !isXMint ? sdk : currentSdk, address);
+      if (sdk && address) {
+        const tokenBalance = await fetchTokenBalance(asset.underlyingToken, sdk, address);
 
         const comptroller = sdk.createComptroller(comptrollerAddress);
         const supplyCap = await comptroller.callStatic.supplyCaps(asset.cToken);
@@ -56,15 +51,70 @@ export function useMaxSupplyAmount(
           bigNumber = tokenBalance;
         }
 
-        const decimals = !isXMint
-          ? asset.underlyingDecimals.toNumber()
-          : xMintAsset
-          ? xMintAsset.decimals
-          : 18;
         return {
           bigNumber: bigNumber,
-          number: Number(utils.formatUnits(bigNumber, decimals)),
+          number: Number(utils.formatUnits(bigNumber, asset.underlyingDecimals)),
+        };
+      } else {
+        return null;
+      }
+    },
+    {
+      cacheTime: Infinity,
+      enabled: !!address && !!asset && !!sdk && !!comptrollerAddress,
+      staleTime: Infinity,
+    }
+  );
+}
+
+export function useMaxSupplyTokenAmount(
+  asset: MarketData,
+  token: TokenData,
+  comptrollerAddress: string,
+  chainId: number
+) {
+  const { address, currentChain, currentSdk } = useMultiMidas();
+  const sdk = useSdk(chainId);
+
+  return useQuery(
+    [
+      'useMaxSupplyTokenAmount',
+      asset.cToken,
+      token.address,
+      comptrollerAddress,
+      sdk?.chainId,
+      address,
+      currentChain?.id,
+    ],
+    async () => {
+      if (sdk && address && currentChain && currentSdk) {
+        const isXMint = currentChain.id !== chainId;
+        const assetToken = token.address;
+        const tokenBalance = !assetToken
+          ? BigNumber.from(0)
+          : await fetchTokenBalance(assetToken, !isXMint ? sdk : currentSdk, address);
+
+        const comptroller = sdk.createComptroller(comptrollerAddress);
+        const supplyCap = await comptroller.callStatic.supplyCaps(asset.cToken);
+
+        let availableCap = BigNumber.from(0);
+
+        // if asset has supply cap
+        if (supplyCap.gt(constants.Zero)) {
+          availableCap = supplyCap.sub(asset.totalSupply);
+        }
+
+        const decimals = !isXMint
+          ? asset.underlyingDecimals.toNumber()
+          : token
+          ? token.decimals
+          : 18;
+
+        return {
+          bigNumber: tokenBalance,
+          number: Number(utils.formatUnits(tokenBalance, decimals)),
           decimals,
+          cap: availableCap,
         };
       } else {
         return null;
@@ -73,7 +123,7 @@ export function useMaxSupplyAmount(
     {
       cacheTime: Infinity,
       staleTime: Infinity,
-      enabled: !!address && !!asset && !!sdk && !!comptrollerAddress && !!xMintAsset,
+      enabled: !!address && !!asset && !!sdk && !!comptrollerAddress && !!token,
     }
   );
 }
