@@ -2152,17 +2152,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@connext/chain-abstraction@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "@connext/chain-abstraction@npm:1.0.0"
+"@connext/chain-abstraction@npm:^1.0.2-alpha.2":
+  version: 1.0.2-alpha.2
+  resolution: "@connext/chain-abstraction@npm:1.0.2-alpha.2"
   dependencies:
-    "@connext/nxtp-utils": 2.0.1
+    "@connext/nxtp-utils": 2.0.2-alpha.4
     "@sinclair/typebox": 0.25.21
     ethers: 5.7.2
     isomorphic-fetch: ^3.0.0
     memoizee: 0.4.15
     typedoc: 0.23.25
-  checksum: d050f6452a1fe6594fc58105992bc3b651e9e00ee2a2f72eeba05314cbb0fb3452b5c76b79232c69406bdeb74843fdc4755cf323461267aff8c63a2aad7cfe7f
+  checksum: ad75e6c40e4d997459953c92084358b8add3e26d73a9edc8a3815733c811c90dc8733da0944d791869c23949ed43f2521f3d261499ab4378b55ea21e0d2b7bb9
   languageName: node
   linkType: hard
 
@@ -2226,6 +2226,29 @@ __metadata:
     secp256k1: 4.0.3
     sinon-chai: 3.7.0
   checksum: aa55f55ead5ee5aac07db3034b70f2def45026420325a09a7150f888bdd1b9e909df874f9978ccd421a219245005170a9f6103f2c5aae4ef5d32078a45d8182c
+  languageName: node
+  linkType: hard
+
+"@connext/nxtp-utils@npm:2.0.2-alpha.4":
+  version: 2.0.2-alpha.4
+  resolution: "@connext/nxtp-utils@npm:2.0.2-alpha.4"
+  dependencies:
+    "@maticnetwork/maticjs": 3.6.0-beta.11
+    "@maticnetwork/maticjs-web3": 1.0.4
+    "@sinclair/typebox": 0.25.21
+    ajv: 8.12.0
+    ajv-formats: 2.1.1
+    axios: 1.3.3
+    chai: 4.3.7
+    chai-as-promised: 7.1.1
+    chai-subset: 1.6.0
+    ethers: 5.7.2
+    hyperid: 3.1.1
+    merkletreejs: 0.3.9
+    pino: 8.10.0
+    secp256k1: 4.0.3
+    sinon-chai: 3.7.0
+  checksum: 07a70b307cf6248b389f34f6a3dcae79f3c01247a7bded208a1e81f924998547e2770f14d63fd6a9d9e2d4534755bd9e606dcc602190c645c2b2e91cdb782969
   languageName: node
   linkType: hard
 
@@ -3989,6 +4012,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@maticnetwork/maticjs@npm:3.6.0-beta.11":
+  version: 3.6.0-beta.11
+  resolution: "@maticnetwork/maticjs@npm:3.6.0-beta.11"
+  dependencies:
+    "@ethereumjs/block": ^3.6.2
+    ethereumjs-util: ^7.1.4
+    merkle-patricia-tree: ^4.2.4
+    node-fetch: ^2.6.1
+  checksum: 21a4a6bd66241dad451a1342357161e546f7ed7febb7e61ec8e5230218f623188c9dca96f400e0961e76e0c3d6299df4687b67a6b66ed93e1d4a4f84db603714
+  languageName: node
+  linkType: hard
+
 "@maticnetwork/maticjs@npm:3.6.0-beta.6":
   version: 3.6.0-beta.6
   resolution: "@maticnetwork/maticjs@npm:3.6.0-beta.6"
@@ -4309,7 +4344,7 @@ __metadata:
     "@chakra-ui/cli": ^2.3.0
     "@chakra-ui/icons": ^2.0.18
     "@chakra-ui/react": ^2.5.5
-    "@connext/chain-abstraction": ^1.0.0
+    "@connext/chain-abstraction": ^1.0.2-alpha.2
     "@connext/sdk": ^2.0.2
     "@emotion/react": ^11.10.6
     "@emotion/styled": ^11.10.6

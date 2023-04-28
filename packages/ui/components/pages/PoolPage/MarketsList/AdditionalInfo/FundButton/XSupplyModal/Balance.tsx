@@ -8,7 +8,7 @@ import { useTokenBalance } from '@ui/hooks/useTokenBalance';
 import { TokenData } from '@ui/types/ComponentPropsType';
 import { getAddress } from 'ethers/lib/utils.js';
 
-export const TokenBalance = ({ asset }: { asset: TokenData }) => {
+export const Balance = ({ asset }: { asset: TokenData }) => {
   const { currentSdk, currentChain } = useMultiMidas();
 
   if (!currentChain || !currentSdk) throw new Error('Connect your wallet');

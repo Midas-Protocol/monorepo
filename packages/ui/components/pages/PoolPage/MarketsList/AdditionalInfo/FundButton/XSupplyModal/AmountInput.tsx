@@ -6,16 +6,15 @@ import { useState } from 'react';
 import { MidasBox } from '@ui/components/shared/Box';
 import { EllipsisText } from '@ui/components/shared/EllipsisText';
 import { Row } from '@ui/components/shared/Flex';
-import { TokenIcon } from '@ui/components/shared/TokenIcon';
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
-import { useMaxSupplyAmount, useMaxSupplyTokenAmount } from '@ui/hooks/useMaxSupplyAmount';
+import { useMaxSupplyTokenAmount } from '@ui/hooks/useMaxSupplyAmount';
 import { useErrorToast } from '@ui/hooks/useToast';
 import type { MarketData } from '@ui/types/TokensDataMap';
 import { handleGenericError } from '@ui/utils/errorHandling';
 import { toFixedNoRound } from '@ui/utils/formatNumber';
 import { TokenData } from '@ui/types/ComponentPropsType';
 
-export const TokenAmountInput = ({
+export const AmountInput = ({
   asset,
   token,
   optionToWrap,

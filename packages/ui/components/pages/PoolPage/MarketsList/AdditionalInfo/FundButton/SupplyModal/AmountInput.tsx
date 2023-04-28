@@ -68,7 +68,7 @@ export const AmountInput = ({
       if (maxBN.lt(constants.Zero) || maxBN.isZero()) {
         updateAmount('');
       } else {
-        const str = utils.formatUnits(maxBN, optionToWrap ? 18 : maxSupplyAmount.decimals);
+        const str = utils.formatUnits(maxBN, asset.underlyingDecimals);
         updateAmount(str);
       }
 

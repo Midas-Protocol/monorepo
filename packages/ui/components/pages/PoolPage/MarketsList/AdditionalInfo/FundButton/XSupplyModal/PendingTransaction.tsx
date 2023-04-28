@@ -19,10 +19,12 @@ export const PendingTransaction = ({
   poolChainId,
   amount,
   asset,
+  isXSupply,
 }: {
   activeStep: number;
   amount: BigNumber;
   asset: MarketData;
+  isXSupply?: boolean | false;
   failedStep: number;
   isSupplying: boolean;
   poolChainId: number;
@@ -73,6 +75,7 @@ export const PendingTransaction = ({
         <TransactionStepper
           activeStep={activeStep}
           failedStep={failedStep}
+          isCross={isXSupply}
           isLoading={isSupplying}
           poolChainId={poolChainId}
           steps={steps}

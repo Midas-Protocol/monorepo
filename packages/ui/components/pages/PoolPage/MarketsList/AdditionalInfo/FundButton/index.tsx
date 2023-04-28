@@ -8,6 +8,8 @@ import { SupplyModal } from '@ui/components/pages/PoolPage/MarketsList/Additiona
 import { WithdrawModal } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/WithdrawModal/index';
 import { useTokenData } from '@ui/hooks/useTokenData';
 import type { MarketData } from '@ui/types/TokensDataMap';
+import { useNetwork } from 'wagmi';
+import { XSupplyModal } from './XSupplyModal';
 
 export const FundButton = ({
   comptrollerAddress,
@@ -35,6 +37,8 @@ export const FundButton = ({
     return name;
   }, [mode]);
 
+  const { chain } = useNetwork();
+
   return (
     <Box>
       <Button
@@ -44,8 +48,18 @@ export const FundButton = ({
       >
         {modeName}
       </Button>
-      {mode === FundOperationMode.SUPPLY && (
+      {mode === FundOperationMode.SUPPLY && chain?.id === poolChainId && (
         <SupplyModal
+          asset={asset}
+          assets={assets}
+          comptrollerAddress={comptrollerAddress}
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          poolChainId={poolChainId}
+        />
+      )}
+      {mode === FundOperationMode.SUPPLY && chain?.id !== poolChainId && (
+        <XSupplyModal
           asset={asset}
           assets={assets}
           comptrollerAddress={comptrollerAddress}
