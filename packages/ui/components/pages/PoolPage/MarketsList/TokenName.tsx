@@ -45,7 +45,7 @@ export const TokenName = ({
         body={
           <VStack spacing={0}>
             <Heading alignSelf="flex-start" size="md" textAlign={'left'}>
-              {tokenData?.symbol ?? asset.underlyingSymbol}
+              {asset.originalSymbol ?? tokenData?.symbol ?? asset.underlyingSymbol}
             </Heading>
             {asset.extraDocs || asset.underlyingSymbol ? (
               <Text
@@ -76,7 +76,7 @@ export const TokenName = ({
             body={
               <VStack spacing={0}>
                 <Heading alignSelf="flex-start" size="md" textAlign={'left'}>
-                  {tokenData?.symbol ?? asset.underlyingSymbol}
+                  {asset.originalSymbol ?? tokenData?.symbol ?? asset.underlyingSymbol}
                 </Heading>
                 {asset.extraDocs || asset.underlyingSymbol ? (
                   <Text
@@ -94,13 +94,13 @@ export const TokenName = ({
           >
             <Text
               fontWeight="bold"
-              maxWidth="120px"
+              maxWidth="200px"
               overflow="hidden"
               size="md"
               textOverflow={'ellipsis'}
               whiteSpace="nowrap"
             >
-              {tokenData?.symbol ?? asset.underlyingSymbol}
+              {asset.originalSymbol ?? tokenData?.symbol ?? asset.underlyingSymbol}
             </Text>
           </PopoverTooltip>
           <PopoverTooltip
@@ -109,7 +109,7 @@ export const TokenName = ({
             }
             popoverProps={{ placement: 'top-start' }}
           >
-            <Text opacity={0.6} size="xs" variant="tnumber">
+            <Text opacity={0.6} size="xs" variant="tnumber" whiteSpace="nowrap">
               {parseFloat(utils.formatUnits(asset.collateralFactor, 16)).toFixed(0)}% LTV
             </Text>
           </PopoverTooltip>
