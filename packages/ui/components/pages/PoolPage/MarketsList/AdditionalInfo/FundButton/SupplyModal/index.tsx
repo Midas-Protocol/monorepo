@@ -1,10 +1,12 @@
-import { Box, Button, Divider, HStack, Select, Text } from '@chakra-ui/react';
+import { Box, Button, Divider, HStack, Icon, Text } from '@chakra-ui/react';
+import { Select, chakraComponents } from 'chakra-react-select';
+
 import { WETHAbi } from '@midas-capital/sdk';
 import { FundOperationMode } from '@midas-capital/types';
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit';
 import { useQueryClient } from '@tanstack/react-query';
 import { BigNumber, constants, utils } from 'ethers';
-import { formatEther, formatUnits } from 'ethers/lib/utils.js';
+import { formatEther, formatUnits, getAddress } from 'ethers/lib/utils.js';
 import { useEffect, useMemo, useState } from 'react';
 import { getContract } from 'sdk/dist/cjs/src/MidasSdk/utils';
 import { useSwitchNetwork } from 'wagmi';
@@ -33,10 +35,12 @@ import { useErrorToast, useSuccessToast } from '@ui/hooks/useToast';
 import { useTokenBalance } from '@ui/hooks/useTokenBalance';
 import { useTokenData } from '@ui/hooks/useTokenData';
 import { useXMintAsset } from '@ui/hooks/useXMintAsset';
-import type { TxStep } from '@ui/types/ComponentPropsType';
+import type { TokenData, TxStep } from '@ui/types/ComponentPropsType';
 import type { MarketData } from '@ui/types/TokensDataMap';
 import { smallFormatter } from '@ui/utils/bigUtils';
 import { handleGenericError } from '@ui/utils/errorHandling';
+import { useTokens } from '@ui/hooks/useTokens';
+import { TokenBalance } from './TokenBalance';
 
 interface SupplyModalProps {
   asset: MarketData;
@@ -82,8 +86,10 @@ export const SupplyModal = ({
     }
   };
   const isXMint = useMemo(() => currentChain.id !== poolChainId, [currentChain, poolChainId]);
-  const xMintAsset = useXMintAsset(asset);
   const [relayerFee, setRelayerFee] = useState<BigNumber>(constants.Zero);
+  const { data: tokens } = useTokens(currentChain.id);
+  const [fromAsset, setFromAsset] = useState<TokenData | undefined>();
+  const xMintAsset = useXMintAsset(asset);
 
   const errorToast = useErrorToast();
   const { data: tokenData } = useTokenData(asset.underlyingToken, poolChainId);
@@ -594,22 +600,73 @@ export const SupplyModal = ({
                 >
                   {tokenData?.symbol || asset.underlyingSymbol}
                 </EllipsisText>
-                <Text variant="title">from</Text>
+              </HStack>
+              <HStack justifyContent="center" mb={2} width="100%">
+                <Text variant="title">From</Text>
                 <Select
-                  ml="2"
-                  onChange={(e) => {
-                    handleSwitch(+e.target.value);
+                  onChange={(d) => {
+                    if (d?.value) handleSwitch(d.value);
                   }}
                   placeholder="From Chain"
-                  value={currentChain.id}
-                  w="200"
-                >
-                  {availableFromChains.map((chainId: number) => (
-                    <option key={chainId} value={chainId}>
-                      {SUPPORTED_CHAINS_BY_CONNEXT[chainId].name}
-                    </option>
-                  ))}
-                </Select>
+                  size="sm"
+                  isMulti={false}
+                  options={availableFromChains.map((chainId: number) => ({
+                    label: SUPPORTED_CHAINS_BY_CONNEXT[chainId].name,
+                    value: chainId,
+                  }))}
+                  defaultValue={{
+                    value: currentChain.id,
+                    label: SUPPORTED_CHAINS_BY_CONNEXT[currentChain.id].name,
+                  }}
+                />
+                {currentChain.id !== poolChainId ? (
+                  <Select
+                    onChange={(option) => {
+                      setFromAsset(
+                        tokens?.find(
+                          (t: TokenData) =>
+                            getAddress(t.address) === getAddress(option?.value || '')
+                        )
+                      );
+                    }}
+                    placeholder=""
+                    size="sm"
+                    options={(tokens || []).map((token: TokenData) => ({
+                      label: token.symbol,
+                      value: token.address,
+                      icon: token.logoURL,
+                    }))}
+                    defaultValue={{
+                      label: tokens?.[0].symbol,
+                      value: tokens?.[0].address,
+                      icon: tokens?.[0].logoURL,
+                    }}
+                    components={{
+                      Option: ({ children, ...props }) => (
+                        <chakraComponents.Option {...props}>
+                          <img
+                            src={props.data.icon}
+                            style={{ marginRight: 3, width: 15, height: 15 }}
+                          />{' '}
+                          {children}
+                        </chakraComponents.Option>
+                      ),
+                    }}
+                  />
+                ) : (
+                  <>
+                    <Box height="36px" mx={2} width="36px">
+                      <TokenIcon address={asset.underlyingToken} chainId={poolChainId} size="36" />
+                    </Box>
+                    <EllipsisText
+                      maxWidth="100px"
+                      tooltip={tokenData?.symbol || asset.underlyingSymbol}
+                      variant="title"
+                    >
+                      {tokenData?.symbol || asset.underlyingSymbol}
+                    </EllipsisText>
+                  </>
+                )}
               </HStack>
 
               <Divider />
@@ -633,7 +690,8 @@ export const SupplyModal = ({
                         setAmount={setAmount}
                       />
 
-                      <Balance asset={asset} />
+                      {!isXMint && <Balance asset={asset} />}
+                      {isXMint && fromAsset && <TokenBalance asset={fromAsset} />}
                     </Column>
                     <StatsColumn
                       amount={amount}

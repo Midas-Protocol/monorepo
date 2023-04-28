@@ -5,18 +5,19 @@ import { Column, Row } from '@ui/components/shared/Flex';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
 import { useTokenBalance } from '@ui/hooks/useTokenBalance';
-import type { MarketData } from '@ui/types/TokensDataMap';
+import { TokenData } from '@ui/types/ComponentPropsType';
+import { getAddress } from 'ethers/lib/utils.js';
 
-export const Balance = ({ asset }: { asset: MarketData }) => {
+export const TokenBalance = ({ asset }: { asset: TokenData }) => {
   const { currentSdk, currentChain } = useMultiMidas();
 
   if (!currentChain || !currentSdk) throw new Error('Connect your wallet');
 
-  const { data: myBalance } = useTokenBalance(asset.underlyingToken);
+  const { data: myBalance } = useTokenBalance(asset.address);
   const { data: myNativeBalance } = useTokenBalance('NO_ADDRESS_HERE_USE_WETH_FOR_ADDRESS');
   const nativeSymbol = currentChain.nativeCurrency?.symbol;
   const optionToWrap =
-    asset.underlyingToken === currentSdk.chainSpecificAddresses.W_TOKEN &&
+    getAddress(asset.address) === getAddress(currentSdk.chainSpecificAddresses.W_TOKEN) &&
     myBalance?.isZero() &&
     !myNativeBalance?.isZero();
 
@@ -27,13 +28,10 @@ export const Balance = ({ asset }: { asset: MarketData }) => {
           Wallet Balance:
         </Text>
         <SimpleTooltip
-          label={`${myBalance ? utils.formatUnits(myBalance, asset.underlyingDecimals) : 0} ${
-            asset.underlyingSymbol
-          }`}
+          label={`${myBalance ? utils.formatUnits(myBalance, asset.decimals) : 0} ${asset.symbol}`}
         >
           <Text maxWidth="300px" overflow="hidden" textOverflow={'ellipsis'} whiteSpace="nowrap">
-            {myBalance ? utils.formatUnits(myBalance, asset.underlyingDecimals) : 0}{' '}
-            {asset.underlyingSymbol}
+            {myBalance ? utils.formatUnits(myBalance, asset.decimals) : 0} {asset.symbol}
           </Text>
         </SimpleTooltip>
       </Row>
@@ -41,8 +39,7 @@ export const Balance = ({ asset }: { asset: MarketData }) => {
         <Row crossAxisAlignment="center" mainAxisAlignment="flex-end" mt={1} width="100%">
           <Text mr={2}>Native Token Balance:</Text>
           <Text>
-            {myNativeBalance ? utils.formatUnits(myNativeBalance, asset.underlyingDecimals) : 0}{' '}
-            {nativeSymbol}
+            {myNativeBalance ? utils.formatUnits(myNativeBalance, 18) : 0} {nativeSymbol}
           </Text>
         </Row>
       )}

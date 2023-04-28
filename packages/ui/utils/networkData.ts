@@ -119,3 +119,17 @@ export const deployedPlugins: { [chainId: string]: DeployedPluginsType } = {
   [SupportedChains.basegoerli]: basegoerli.deployedPlugins,
   [SupportedChains.ethereum]: ethereum.deployedPlugins,
 };
+
+export const tokenListUrls: { [chainId: string]: string } = {
+  [SupportedChains.bsc]: 'https://gateway.ipfs.io/ipns/tokens.uniswap.org',
+  [SupportedChains.polygon]: 'https://gateway.ipfs.io/ipns/tokens.uniswap.org',
+  [SupportedChains.ganache]: '',
+  [SupportedChains.evmos]: '',
+  [SupportedChains.chapel]: '',
+  [SupportedChains.moonbeam]: '',
+  [SupportedChains.neon_devnet]: '',
+  [SupportedChains.arbitrum]: 'https://gateway.ipfs.io/ipns/tokens.uniswap.org',
+  [SupportedChains.fantom]: '',
+  [SupportedChains.basegoerli]: '',
+  [SupportedChains.ethereum]: 'https://gateway.ipfs.io/ipns/tokens.uniswap.org',
+};
