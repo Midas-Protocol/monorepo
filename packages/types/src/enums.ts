@@ -28,6 +28,9 @@ export enum RedemptionStrategyContract {
   BalancerLpTokenLiquidator = "BalancerLpTokenLiquidator",
   BalancerSwapLiquidator = "BalancerSwapLiquidator",
   ERC4626Liquidator = "ERC4626Liquidator",
+  AlgebraSwapLiquidator = "AlgebraSwapLiquidator",
+  SolidlyLiquidator = "SolidlyLiquidator",
+  SolidlyLpTokenLiquidator = "SolidlyLpTokenLiquidator",
 }
 
 export enum FundingStrategyContract {
@@ -145,6 +148,15 @@ export enum FundOperationMode {
   WITHDRAW,
   BORROW,
   REPAY,
+}
+
+export enum assetOriginalSymbols {
+  // thena
+  "sAMM-jBRL/BRZ" = "jBRL/BRZ Thena LP",
+  "sAMM-HAY/BUSD" = "HAY/BUSD Thena LP",
+  "vAMM-ANKR/ankrBNB" = "ankrBNB/ANKR Thena LP",
+  "vAMM-ANKR/HAY" = "HAY/ANKR Thena LP",
+  "vAMM-HAY/ankrBNB" = "HAY/ankrBNB Thena LP",
 }
 
 export enum assetSymbols {
