@@ -69,7 +69,7 @@ export function useMaxSupplyAmount(
 
 export function useMaxSupplyTokenAmount(
   asset: MarketData,
-  token: TokenData,
+  token: TokenData | undefined,
   comptrollerAddress: string,
   chainId: number
 ) {
@@ -80,14 +80,14 @@ export function useMaxSupplyTokenAmount(
     [
       'useMaxSupplyTokenAmount',
       asset.cToken,
-      token.address,
+      token?.address,
       comptrollerAddress,
       sdk?.chainId,
       address,
       currentChain?.id,
     ],
     async () => {
-      if (sdk && address && currentChain && currentSdk) {
+      if (sdk && address && currentChain && currentSdk && token) {
         const isXMint = currentChain.id !== chainId;
         const assetToken = token.address;
         const tokenBalance = !assetToken

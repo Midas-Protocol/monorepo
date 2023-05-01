@@ -119,9 +119,9 @@ export const AmountInput = ({
               maxWidth="80px"
               mr={2}
               size="md"
-              tooltip={optionToWrap ? token.symbol.slice(1) : token.symbol}
+              tooltip={optionToWrap ? token?.symbol.slice(1) : token?.symbol}
             >
-              {optionToWrap ? token.symbol.slice(1) : token.symbol}
+              {optionToWrap ? token?.symbol.slice(1) : token?.symbol}
             </EllipsisText>
           </Row>
           <Button

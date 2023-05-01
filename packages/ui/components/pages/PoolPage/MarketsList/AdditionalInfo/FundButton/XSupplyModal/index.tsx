@@ -4,7 +4,6 @@ import { Select, chakraComponents } from 'chakra-react-select';
 import { WETHAbi } from '@midas-capital/sdk';
 import { FundOperationMode } from '@midas-capital/types';
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit';
-import { useQueryClient } from '@tanstack/react-query';
 import { BigNumber, constants, utils } from 'ethers';
 import { formatEther, formatUnits, getAddress } from 'ethers/lib/utils.js';
 import { useEffect, useMemo, useState } from 'react';
@@ -16,7 +15,6 @@ import { AmountInput } from '@ui/components/pages/PoolPage/MarketsList/Additiona
 import { Balance } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/XSupplyModal/Balance';
 import { EnableCollateral } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/XSupplyModal/EnableCollateral';
 import { PendingTransaction } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/XSupplyModal/PendingTransaction';
-import { SupplyError } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/XSupplyModal/SupplyError';
 import { Banner } from '@ui/components/shared/Banner';
 import { EllipsisText } from '@ui/components/shared/EllipsisText';
 import { Column, Row } from '@ui/components/shared/Flex';
@@ -29,17 +27,17 @@ import {
 } from '@ui/constants/index';
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
 import { useColors } from '@ui/hooks/useColors';
-import { useMaxSupplyAmount } from '@ui/hooks/useMaxSupplyAmount';
+import { useMaxSupplyTokenAmount } from '@ui/hooks/useMaxSupplyAmount';
 import { useSupplyCap } from '@ui/hooks/useSupplyCap';
 import { useErrorToast, useSuccessToast } from '@ui/hooks/useToast';
 import { useTokenBalance } from '@ui/hooks/useTokenBalance';
 import { useTokenData } from '@ui/hooks/useTokenData';
-import { useXMintAsset } from '@ui/hooks/useXMintAsset';
 import type { TokenData, TxStep } from '@ui/types/ComponentPropsType';
 import type { MarketData } from '@ui/types/TokensDataMap';
 import { smallFormatter } from '@ui/utils/bigUtils';
 import { handleGenericError } from '@ui/utils/errorHandling';
 import { useTokens } from '@ui/hooks/useTokens';
+import { useXMintAsset } from '@ui/hooks/useXMintAsset';
 
 interface SupplyModalProps {
   asset: MarketData;
@@ -130,13 +128,12 @@ export const XSupplyModal = ({
     market: asset,
   });
 
-  const { data: maxSupplyAmount, isLoading } = useMaxSupplyAmount(
+  const { data: maxSupplyAmount, isLoading } = useMaxSupplyTokenAmount(
     asset,
+    fromAsset,
     comptrollerAddress,
     poolChainId
   );
-
-  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!fromAsset && tokens?.length) {
@@ -151,23 +148,23 @@ export const XSupplyModal = ({
       const max = optionToWrap
         ? +formatEther(myNativeBalance as BigNumber)
         : maxSupplyAmount.number;
-      setIsAmountValid(+formatUnits(amount, asset.underlyingDecimals) <= max);
+      setIsAmountValid(+formatUnits(amount, fromAsset?.decimals) <= max);
     }
-  }, [amount, maxSupplyAmount, optionToWrap, myNativeBalance, asset.underlyingDecimals]);
+  }, [amount, maxSupplyAmount, optionToWrap, myNativeBalance, fromAsset]);
 
   useEffect(() => {
-    if (amount.isZero()) {
+    if (amount.isZero() || !fromAsset) {
       setBtnStr('Enter a valid amount to supply');
     } else if (isLoading) {
-      setBtnStr(`Loading your balance of ${asset.underlyingSymbol}...`);
+      setBtnStr(`Loading your balance of ${fromAsset?.symbol}...`);
     } else {
       if (isAmountValid) {
         setBtnStr('Supply');
       } else {
-        setBtnStr(`You don't have enough ${asset.underlyingSymbol}`);
+        setBtnStr(`You don't have enough ${fromAsset?.symbol}`);
       }
     }
-  }, [amount, isLoading, isAmountValid, asset.underlyingSymbol]);
+  }, [amount, isLoading, isAmountValid, fromAsset]);
 
   useEffect(() => {
     if (!currentChain || !connextSdk) {
@@ -195,10 +192,11 @@ export const XSupplyModal = ({
   };
 
   const handleXSupply = async () => {
-    if (!connextSdk || !xMintAsset || !maxSupplyAmount) return;
+    if (!connextSdk || !fromAsset || !maxSupplyAmount) return;
 
     const origin = SUPPORTED_CHAINS_BY_CONNEXT[currentChain.id].domainId;
     const destination = SUPPORTED_CHAINS_BY_CONNEXT[poolChainId].domainId;
+
     const connext = await connextSdk.getConnext(origin);
 
     if (!connext) {
@@ -209,6 +207,7 @@ export const XSupplyModal = ({
       connext: connext,
       chainId: currentSdk.chainId,
       comptroller: comptrollerAddress,
+      asset: fromAsset,
     };
 
     setIsConfirmed(true);
@@ -219,17 +218,9 @@ export const XSupplyModal = ({
     setActiveStep(0);
     setFailedStep(0);
 
-    const xcallAmount = utils.parseUnits(
-      utils.formatUnits(amount.toString(), asset.underlyingDecimals.toNumber()),
-      maxSupplyAmount.decimals
-    );
-
     try {
       setActiveStep(optionToWrap ? 2 : 1);
-      const token = currentSdk.getEIP20RewardTokenInstance(
-        xMintAsset.underlying,
-        currentSdk.signer
-      );
+      const token = currentSdk.getEIP20TokenInstance(fromAsset.address, currentSdk.signer);
 
       const hasApprovedEnough = (await token.callStatic.allowance(address, connext.address)).gte(
         xcallAmount
