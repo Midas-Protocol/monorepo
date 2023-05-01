@@ -50,4 +50,5 @@ export type ChainXMintData = {
   assets: SupportedAsset[];
   swapAddress: string;
   targetAddress: string;
+  uniV3Address: string;
 };

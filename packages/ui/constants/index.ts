@@ -302,20 +302,23 @@ export const SUPPORTED_CHAINS_XMINT: {
   [bsc.chainId]: {
     supported: true,
     assets: bsc.assets.filter((a) => SUPPORTED_SYMBOLS_BY_CONNEXT.includes(a.symbol)),
-    swapAddress: '0x6840600Bc9B74fA6B3BDF1503cb31A7AdF061c1D',
-    targetAddress: '0xEF8dd349E32D1fE8691A5fCaFb7faac6DA9b4499',
+    swapAddress: '0xB7E327b0484641Aa59b3F9ffDbEa4b4872a701fD',
+    targetAddress: '0x5510188B296d1a13140a6cd52A83B81078f22413',
+    uniV3Address: '0x911b8C1b2d99c5bBB82BC1F71c85A3a54d2dFfcE',
   },
   [polygon.chainId]: {
     supported: true,
     assets: polygon.assets.filter((a) => SUPPORTED_SYMBOLS_BY_CONNEXT.includes(a.symbol)),
-    swapAddress: '0x697075f4A3Ce358d125281134e98d594D8Bb472e',
-    targetAddress: '0x5d7663c5483A46e7794b652aF8f155775E4F390C',
+    swapAddress: '0x56D087121E5CC320002A4D826B08832FA9E729Bc',
+    targetAddress: '0x4E02AC4b0942E670dD0366fa504f665a2257443c',
+    uniV3Address: '0xd92fd008bb2a1B74C9De29B7a68d9822Cc8c9868',
   },
   [arbitrum.chainId]: {
     supported: false,
     assets: arbitrum.assets.filter((a) => SUPPORTED_SYMBOLS_BY_CONNEXT.includes(a.symbol)),
     swapAddress: '',
     targetAddress: '',
+    uniV3Address: '',
   },
 };
 
