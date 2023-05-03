@@ -37,7 +37,6 @@ import { useColors } from '@ui/hooks/useColors';
 import { useMaxSupplyTokenAmount } from '@ui/hooks/useMaxSupplyAmount';
 import { useSupplyCap } from '@ui/hooks/useSupplyCap';
 import { useErrorToast, useSuccessToast } from '@ui/hooks/useToast';
-import { useTokenBalance } from '@ui/hooks/useTokenBalance';
 import { useTokenData } from '@ui/hooks/useTokenData';
 import { useTokens } from '@ui/hooks/useTokens';
 import type { TokenData, TxStep } from '@ui/types/ComponentPropsType';
@@ -102,8 +101,6 @@ export const XSupplyModal = ({
   const [amount, setAmount] = useState<BigNumber>(constants.Zero);
   const [enableAsCollateral, setEnableAsCollateral] = useState(!asset.membership);
   const { cCard } = useColors();
-  const { data: myBalance } = useTokenBalance(asset.underlyingToken);
-  const { data: myNativeBalance } = useTokenBalance('NO_ADDRESS_HERE_USE_WETH_FOR_ADDRESS');
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [isSupplying, setIsSupplying] = useState(false);
   const [activeStep, setActiveStep] = useState<number>(0);
@@ -114,18 +111,7 @@ export const XSupplyModal = ({
   const [confirmedSteps, setConfirmedSteps] = useState<TxStep[]>([]);
   const successToast = useSuccessToast();
   const nativeSymbol = currentChain.nativeCurrency?.symbol;
-  const optionToWrap = useMemo(() => {
-    return (
-      asset.underlyingToken === currentSdk.chainSpecificAddresses.W_TOKEN &&
-      myBalance?.isZero() &&
-      !myNativeBalance?.isZero()
-    );
-  }, [
-    asset.underlyingToken,
-    currentSdk.chainSpecificAddresses.W_TOKEN,
-    myBalance,
-    myNativeBalance,
-  ]);
+  const optionToWrap = false;
 
   const { data: supplyCap } = useSupplyCap({
     chainId: poolChainId,
@@ -150,12 +136,10 @@ export const XSupplyModal = ({
     if (amount.isZero() || !maxSupplyAmount) {
       setIsAmountValid(false);
     } else {
-      const max = optionToWrap
-        ? +formatEther(myNativeBalance as BigNumber)
-        : maxSupplyAmount.number;
+      const max = maxSupplyAmount.number;
       setIsAmountValid(+formatUnits(amount, fromAsset?.decimals) <= max);
     }
-  }, [amount, maxSupplyAmount, optionToWrap, myNativeBalance, fromAsset]);
+  }, [amount, maxSupplyAmount, fromAsset]);
 
   useEffect(() => {
     if (amount.isZero() || !fromAsset) {
@@ -492,9 +476,9 @@ export const XSupplyModal = ({
                       ),
                     }}
                     defaultValue={{
-                      icon: tokens?.[0].logoURL,
-                      label: tokens?.[0].symbol,
-                      value: tokens?.[0].address,
+                      icon: (fromAsset ?? tokens?.[0])?.logoURL,
+                      label: (fromAsset ?? tokens?.[0])?.symbol,
+                      value: (fromAsset ?? tokens?.[0])?.address,
                     }}
                     onChange={(option) => {
                       setFromAsset(
@@ -541,14 +525,16 @@ export const XSupplyModal = ({
                 {!supplyCap || asset.totalSupplyFiat < supplyCap.usdCap ? (
                   <>
                     <Column gap={1} w="100%">
-                      <AmountInput
-                        asset={asset}
-                        comptrollerAddress={comptrollerAddress}
-                        optionToWrap={optionToWrap}
-                        poolChainId={poolChainId}
-                        setAmount={setAmount}
-                        token={fromAsset}
-                      />
+                      {fromAsset && (
+                        <AmountInput
+                          asset={asset}
+                          comptrollerAddress={comptrollerAddress}
+                          optionToWrap={optionToWrap}
+                          poolChainId={poolChainId}
+                          setAmount={setAmount}
+                          token={fromAsset}
+                        />
+                      )}
 
                       {fromAsset && <Balance asset={fromAsset} />}
                     </Column>
