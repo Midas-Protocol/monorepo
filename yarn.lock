@@ -2152,17 +2152,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@connext/chain-abstraction@npm:^1.0.2-alpha.2":
-  version: 1.0.2-alpha.2
-  resolution: "@connext/chain-abstraction@npm:1.0.2-alpha.2"
+"@connext/chain-abstraction@npm:^1.0.2-alpha.6":
+  version: 1.0.2-alpha.6
+  resolution: "@connext/chain-abstraction@npm:1.0.2-alpha.6"
   dependencies:
-    "@connext/nxtp-utils": 2.0.2-alpha.4
+    "@connext/nxtp-utils": 2.0.2-alpha.8
     "@sinclair/typebox": 0.25.21
     ethers: 5.7.2
     isomorphic-fetch: ^3.0.0
     memoizee: 0.4.15
     typedoc: 0.23.25
-  checksum: ad75e6c40e4d997459953c92084358b8add3e26d73a9edc8a3815733c811c90dc8733da0944d791869c23949ed43f2521f3d261499ab4378b55ea21e0d2b7bb9
+  checksum: e07f13d13ad6dcd6d7567d1837fec5f0dbe9f0ade90bad87bd8ad35c851ba194380b5d38e96e7683fafa27353980587bb320ae0a23f99f47c64b832b98d4c674
   languageName: node
   linkType: hard
 
@@ -2229,9 +2229,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@connext/nxtp-utils@npm:2.0.2-alpha.4":
-  version: 2.0.2-alpha.4
-  resolution: "@connext/nxtp-utils@npm:2.0.2-alpha.4"
+"@connext/nxtp-utils@npm:2.0.2-alpha.8":
+  version: 2.0.2-alpha.8
+  resolution: "@connext/nxtp-utils@npm:2.0.2-alpha.8"
   dependencies:
     "@maticnetwork/maticjs": 3.6.0-beta.11
     "@maticnetwork/maticjs-web3": 1.0.4
@@ -2248,7 +2248,7 @@ __metadata:
     pino: 8.10.0
     secp256k1: 4.0.3
     sinon-chai: 3.7.0
-  checksum: 07a70b307cf6248b389f34f6a3dcae79f3c01247a7bded208a1e81f924998547e2770f14d63fd6a9d9e2d4534755bd9e606dcc602190c645c2b2e91cdb782969
+  checksum: a81a549183d1b5aac61a2163ab047998df047d5c3b5a3e003e87db02cf1df1b4763b45ad1d981da32f25786b9cb5b1814e8e590a797246f13c860db920f9c2f1
   languageName: node
   linkType: hard
 
@@ -4344,7 +4344,7 @@ __metadata:
     "@chakra-ui/cli": ^2.3.0
     "@chakra-ui/icons": ^2.0.18
     "@chakra-ui/react": ^2.5.5
-    "@connext/chain-abstraction": ^1.0.2-alpha.2
+    "@connext/chain-abstraction": ^1.0.2-alpha.6
     "@connext/sdk": ^2.0.2
     "@emotion/react": ^11.10.6
     "@emotion/styled": ^11.10.6

@@ -2,7 +2,7 @@ import { Box, Button, Divider, HStack, Text } from '@chakra-ui/react';
 import { Select, chakraComponents } from 'chakra-react-select';
 
 import { WETHAbi } from '@midas-capital/sdk';
-import { FundOperationMode } from '@midas-capital/types';
+import { FundOperationMode, assetSymbols } from '@midas-capital/types';
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit';
 import { BigNumber, constants, utils } from 'ethers';
 import { formatEther, formatUnits, getAddress } from 'ethers/lib/utils.js';
@@ -38,6 +38,14 @@ import { smallFormatter } from '@ui/utils/bigUtils';
 import { handleGenericError } from '@ui/utils/errorHandling';
 import { useTokens } from '@ui/hooks/useTokens';
 import { useXMintAsset } from '@ui/hooks/useXMintAsset';
+import { DestinationCallDataParams, Swapper } from '@connext/chain-abstraction/dist/types';
+import {
+  getPoolFeeForUniV3,
+  getXCallCallData,
+  prepareSwapAndXCall,
+} from '@connext/chain-abstraction';
+import { chainIdToConfig } from 'chains/dist';
+import { SUPPORTED_SYMBOLS_BY_CONNEXT } from '@ui/constants/index';
 
 interface SupplyModalProps {
   asset: MarketData;
@@ -218,20 +226,30 @@ export const XSupplyModal = ({
     setActiveStep(0);
     setFailedStep(0);
 
+    const xMintSource = SUPPORTED_CHAINS_XMINT[currentChain.id];
+    const xMintDestination = SUPPORTED_CHAINS_XMINT[poolChainId];
+    const destinationSwapAsset = SUPPORTED_SYMBOLS_BY_CONNEXT.includes(asset.underlyingSymbol)
+      ? asset.underlyingToken
+      : xMintDestination.usdcAddress;
+    const originSwapAsset =
+      destinationSwapAsset === xMintDestination.usdcAddress
+        ? xMintSource.usdcAddress
+        : xMintDestination.wethAddress;
+
     try {
       setActiveStep(optionToWrap ? 2 : 1);
-      const token = currentSdk.getEIP20TokenInstance(fromAsset.address, currentSdk.signer);
 
-      const hasApprovedEnough = (await token.callStatic.allowance(address, connext.address)).gte(
-        xcallAmount
-      );
+      const token = currentSdk.getEIP20TokenInstance(fromAsset.address, currentSdk.signer);
+      const hasApprovedEnough = (
+        await token.callStatic.allowance(address, xMintSource.swapAddress)
+      ).gte(amount);
 
       if (!hasApprovedEnough) {
-        const tx = await currentSdk.approve(connext.address, xMintAsset.underlying);
+        const tx = await currentSdk.approve(xMintSource.swapAddress, fromAsset.address);
 
         addRecentTransaction({
           hash: tx.hash,
-          description: `Approve ${xMintAsset.symbol}`,
+          description: `Approve ${fromAsset.symbol}`,
         });
         _steps[optionToWrap ? 1 : 0] = {
           ..._steps[optionToWrap ? 1 : 0],
@@ -281,25 +299,56 @@ export const XSupplyModal = ({
         isHighPriority: true,
       };
       const relayerFee = await connextSdk.estimateRelayerFee(estimateRelayerFeeParams);
-      const callData = utils.defaultAbiCoder.encode(
-        ['address', 'address'],
-        [asset.cToken, signerAddress]
-      );
-      const xMintContract = SUPPORTED_CHAINS_XMINT[poolChainId].xMinterAddress;
-      const xcallParams = {
-        origin: origin,
-        destination: destination,
-        asset: xMintAsset.underlying,
-        to: xMintContract,
-        delegate: signerAddress,
-        amount: xcallAmount.toString(),
-        slippage: '300',
-        receiveLocal: false,
-        callData: callData,
-        relayerFee: relayerFee.toString(),
-      };
 
-      const xcall_request = await connextSdk.xcall(xcallParams);
+      // Params for calldata generation
+      const destinationRpc =
+        chainIdToConfig[poolChainId].specificParams.metadata.rpcUrls.default.http[0];
+      const swapper = Swapper.UniV3;
+      const poolFee = await getPoolFeeForUniV3(
+        destination,
+        destinationRpc,
+        destinationSwapAsset,
+        asset.underlyingToken
+      );
+
+      const params: DestinationCallDataParams = {
+        fallback: signerAddress,
+        swapForwarderData: {
+          toAsset: asset.underlyingToken,
+          swapData: {
+            amountOutMin: '0',
+            poolFee: poolFee,
+          },
+        },
+      };
+      console.log('pool fee', destinationSwapAsset, asset.underlyingToken, params);
+      const forwardCallData = utils.defaultAbiCoder.encode(
+        ['address', 'address', 'address'],
+        [asset.cToken, asset.underlyingToken, signerAddress]
+      );
+      const callDataForMidasProtocolTarget = await getXCallCallData(
+        destination,
+        swapper,
+        forwardCallData,
+        params
+      );
+      console.log('get xcall data', callDataForMidasProtocolTarget);
+      const swapAndXCallParams = {
+        originDomain: origin,
+        destinationDomain: destination,
+        fromAsset: fromAsset.address,
+        toAsset: originSwapAsset,
+        amountIn: amount.toString(),
+        to: xMintDestination.targetAddress,
+        relayerFeeInNativeAsset: relayerFee.toString(),
+        callData: callDataForMidasProtocolTarget,
+      };
+      console.log('swap and xcall', swapAndXCallParams);
+
+      const xcall_request = await prepareSwapAndXCall(swapAndXCallParams, signerAddress);
+      if (!xcall_request) {
+        throw new Error('Failed to generate xcall data');
+      }
 
       const tx = await currentSdk.signer.sendTransaction(xcall_request);
 
@@ -331,7 +380,7 @@ export const XSupplyModal = ({
       setConfirmedSteps([..._steps]);
     } catch (error) {
       const sentryInfo = {
-        contextName: 'Supply - Minting',
+        contextName: 'XSupply - Minting',
         properties: sentryProperties,
       };
       handleGenericError({ error, toast: errorToast, sentryInfo });

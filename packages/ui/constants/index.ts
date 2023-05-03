@@ -273,23 +273,6 @@ export const SUPPORTED_CHAINS_BY_CONNEXT: Record<
   },
 };
 
-export const xMinterContractABI = [
-  {
-    inputs: [
-      { internalType: 'bytes32', name: '_transferId', type: 'bytes32' },
-      { internalType: 'uint256', name: '_amount', type: 'uint256' },
-      { internalType: 'address', name: '_asset', type: 'address' },
-      { internalType: 'address', name: '_originSender', type: 'address' },
-      { internalType: 'uint32', name: '_origin', type: 'uint32' },
-      { internalType: 'bytes', name: '_callData', type: 'bytes' },
-    ],
-    name: 'xReceive',
-    outputs: [{ internalType: 'bytes', name: '', type: 'bytes' }],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-];
-
 export const SUPPORTED_SYMBOLS_BY_CONNEXT: string[] = [
   assetSymbols.ETH,
   assetSymbols.WETH,
@@ -304,7 +287,9 @@ export const SUPPORTED_CHAINS_XMINT: {
     assets: bsc.assets.filter((a) => SUPPORTED_SYMBOLS_BY_CONNEXT.includes(a.symbol)),
     swapAddress: '0xB7E327b0484641Aa59b3F9ffDbEa4b4872a701fD',
     targetAddress: '0x5510188B296d1a13140a6cd52A83B81078f22413',
-    uniV3Address: '0x911b8C1b2d99c5bBB82BC1F71c85A3a54d2dFfcE',
+    uniV3Address: '0x73D53460fc1ead8Eb4A7771Bc5023159E8730E68',
+    usdcAddress: bsc.assets.find((a) => a.symbol === assetSymbols.USDC)!.underlying,
+    wethAddress: bsc.assets.find((a) => a.symbol === assetSymbols.ETH)!.underlying,
   },
   [polygon.chainId]: {
     supported: true,
@@ -312,6 +297,8 @@ export const SUPPORTED_CHAINS_XMINT: {
     swapAddress: '0x56D087121E5CC320002A4D826B08832FA9E729Bc',
     targetAddress: '0x4E02AC4b0942E670dD0366fa504f665a2257443c',
     uniV3Address: '0xd92fd008bb2a1B74C9De29B7a68d9822Cc8c9868',
+    usdcAddress: polygon.assets.find((a) => a.symbol === assetSymbols.USDC)!.underlying,
+    wethAddress: polygon.assets.find((a) => a.symbol === assetSymbols.WETH)!.underlying,
   },
   [arbitrum.chainId]: {
     supported: false,
@@ -319,6 +306,8 @@ export const SUPPORTED_CHAINS_XMINT: {
     swapAddress: '',
     targetAddress: '',
     uniV3Address: '',
+    usdcAddress: arbitrum.assets.find((a) => a.symbol === assetSymbols.USDC)!.underlying,
+    wethAddress: arbitrum.assets.find((a) => a.symbol === assetSymbols.WETH)!.underlying,
   },
 };
 

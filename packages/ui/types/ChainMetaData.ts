@@ -51,4 +51,6 @@ export type ChainXMintData = {
   swapAddress: string;
   targetAddress: string;
   uniV3Address: string;
+  usdcAddress: string;
+  wethAddress: string;
 };
