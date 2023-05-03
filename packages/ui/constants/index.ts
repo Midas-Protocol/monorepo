@@ -285,7 +285,7 @@ export const SUPPORTED_CHAINS_XMINT: {
   [bsc.chainId]: {
     supported: true,
     assets: bsc.assets.filter((a) => SUPPORTED_SYMBOLS_BY_CONNEXT.includes(a.symbol)),
-    swapAddress: '0xB7E327b0484641Aa59b3F9ffDbEa4b4872a701fD',
+    swapAddress: '0xE57c141e99257426294032D8437B136A8B641C27',
     targetAddress: '0x5510188B296d1a13140a6cd52A83B81078f22413',
     uniV3Address: '0x73D53460fc1ead8Eb4A7771Bc5023159E8730E68',
     usdcAddress: bsc.assets.find((a) => a.symbol === assetSymbols.USDC)!.underlying,
@@ -294,7 +294,7 @@ export const SUPPORTED_CHAINS_XMINT: {
   [polygon.chainId]: {
     supported: true,
     assets: polygon.assets.filter((a) => SUPPORTED_SYMBOLS_BY_CONNEXT.includes(a.symbol)),
-    swapAddress: '0x56D087121E5CC320002A4D826B08832FA9E729Bc',
+    swapAddress: '0x833cBFaf81EE07528B34cBB4c487287435113EdF',
     targetAddress: '0x4E02AC4b0942E670dD0366fa504f665a2257443c',
     uniV3Address: '0xd92fd008bb2a1B74C9De29B7a68d9822Cc8c9868',
     usdcAddress: polygon.assets.find((a) => a.symbol === assetSymbols.USDC)!.underlying,

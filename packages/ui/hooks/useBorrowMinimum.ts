@@ -20,7 +20,7 @@ export const useBorrowMinimum = (asset: FuseAsset, poolChainId: number) => {
   const response = useQuery(
     [`useBorrowMinimum`, currentSdk?.chainId, asset.cToken],
     async () => {
-      if (currentSdk) {
+      if (currentSdk && currentSdk.chainId == poolChainId) {
         return await currentSdk.contracts.FuseFeeDistributor.callStatic.getMinBorrowEth(
           asset.cToken
         );

@@ -1,8 +1,7 @@
 import { Box, Button, Divider, HStack, Text } from '@chakra-ui/react';
 import { Select, chakraComponents } from 'chakra-react-select';
 
-import { WETHAbi } from '@midas-capital/sdk';
-import { FundOperationMode, assetSymbols } from '@midas-capital/types';
+import { FundOperationMode } from '@midas-capital/types';
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit';
 import { BigNumber, constants, utils } from 'ethers';
 import { formatEther, formatUnits, getAddress } from 'ethers/lib/utils.js';
@@ -37,7 +36,6 @@ import type { MarketData } from '@ui/types/TokensDataMap';
 import { smallFormatter } from '@ui/utils/bigUtils';
 import { handleGenericError } from '@ui/utils/errorHandling';
 import { useTokens } from '@ui/hooks/useTokens';
-import { useXMintAsset } from '@ui/hooks/useXMintAsset';
 import { DestinationCallDataParams, Swapper } from '@connext/chain-abstraction/dist/types';
 import {
   getPoolFeeForUniV3,
@@ -98,7 +96,6 @@ export const XSupplyModal = ({
   const [relayerFee, setRelayerFee] = useState<BigNumber>(constants.Zero);
   const { data: tokens } = useTokens(currentChain.id);
   const [fromAsset, setFromAsset] = useState<TokenData | undefined>();
-  const xMintAsset = useXMintAsset(asset);
 
   const errorToast = useErrorToast();
   const { data: tokenData } = useTokenData(asset.underlyingToken, poolChainId);
@@ -212,10 +209,10 @@ export const XSupplyModal = ({
     }
 
     const sentryProperties = {
-      connext: connext,
+      asset: fromAsset,
       chainId: currentSdk.chainId,
       comptroller: comptrollerAddress,
-      asset: fromAsset,
+      connext: connext,
     };
 
     setIsConfirmed(true);
@@ -248,8 +245,8 @@ export const XSupplyModal = ({
         const tx = await currentSdk.approve(xMintSource.swapAddress, fromAsset.address);
 
         addRecentTransaction({
-          hash: tx.hash,
           description: `Approve ${fromAsset.symbol}`,
+          hash: tx.hash,
         });
         _steps[optionToWrap ? 1 : 0] = {
           ..._steps[optionToWrap ? 1 : 0],
@@ -266,8 +263,8 @@ export const XSupplyModal = ({
         };
         setConfirmedSteps([..._steps]);
         successToast({
-          id: 'approved',
           description: 'Successfully Approved!',
+          id: 'approved',
         });
       } else {
         _steps[optionToWrap ? 1 : 0] = {
