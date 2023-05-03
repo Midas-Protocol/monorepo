@@ -1,6 +1,8 @@
-import type { TokenData } from '@ui/types/ComponentPropsType';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+
+import type { TokenData } from '@ui/types/ComponentPropsType';
 import { tokenListUrls } from '@ui/utils/networkData';
 
 export function useTokens(chainId?: number) {

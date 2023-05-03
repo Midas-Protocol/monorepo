@@ -9,10 +9,10 @@ import { Row } from '@ui/components/shared/Flex';
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
 import { useMaxSupplyTokenAmount } from '@ui/hooks/useMaxSupplyAmount';
 import { useErrorToast } from '@ui/hooks/useToast';
+import type { TokenData } from '@ui/types/ComponentPropsType';
 import type { MarketData } from '@ui/types/TokensDataMap';
 import { handleGenericError } from '@ui/utils/errorHandling';
 import { toFixedNoRound } from '@ui/utils/formatNumber';
-import { TokenData } from '@ui/types/ComponentPropsType';
 
 export const AmountInput = ({
   asset,
@@ -23,11 +23,11 @@ export const AmountInput = ({
   comptrollerAddress,
 }: {
   asset: MarketData;
-  token: TokenData;
   comptrollerAddress: string;
   optionToWrap?: boolean;
   poolChainId: number;
   setAmount: (amount: BigNumber) => void;
+  token: TokenData;
 }) => {
   const { currentSdk, address } = useMultiMidas();
   const [userEnteredAmount, setUserEnteredAmount] = useState('');
@@ -112,7 +112,7 @@ export const AmountInput = ({
         <Row crossAxisAlignment="center" flexShrink={0} mainAxisAlignment="flex-start">
           <Row crossAxisAlignment="center" mainAxisAlignment="flex-start">
             <Box height={8} mr={1} width={8}>
-              <Avatar borderRadius={0} name={token?.symbol} src={token?.logoURL} size="sm" />
+              <Avatar borderRadius={0} name={token?.symbol} size="sm" src={token?.logoURL} />
             </Box>
             <EllipsisText
               fontWeight="bold"

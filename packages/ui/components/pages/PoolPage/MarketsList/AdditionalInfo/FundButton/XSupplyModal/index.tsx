@@ -1,12 +1,19 @@
 import { Box, Button, Divider, HStack, Text } from '@chakra-ui/react';
-import { Select, chakraComponents } from 'chakra-react-select';
-
+import {
+  getPoolFeeForUniV3,
+  getXCallCallData,
+  prepareSwapAndXCall,
+} from '@connext/chain-abstraction';
+import type { DestinationCallDataParams } from '@connext/chain-abstraction/dist/types';
+import { Swapper } from '@connext/chain-abstraction/dist/types';
 import { FundOperationMode } from '@midas-capital/types';
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit';
-import { BigNumber, constants, utils } from 'ethers';
+import { chainIdToConfig } from 'chains/dist';
+import { chakraComponents, Select } from 'chakra-react-select';
+import type { BigNumber } from 'ethers';
+import { constants, utils } from 'ethers';
 import { formatEther, formatUnits, getAddress } from 'ethers/lib/utils.js';
 import { useEffect, useMemo, useState } from 'react';
-import { getContract } from 'sdk/dist/cjs/src/MidasSdk/utils';
 import { useSwitchNetwork } from 'wagmi';
 
 import { StatsColumn } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/StatsColumn';
@@ -23,6 +30,7 @@ import {
   SUPPLY_STEPS,
   SUPPORTED_CHAINS_BY_CONNEXT,
   SUPPORTED_CHAINS_XMINT,
+  SUPPORTED_SYMBOLS_BY_CONNEXT,
 } from '@ui/constants/index';
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
 import { useColors } from '@ui/hooks/useColors';
@@ -31,19 +39,11 @@ import { useSupplyCap } from '@ui/hooks/useSupplyCap';
 import { useErrorToast, useSuccessToast } from '@ui/hooks/useToast';
 import { useTokenBalance } from '@ui/hooks/useTokenBalance';
 import { useTokenData } from '@ui/hooks/useTokenData';
+import { useTokens } from '@ui/hooks/useTokens';
 import type { TokenData, TxStep } from '@ui/types/ComponentPropsType';
 import type { MarketData } from '@ui/types/TokensDataMap';
 import { smallFormatter } from '@ui/utils/bigUtils';
 import { handleGenericError } from '@ui/utils/errorHandling';
-import { useTokens } from '@ui/hooks/useTokens';
-import { DestinationCallDataParams, Swapper } from '@connext/chain-abstraction/dist/types';
-import {
-  getPoolFeeForUniV3,
-  getXCallCallData,
-  prepareSwapAndXCall,
-} from '@connext/chain-abstraction';
-import { chainIdToConfig } from 'chains/dist';
-import { SUPPORTED_SYMBOLS_BY_CONNEXT } from '@ui/constants/index';
 
 interface SupplyModalProps {
   asset: MarketData;
@@ -76,11 +76,11 @@ export const XSupplyModal = ({
   }
 
   const availableFromChains = useMemo(() => {
-    if (poolChainId && asset) {
-      return [poolChainId, ...getAvailableFromChains(poolChainId, asset.underlyingToken)];
+    if (poolChainId) {
+      return [poolChainId, ...getAvailableFromChains(poolChainId)];
     }
     return [];
-  }, [asset, getAvailableFromChains, poolChainId]);
+  }, [getAvailableFromChains, poolChainId]);
 
   const { switchNetworkAsync } = useSwitchNetwork();
   const handleSwitch = async (chainId: number) => {
@@ -180,9 +180,9 @@ export const XSupplyModal = ({
 
       // Calculate relayer fee
       const estimateRelayerFeeParams = {
-        originDomain: origin,
         destinationDomain: destination,
         isHighPriority: true,
+        originDomain: origin,
       };
       connextSdk.estimateRelayerFee(estimateRelayerFeeParams).then((res) => {
         setRelayerFee(res);
@@ -279,7 +279,7 @@ export const XSupplyModal = ({
         contextName: 'Supply - Approving',
         properties: sentryProperties,
       };
-      handleGenericError({ error, toast: errorToast, sentryInfo });
+      handleGenericError({ error, sentryInfo, toast: errorToast });
       setFailedStep(optionToWrap ? 2 : 1);
     }
 
@@ -291,9 +291,9 @@ export const XSupplyModal = ({
       const signerAddress = await currentSdk.signer.getAddress();
       // Calculate relayer fee
       const estimateRelayerFeeParams = {
-        originDomain: origin,
         destinationDomain: destination,
         isHighPriority: true,
+        originDomain: origin,
       };
       const relayerFee = await connextSdk.estimateRelayerFee(estimateRelayerFeeParams);
 
@@ -311,14 +311,13 @@ export const XSupplyModal = ({
       const params: DestinationCallDataParams = {
         fallback: signerAddress,
         swapForwarderData: {
-          toAsset: asset.underlyingToken,
           swapData: {
             amountOutMin: '0',
             poolFee: poolFee,
           },
+          toAsset: asset.underlyingToken,
         },
       };
-      console.log('pool fee', destinationSwapAsset, asset.underlyingToken, params);
       const forwardCallData = utils.defaultAbiCoder.encode(
         ['address', 'address', 'address'],
         [asset.cToken, asset.underlyingToken, signerAddress]
@@ -329,18 +328,16 @@ export const XSupplyModal = ({
         forwardCallData,
         params
       );
-      console.log('get xcall data', callDataForMidasProtocolTarget);
       const swapAndXCallParams = {
-        originDomain: origin,
+        amountIn: amount.toString(),
+        callData: callDataForMidasProtocolTarget,
         destinationDomain: destination,
         fromAsset: fromAsset.address,
-        toAsset: originSwapAsset,
-        amountIn: amount.toString(),
-        to: xMintDestination.targetAddress,
+        originDomain: origin,
         relayerFeeInNativeAsset: relayerFee.toString(),
-        callData: callDataForMidasProtocolTarget,
+        to: xMintDestination.targetAddress,
+        toAsset: originSwapAsset,
       };
-      console.log('swap and xcall', swapAndXCallParams);
 
       const xcall_request = await prepareSwapAndXCall(swapAndXCallParams, signerAddress);
       if (!xcall_request) {
@@ -350,8 +347,8 @@ export const XSupplyModal = ({
       const tx = await currentSdk.signer.sendTransaction(xcall_request);
 
       addRecentTransaction({
-        hash: tx.hash,
         description: `${asset.underlyingSymbol} Token Supply`,
+        hash: tx.hash,
       });
       _steps[optionToWrap && enableAsCollateral ? 3 : optionToWrap || enableAsCollateral ? 2 : 1] =
         {
@@ -380,7 +377,7 @@ export const XSupplyModal = ({
         contextName: 'XSupply - Minting',
         properties: sentryProperties,
       };
-      handleGenericError({ error, toast: errorToast, sentryInfo });
+      handleGenericError({ error, sentryInfo, toast: errorToast });
       setFailedStep(
         optionToWrap && enableAsCollateral ? 4 : optionToWrap || enableAsCollateral ? 3 : 2
       );
@@ -466,23 +463,39 @@ export const XSupplyModal = ({
               <HStack justifyContent="center" mb={2} width="100%">
                 <Text variant="title">From</Text>
                 <Select
+                  defaultValue={{
+                    label: SUPPORTED_CHAINS_BY_CONNEXT[currentChain.id].name,
+                    value: currentChain.id,
+                  }}
+                  isMulti={false}
                   onChange={(d) => {
                     if (d?.value) handleSwitch(d.value);
                   }}
-                  placeholder="From Chain"
-                  size="sm"
-                  isMulti={false}
                   options={availableFromChains.map((chainId: number) => ({
                     label: SUPPORTED_CHAINS_BY_CONNEXT[chainId].name,
                     value: chainId,
                   }))}
-                  defaultValue={{
-                    value: currentChain.id,
-                    label: SUPPORTED_CHAINS_BY_CONNEXT[currentChain.id].name,
-                  }}
+                  placeholder="From Chain"
+                  size="sm"
                 />
                 {currentChain.id !== poolChainId ? (
                   <Select
+                    components={{
+                      Option: ({ children, ...props }) => (
+                        <chakraComponents.Option {...props}>
+                          <img
+                            src={props.data.icon}
+                            style={{ height: 15, marginRight: 3, width: 15 }}
+                          />{' '}
+                          {children}
+                        </chakraComponents.Option>
+                      ),
+                    }}
+                    defaultValue={{
+                      icon: tokens?.[0].logoURL,
+                      label: tokens?.[0].symbol,
+                      value: tokens?.[0].address,
+                    }}
                     onChange={(option) => {
                       setFromAsset(
                         tokens?.find(
@@ -491,29 +504,13 @@ export const XSupplyModal = ({
                         )
                       );
                     }}
-                    placeholder=""
-                    size="sm"
                     options={(tokens || []).map((token: TokenData) => ({
+                      icon: token.logoURL,
                       label: token.symbol,
                       value: token.address,
-                      icon: token.logoURL,
                     }))}
-                    defaultValue={{
-                      label: tokens?.[0].symbol,
-                      value: tokens?.[0].address,
-                      icon: tokens?.[0].logoURL,
-                    }}
-                    components={{
-                      Option: ({ children, ...props }) => (
-                        <chakraComponents.Option {...props}>
-                          <img
-                            src={props.data.icon}
-                            style={{ marginRight: 3, width: 15, height: 15 }}
-                          />{' '}
-                          {children}
-                        </chakraComponents.Option>
-                      ),
-                    }}
+                    placeholder=""
+                    size="sm"
                   />
                 ) : (
                   <>
@@ -546,11 +543,11 @@ export const XSupplyModal = ({
                     <Column gap={1} w="100%">
                       <AmountInput
                         asset={asset}
-                        token={fromAsset}
                         comptrollerAddress={comptrollerAddress}
                         optionToWrap={optionToWrap}
                         poolChainId={poolChainId}
                         setAmount={setAmount}
+                        token={fromAsset}
                       />
 
                       {fromAsset && <Balance asset={fromAsset} />}

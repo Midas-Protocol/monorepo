@@ -1,15 +1,11 @@
-import {
-  SdkBase as ConnextSdk,
-  SdkConfig as ConnextSdkConfig,
-  create as createConnextSdk,
-} from '@connext/sdk';
+import type { SdkBase as ConnextSdk, SdkConfig as ConnextSdkConfig } from '@connext/sdk';
+import { create as createConnextSdk } from '@connext/sdk';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { chainIdToConfig } from '@midas-capital/chains';
 import { MidasSdk } from '@midas-capital/sdk';
 import Security from '@midas-capital/security';
 import type { SupportedChains } from '@midas-capital/types';
 import * as Sentry from '@sentry/browser';
-import { getAddress } from 'ethers/lib/utils';
 import type { FetchSignerResult, Signer } from '@wagmi/core';
 import type { Dispatch, ReactNode } from 'react';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -23,14 +19,16 @@ import { useEnabledChains } from '@ui/hooks/useChainConfig';
 export interface MultiMidasContextData {
   address?: string;
   chainIds: SupportedChains[];
+  connextSdk?: ConnextSdk;
+  connextSdkConfig?: ConnextSdkConfig;
   currentChain?: Chain & {
     unsupported?: boolean | undefined;
   };
   currentSdk?: MidasSdk;
-  getSdk: (chainId: number) => MidasSdk | undefined;
-  connextSdk?: ConnextSdk;
-  connextSdkConfig?: ConnextSdkConfig;
   disconnect: () => void;
+  enabledChainsForConnext: SupportedChains[];
+  getAvailableFromChains: (chainId: number) => SupportedChains[];
+  getSdk: (chainId: number) => MidasSdk | undefined;
   getSecurity: (chainId: number) => Security | undefined;
   isConnected: boolean;
   isGlobalLoading: boolean;
@@ -38,8 +36,6 @@ export interface MultiMidasContextData {
   sdks: MidasSdk[];
   securities: Security[];
   setAddress: Dispatch<string>;
-  enabledChainsForConnext: SupportedChains[];
-  getAvailableFromChains: (chainId: number, underlyingAsset: string) => SupportedChains[];
   setGlobalLoading: Dispatch<boolean>;
   setIsSidebarCollapsed: Dispatch<boolean>;
   signer?: FetchSignerResult<Signer>;
@@ -126,9 +122,9 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
         }
 
         const connextSdkConfig: ConnextSdkConfig = {
-          signerAddress: wagmiAddress,
-          network: network as 'mainnet' | 'testnet',
           chains: domainConfig,
+          network: network as 'mainnet' | 'testnet',
+          signerAddress: wagmiAddress,
         };
         return connextSdkConfig;
       }
@@ -146,7 +142,7 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
   }, [connextSdkConfig]);
 
   const getAvailableFromChains = useCallback(
-    (chainId: number, underlyingAsset: string) => {
+    (chainId: number) => {
       const xMintChain = SUPPORTED_CHAINS_XMINT[chainId];
       if (!xMintChain || !xMintChain.supported || !xMintChain.targetAddress) {
         return [];
@@ -197,9 +193,13 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
     return {
       address,
       chainIds,
+      connextSdk,
+      connextSdkConfig,
       currentChain,
       currentSdk,
       disconnect,
+      enabledChainsForConnext,
+      getAvailableFromChains,
       getSdk,
       getSecurity,
       isConnected,
@@ -208,10 +208,6 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
       sdks,
       securities,
       setAddress,
-      connextSdk,
-      connextSdkConfig,
-      enabledChainsForConnext,
-      getAvailableFromChains,
       setGlobalLoading,
       setIsSidebarCollapsed,
       signer,

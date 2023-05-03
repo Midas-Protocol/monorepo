@@ -1,6 +1,9 @@
 import { Box, Button, useDisclosure } from '@chakra-ui/react';
 import { FundOperationMode } from '@midas-capital/types';
 import { useMemo } from 'react';
+import { useNetwork } from 'wagmi';
+
+import { XSupplyModal } from './XSupplyModal';
 
 import { BorrowModal } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/BorrowModal';
 import { RepayModal } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/RepayModal/index';
@@ -8,8 +11,6 @@ import { SupplyModal } from '@ui/components/pages/PoolPage/MarketsList/Additiona
 import { WithdrawModal } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/WithdrawModal/index';
 import { useTokenData } from '@ui/hooks/useTokenData';
 import type { MarketData } from '@ui/types/TokensDataMap';
-import { useNetwork } from 'wagmi';
-import { XSupplyModal } from './XSupplyModal';
 
 export const FundButton = ({
   comptrollerAddress,

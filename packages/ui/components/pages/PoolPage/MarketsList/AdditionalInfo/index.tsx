@@ -123,10 +123,10 @@ export const AdditionalInfo = ({
   const { data: irm } = useIRM(asset.cToken, poolChainId);
 
   const availableFromChains = useMemo(() => {
-    if (poolChainId && asset) {
-      return getAvailableFromChains(poolChainId, asset.underlyingToken);
+    if (poolChainId) {
+      return getAvailableFromChains(poolChainId);
     }
-  }, [asset, getAvailableFromChains, poolChainId]);
+  }, [getAvailableFromChains, poolChainId]);
 
   return (
     <Box minWidth="400px" width={{ base: windowWidth.width * 0.9, md: 'auto' }}>

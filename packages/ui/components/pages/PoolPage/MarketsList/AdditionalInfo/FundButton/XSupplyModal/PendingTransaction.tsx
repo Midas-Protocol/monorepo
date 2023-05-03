@@ -24,9 +24,9 @@ export const PendingTransaction = ({
   activeStep: number;
   amount: BigNumber;
   asset: MarketData;
-  isXSupply?: boolean | false;
   failedStep: number;
   isSupplying: boolean;
+  isXSupply?: boolean | false;
   poolChainId: number;
   steps: TxStep[];
 }) => {

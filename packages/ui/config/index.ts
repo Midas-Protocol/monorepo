@@ -43,7 +43,7 @@ const config: CONFIG = {
   supabasePluginTableName: process.env.SUPABASE_PLUGIN_TABLE_NAME ?? '',
   supabasePublicKey: process.env.SUPABASE_KEY ?? '',
   supabaseUrl: process.env.SUPABASE_URL ?? '',
-  supabaseVaultApyTableName: process.env.SUPABASE_VAULT_APY_TABLE_NAME ?? ''
+  supabaseVaultApyTableName: process.env.SUPABASE_VAULT_APY_TABLE_NAME ?? '',
 };
 
 export { config };

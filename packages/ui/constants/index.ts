@@ -1,7 +1,7 @@
 import { arbitrum, bsc, polygon } from '@midas-capital/chains';
 import { assetSymbols, SupportedChainsArray } from '@midas-capital/types';
 
-import { ChainXMintData } from '@ui/types/ChainMetaData';
+import type { ChainXMintData } from '@ui/types/ChainMetaData';
 import type { TxStep } from '@ui/types/ComponentPropsType';
 
 export const SUPPORTED_NETWORKS_REGEX = new RegExp(SupportedChainsArray.join('|'));
@@ -209,66 +209,66 @@ export const HIGH_RISK_RATIO = 0.8;
  **/
 export const SUPPORTED_CHAINS_BY_CONNEXT: Record<
   number,
-  { name: string; domainId: string; network: string }
+  { domainId: string; name: string; network: string }
 > = {
   1: {
+    domainId: '6648936',
     // Ethereum Mainnet
     name: 'Ethereum',
-    domainId: '6648936',
-    network: 'mainnet',
-  },
-  137: {
-    // Polygon
-    name: 'Polygon',
-    domainId: '1886350457',
     network: 'mainnet',
   },
   10: {
+    domainId: '1869640809',
     // Optimism
     name: 'Optimism',
-    domainId: '1869640809',
-    network: 'mainnet',
-  },
-  42161: {
-    // Arbitrum One
-    name: 'Arbitrum',
-    domainId: '1634886255',
     network: 'mainnet',
   },
   100: {
+    domainId: '6778479',
     // Gnosis Chain
     name: 'Gnosis',
-    domainId: '6778479',
     network: 'mainnet',
   },
-  56: {
-    // BNB Chain
-    name: 'BNB',
-    domainId: '6450786',
+  137: {
+    domainId: '1886350457',
+    // Polygon
+    name: 'Polygon',
     network: 'mainnet',
-  },
-  5: {
-    // Goerli
-    name: 'Goerli',
-    domainId: '1735353714',
-    network: 'testnet',
   },
   420: {
+    domainId: '1735356532',
     // Optimism-Goerli
     name: 'OptGoerli',
-    domainId: '1735356532',
     network: 'testnet',
   },
-  80001: {
-    // Mumbai
-    name: 'Mumbai',
-    domainId: '9991',
-    network: 'testnet',
+  42161: {
+    domainId: '1634886255',
+    // Arbitrum One
+    name: 'Arbitrum',
+    network: 'mainnet',
   },
   421613: {
+    domainId: '1734439522',
     // Arbitrum-Goerli
     name: 'ArbGoerli',
-    domainId: '1734439522',
+    network: 'testnet',
+  },
+  5: {
+    domainId: '1735353714',
+    // Goerli
+    name: 'Goerli',
+    network: 'testnet',
+  },
+  56: {
+    domainId: '6450786',
+    // BNB Chain
+    name: 'BNB',
+    network: 'mainnet',
+  },
+  80001: {
+    domainId: '9991',
+    // Mumbai
+    name: 'Mumbai',
     network: 'testnet',
   },
 };
@@ -283,8 +283,8 @@ export const SUPPORTED_CHAINS_XMINT: {
   [chainId: number]: ChainXMintData;
 } = {
   [bsc.chainId]: {
-    supported: true,
     assets: bsc.assets.filter((a) => SUPPORTED_SYMBOLS_BY_CONNEXT.includes(a.symbol)),
+    supported: true,
     swapAddress: '0xE57c141e99257426294032D8437B136A8B641C27',
     targetAddress: '0x5510188B296d1a13140a6cd52A83B81078f22413',
     uniV3Address: '0x73D53460fc1ead8Eb4A7771Bc5023159E8730E68',
@@ -292,8 +292,8 @@ export const SUPPORTED_CHAINS_XMINT: {
     wethAddress: bsc.assets.find((a) => a.symbol === assetSymbols.ETH)!.underlying,
   },
   [polygon.chainId]: {
-    supported: true,
     assets: polygon.assets.filter((a) => SUPPORTED_SYMBOLS_BY_CONNEXT.includes(a.symbol)),
+    supported: true,
     swapAddress: '0x833cBFaf81EE07528B34cBB4c487287435113EdF',
     targetAddress: '0x4E02AC4b0942E670dD0366fa504f665a2257443c',
     uniV3Address: '0xd92fd008bb2a1B74C9De29B7a68d9822Cc8c9868',
@@ -301,8 +301,8 @@ export const SUPPORTED_CHAINS_XMINT: {
     wethAddress: polygon.assets.find((a) => a.symbol === assetSymbols.WETH)!.underlying,
   },
   [arbitrum.chainId]: {
-    supported: false,
     assets: arbitrum.assets.filter((a) => SUPPORTED_SYMBOLS_BY_CONNEXT.includes(a.symbol)),
+    supported: false,
     swapAddress: '',
     targetAddress: '',
     uniV3Address: '',

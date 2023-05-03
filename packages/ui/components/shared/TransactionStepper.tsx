@@ -31,9 +31,9 @@ const TransactionStepper = ({
 }: {
   activeStep: number;
   failedStep: number;
+  isCross?: boolean | false;
   isLoading: boolean;
   poolChainId: number;
-  isCross?: boolean | false;
   steps: TxStep[];
 }) => {
   const { cCard } = useColors();

@@ -1,12 +1,12 @@
 import type { NativePricedFuseAsset } from '@midas-capital/types';
 import { useQuery } from '@tanstack/react-query';
-import { BigNumber } from 'ethers';
-import { constants, utils } from 'ethers';
+import { BigNumber, constants, utils } from 'ethers';
+
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
 import { useSdk } from '@ui/hooks/fuse/useSdk';
 import { fetchTokenBalance } from '@ui/hooks/useTokenBalance';
-import { TokenData } from '@ui/types/ComponentPropsType';
-import { MarketData } from '@ui/types/TokensDataMap';
+import type { TokenData } from '@ui/types/ComponentPropsType';
+import type { MarketData } from '@ui/types/TokensDataMap';
 
 export function useMaxSupplyAmount(
   asset: NativePricedFuseAsset,
@@ -109,9 +109,9 @@ export function useMaxSupplyTokenAmount(
 
         return {
           bigNumber: tokenBalance,
-          number: Number(utils.formatUnits(tokenBalance, decimals)),
-          decimals,
           cap: availableCap,
+          decimals,
+          number: Number(utils.formatUnits(tokenBalance, decimals)),
         };
       } else {
         return null;
@@ -119,8 +119,8 @@ export function useMaxSupplyTokenAmount(
     },
     {
       cacheTime: Infinity,
-      staleTime: Infinity,
       enabled: !!address && !!asset && !!sdk && !!comptrollerAddress && !!token,
+      staleTime: Infinity,
     }
   );
 }

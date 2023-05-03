@@ -39,8 +39,8 @@ export function useTokenBalance(tokenAddress: string, customAddress?: string, sd
     },
     {
       cacheTime: Infinity,
-      staleTime: Infinity,
       enabled: !!chainId && !!tokenAddress && !!addressToCheck && !!midasSdk,
+      staleTime: Infinity,
     }
   );
 }

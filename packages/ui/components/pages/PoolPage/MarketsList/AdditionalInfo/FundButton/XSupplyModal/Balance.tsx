@@ -1,12 +1,12 @@
 import { Text } from '@chakra-ui/react';
 import { utils } from 'ethers';
+import { getAddress } from 'ethers/lib/utils.js';
 
 import { Column, Row } from '@ui/components/shared/Flex';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
 import { useTokenBalance } from '@ui/hooks/useTokenBalance';
-import { TokenData } from '@ui/types/ComponentPropsType';
-import { getAddress } from 'ethers/lib/utils.js';
+import type { TokenData } from '@ui/types/ComponentPropsType';
 
 export const Balance = ({ asset }: { asset: TokenData }) => {
   const { currentSdk, currentChain } = useMultiMidas();
