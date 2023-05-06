@@ -1,6 +1,8 @@
 import { Box, Button, Divider, HStack, Text } from '@chakra-ui/react';
 import {
+  getBridgeAmountOut,
   getPoolFeeForUniV3,
+  getSwapAndXcallAddress,
   getXCallCallData,
   prepareSwapAndXCall,
 } from '@connext/chain-abstraction';
@@ -10,8 +12,7 @@ import { FundOperationMode } from '@midas-capital/types';
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit';
 import { chainIdToConfig } from 'chains/dist';
 import { chakraComponents, Select } from 'chakra-react-select';
-import type { BigNumber } from 'ethers';
-import { constants, utils } from 'ethers';
+import { constants, BigNumber, utils } from 'ethers';
 import { formatEther, formatUnits, getAddress } from 'ethers/lib/utils.js';
 import { useEffect, useMemo, useState } from 'react';
 import { useSwitchNetwork } from 'wagmi';
@@ -30,7 +31,6 @@ import {
   SUPPLY_STEPS,
   SUPPORTED_CHAINS_BY_CONNEXT,
   SUPPORTED_CHAINS_XMINT,
-  SUPPORTED_SYMBOLS_BY_CONNEXT,
 } from '@ui/constants/index';
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
 import { useColors } from '@ui/hooks/useColors';
@@ -43,6 +43,7 @@ import type { TokenData, TxStep } from '@ui/types/ComponentPropsType';
 import type { MarketData } from '@ui/types/TokensDataMap';
 import { smallFormatter } from '@ui/utils/bigUtils';
 import { handleGenericError } from '@ui/utils/errorHandling';
+import { useConnextSdk } from '@ui/hooks/useConnextSdk';
 
 interface SupplyModalProps {
   asset: MarketData;
@@ -88,13 +89,14 @@ export const XSupplyModal = ({
     }
   };
   const ixXSupply = useMemo(() => currentChain.id !== poolChainId, [currentChain, poolChainId]);
-  if (!ixXSupply) {
+  if (!ixXSupply && isOpen) {
     throw new Error('Not XSupply!');
   }
 
-  const [relayerFee, setRelayerFee] = useState<BigNumber>(constants.Zero);
   const { data: tokens } = useTokens(currentChain.id);
   const [fromAsset, setFromAsset] = useState<TokenData | undefined>();
+  const { estimateSupplyAmount, relayerFee, swapAssets } = useConnextSdk(asset, poolChainId);
+  const [supplyAmount, setSupplyAmount] = useState<BigNumber>(constants.Zero);
 
   const errorToast = useErrorToast();
   const { data: tokenData } = useTokenData(asset.underlyingToken, poolChainId);
@@ -138,8 +140,13 @@ export const XSupplyModal = ({
     } else {
       const max = maxSupplyAmount.number;
       setIsAmountValid(+formatUnits(amount, fromAsset?.decimals) <= max);
+      if (fromAsset) {
+        estimateSupplyAmount(fromAsset, amount).then((res) =>
+          setSupplyAmount(res ? res.bigNumber : constants.Zero)
+        );
+      }
     }
-  }, [amount, maxSupplyAmount, fromAsset]);
+  }, [amount, estimateSupplyAmount, fromAsset, maxSupplyAmount]);
 
   useEffect(() => {
     if (amount.isZero() || !fromAsset) {
@@ -155,25 +162,6 @@ export const XSupplyModal = ({
     }
   }, [amount, isLoading, isAmountValid, fromAsset]);
 
-  useEffect(() => {
-    if (!currentChain || !connextSdk) {
-      setRelayerFee(constants.Zero);
-    } else {
-      const origin = SUPPORTED_CHAINS_BY_CONNEXT[currentChain.id].domainId;
-      const destination = SUPPORTED_CHAINS_BY_CONNEXT[poolChainId].domainId;
-
-      // Calculate relayer fee
-      const estimateRelayerFeeParams = {
-        destinationDomain: destination,
-        isHighPriority: true,
-        originDomain: origin,
-      };
-      connextSdk.estimateRelayerFee(estimateRelayerFeeParams).then((res) => {
-        setRelayerFee(res);
-      });
-    }
-  }, [connextSdk, currentChain, poolChainId]);
-
   const onConfirm = async () => {
     if (!currentSdk || !address) return;
 
@@ -181,14 +169,15 @@ export const XSupplyModal = ({
   };
 
   const handleXSupply = async () => {
-    if (!connextSdk || !fromAsset || !maxSupplyAmount) return;
+    if (!connextSdk || !fromAsset || !maxSupplyAmount || !swapAssets) return;
 
     const origin = SUPPORTED_CHAINS_BY_CONNEXT[currentChain.id].domainId;
     const destination = SUPPORTED_CHAINS_BY_CONNEXT[poolChainId].domainId;
 
     const connext = await connextSdk.getConnext(origin);
+    const sourceSwapAddress = getSwapAndXcallAddress(origin);
 
-    if (!connext) {
+    if (!connext || !sourceSwapAddress) {
       return;
     }
 
@@ -207,26 +196,16 @@ export const XSupplyModal = ({
     setActiveStep(0);
     setFailedStep(0);
 
-    const xMintSource = SUPPORTED_CHAINS_XMINT[currentChain.id];
-    const xMintDestination = SUPPORTED_CHAINS_XMINT[poolChainId];
-    const destinationSwapAsset = SUPPORTED_SYMBOLS_BY_CONNEXT.includes(asset.underlyingSymbol)
-      ? asset.underlyingToken
-      : xMintDestination.usdcAddress;
-    const originSwapAsset =
-      destinationSwapAsset === xMintDestination.usdcAddress
-        ? xMintSource.usdcAddress
-        : xMintDestination.wethAddress;
-
     try {
       setActiveStep(optionToWrap ? 2 : 1);
 
       const token = currentSdk.getEIP20TokenInstance(fromAsset.address, currentSdk.signer);
-      const hasApprovedEnough = (
-        await token.callStatic.allowance(address, xMintSource.swapAddress)
-      ).gte(amount);
+      const hasApprovedEnough = (await token.callStatic.allowance(address, sourceSwapAddress)).gte(
+        amount
+      );
 
       if (!hasApprovedEnough) {
-        const tx = await currentSdk.approve(xMintSource.swapAddress, fromAsset.address);
+        const tx = await currentSdk.approve(sourceSwapAddress, fromAsset.address);
 
         addRecentTransaction({
           description: `Approve ${fromAsset.symbol}`,
@@ -288,7 +267,7 @@ export const XSupplyModal = ({
       const poolFee = await getPoolFeeForUniV3(
         destination,
         destinationRpc,
-        destinationSwapAsset,
+        swapAssets.destination.underlying,
         asset.underlyingToken
       );
 
@@ -319,8 +298,8 @@ export const XSupplyModal = ({
         fromAsset: fromAsset.address,
         originDomain: origin,
         relayerFeeInNativeAsset: relayerFee.toString(),
-        to: xMintDestination.targetAddress,
-        toAsset: originSwapAsset,
+        to: SUPPORTED_CHAINS_XMINT[poolChainId].targetAddress, // Midas Target address
+        toAsset: swapAssets.origin.underlying,
       };
 
       const xcall_request = await prepareSwapAndXCall(swapAndXCallParams, signerAddress);
@@ -539,7 +518,7 @@ export const XSupplyModal = ({
                       {fromAsset && <Balance asset={fromAsset} />}
                     </Column>
                     <StatsColumn
-                      amount={amount}
+                      amount={supplyAmount}
                       asset={asset}
                       assets={assets}
                       comptrollerAddress={comptrollerAddress}

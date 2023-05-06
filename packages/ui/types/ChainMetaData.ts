@@ -47,9 +47,9 @@ export interface FusePoolsPerChain {
 export type ChainXMintData = {
   assets: SupportedAsset[];
   supported: boolean;
-  swapAddress: string;
+  swapAddress?: string;
   targetAddress: string;
-  uniV3Address: string;
-  usdcAddress: string;
-  wethAddress: string;
+  uniV3Address?: string;
+  usdc?: SupportedAsset;
+  weth?: SupportedAsset;
 };
