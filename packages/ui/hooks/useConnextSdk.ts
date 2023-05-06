@@ -1,17 +1,19 @@
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
-import { MarketData } from '@ui/types/TokensDataMap';
+import { getBridgeAmountOut } from '@connext/chain-abstraction';
+import { chainIdToConfig } from 'chains/dist';
+import { BigNumber, constants } from 'ethers';
+import { formatUnits } from 'ethers/lib/utils.js';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { SupportedAsset } from 'types/dist';
+
 import {
   SUPPORTED_CHAINS_BY_CONNEXT,
   SUPPORTED_CHAINS_XMINT,
   SUPPORTED_SYMBOLS_BY_CONNEXT,
 } from '../constants';
-import { SupportedAsset } from 'types/dist';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { BigNumber, constants } from 'ethers';
-import { TokenData } from '@ui/types/ComponentPropsType';
-import { getBridgeAmountOut } from '@connext/chain-abstraction';
-import { chainIdToConfig } from 'chains/dist';
-import { formatUnits } from 'ethers/lib/utils.js';
+
+import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import type { TokenData } from '@ui/types/ComponentPropsType';
+import type { MarketData } from '@ui/types/TokensDataMap';
 
 export function useConnextSdk(
   asset: MarketData,

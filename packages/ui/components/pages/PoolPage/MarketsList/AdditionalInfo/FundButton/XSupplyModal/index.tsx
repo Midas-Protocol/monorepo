@@ -1,6 +1,5 @@
 import { Box, Button, Divider, HStack, Text } from '@chakra-ui/react';
 import {
-  getBridgeAmountOut,
   getPoolFeeForUniV3,
   getSwapAndXcallAddress,
   getXCallCallData,
@@ -12,7 +11,8 @@ import { FundOperationMode } from '@midas-capital/types';
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit';
 import { chainIdToConfig } from 'chains/dist';
 import { chakraComponents, Select } from 'chakra-react-select';
-import { constants, BigNumber, utils } from 'ethers';
+import type { BigNumber } from 'ethers';
+import { constants, utils } from 'ethers';
 import { formatEther, formatUnits, getAddress } from 'ethers/lib/utils.js';
 import { useEffect, useMemo, useState } from 'react';
 import { useSwitchNetwork } from 'wagmi';
@@ -34,6 +34,7 @@ import {
 } from '@ui/constants/index';
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
 import { useColors } from '@ui/hooks/useColors';
+import { useConnextSdk } from '@ui/hooks/useConnextSdk';
 import { useMaxSupplyTokenAmount } from '@ui/hooks/useMaxSupplyAmount';
 import { useSupplyCap } from '@ui/hooks/useSupplyCap';
 import { useErrorToast, useSuccessToast } from '@ui/hooks/useToast';
@@ -43,7 +44,6 @@ import type { TokenData, TxStep } from '@ui/types/ComponentPropsType';
 import type { MarketData } from '@ui/types/TokensDataMap';
 import { smallFormatter } from '@ui/utils/bigUtils';
 import { handleGenericError } from '@ui/utils/errorHandling';
-import { useConnextSdk } from '@ui/hooks/useConnextSdk';
 
 interface SupplyModalProps {
   asset: MarketData;
