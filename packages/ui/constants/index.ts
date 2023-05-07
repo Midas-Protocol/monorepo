@@ -307,8 +307,8 @@ export const SUPPORTED_CHAINS_XMINT: {
     swapAddress: '0x119dd93154780d7604D50014c4545b4906928bFF',
     targetAddress: '0x0b081b724CDC4DD9186E64F259b5fC589a4Fd7D0',
     uniV3Address: '0x73D53460fc1ead8Eb4A7771Bc5023159E8730E68',
-    usdc: bsc.assets.find((a) => a.symbol === assetSymbols.USDC)!,
-    weth: bsc.assets.find((a) => a.symbol === assetSymbols.ETH)!,
+    usdc: bsc.assets.find((a) => a.symbol === assetSymbols.USDC),
+    weth: bsc.assets.find((a) => a.symbol === assetSymbols.ETH),
   },
   [polygon.chainId]: {
     assets: polygon.assets.filter((a) => SUPPORTED_SYMBOLS_BY_CONNEXT.includes(a.symbol)),
@@ -316,8 +316,8 @@ export const SUPPORTED_CHAINS_XMINT: {
     swapAddress: '0x6e92344d08F8443a9C704452ac66bEFB90D32E12',
     targetAddress: '0xDF97CadbcCeE9cfdB12A3e9BB7663E6753A71a0C',
     uniV3Address: '0xeC345E9be52f0Fca8aAd6aec3254Ed86151b060d',
-    usdc: polygon.assets.find((a) => a.symbol === assetSymbols.USDC)!,
-    weth: polygon.assets.find((a) => a.symbol === assetSymbols.WETH)!,
+    usdc: polygon.assets.find((a) => a.symbol === assetSymbols.USDC),
+    weth: polygon.assets.find((a) => a.symbol === assetSymbols.WETH),
   },
   [arbitrum.chainId]: {
     assets: arbitrum.assets.filter((a) => SUPPORTED_SYMBOLS_BY_CONNEXT.includes(a.symbol)),
@@ -325,8 +325,8 @@ export const SUPPORTED_CHAINS_XMINT: {
     swapAddress: '',
     targetAddress: '',
     uniV3Address: '',
-    usdc: arbitrum.assets.find((a) => a.symbol === assetSymbols.USDC)!,
-    weth: arbitrum.assets.find((a) => a.symbol === assetSymbols.WETH)!,
+    usdc: arbitrum.assets.find((a) => a.symbol === assetSymbols.USDC),
+    weth: arbitrum.assets.find((a) => a.symbol === assetSymbols.WETH),
   },
 };
 

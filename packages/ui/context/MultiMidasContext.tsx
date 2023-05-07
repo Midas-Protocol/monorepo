@@ -11,6 +11,7 @@ import type { Dispatch, ReactNode } from 'react';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { Chain } from 'wagmi';
 import { useAccount, useDisconnect, useNetwork, useSigner } from 'wagmi';
+
 import {
   MIDAS_LOCALSTORAGE_KEYS,
   SUPPORTED_CHAINS_BY_CONNEXT,
