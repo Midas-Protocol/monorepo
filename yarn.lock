@@ -2152,9 +2152,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@connext/chain-abstraction@npm:^1.0.2-alpha.14":
-  version: 1.0.2-alpha.14
-  resolution: "@connext/chain-abstraction@npm:1.0.2-alpha.14"
+"@connext/chain-abstraction@npm:^1.0.2-alpha.16":
+  version: 1.0.2-alpha.16
+  resolution: "@connext/chain-abstraction@npm:1.0.2-alpha.16"
   dependencies:
     "@connext/nxtp-utils": 2.0.2-alpha.8
     "@sinclair/typebox": 0.25.21
@@ -2162,7 +2162,7 @@ __metadata:
     isomorphic-fetch: ^3.0.0
     memoizee: 0.4.15
     typedoc: 0.23.25
-  checksum: d6d6aa9ffa486ec9a1d4d793b32e8f89348072b048caebe0c11ff9903f01a9b54a6e118f1f2569506158a47c427d9cb1b71be88220ea502abb255cfee2d9b3a7
+  checksum: 7541f79ce84f4e092367e879c833a4a14e5fd98a2b74549e9d786314c05d9eb99b55e62cf7846a65ef0a9c22cdd6c3286d3b27a04c70174c22528a8b63616056
   languageName: node
   linkType: hard
 
@@ -4344,7 +4344,7 @@ __metadata:
     "@chakra-ui/cli": ^2.3.0
     "@chakra-ui/icons": ^2.0.18
     "@chakra-ui/react": ^2.5.5
-    "@connext/chain-abstraction": ^1.0.2-alpha.14
+    "@connext/chain-abstraction": ^1.0.2-alpha.16
     "@connext/sdk": ^2.0.2
     "@emotion/react": ^11.10.6
     "@emotion/styled": ^11.10.6
