@@ -42,7 +42,7 @@ export function useConnextSdk(
         const originSwapAsset =
           destinationSwapAsset.symbol === xMintDestination.usdc?.symbol
             ? xMintSource.usdc
-            : xMintDestination.weth;
+            : xMintSource.weth;
 
         if (originSwapAsset) {
           return {
