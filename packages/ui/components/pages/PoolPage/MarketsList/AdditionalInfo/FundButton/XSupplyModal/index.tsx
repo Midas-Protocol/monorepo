@@ -174,7 +174,16 @@ export const XSupplyModal = ({
         }
       }
     }
-  }, [amount, asset, isLoading, isAmountValid, fromAsset, supplyAmount, maxSupplyAmount]);
+  }, [
+    amount,
+    asset,
+    estimating,
+    isLoading,
+    isAmountValid,
+    fromAsset,
+    supplyAmount,
+    maxSupplyAmount,
+  ]);
 
   const onConfirm = async () => {
     if (!currentSdk || !address) return;
