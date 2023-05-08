@@ -96,6 +96,7 @@ export const XSupplyModal = ({
   const { data: tokens } = useTokens(currentChain.id);
   const [fromAsset, setFromAsset] = useState<TokenData | undefined>();
   const { estimateSupplyAmount, relayerFee, swapAssets } = useConnextSdk(asset, poolChainId);
+  const [estimating, setEstimating] = useState<boolean>(false);
   const [supplyAmount, setSupplyAmount] = useState<BigNumber>(constants.Zero);
 
   const errorToast = useErrorToast();
@@ -141,34 +142,39 @@ export const XSupplyModal = ({
       const max = maxSupplyAmount.number;
       setIsAmountValid(+formatUnits(amount, fromAsset?.decimals) <= max);
       if (fromAsset) {
-        estimateSupplyAmount(fromAsset, amount).then((res) =>
-          setSupplyAmount(res ? res.bigNumber : constants.Zero)
-        );
+        setEstimating(true);
+        estimateSupplyAmount(fromAsset, amount).then((res) => {
+          setEstimating(false);
+          const supply = res ? res.bigNumber : constants.Zero;
+          setSupplyAmount(supply);
+
+          if (supply.gt(maxSupplyAmount.cap)) {
+            setIsAmountValid(false);
+          }
+        });
       }
     }
   }, [amount, estimateSupplyAmount, fromAsset, maxSupplyAmount]);
-
-  useEffect(() => {
-    if (!maxSupplyAmount) {
-      setIsAmountValid(false);
-    } else {
-      setIsAmountValid(supplyAmount.lte(maxSupplyAmount.cap));
-    }
-  }, [supplyAmount, maxSupplyAmount]);
 
   useEffect(() => {
     if (amount.isZero() || !fromAsset) {
       setBtnStr('Enter a valid amount to supply');
     } else if (isLoading) {
       setBtnStr(`Loading your balance of ${fromAsset?.symbol}...`);
+    } else if (estimating) {
+      setBtnStr(`Estimating supply amount...`);
     } else {
       if (isAmountValid) {
         setBtnStr('Supply');
       } else {
-        setBtnStr(`You don't have enough ${fromAsset?.symbol}`);
+        if (maxSupplyAmount && supplyAmount.gt(maxSupplyAmount.cap)) {
+          setBtnStr(`Your supply amount is more than ${asset.underlyingSymbol} cap`);
+        } else {
+          setBtnStr(`You don't have enough ${fromAsset?.symbol}`);
+        }
       }
     }
-  }, [amount, isLoading, isAmountValid, fromAsset]);
+  }, [amount, asset, isLoading, isAmountValid, fromAsset, supplyAmount, maxSupplyAmount]);
 
   const onConfirm = async () => {
     if (!currentSdk || !address) return;
@@ -565,7 +571,7 @@ export const XSupplyModal = ({
                     <Button
                       height={16}
                       id="confirmFund"
-                      isDisabled={!isAmountValid}
+                      isDisabled={!isAmountValid || isLoading || estimating}
                       onClick={onConfirm}
                       width="100%"
                     >

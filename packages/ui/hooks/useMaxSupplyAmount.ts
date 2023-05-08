@@ -81,33 +81,43 @@ export function useMaxSupplyTokenAmount(
 ) {
   const { address, currentChain, currentSdk } = useMultiMidas();
   const sdk = useSdk(chainId);
+  const { data: supplyCapsDataForAsset } = useSupplyCapsDataForAsset(
+    comptrollerAddress,
+    asset.cToken,
+    chainId
+  );
 
   return useQuery(
     [
       'useMaxSupplyTokenAmount',
       asset.cToken,
-      token?.address,
+      token,
       comptrollerAddress,
       sdk?.chainId,
       address,
       currentChain?.id,
+      supplyCapsDataForAsset,
     ],
     async () => {
-      if (sdk && address && currentChain && currentSdk && token) {
+      if (sdk && address && currentChain && currentSdk && token && supplyCapsDataForAsset) {
         const isXMint = currentChain.id !== chainId;
         const assetToken = token.address;
+
         const tokenBalance = !assetToken
           ? BigNumber.from(0)
           : await fetchTokenBalance(assetToken, !isXMint ? sdk : currentSdk, address);
 
         const comptroller = sdk.createComptroller(comptrollerAddress);
-        const supplyCap = await comptroller.callStatic.supplyCaps(asset.cToken);
+        const [supplyCap, isWhitelisted] = await Promise.all([
+          comptroller.callStatic.supplyCaps(asset.cToken),
+          comptroller.callStatic.isSupplyCapWhitelisted(asset.cToken, address),
+        ]);
 
-        let availableCap = BigNumber.from(0);
+        let availableCap = constants.MaxInt256;
 
-        // if asset has supply cap
-        if (supplyCap.gt(constants.Zero)) {
-          availableCap = supplyCap.sub(asset.totalSupply);
+        // if address isn't in supply cap whitelist and asset has supply cap
+        if (!isWhitelisted && supplyCap.gt(constants.Zero)) {
+          availableCap = supplyCap.sub(supplyCapsDataForAsset.nonWhitelistedTotalSupply);
         }
 
         const decimals = !isXMint
