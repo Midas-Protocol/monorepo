@@ -149,6 +149,14 @@ export const XSupplyModal = ({
   }, [amount, estimateSupplyAmount, fromAsset, maxSupplyAmount]);
 
   useEffect(() => {
+    if (!maxSupplyAmount) {
+      setIsAmountValid(false);
+    } else {
+      setIsAmountValid(supplyAmount.lte(maxSupplyAmount.cap));
+    }
+  }, [supplyAmount, maxSupplyAmount]);
+
+  useEffect(() => {
     if (amount.isZero() || !fromAsset) {
       setBtnStr('Enter a valid amount to supply');
     } else if (isLoading) {
