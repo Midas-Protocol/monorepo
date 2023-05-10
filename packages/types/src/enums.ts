@@ -421,6 +421,7 @@ export enum assetSymbols {
   // Arbitrum
   "2pool" = "2pool",
   GOHM = "GOHM",
+  OHM = "OHM",
   "WETH-GOHM" = "WETH-GOHM",
   DPX = "DPX",
   MAGIC = "MAGIC",
@@ -445,5 +446,3 @@ export enum assetSymbols {
   ethBtcMomentum = "ethBtcMomentum",
   wstETH = "wstETH",
 }
-
-export default assetSymbols;
