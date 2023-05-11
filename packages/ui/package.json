@@ -17,7 +17,7 @@
     "@chainsafe/dappeteer": "^5.0.1",
     "@chakra-ui/icons": "^2.0.18",
     "@chakra-ui/react": "^2.5.5",
-    "@connext/chain-abstraction": "^1.0.2-alpha.16",
+    "@connext/chain-abstraction": "^1.0.2-alpha.18",
     "@connext/sdk": "^2.0.2",
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
