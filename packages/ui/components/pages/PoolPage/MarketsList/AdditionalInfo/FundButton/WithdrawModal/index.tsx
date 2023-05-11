@@ -98,7 +98,11 @@ export const WithdrawModal = ({
 
       let resp;
       if (maxWithdrawAmount.eq(amount)) {
-        resp = await currentSdk.withdraw(asset.cToken, constants.MaxUint256);
+        if (asset.borrowBalance.isZero()) {
+          resp = await currentSdk.maxWithdrawForNonBorrower(asset.cToken);
+        } else {
+          resp = await currentSdk.withdraw(asset.cToken, constants.MaxUint256);
+        }
       } else {
         resp = await currentSdk.withdraw(asset.cToken, amount);
       }
