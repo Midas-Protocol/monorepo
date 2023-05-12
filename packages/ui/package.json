@@ -18,7 +18,7 @@
     "@chakra-ui/icons": "^2.0.18",
     "@chakra-ui/react": "^2.5.5",
     "@connext/chain-abstraction": "^1.0.2-alpha.18",
-    "@connext/sdk": "^2.0.2",
+    "@connext/sdk": "^2.0.3-alpha.12",
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
     "@ethersproject/contracts": "^5.7.0",

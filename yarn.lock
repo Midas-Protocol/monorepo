@@ -1886,29 +1886,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@connext/nxtp-utils@npm:2.0.1":
-  version: 2.0.1
-  resolution: "@connext/nxtp-utils@npm:2.0.1"
-  dependencies:
-    "@maticnetwork/maticjs": 3.6.0-beta.6
-    "@maticnetwork/maticjs-web3": 1.0.4
-    "@sinclair/typebox": 0.25.21
-    ajv: 8.12.0
-    ajv-formats: 2.1.1
-    axios: 1.3.3
-    chai: 4.3.7
-    chai-as-promised: 7.1.1
-    chai-subset: 1.6.0
-    ethers: 5.7.2
-    hyperid: 3.1.1
-    merkletreejs: 0.3.9
-    pino: 8.10.0
-    secp256k1: 4.0.3
-    sinon-chai: 3.7.0
-  checksum: aa55f55ead5ee5aac07db3034b70f2def45026420325a09a7150f888bdd1b9e909df874f9978ccd421a219245005170a9f6103f2c5aae4ef5d32078a45d8182c
-  languageName: node
-  linkType: hard
-
 "@connext/nxtp-utils@npm:2.0.2-alpha.9":
   version: 2.0.2-alpha.9
   resolution: "@connext/nxtp-utils@npm:2.0.2-alpha.9"
@@ -1932,18 +1909,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@connext/sdk@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "@connext/sdk@npm:2.0.2"
+"@connext/sdk@npm:^2.0.3-alpha.12":
+  version: 2.0.3-alpha.12
+  resolution: "@connext/sdk@npm:2.0.3-alpha.12"
   dependencies:
     "@connext/nxtp-txservice": 2.0.0-alpha.1
-    "@connext/nxtp-utils": 2.0.1
+    "@connext/nxtp-utils": 2.0.2-alpha.9
     "@sinclair/typebox": 0.25.21
     ethers: 5.7.2
     isomorphic-fetch: ^3.0.0
     memoizee: 0.4.15
     typedoc: 0.23.25
-  checksum: e83645b83a8de27aad22df445526723a916d96e586e29f7b1af15f5c0b32626b900f5d69c87c5234ad21c28ff9ddf505171cc2aab90bc4735eab316fa3375829
+  checksum: 149dafd70f0dd6730d0c2f13e5983eeea8d6b96be7e2f866a4da1d2ae410c6315e6b916890d9fc0aa02c3ad2fb5cbb6816abe5b35ea91589992df09a2d6030ed
   languageName: node
   linkType: hard
 
@@ -4019,7 +3996,7 @@ __metadata:
     "@chakra-ui/icons": ^2.0.18
     "@chakra-ui/react": ^2.5.5
     "@connext/chain-abstraction": ^1.0.2-alpha.18
-    "@connext/sdk": ^2.0.2
+    "@connext/sdk": ^2.0.3-alpha.12
     "@emotion/react": ^11.10.6
     "@emotion/styled": ^11.10.6
     "@ethersproject/contracts": ^5.7.0
