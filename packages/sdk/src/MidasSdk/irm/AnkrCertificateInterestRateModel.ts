@@ -8,11 +8,11 @@ import { getContract } from "../utils";
 
 export default class AnkrCertificateInterestRateModel implements InterestRateModel {
   initialized: boolean | undefined;
-  baseRatePerBlock: BigNumber | undefined;
-  multiplierPerBlock: BigNumber | undefined;
-  jumpMultiplierPerBlock: BigNumber | undefined;
-  kink: BigNumber | undefined;
-  reserveFactorMantissa: BigNumber | undefined;
+  baseRatePerBlock: bigint | undefined;
+  multiplierPerBlock: bigint | undefined;
+  jumpMultiplierPerBlock: bigint | undefined;
+  kink: bigint | undefined;
+  reserveFactorMantissa: bigint | undefined;
 
   async init(interestRateModelAddress: string, assetAddress: string, provider: Web3Provider): Promise<void> {
     const jumpRateModelContract = getContract(

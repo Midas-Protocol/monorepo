@@ -1,4 +1,5 @@
 import { BigNumber, BigNumberish, Overrides, providers } from "ethers";
+import { PublicClient } from "viem";
 
 export type Artifact = {
   abi: Array<object>;
@@ -31,18 +32,14 @@ export type MinifiedCompoundContracts = {
 export type MinifiedOraclesContracts = MinifiedCompoundContracts;
 
 export interface InterestRateModel {
-  init(
-    interestRateModelAddress: string,
-    assetAddress: string,
-    provider: providers.Web3Provider | providers.JsonRpcProvider
-  ): Promise<void>;
+  init(interestRateModelAddress: string, assetAddress: string, publicClient: PublicClient): Promise<void>;
 
   _init(
     interestRateModelAddress: string,
     reserveFactorMantissa: BigNumberish,
     adminFeeMantissa: BigNumberish,
     fuseFeeMantissa: BigNumberish,
-    provider: providers.Web3Provider | providers.JsonRpcProvider
+    publicClient: PublicClient
   ): Promise<void>;
 
   __init(

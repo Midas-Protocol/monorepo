@@ -1,17 +1,16 @@
-import { JsonRpcProvider } from '@ethersproject/providers';
 import { chainIdToConfig } from '@midas-capital/chains';
 import { MidasSdk } from '@midas-capital/sdk';
 import Security from '@midas-capital/security';
 import type { SupportedChains } from '@midas-capital/types';
 import * as Sentry from '@sentry/browser';
-import type { FetchSignerResult, Signer } from '@wagmi/core';
 import type { Dispatch, ReactNode } from 'react';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import type { WalletClient } from 'viem';
+import { createPublicClient, http } from 'viem';
+import { useAccount, useDisconnect, useNetwork, useWalletClient } from 'wagmi';
 import type { Chain } from 'wagmi';
-import { useAccount, useDisconnect, useNetwork, useSigner } from 'wagmi';
 
 import { MIDAS_LOCALSTORAGE_KEYS } from '@ui/constants/index';
-import { useEnabledChains } from '@ui/hooks/useChainConfig';
 
 export interface MultiMidasContextData {
   address?: string;
@@ -31,23 +30,25 @@ export interface MultiMidasContextData {
   setAddress: Dispatch<string>;
   setGlobalLoading: Dispatch<boolean>;
   setIsSidebarCollapsed: Dispatch<boolean>;
-  signer?: FetchSignerResult<Signer>;
+  walletClient?: WalletClient | null;
 }
 
 export const MultiMidasContext = createContext<MultiMidasContextData | undefined>(undefined);
 
 interface MultiMidasProviderProps {
+  chains: Chain[];
   children: ReactNode;
 }
 
-export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { children: null }) => {
-  const enabledChains = useEnabledChains();
+export const MultiMidasProvider = (
+  { children, chains }: MultiMidasProviderProps = { chains: [], children: null }
+) => {
   const { chain } = useNetwork();
   // const { chain, chains } = useNetwork();
   const { address: wagmiAddress, isConnected } = useAccount();
   // const { address, isConnecting, isReconnecting, isConnected } = useAccount();
   // const { isLoading: isNetworkLoading, isIdle, switchNetworkAsync } = useSwitchNetwork();
-  const { data: signer } = useSigner();
+  const { data: walletClient } = useWalletClient();
   const { disconnect } = useDisconnect();
   const [address, setAddress] = useState<string | undefined>();
   const [currentChain, setCurrentChain] = useState<
@@ -63,25 +64,20 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
     const _sdks: MidasSdk[] = [];
     const _securities: Security[] = [];
     const _chainIds: SupportedChains[] = [];
-    enabledChains.map((chainId) => {
-      const config = chainIdToConfig[chainId];
-      _sdks.push(
-        new MidasSdk(
-          new JsonRpcProvider(config.specificParams.metadata.rpcUrls.default.http[0]),
-          config
-        )
-      );
-      _securities.push(
-        new Security(
-          chainId,
-          new JsonRpcProvider(config.specificParams.metadata.rpcUrls.default.http[0])
-        )
-      );
-      _chainIds.push(chainId);
+    chains.map((chain) => {
+      const config = chainIdToConfig[chain.id];
+      const publicClient = createPublicClient({
+        chain: chain,
+        transport: http(config.specificParams.metadata.rpcUrls.default.http[0]),
+      });
+
+      _sdks.push(new MidasSdk(publicClient, null, config));
+      _securities.push(new Security(chain.id, publicClient, null));
+      _chainIds.push(chain.id);
     });
 
     return [_sdks, _securities, _chainIds.sort()];
-  }, [enabledChains]);
+  }, [chains]);
 
   const currentSdk = useMemo(() => {
     if (chain && !chain.unsupported) {
@@ -102,21 +98,14 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
   );
 
   useEffect(() => {
-    if (currentSdk && signer) {
-      currentSdk.setSigner(signer);
-    }
-  }, [signer, currentSdk]);
-
-  useEffect(() => {
-    if (sdks.length > 0 && !signer) {
-      sdks.map((sdk) => {
-        const config = chainIdToConfig[sdk.chainId];
-        sdk.removeSigner(
-          new JsonRpcProvider(config.specificParams.metadata.rpcUrls.default.http[0])
-        );
-      });
-    }
-  }, [signer, sdks]);
+    sdks.map((sdk) => {
+      if (walletClient && sdk.chainId === walletClient.chain.id) {
+        sdk.setClients(sdk.publicClient, walletClient);
+      } else {
+        sdk.setClients(sdk.publicClient, null);
+      }
+    });
+  }, [walletClient, sdks]);
 
   useEffect(() => {
     if (wagmiAddress) {
@@ -168,7 +157,7 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
       setAddress,
       setGlobalLoading,
       setIsSidebarCollapsed,
-      signer,
+      walletClient,
     };
   }, [
     sdks,
@@ -183,7 +172,7 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
     address,
     disconnect,
     isConnected,
-    signer,
+    walletClient,
     setAddress,
     isSidebarCollapsed,
     setIsSidebarCollapsed,

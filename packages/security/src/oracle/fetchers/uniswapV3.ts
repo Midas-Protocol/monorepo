@@ -1,21 +1,32 @@
 import { ChainConfig } from "@midas-capital/types";
 import Decimal from "decimal.js";
-import { BigNumber, Contract, utils } from "ethers";
+import {
+  encodeAbiParameters,
+  encodePacked,
+  formatEther,
+  getAddress,
+  getContract,
+  getContractAddress,
+  keccak256,
+  parseAbi,
+  parseAbiParameters,
+  parseEther,
+  PublicClient,
+} from "viem";
 
-import { SignerOrProvider } from "../..";
 import { c1e18, QUOTER_ABI, UNISWAP_V3_POOL_ABI } from "../scorers/uniswapV3/constants";
 import { Direction, PumpAndDump, Quote, Slot0, Trade, UniswapV3AssetConfig } from "../scorers/uniswapV3/types";
 import { sqrtPriceX96ToPrice } from "../scorers/uniswapV3/utils";
 
 export class UniswapV3Fetcher {
-  public quoter: Contract;
+  public quoter: any;
   public chainConfig: ChainConfig;
   public W_TOKEN: string;
   public quoterContract: string;
   public uniV3Factory: string;
   public uniV3PairInitHash: string;
 
-  public constructor(chainConfig: ChainConfig, provider: SignerOrProvider) {
+  public constructor(chainConfig: ChainConfig, publicClient: PublicClient) {
     this.chainConfig = chainConfig;
     this.W_TOKEN = chainConfig.chainAddresses.W_TOKEN;
     if (chainConfig.chainAddresses && chainConfig.chainAddresses.UNISWAP_V3) {
@@ -25,18 +36,22 @@ export class UniswapV3Fetcher {
     } else {
       throw new Error("UniswapV3 Config not found");
     }
-    this.quoter = new Contract(this.quoterContract, QUOTER_ABI, provider);
+    this.quoter = getContract({ address: getAddress(this.quoterContract), abi: QUOTER_ABI, publicClient });
   }
 
-  getSlot0 = async (tokenConfig: UniswapV3AssetConfig, provider: SignerOrProvider): Promise<Slot0> => {
+  getSlot0 = async (tokenConfig: UniswapV3AssetConfig, publicClient: PublicClient): Promise<Slot0> => {
     const { token, fee, inverted } = tokenConfig;
     if (token.address === this.W_TOKEN) {
       throw Error("Token is WNATIVE");
     }
     const poolAddress = this.#computeUniV3PoolAddress(token.address, this.W_TOKEN, fee);
     try {
-      const pool = new Contract(poolAddress, UNISWAP_V3_POOL_ABI, provider);
-      const res: Slot0 = await pool.callStatic["slot0()"]();
+      const res = (await publicClient.readContract({
+        address: getAddress(poolAddress),
+        abi: parseAbi(UNISWAP_V3_POOL_ABI),
+        functionName: "slot0",
+      })) as Slot0;
+
       return {
         ...res,
         price: sqrtPriceX96ToPrice(res.sqrtPriceX96, inverted),
@@ -46,19 +61,37 @@ export class UniswapV3Fetcher {
     }
   };
   #computeUniV3PoolAddress = (tokenA: string, tokenB: string, fee: number) => {
-    const [token0, token1] = BigNumber.from(tokenA).lt(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA];
+    const [token0, token1] = BigInt(tokenA) < BigInt(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA];
 
-    return utils.getCreate2Address(
-      this.uniV3Factory,
-      utils.solidityKeccak256(
-        ["bytes"],
-        [utils.defaultAbiCoder.encode(["address", "address", "uint24"], [token0, token1, fee])]
+    return getContractAddress({
+      bytecode: this.uniV3PairInitHash,
+      from: getAddress(this.uniV3Factory),
+      opcode: "CREATE2",
+      salt: keccak256(
+        encodePacked(
+          ["bytes"],
+          [
+            encodeAbiParameters(parseAbiParameters("address, address, uint24"), [
+              getAddress(token0),
+              getAddress(token1),
+              fee,
+            ]),
+          ]
+        )
       ),
-      this.uniV3PairInitHash
-    );
+    });
+
+    // return utils.getCreate2Address(
+    //   this.uniV3Factory,
+    //   utils.solidityKeccak256(
+    //     ["bytes"],
+    //     [utils.defaultAbiCoder.encode(["address", "address", "uint24"], [token0, token1, fee])]
+    //   ),
+    //   this.uniV3PairInitHash
+    // );
   };
   getPumpAndDump = async (
-    currPrice: BigNumber,
+    currPrice: bigint,
     tokenConfig: UniswapV3AssetConfig,
     ethPrice: number,
     tradeValueInUSD: number
@@ -71,7 +104,7 @@ export class UniswapV3Fetcher {
   };
 
   getTrade = async (
-    currPrice: BigNumber,
+    currPrice: bigint,
     tokenConfig: UniswapV3AssetConfig,
     ethPrice: number,
     tradeValueInUSD: number,
@@ -81,11 +114,11 @@ export class UniswapV3Fetcher {
     if (token.address === this.W_TOKEN)
       return {
         value: tradeValueInUSD,
-        price: BigNumber.from(0),
+        price: BigInt(0),
         priceImpact: "0",
-        amountIn: BigNumber.from(0),
-        amountOut: BigNumber.from(0),
-        after: BigNumber.from(0),
+        amountIn: BigInt(0),
+        amountOut: BigInt(0),
+        after: BigInt(0),
         tokenOut: token.address,
         index: 0,
       };
@@ -93,11 +126,9 @@ export class UniswapV3Fetcher {
     try {
       const amountIn =
         direction === "pump"
-          ? utils.parseEther(new Decimal(tradeValueInUSD / ethPrice).toFixed(18))
-          : utils
-              .parseEther(new Decimal(tradeValueInUSD / ethPrice).toFixed(18))
-              .mul(c1e18)
-              .div(currPrice.eq(0) ? 1 : currPrice);
+          ? parseEther(`${Number(new Decimal(tradeValueInUSD / ethPrice).toFixed(18))}`)
+          : (parseEther(`${Number(new Decimal(tradeValueInUSD / ethPrice).toFixed(18))}`) * c1e18) /
+            (currPrice == BigInt(0) ? BigInt(1) : currPrice);
 
       const quote: Quote = await this.quoter.callStatic.quoteExactInputSingle({
         tokenIn: direction === "pump" ? this.W_TOKEN : token.address,
@@ -109,12 +140,8 @@ export class UniswapV3Fetcher {
 
       const after = sqrtPriceX96ToPrice(quote.sqrtPriceX96After, inverted);
 
-      const priceImpact = utils.formatEther(
-        after
-          .sub(currPrice)
-          .mul(c1e18)
-          .div(currPrice.eq(0) ? 1 : currPrice)
-          .mul(100)
+      const priceImpact = formatEther(
+        (((after - currPrice) * c1e18) / (currPrice == BigInt(0) ? BigInt(1) : currPrice)) * 100n
       );
       return {
         amountIn: amountIn,

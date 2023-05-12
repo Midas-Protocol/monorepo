@@ -3,30 +3,30 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import type { AppProps } from 'next/app';
 import { appWithTranslation } from 'next-i18next';
-import { createClient, WagmiConfig } from 'wagmi';
+import { createConfig, WagmiConfig } from 'wagmi';
 
 import Layout from '@ui/components/shared/Layout';
 import RainbowKit from '@ui/components/shared/RainbowKitProvider';
 import { config } from '@ui/config/index';
 import { MultiMidasProvider } from '@ui/context/MultiMidasContext';
 import { theme } from '@ui/theme/index';
-import { connectors, provider } from '@ui/utils/connectors';
+import { chains, connectors, publicClient } from '@ui/utils/connectors';
 
 const queryClient = new QueryClient();
 
-const client = createClient({
+const wagmiConfig = createConfig({
   autoConnect: true,
   connectors,
-  provider,
+  publicClient,
 });
 
 function MidasDapp({ Component, pageProps }: AppProps) {
   return (
     <ChakraProvider theme={theme}>
-      <WagmiConfig client={client}>
+      <WagmiConfig config={wagmiConfig}>
         <RainbowKit>
           <QueryClientProvider client={queryClient}>
-            <MultiMidasProvider>
+            <MultiMidasProvider chains={chains}>
               <Layout>
                 <Component {...pageProps} />
               </Layout>

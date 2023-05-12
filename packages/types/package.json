@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "ethers": "^5.6.9",
-    "utf-8-validate": "^5.0.9"
+    "utf-8-validate": "^5.0.9",
+    "viem": "^0.3.22"
   }
 }

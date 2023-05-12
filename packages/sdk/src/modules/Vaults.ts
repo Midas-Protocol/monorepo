@@ -1,7 +1,9 @@
 import { FlywheelRewardsInfoForVault, FundOperationMode, SupportedChains, VaultData } from "@midas-capital/types";
-import { BigNumber, constants, ContractTransaction, utils } from "ethers";
+import { bigint, constants, ContractTransaction, utils } from "ethers";
+import { getAddress } from "viem";
 
 import EIP20InterfaceABI from "../../abis/EIP20Interface";
+import { MaxUint256 } from "../MidasSdk/constants";
 import { getContract } from "../MidasSdk/utils";
 
 import { CreateContractsModule } from "./CreateContracts";
@@ -120,27 +122,35 @@ export function withVaults<TBase extends CreateContractsModule = CreateContracts
     }
 
     async vaultApprove(vault: string, asset: string) {
+      this.walletClient.writeContract({
+        address: getAddress(asset),
+        abi: EIP20InterfaceABI,
+        functionName: "approve",
+        args: [getAddress(vault), MaxUint256],
+        account: this.account,
+        chain: this.walletClient.chain,
+      });
       const token = getContract(asset, EIP20InterfaceABI, this.signer);
-      const tx = await token.approve(vault, constants.MaxUint256);
+      const tx = await token.approve(vault, MaxUint256);
 
       return tx;
     }
 
-    async vaultDeposit(vault: string, amount: BigNumber) {
+    async vaultDeposit(vault: string, amount: bigint) {
       const optimizedAPRVault = this.createOptimizedAPRVault(vault, this.signer);
       const tx: ContractTransaction = await optimizedAPRVault["deposit(uint256)"](amount);
 
       return { tx };
     }
 
-    async vaultWithdraw(vault: string, amount: BigNumber) {
+    async vaultWithdraw(vault: string, amount: bigint) {
       const optimizedAPRVault = this.createOptimizedAPRVault(vault, this.signer);
       const tx: ContractTransaction = await optimizedAPRVault["withdraw(uint256)"](amount);
 
       return { tx };
     }
 
-    async getUpdatedVault(mode: FundOperationMode, vault: VaultData, amount: BigNumber) {
+    async getUpdatedVault(mode: FundOperationMode, vault: VaultData, amount: bigint) {
       let updatedVault: VaultData = vault;
       const optimizedAPRVault = this.createOptimizedAPRVault(vault.vault);
 
