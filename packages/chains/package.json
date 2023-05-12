@@ -35,7 +35,6 @@
   },
   "dependencies": {
     "@midas-capital/types": "workspace:*",
-    "ethers": "^5.6.9",
     "utf-8-validate": "^5.0.9"
   }
 }

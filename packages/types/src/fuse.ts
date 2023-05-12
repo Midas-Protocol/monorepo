@@ -1,44 +1,42 @@
-import { BigNumber } from "ethers";
-
 export interface FuseAsset {
   cToken: string;
   plugin?: string;
 
   /** scaled by `underlying.decimals()`  */
-  borrowBalance: BigNumber;
+  borrowBalance: bigint;
   /** scaled by `underlying.decimals()`  */
-  supplyBalance: BigNumber;
+  supplyBalance: bigint;
 
   /** scaled by `underlying.decimals()`  */
-  liquidity: BigNumber;
+  liquidity: bigint;
   membership: boolean;
 
   underlyingName: string;
   underlyingSymbol: string;
   underlyingToken: string;
-  underlyingDecimals: BigNumber;
+  underlyingDecimals: bigint;
 
   /** scaled by `1e18` */
-  underlyingPrice: BigNumber;
+  underlyingPrice: bigint;
 
   /** scaled by `underlying.decimals()`  */
-  underlyingBalance: BigNumber;
+  underlyingBalance: bigint;
 
   /** scaled by `1e18` */
-  collateralFactor: BigNumber;
+  collateralFactor: bigint;
   /** scaled by `1e18` */
-  reserveFactor: BigNumber;
+  reserveFactor: bigint;
 
-  adminFee: BigNumber;
-  fuseFee: BigNumber;
+  adminFee: bigint;
+  fuseFee: bigint;
 
-  borrowRatePerBlock: BigNumber;
-  supplyRatePerBlock: BigNumber;
+  borrowRatePerBlock: bigint;
+  supplyRatePerBlock: bigint;
 
   /** scaled by `underlying.decimals()`  */
-  totalBorrow: BigNumber;
+  totalBorrow: bigint;
   /** scaled by `underlying.decimals()`  */
-  totalSupply: BigNumber;
+  totalSupply: bigint;
 
   isBorrowPaused: boolean;
   isSupplyPaused: boolean;
@@ -80,8 +78,8 @@ export interface FusePoolData {
 
   totalSupplyBalanceNative: number;
   totalBorrowBalanceNative: number;
-  blockPosted: BigNumber;
-  timestampPosted: BigNumber;
+  blockPosted: bigint;
+  timestampPosted: bigint;
   underlyingTokens: string[];
   underlyingSymbols: string[];
   utilization: number;

@@ -1,4 +1,3 @@
-import { BigNumber, BigNumberish, Overrides, providers } from "ethers";
 import { PublicClient } from "viem";
 
 export type Artifact = {
@@ -12,8 +11,6 @@ export type Artifact = {
     sourceMap: string;
   };
 };
-
-export type TxOptions = Overrides & { from?: string | Promise<string> };
 
 export type MinifiedContracts = {
   [key: string]: {
@@ -36,23 +33,23 @@ export interface InterestRateModel {
 
   _init(
     interestRateModelAddress: string,
-    reserveFactorMantissa: BigNumberish,
-    adminFeeMantissa: BigNumberish,
-    fuseFeeMantissa: BigNumberish,
+    reserveFactorMantissa: bigint,
+    adminFeeMantissa: bigint,
+    fuseFeeMantissa: bigint,
     publicClient: PublicClient
   ): Promise<void>;
 
   __init(
-    baseRatePerBlock: BigNumberish,
-    multiplierPerBlock: BigNumberish,
-    jumpMultiplierPerBlock: BigNumberish,
-    kink: BigNumberish,
-    reserveFactorMantissa: BigNumberish,
-    adminFeeMantissa: BigNumberish,
-    fuseFeeMantissa: BigNumberish
+    baseRatePerBlock: bigint,
+    multiplierPerBlock: bigint,
+    jumpMultiplierPerBlock: bigint,
+    kink: bigint,
+    reserveFactorMantissa: bigint,
+    adminFeeMantissa: bigint,
+    fuseFeeMantissa: bigint
   ): Promise<void>;
 
-  getBorrowRate(utilizationRate: BigNumber): BigNumber;
+  getBorrowRate(utilizationRate: bigint): bigint;
 
-  getSupplyRate(utilizationRate: BigNumber): BigNumber;
+  getSupplyRate(utilizationRate: bigint): bigint;
 }

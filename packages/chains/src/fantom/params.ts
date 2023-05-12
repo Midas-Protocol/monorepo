@@ -1,11 +1,10 @@
 import { assetSymbols, ChainParams } from "@midas-capital/types";
-import { BigNumber } from "ethers";
 
 import chainAddresses from "./addresses";
 
 const specificParams: ChainParams = {
   // ~ 1.5 seconds per block: https://ftmscan.com/chart/blocktime
-  blocksPerYear: BigNumber.from((40 * 24 * 365 * 60).toString()),
+  blocksPerYear: 40n * 24n * 365n * 60n,
   cgId: "fantom",
   metadata: {
     chainIdHex: "0xFA",

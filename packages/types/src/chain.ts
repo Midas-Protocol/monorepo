@@ -1,5 +1,3 @@
-import { BigNumber } from "ethers";
-
 import { IrmTypes, OracleTypes, SupportedChains } from "./enums";
 import { FundingStrategy, LiquidationDefaults, RedemptionStrategy } from "./liquidation";
 import { DeployedPlugins } from "./plugin";
@@ -12,7 +10,7 @@ export type SupportedAsset = {
   extraDocs?: string;
   disabled?: boolean;
   oracle?: OracleTypes;
-  simplePriceOracleAssetPrice?: BigNumber;
+  simplePriceOracleAssetPrice?: bigint;
   originalSymbol?: string;
 };
 export type BlockExplorer = {
@@ -57,7 +55,7 @@ export interface ChainMetadata {
 }
 
 export type ChainParams = {
-  blocksPerYear: BigNumber;
+  blocksPerYear: bigint;
   cgId: string;
   metadata: ChainMetadata;
 };

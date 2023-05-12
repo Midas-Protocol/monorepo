@@ -1,5 +1,3 @@
-import { BigNumber } from "ethers";
-
 import { ChainDeployment } from "./chain";
 
 export type OracleConfig = ChainDeployment;
@@ -28,7 +26,7 @@ export type RewardsDistributorConfig = {
 };
 
 export type InterestRateModelParams = {
-  blocksPerYear?: BigNumber;
+  blocksPerYear?: bigint;
   baseRatePerYear?: string;
   multiplierPerYear?: string;
   jumpMultiplierPerYear?: string;
