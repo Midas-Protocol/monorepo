@@ -314,11 +314,16 @@ export const XSupplyModal = ({
         forwardCallData,
         params
       );
+      const fromAssetAddress =
+        currentChain.id == 137 && fromAsset.address == '0x0000000000000000000000000000000000001010'
+          ? constants.AddressZero
+          : fromAsset.address;
+
       const swapAndXCallParams = {
         amountIn: amount.toString(),
         callData: callDataForMidasProtocolTarget,
         destinationDomain: destination,
-        fromAsset: fromAsset.address,
+        fromAsset: fromAssetAddress,
         originDomain: origin,
         relayerFeeInNativeAsset: relayerFee.toString(),
         to: SUPPORTED_CHAINS_XMINT[poolChainId].targetAddress, // Midas Target address

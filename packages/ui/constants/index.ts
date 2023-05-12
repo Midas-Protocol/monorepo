@@ -322,11 +322,43 @@ export const SUPPORTED_CHAINS_XMINT: {
   [arbitrum.chainId]: {
     assets: arbitrum.assets.filter((a) => SUPPORTED_SYMBOLS_BY_CONNEXT.includes(a.symbol)),
     supported: false,
-    swapAddress: '',
+    swapAddress: '0xa28DE94d2e6F84659c2C32dF14334Daa08DD6461',
     targetAddress: '',
-    uniV3Address: '',
+    uniV3Address: '0x924E679c3c23017aef214c9ea1fBC22e97ff9E2e',
     usdc: arbitrum.assets.find((a) => a.symbol === assetSymbols.USDC),
     weth: arbitrum.assets.find((a) => a.symbol === assetSymbols.WETH),
+  },
+  [10]: {
+    assets: [
+      {
+        decimals: 18,
+        name: 'USDC',
+        symbol: assetSymbols.USDC,
+        underlying: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
+      },
+      {
+        decimals: 18,
+        name: 'Wrapped ETH',
+        symbol: assetSymbols.WETH,
+        underlying: '0x4200000000000000000000000000000000000006',
+      },
+    ],
+    supported: false,
+    swapAddress: '0xeB35e251b29166ACD5652E00892AAdEb2b45F5D3',
+    targetAddress: '',
+    uniV3Address: '0x1135Cc96A7E9d8f161BE8B6bDB74F896A9658a08',
+    usdc: {
+      decimals: 18,
+      name: 'USDC',
+      symbol: assetSymbols.USDC,
+      underlying: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
+    },
+    weth: {
+      decimals: 18,
+      name: 'Wrapped ETH',
+      symbol: assetSymbols.WETH,
+      underlying: '0x4200000000000000000000000000000000000006',
+    },
   },
 };
 

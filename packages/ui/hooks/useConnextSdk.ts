@@ -77,11 +77,17 @@ export function useConnextSdk(
   const estimateSupplyAmount = useCallback(
     async (fromAsset: TokenData, amount: BigNumber) => {
       if (currentChain && fromAsset && !amount.isZero() && swapAssets) {
+        const fromAssetAddress =
+          currentChain.id == 137 &&
+          fromAsset.address == '0x0000000000000000000000000000000000001010'
+            ? constants.AddressZero
+            : fromAsset.address;
+
         const supply = await getBridgeAmountOut(
           {
             amountIn: amount.toString(),
             domainId: SUPPORTED_CHAINS_BY_CONNEXT[currentChain.id].domainId,
-            fromAsset: fromAsset.address,
+            fromAsset: fromAssetAddress,
             rpc: chainIdToConfig[currentChain.id].specificParams.metadata.rpcUrls.default.http[0],
             toAsset: swapAssets.origin.underlying,
           },
