@@ -14,17 +14,8 @@ import {
 } from "@midas-capital/types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber, Contract, Signer, utils } from "ethers";
-import {
-  Account,
-  encodeAbiParameters,
-  getAddress,
-  getContract,
-  keccak256,
-  parseAbiParameters,
-  PublicClient,
-  TransactionReceipt,
-  WalletClient,
-} from "viem";
+import { encodeAbiParameters, getAddress, getContract, keccak256, parseAbiParameters } from "viem";
+import type { Account, PublicClient, TransactionReceipt, WalletClient } from "viem";
 
 import ComptrollerABI from "../../abis/Comptroller";
 import CTokenInterfaceABI from "../../abis/CTokenInterface";
@@ -379,24 +370,13 @@ export class MidasBase {
     return oracle;
   }
 
-  getEIP20TokenInstance(address: string, signerOrProvider: SignerOrProvider = this.provider) {
-    currentSdk.walletClient.writeContract({
-      address: getAddress(asset),
-      abi: EIP20InterfaceABI,
-      functionName: "approve",
-      args: [getAddress(vault), MaxUint256],
-      account: this.account,
-      chain: this.walletClient.chain,
-    });
-
-    return new Contract(address, EIP20InterfaceABI, signerOrProvider) as EIP20Interface;
-    const aa = getContract({
+  getEIP20TokenInstance(address: string) {
+    return getContract({
       address: getAddress(address),
       abi: EIP20InterfaceABI,
       publicClient: this.publicClient,
       walletClient: this.walletClient,
     });
-    aa.write.approve([getAddress("0x22222"), 10n]);
   }
 
   getUnitrollerInstance(address: string, signerOrProvider: SignerOrProvider = this.provider) {

@@ -1,60 +1,73 @@
-import { Web3Provider } from "@ethersproject/providers";
-import { BigNumber, BigNumberish, utils } from "ethers";
+import { getAddress, getContract, keccak256 } from "viem";
+import type { PublicClient } from "viem";
 
-import CTokenInterfacesArtifact from "../../../artifacts/CTokenInterface.json";
+import CTokenInterfacesAbi from "../../../abis/CTokenInterface";
+import DAIInterestRateModelV2Abi from "../../../abis/DAIInterestRateModelV2";
 import DAIInterestRateModelV2Artifact from "../../../artifacts/DAIInterestRateModelV2.json";
-import { getContract } from "../utils";
 
 import JumpRateModel from "./JumpRateModel";
 
 export default class DAIInterestRateModelV2 extends JumpRateModel {
-  static RUNTIME_BYTECODE_HASH = utils.keccak256(DAIInterestRateModelV2Artifact.deployedBytecode.object);
+  static RUNTIME_BYTECODE_HASH = keccak256(DAIInterestRateModelV2Artifact.deployedBytecode.object);
 
   initialized: boolean | undefined;
-  dsrPerBlock: BigNumber | undefined;
-  cash: BigNumber | undefined;
-  borrows: BigNumber | undefined;
-  reserves: BigNumber | undefined;
-  reserveFactorMantissa: BigNumber | undefined;
+  dsrPerBlock: bigint | undefined;
+  cash: bigint | undefined;
+  borrows: bigint | undefined;
+  reserves: bigint | undefined;
+  reserveFactorMantissa: bigint | undefined;
 
-  async init(interestRateModelAddress: string, assetAddress: string, provider: any) {
-    await super.init(interestRateModelAddress, assetAddress, provider);
+  async init(interestRateModelAddress: string, assetAddress: string, publicClient: PublicClient) {
+    await super.init(interestRateModelAddress, assetAddress, publicClient);
 
-    const interestRateContract = getContract(interestRateModelAddress, DAIInterestRateModelV2Artifact.abi, provider);
+    const interestRateContract = getContract({
+      address: getAddress(interestRateModelAddress),
+      abi: DAIInterestRateModelV2Abi,
+      publicClient,
+    });
+    const cTokenContract = getContract({ address: getAddress(assetAddress), abi: CTokenInterfacesAbi, publicClient });
 
-    this.dsrPerBlock = BigNumber.from(await interestRateContract.callStatic.dsrPerBlock());
+    const [dsrPerBlock, cash, borrows, reserves] = await Promise.all([
+      interestRateContract.read.dsrPerBlock(),
+      cTokenContract.read.getCash(),
+      cTokenContract.read.totalBorrows(),
+      cTokenContract.read.totalReserves(),
+    ]);
 
-    const cTokenContract = getContract(assetAddress, CTokenInterfacesArtifact.abi, provider);
-
-    this.cash = BigNumber.from(await cTokenContract.callStatic.getCash());
-    this.borrows = BigNumber.from(await cTokenContract.callStatic.totalBorrowsCurrent());
-    this.reserves = BigNumber.from(await cTokenContract.callStatic.totalReserves());
+    this.dsrPerBlock = dsrPerBlock;
+    this.cash = cash;
+    this.borrows = borrows;
+    this.reserves = reserves;
   }
 
   async _init(
     interestRateModelAddress: string,
-    reserveFactorMantissa: BigNumberish,
-    adminFeeMantissa: BigNumberish,
-    fuseFeeMantissa: BigNumberish,
-    provider: Web3Provider
+    reserveFactorMantissa: bigint,
+    adminFeeMantissa: bigint,
+    fuseFeeMantissa: bigint,
+    publicClient: PublicClient
   ) {
-    await super._init(interestRateModelAddress, reserveFactorMantissa, adminFeeMantissa, fuseFeeMantissa, provider);
+    await super._init(interestRateModelAddress, reserveFactorMantissa, adminFeeMantissa, fuseFeeMantissa, publicClient);
 
-    const interestRateContract = getContract(interestRateModelAddress, DAIInterestRateModelV2Artifact.abi, provider);
-    this.dsrPerBlock = BigNumber.from(await interestRateContract.callStatic.dsrPerBlock());
-    this.cash = BigNumber.from(0);
-    this.borrows = BigNumber.from(0);
-    this.reserves = BigNumber.from(0);
+    const interestRateContract = getContract({
+      address: getAddress(interestRateModelAddress),
+      abi: DAIInterestRateModelV2Abi,
+      publicClient,
+    });
+    this.dsrPerBlock = await interestRateContract.read.dsrPerBlock();
+    this.cash = BigInt(0);
+    this.borrows = BigInt(0);
+    this.reserves = BigInt(0);
   }
 
   async __init(
-    baseRatePerBlock: BigNumberish,
-    multiplierPerBlock: BigNumberish,
-    jumpMultiplierPerBlock: BigNumberish,
-    kink: BigNumberish,
-    reserveFactorMantissa: BigNumberish,
-    adminFeeMantissa: BigNumberish,
-    fuseFeeMantissa: BigNumberish
+    baseRatePerBlock: bigint,
+    multiplierPerBlock: bigint,
+    jumpMultiplierPerBlock: bigint,
+    kink: bigint,
+    reserveFactorMantissa: bigint,
+    adminFeeMantissa: bigint,
+    fuseFeeMantissa: bigint
   ) {
     await super.__init(
       baseRatePerBlock,
@@ -65,25 +78,25 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
       adminFeeMantissa,
       fuseFeeMantissa
     );
-    this.dsrPerBlock = BigNumber.from(0); // TODO: Make this work if DSR ever goes positive again
-    this.cash = BigNumber.from(0);
-    this.borrows = BigNumber.from(0);
-    this.reserves = BigNumber.from(0);
+    this.dsrPerBlock = BigInt(0); // TODO: Make this work if DSR ever goes positive again
+    this.cash = BigInt(0);
+    this.borrows = BigInt(0);
+    this.reserves = BigInt(0);
   }
 
-  getSupplyRate(utilizationRate: BigNumber) {
+  getSupplyRate(utilizationRate: bigint) {
     if (!this.initialized || !this.cash || !this.borrows || !this.reserves || !this.dsrPerBlock)
       throw new Error("Interest rate model class not initialized.");
 
     // const protocolRate = super.getSupplyRate(utilizationRate, this.reserveFactorMantissa); //todo - do we need this
     const protocolRate = super.getSupplyRate(utilizationRate);
-    const underlying = this.cash.add(this.borrows).sub(this.reserves);
+    const underlying = this.cash + this.borrows - this.reserves;
 
-    if (underlying.isZero()) {
+    if (underlying == 0n) {
       return protocolRate;
     } else {
-      const cashRate = this.cash.mul(this.dsrPerBlock).div(underlying);
-      return cashRate.add(protocolRate);
+      const cashRate = (this.cash * this.dsrPerBlock) / underlying;
+      return cashRate + protocolRate;
     }
   }
 }

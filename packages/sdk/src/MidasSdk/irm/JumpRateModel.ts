@@ -1,5 +1,6 @@
 import { InterestRateModel } from "@midas-capital/types";
-import { getAddress, getContract, keccak256, numberToHex, parseEther, PublicClient } from "viem";
+import { getAddress, getContract, keccak256, numberToHex, parseEther } from "viem";
+import type { PublicClient } from "viem";
 
 import CTokenInterfaceAbi from "../../../abis/CTokenInterface";
 import JumpRateModelAbi from "../../../abis/JumpRateModel";

@@ -1,4 +1,5 @@
-import { getAddress, getContract, keccak256, numberToHex, PublicClient } from "viem";
+import { getAddress, getContract, keccak256, numberToHex } from "viem";
+import type { PublicClient } from "viem";
 
 import AdjustableAnkrBNBIrmAbi from "../../../abis/AdjustableAnkrBNBIrm";
 import CTokenInterfaceAbi from "../../../abis/CTokenInterface";

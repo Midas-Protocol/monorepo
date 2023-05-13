@@ -1,6 +1,6 @@
 import { chainIdToConfig } from "@midas-capital/chains";
 import { ChainConfig } from "@midas-capital/types";
-import { PublicClient } from "viem";
+import type { PublicClient } from "viem";
 
 import { withChainLinkOracleScorer, withUniswapV3OracleScorer } from "./oracle";
 import { withErc4626StrategyScorer } from "./strategy";

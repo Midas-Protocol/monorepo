@@ -1,6 +1,6 @@
 import { FlywheelRewardsInfoForVault, FundOperationMode, SupportedChains, VaultData } from "@midas-capital/types";
 import { bigint, constants, ContractTransaction, utils } from "ethers";
-import { getAddress } from "viem";
+import { formatUnits, getAddress } from "viem";
 
 import EIP20InterfaceABI from "../../abis/EIP20Interface";
 import { MaxUint256 } from "../MidasSdk/constants";
@@ -34,8 +34,8 @@ export function withVaults<TBase extends CreateContractsModule = CreateContracts
 
               const underlyingPrice = await mpo.callStatic.price(data.asset);
               const totalSupplyNative =
-                Number(utils.formatUnits(data.estimatedTotalAssets, data.assetDecimals)) *
-                Number(utils.formatUnits(underlyingPrice, 18));
+                BigInt(formatUnits(data.estimatedTotalAssets, data.assetDecimals)) *
+                BigInt(formatUnits(underlyingPrice, 18));
 
               return {
                 vault: data.vault,

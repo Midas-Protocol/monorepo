@@ -1,17 +1,19 @@
-import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 import Filter from "bad-words";
-import { Contract, Signer, utils } from "ethers";
 import {
   encodeAbiParameters,
   encodePacked,
   getAddress,
+  getContract,
   getContractAddress,
   keccak256,
   numberToHex,
   parseAbiParameters,
 } from "viem";
+import type { PublicClient } from "viem";
 
 import ComptrollerABI from "../../abis/Comptroller";
+import UnitrollerAbi from "../../abis/Unitroller";
+import ComptrollerArtifact from "../../artifacts/Comptroller.json";
 import UnitrollerArtifact from "../../artifacts/Unitroller.json";
 import { Comptroller } from "../../typechain/Comptroller";
 import { Unitroller } from "../../typechain/Unitroller";
@@ -53,14 +55,18 @@ export const getPoolAddress = (
   });
 };
 
-export const getPoolUnitroller = (poolAddress: string, signer?: Signer): Unitroller => {
-  return new Contract(poolAddress, UnitrollerArtifact.abi, signer) as Unitroller;
+export const getPoolUnitroller = (poolAddress: string, publicClient: PublicClient) => {
+  return getContract({
+    address: getAddress(poolAddress),
+    abi: UnitrollerAbi,
+    publicClient,
+  });
 };
 
-export const getPoolComptroller = (poolAddress: string, signer?: Signer): Comptroller => {
-  return new Contract(poolAddress, ComptrollerABI, signer) as Comptroller;
-};
-
-export const getContract = (address: string, abi: any, providerOrSigner: Web3Provider | JsonRpcProvider | Signer) => {
-  return new Contract(address, abi, providerOrSigner);
+export const getPoolComptroller = (poolAddress: string, publicClient: PublicClient) => {
+  return getContract({
+    address: getAddress(poolAddress),
+    abi: ComptrollerABI,
+    publicClient,
+  });
 };

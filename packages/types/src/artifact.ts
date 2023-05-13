@@ -1,4 +1,4 @@
-import { PublicClient } from "viem";
+import type { PublicClient } from "viem";
 
 export type Artifact = {
   abi: Array<object>;

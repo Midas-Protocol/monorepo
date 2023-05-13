@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "baseUrl": "../..",
+    "paths": {
+      "*": ["node_modules/*"]
+    },
     "target": "ES2020",
     "lib": ["ES2019", "DOM"],
     "module": "ES2020",

@@ -11,8 +11,8 @@ import {
   parseAbi,
   parseAbiParameters,
   parseEther,
-  PublicClient,
 } from "viem";
+import type { PublicClient } from "viem";
 
 import { c1e18, QUOTER_ABI, UNISWAP_V3_POOL_ABI } from "../scorers/uniswapV3/constants";
 import { Direction, PumpAndDump, Quote, Slot0, Trade, UniswapV3AssetConfig } from "../scorers/uniswapV3/types";
