@@ -48,6 +48,10 @@ variable "liquidation_discord_webhook_url" {
   type = string
 }
 
+variable "vaults_discord_webhook_url" {
+  type = string
+}
+
 
 variable "supabase_key" {
   type = string

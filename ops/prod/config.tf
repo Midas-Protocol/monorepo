@@ -11,6 +11,11 @@ locals {
 
 
 locals {
+  vaults_claimer_variables = merge(
+    local.shared_env_vars_lambda,
+    { DISCORD_WEBHOOK_URL = var.vaults_discord_webhook_url },
+  )
+
   liquidation_variables = merge(
     local.shared_env_vars_lambda,
     { DISCORD_WEBHOOK_URL = var.liquidation_discord_webhook_url },

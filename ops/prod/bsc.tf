@@ -83,3 +83,22 @@ module "bsc_mainnet_liquidation_rpc_2" {
 }
 
 
+# module "bsc_mainnet_vaults_claimer" {
+#   source              = "../modules/lambda"
+#   ecr_repository_name = "vaults-claimer"
+#   docker_image_tag    = var.bots_image_tag
+#   container_family    = "vaults-claimer"
+#   environment         = "mainnet"
+#   chain_id            = local.bsc_mainnet_chain_id
+#   container_env_vars = merge(
+#     local.vaults_claimer_variables,
+#     { WEB3_HTTP_PROVIDER_URL = local.bsc_mainnet_rpc_2 }
+#   )
+#   schedule_expression = "rate(24 hours)"
+#   timeout             = 450
+#   memory_size         = 128
+# }
+
+
+
+

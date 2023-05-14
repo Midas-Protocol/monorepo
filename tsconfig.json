@@ -45,6 +45,9 @@
       "path": "./packages/bots/liquidator"
     },
     {
+      "path": "./packages/bots/vaults"
+    },
+    {
       "path": "./packages/monitors/oracle"
     },
     {

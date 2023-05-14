@@ -54,3 +54,8 @@ output "moonbeam-mainnet-liquidation-1" {
 output "fantom-mainnet-liquidation" {
   value = module.fantom_mainnet_liquidation_rpc_1.lambda_cron_service_name
 }
+
+# Chapel
+output "bsc-testnet-vaults-claimer" {
+  value = module.bsc_testnet_vaults_claimer.lambda_cron_service_name
+}

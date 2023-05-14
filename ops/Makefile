@@ -70,6 +70,7 @@ prod-plan:
 	export TF_VAR_ecs_notifier_discord_webhook_url=${ECS_NOTIFIER_DISCORD_WEBHOOK_URL} && \
 	export TF_VAR_oracles_discord_webhook_url=${ORACLES_DISCORD_WEBHOOK_URL} && \
 	export TF_VAR_liquidation_discord_webhook_url=${LIQUIDATION_DISCORD_WEBHOOK_URL} && \
+	export TF_VAR_vaults_discord_webhook_url=${VAULTS_DISCORD_WEBHOOK_URL} && \
 	export TF_VAR_supabase_key=${SUPABASE_KEY} && \
 	terraform init && \
 	terraform plan
@@ -86,6 +87,7 @@ prod-deploy:
 	export TF_VAR_ecs_notifier_discord_webhook_url=${ECS_NOTIFIER_DISCORD_WEBHOOK_URL} && \
 	export TF_VAR_oracles_discord_webhook_url=${ORACLES_DISCORD_WEBHOOK_URL} && \
 	export TF_VAR_liquidation_discord_webhook_url=${LIQUIDATION_DISCORD_WEBHOOK_URL} && \
+	export TF_VAR_vaults_discord_webhook_url=${VAULTS_DISCORD_WEBHOOK_URL} && \
 	export TF_VAR_supabase_key=${SUPABASE_KEY} && \
 	terraform init && \
 	terraform apply -auto-approve

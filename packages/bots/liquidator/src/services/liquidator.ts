@@ -55,7 +55,7 @@ export class Liquidator {
       logger.info(`${succeededLiquidations.length} Liquidations succeeded`);
       const msg = succeededLiquidations
         .map((tx, index) => {
-          `\n# Liquidation ${index}:\n - TX Hash: ${tx.hash}`;
+          return `\n# Liquidation ${index}:\n - TX Hash: ${tx.hash}`;
         })
         .join("\n");
 
