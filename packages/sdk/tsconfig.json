@@ -14,5 +14,6 @@
     "outDir": "./dist/cjs",
     "composite": true
   },
+  "include": ["./artifacts", "./abis"],
   "exclude": []
 }

@@ -1,10 +1,12 @@
 //
-import { keccak256 } from "viem";
+import { keccak256, numberToHex } from "viem";
 
 import AnkrFTMInterestRateModelArtifact from "../../../artifacts/AnkrFTMInterestRateModel.json";
 
 import AnkrCertificateInterestRateModel from "./AnkrCertificateInterestRateModel";
 
 export default class AnkrFTMInterestRateModel extends AnkrCertificateInterestRateModel {
-  static RUNTIME_BYTECODE_HASH = keccak256(AnkrFTMInterestRateModelArtifact.deployedBytecode.object);
+  static RUNTIME_BYTECODE_HASH = keccak256(
+    numberToHex(BigInt(AnkrFTMInterestRateModelArtifact.deployedBytecode.object))
+  );
 }

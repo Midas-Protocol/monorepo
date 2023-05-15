@@ -1,5 +1,5 @@
 import { InterestRateModel } from "@midas-capital/types";
-import { getAddress, getContract, keccak256 } from "viem";
+import { getAddress, getContract, keccak256, numberToHex } from "viem";
 import type { PublicClient } from "viem";
 
 import CTokenInterfaceAbi from "../../../abis/CTokenInterface";
@@ -8,7 +8,9 @@ import WhitePaperInterestRateModelArtifact from "../../../artifacts/WhitePaperIn
 import { WeiPerEther } from "../constants";
 
 export default class WhitePaperInterestRateModel implements InterestRateModel {
-  static RUNTIME_BYTECODE_HASH = keccak256(WhitePaperInterestRateModelArtifact.deployedBytecode.object);
+  static RUNTIME_BYTECODE_HASH = keccak256(
+    numberToHex(BigInt(WhitePaperInterestRateModelArtifact.deployedBytecode.object))
+  );
 
   initialized: boolean | undefined;
   baseRatePerBlock: bigint | undefined;

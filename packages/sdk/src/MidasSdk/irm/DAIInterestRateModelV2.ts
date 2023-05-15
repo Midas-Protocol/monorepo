@@ -1,4 +1,4 @@
-import { getAddress, getContract, keccak256 } from "viem";
+import { getAddress, getContract, keccak256, numberToHex } from "viem";
 import type { PublicClient } from "viem";
 
 import CTokenInterfacesAbi from "../../../abis/CTokenInterface";
@@ -8,7 +8,7 @@ import DAIInterestRateModelV2Artifact from "../../../artifacts/DAIInterestRateMo
 import JumpRateModel from "./JumpRateModel";
 
 export default class DAIInterestRateModelV2 extends JumpRateModel {
-  static RUNTIME_BYTECODE_HASH = keccak256(DAIInterestRateModelV2Artifact.deployedBytecode.object);
+  static RUNTIME_BYTECODE_HASH = keccak256(numberToHex(BigInt(DAIInterestRateModelV2Artifact.deployedBytecode.object)));
 
   initialized: boolean | undefined;
   dsrPerBlock: bigint | undefined;
