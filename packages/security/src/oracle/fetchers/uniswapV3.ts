@@ -44,7 +44,7 @@ export class UniswapV3Fetcher {
     if (token.address === this.W_TOKEN) {
       throw Error("Token is WNATIVE");
     }
-    const poolAddress = this.#computeUniV3PoolAddress(token.address, this.W_TOKEN, fee);
+    const poolAddress = this.#computeUniV3PoolAddress(token.address, this.W_TOKEN, fee, publicClient);
     try {
       const res = (await publicClient.readContract({
         address: getAddress(poolAddress),
@@ -60,11 +60,13 @@ export class UniswapV3Fetcher {
       throw Error(`current price Error for ${token.symbol}: ${e}`);
     }
   };
-  #computeUniV3PoolAddress = (tokenA: string, tokenB: string, fee: number) => {
+  #computeUniV3PoolAddress = async (tokenA: string, tokenB: string, fee: number, publicClient: PublicClient) => {
     const [token0, token1] = BigInt(tokenA) < BigInt(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA];
-
+    const bytecode = await publicClient.getBytecode({
+      address: getAddress(tokenA),
+    });
     return getContractAddress({
-      bytecode: this.uniV3PairInitHash,
+      bytecode,
       from: getAddress(this.uniV3Factory),
       opcode: "CREATE2",
       salt: keccak256(
@@ -80,15 +82,6 @@ export class UniswapV3Fetcher {
         )
       ),
     });
-
-    // return utils.getCreate2Address(
-    //   this.uniV3Factory,
-    //   utils.solidityKeccak256(
-    //     ["bytes"],
-    //     [utils.defaultAbiCoder.encode(["address", "address", "uint24"], [token0, token1, fee])]
-    //   ),
-    //   this.uniV3PairInitHash
-    // );
   };
   getPumpAndDump = async (
     currPrice: bigint,
