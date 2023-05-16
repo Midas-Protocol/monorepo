@@ -31,6 +31,7 @@ const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 const USDT = "0x55d398326f99059fF775485246999027B3197955";
 const TUSD = "0x14016E85a25aeb13065688cAFB43044C2ef86784";
 const MAI = "0x3F56e0c36d275367b8C502090EDF38289b3dEa0d";
+const FRAX = "0x29cED01C447166958605519F10DcF8b0255fB379";
 const threeEPS = "0xaF4dE8E872131AE328Ce21D909C74705d3Aaf452";
 const maiThreeEPS = "0x80D00D2c8d920a9253c3D65BA901250a55011b37";
 const twoBRL = "0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9";
@@ -81,6 +82,9 @@ const solidlyVolatileAMM_ANKR_ankrBNB = "0x7ef540f672Cd643B79D2488344944499F7518
 const solidlyVolatileAMM_ANKR_HAY = "0xa2C2C08AFEFD3CC69B9aab797dEe5a1886388783";
 const solidlyStableAMM_HAY_BUSD = "0x93B32a8dfE10e9196403dd111974E325219aec24";
 const solidlyVolatileAMM_HAY_ankrBNB = "0xC6dB38F34DA75393E9aac841c08104348997D509";
+
+const solidlyStableAMM_stkBNB_WBNB = "0x2B3510f57365aA17bFF8E6360EA67C136175dC6D";
+const solidlyGammaStable_stkBNB_WBNB = "0x86b481fCe116DCd01fBeBb963f1358bcc466668C";
 
 const assets: SupportedAsset[] = [
   {
@@ -168,6 +172,14 @@ const assets: SupportedAsset[] = [
     decimals: 18,
     extraDocs: defaultDocs("https://bscscan.com", BIFI),
     disabled: true,
+  },
+  {
+    symbol: assetSymbols.FRAX,
+    underlying: FRAX,
+    name: "Frax",
+    oracle: OracleTypes.ChainlinkPriceOracleV2,
+    decimals: 18,
+    extraDocs: defaultDocs("https://bscscan.com", FRAX),
   },
   {
     symbol: assetSymbols.ALPACA,
@@ -618,6 +630,23 @@ const assets: SupportedAsset[] = [
     oracle: OracleTypes.SolidlyLpTokenPriceOracle,
     extraDocs: thenaDocs(solidlyStableAMM_HAY_BUSD),
     originalSymbol: assetOriginalSymbols["sAMM-HAY/BUSD"],
+  },
+  {
+    symbol: assetSymbols["sAMM-stkBNB/WBNB"],
+    underlying: solidlyStableAMM_stkBNB_WBNB,
+    name: "Stable V1 AMM - stkBNB/WBNB",
+    decimals: 18,
+    oracle: OracleTypes.SolidlyLpTokenPriceOracle,
+    extraDocs: thenaDocs(solidlyStableAMM_stkBNB_WBNB),
+    originalSymbol: assetOriginalSymbols["sAMM-stkBNB/WBNB"],
+  },
+  {
+    symbol: assetSymbols.aWBNB_STKBNB,
+    underlying: solidlyGammaStable_stkBNB_WBNB,
+    name: "Fusion V2 AMM - Stable stkBNB/WBNB",
+    decimals: 18,
+    oracle: OracleTypes.GammaPoolPriceOracle,
+    extraDocs: thenaDocs(solidlyGammaStable_stkBNB_WBNB),
   },
 ];
 

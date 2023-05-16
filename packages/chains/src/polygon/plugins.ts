@@ -158,7 +158,7 @@ const deployedPlugins: DeployedPlugins = {
     otherParams: ["0xebe0c8d842AA5A57D7BEf8e524dEabA676F91cD1", "50"],
     icon: "https://d1912tcoux65lj.cloudfront.net/plugin/beefy.png",
   },
-  // BeefyERC4626_MAI-USDC_0x9df035a2DC13ab63FcF05bb27B3722E68c7AE6b9.json
+  // BeefyERC4626_JEUR_PAR STABLE BLP_0x1944FA4a490f85Ed99e2c6fF9234F94DE16fdbde.json
   "0x36A297A86Eaed6aE0BaEb541F766A1675960B390": {
     market: "0x1944FA4a490f85Ed99e2c6fF9234F94DE16fdbde",
     name: "Beefy JEUR-PAR Vault",
@@ -167,6 +167,28 @@ const deployedPlugins: DeployedPlugins = {
     strategyDocsUrl: "https://docs.midascapital.xyz/guides/assets-and-strategies-addresses/polygon/mimo-pool",
     underlying: underlying(assets, assetSymbols.JEUR_PAR_STABLE_BLP),
     otherParams: ["0xB476B7A027da3D9fB5A5c9CB6078A34f7289B476", "0"],
+    icon: "https://d1912tcoux65lj.cloudfront.net/plugin/beefy.png",
+  },
+  // BeefyERC4626_MaticX-bba-WMATIC_0x13e763D25D78c3Fd6FEA534231BdaEBE7Fa52945.json
+  "0x27569756A02Ee590306F1409821b5496A8e4B2B3": {
+    market: "0x13e763D25D78c3Fd6FEA534231BdaEBE7Fa52945",
+    name: "Beefy MaticX-bba-WMATIC Vault",
+    strategy: Strategy.Beefy,
+    apyDocsUrl: "https://app.beefy.finance/vault/balancer-maticx-bbawmatic",
+    strategyDocsUrl: "https://docs.midascapital.xyz/guides/assets-and-strategies-addresses/polygon/mimo-pool",
+    underlying: underlying(assets, assetSymbols.MaticX_bbaWMATIC),
+    otherParams: ["0x4C98CB046c3eb7e3ae7Eb49a33D6f3386Ec2b9D9", "0"],
+    icon: "https://d1912tcoux65lj.cloudfront.net/plugin/beefy.png",
+  },
+  // BeefyERC4626_StMatic-bba-WMATIC_0x6107D9186D710cA8BaC2B9b2b8b26a045D9f994b.json
+  "0x9d71BFb9F408996D9939334FD81e391e3FC72d2A": {
+    market: "0x6107D9186D710cA8BaC2B9b2b8b26a045D9f994b",
+    name: "Beefy StMatic-bba-WMATIC Vault",
+    strategy: Strategy.Beefy,
+    apyDocsUrl: "https://app.beefy.finance/vault/balancer-stmatic-bbawmatic",
+    strategyDocsUrl: "https://docs.midascapital.xyz/guides/assets-and-strategies-addresses/polygon/mimo-pool",
+    underlying: underlying(assets, assetSymbols.StMatic_bbaWMATIC),
+    otherParams: ["0xf0695B22d8F416FEC35E02668aE01B9EEAF96a0D", "0"],
     icon: "https://d1912tcoux65lj.cloudfront.net/plugin/beefy.png",
   },
 };

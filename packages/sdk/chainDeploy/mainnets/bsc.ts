@@ -13,6 +13,7 @@ import {
   deployCurveV2LpOracle,
   deployDiaOracle,
   deployFlywheelWithDynamicRewards,
+  deployGammaPoolOracle,
   deploySolidlyLpOracle,
   deploySolidlyPriceOracle,
   deployStkBNBOracle,
@@ -27,6 +28,7 @@ import {
   CurvePoolConfig,
   CurveV2PoolConfig,
   DiaAsset,
+  GammaLpAsset,
   SolidlyLpAsset,
   SolidlyOracleAssetConfig,
   WombatAsset,
@@ -225,6 +227,11 @@ const chainlinkAssets: ChainlinkAsset[] = [
     aggregator: "0xc4429B539397a3166eF3ef132c29e34715a3ABb4",
     feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
   },
+  {
+    symbol: assetSymbols.FRAX,
+    aggregator: "0x13A9c98b07F098c5319f4FF786eB16E22DC738e1",
+    feedBaseCurrency: ChainlinkFeedBaseCurrency.USD,
+  },
 ];
 
 // TODO use these as funding and redemption strategies
@@ -323,12 +330,20 @@ const solidlyLps: SolidlyLpAsset[] = [
   { lpTokenAddress: underlying(assets, assetSymbols["sAMM-HAY/BUSD"]) },
   { lpTokenAddress: underlying(assets, assetSymbols["vAMM-ANKR/ankrBNB"]) },
   { lpTokenAddress: underlying(assets, assetSymbols["vAMM-ANKR/HAY"]) },
+  { lpTokenAddress: underlying(assets, assetSymbols["sAMM-stkBNB/WBNB"]) },
+];
+
+const gammaLps: GammaLpAsset[] = [
+  {
+    lpTokenAddress: underlying(assets, assetSymbols.aWBNB_STKBNB),
+  },
 ];
 
 const solidlyOracleSupportedStables: string[] = [
   deployConfig.stableToken!,
   underlying(assets, assetSymbols.USDC),
   underlying(assets, assetSymbols.ankrBNB),
+  underlying(assets, assetSymbols.FRAX),
 ];
 
 const solidlyOracles: SolidlyOracleAssetConfig[] = [
@@ -341,6 +356,11 @@ const solidlyOracles: SolidlyOracleAssetConfig[] = [
     underlying: underlying(assets, assetSymbols.ANKR),
     poolAddress: "0x7ef540f672Cd643B79D2488344944499F7518b1f", // vAMM-ankrBNB-ANKR
     baseToken: underlying(assets, assetSymbols.ankrBNB),
+  },
+  {
+    underlying: underlying(assets, assetSymbols.MAI),
+    poolAddress: "0x49ad051F4263517BD7204f75123b7C11aF9Fd31C", // sAMM-MAI-FRAX
+    baseToken: underlying(assets, assetSymbols.FRAX),
   },
 ];
 
@@ -439,6 +459,15 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
     deployments,
     deployConfig,
     solidlyLps,
+  });
+  //// Solidly LP Oracle
+  await deployGammaPoolOracle({
+    run,
+    ethers,
+    getNamedAccounts,
+    deployments,
+    deployConfig,
+    gammaLps,
   });
 
   //// Curve LP Oracle
