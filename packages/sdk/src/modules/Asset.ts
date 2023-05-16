@@ -1,6 +1,7 @@
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import { FundOperationMode, MarketConfig, NativePricedFuseAsset } from "@midas-capital/types";
 import { BigNumber, constants, ethers, utils } from "ethers";
+import { encodeAbiParameters, getAddress, parseAbiParameters, parseEther } from "viem";
 
 import CErc20DelegatorArtifact from "../../artifacts/CErc20Delegator.json";
 import { COMPTROLLER_ERROR_CODES } from "../MidasSdk/config";
@@ -59,16 +60,14 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
     }
 
     async #deployMarket(config: MarketConfig): Promise<[string, string, TransactionReceipt]> {
-      const abiCoder = new utils.AbiCoder();
-
-      const reserveFactorBN = utils.parseUnits((config.reserveFactor / 100).toString());
-      const adminFeeBN = utils.parseUnits((config.adminFee / 100).toString());
-      const collateralFactorBN = utils.parseUnits((config.collateralFactor / 100).toString());
+      const reserveFactor = parseEther(`${config.reserveFactor / 100}`);
+      const adminFee = parseEther(`${config.adminFee / 100}`);
+      const collateralFactor = parseEther(`${config.collateralFactor / 100}`);
 
       const comptroller = this.createComptroller(config.comptroller);
 
       // Use Default CErc20Delegate
-      const implementationAddress = this.chainDeployment.CErc20Delegate.address;
+      const implementationAddress = getAddress(this.chainDeployment.CErc20Delegate.address);
       const implementationData = "0x00";
 
       // Prepare Transaction Data
@@ -81,31 +80,27 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
         config.symbol,
         implementationAddress,
         implementationData,
-        reserveFactorBN,
-        adminFeeBN,
+        reserveFactor,
+        adminFee,
       ];
 
-      const constructorData = abiCoder.encode(
-        ["address", "address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
+      const constructorData = encodeAbiParameters(
+        parseAbiParameters("address,address,address,address,string,string,address,bytes,uint256,uint256"),
         deployArgs
       );
 
       // Test Transaction
-      const errorCode = await comptroller.callStatic._deployMarket(false, constructorData, collateralFactorBN);
-      if (errorCode.toNumber() !== 0) {
-        throw `Unable to _deployMarket: ${this.COMPTROLLER_ERROR_CODES[errorCode.toNumber()]}`;
+      const sim = await comptroller.simulate._deployMarket([false, constructorData, collateralFactor]);
+
+      if (sim.result !== BigInt(0)) {
+        throw `Unable to _deployMarket: ${this.COMPTROLLER_ERROR_CODES[Number(sim.result)]}`;
       }
 
       // Make actual Transaction
-      const tx: ethers.providers.TransactionResponse = await comptroller._deployMarket(
-        false,
-        constructorData,
-        collateralFactorBN
-      );
-
+      const tx = await comptroller.write._deployMarket([false, constructorData, collateralFactor]);
+      const receipt = await this.publicClient.waitForTransactionReceipt({ hash: tx });
       // Recreate Address of Deployed Market
-      const receipt: TransactionReceipt = await tx.wait();
-      if (receipt.status != constants.One.toNumber()) {
+      if (receipt.status != "success") {
         throw "Failed to deploy market ";
       }
       const marketCounter = await this.contracts.FuseFeeDistributor.callStatic.marketsCounter();
