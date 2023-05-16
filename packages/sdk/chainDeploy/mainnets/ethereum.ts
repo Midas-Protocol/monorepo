@@ -21,7 +21,7 @@ export const deployConfig: ChainDeployConfig = {
   nativeTokenSymbol: "ETH",
   stableToken: USDC,
   nativeTokenUsdChainlinkFeed: "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419",
-  blocksPerYear: ethereum.specificParams.blocksPerYear.toNumber(), // 12 second blocks, 5 blocks per minute// 12 second blocks, 5 blocks per minute
+  blocksPerYear: Number(ethereum.specificParams.blocksPerYear), // 12 second blocks, 5 blocks per minute// 12 second blocks, 5 blocks per minute
   uniswap: {
     hardcoded: [],
     uniswapData: [],

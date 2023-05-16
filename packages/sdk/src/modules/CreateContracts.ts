@@ -1,4 +1,4 @@
-import { Contract, ContractInterface } from "ethers";
+import { getAddress, getContract, GetContractReturnType } from "viem";
 
 import { MidasBaseConstructor } from "..";
 import CErc20DelegateABI from "../../abis/CErc20Delegate";
@@ -16,105 +16,156 @@ import OptimizedAPRVaultFirstExtensionABI from "../../abis/OptimizedAPRVaultFirs
 import OptimizedAPRVaultSecondExtensionABI from "../../abis/OptimizedAPRVaultSecondExtension";
 import OptimizedVaultsRegistryABI from "../../abis/OptimizedVaultsRegistry";
 import UnitrollerABI from "../../abis/Unitroller";
-import { CErc20Delegate } from "../../typechain/CErc20Delegate";
-import { CErc20PluginRewardsDelegate } from "../../typechain/CErc20PluginRewardsDelegate";
-import { CompoundMarketERC4626 } from "../../typechain/CompoundMarketERC4626";
-import { Comptroller } from "../../typechain/Comptroller";
-import { ComptrollerFirstExtension } from "../../typechain/ComptrollerFirstExtension";
-import { CTokenFirstExtension } from "../../typechain/CTokenFirstExtension";
-import { FlywheelStaticRewards } from "../../typechain/FlywheelStaticRewards";
-import { JumpRateModel } from "../../typechain/JumpRateModel";
-import { MasterPriceOracle } from "../../typechain/MasterPriceOracle";
-import { MidasFlywheel } from "../../typechain/MidasFlywheel";
-import { MidasFlywheelLensRouter } from "../../typechain/MidasFlywheelLensRouter";
-import { OptimizedAPRVaultFirstExtension } from "../../typechain/OptimizedAPRVaultFirstExtension";
-import { OptimizedAPRVaultSecondExtension } from "../../typechain/OptimizedAPRVaultSecondExtension";
-import { OptimizedVaultsRegistry } from "../../typechain/OptimizedVaultsRegistry";
-import { Unitroller } from "../../typechain/Unitroller";
-import { SignerOrProvider } from "../MidasSdk";
-
-type ComptrollerWithExtensions = Comptroller & ComptrollerFirstExtension;
-type CTokenWithExtensions = CErc20Delegate & CTokenFirstExtension;
-type OptimizedAPRVaultWithExtensions = OptimizedAPRVaultFirstExtension & OptimizedAPRVaultSecondExtension;
 
 export function withCreateContracts<TBase extends MidasBaseConstructor>(Base: TBase) {
   return class CreateContracts extends Base {
-    createContractInstance<T extends Contract>(abi: ContractInterface) {
-      return (address: string, signerOrProvider: SignerOrProvider = this.signer) =>
-        new Contract(address, abi, signerOrProvider) as T;
+    // createContractInstance(abi: GetContractParameters["abi"]) {
+    //   return (address: string) =>
+    //     getContract({
+    //       address: getAddress(address),
+    //       abi,
+    //       publicClient: this.publicClient,
+    //       walletClient: this.walletClient ? this.walletClient : undefined,
+    //     });
+    // }
+
+    // createUnitroller1 = this.createContractInstance(UnitrollerABI);
+    // createMidasFlywheel = this.createContractInstance(MidasFlywheelABI);
+    // createFlywheelStaticRewards = this.createContractInstance(FlywheelStaticRewardsABI);
+    // createJumpRateModel = this.createContractInstance(JumpRateModelABI);
+    createUnitroller(address: string) {
+      return getContract({
+        address: getAddress(address),
+        abi: UnitrollerABI,
+        publicClient: this.publicClient,
+        walletClient: this.walletClient ? this.walletClient : undefined,
+      });
     }
 
-    createUnitroller = this.createContractInstance<Unitroller>(UnitrollerABI);
-    createMidasFlywheel = this.createContractInstance<MidasFlywheel>(MidasFlywheelABI);
-    createFlywheelStaticRewards = this.createContractInstance<FlywheelStaticRewards>(FlywheelStaticRewardsABI);
-    createJumpRateModel = this.createContractInstance<JumpRateModel>(JumpRateModelABI);
-
-    createComptroller(comptrollerAddress: string, signerOrProvider: SignerOrProvider = this.provider) {
-      if (this.chainDeployment.ComptrollerFirstExtension) {
-        return new Contract(
-          comptrollerAddress,
-          [...ComptrollerABI, ...ComptrollerFirstExtensionABI],
-          signerOrProvider
-        ) as ComptrollerWithExtensions;
-      }
-
-      return new Contract(comptrollerAddress, ComptrollerABI, signerOrProvider) as ComptrollerWithExtensions;
+    createMidasFlywheel(address: string) {
+      return getContract({
+        address: getAddress(address),
+        abi: MidasFlywheelABI,
+        publicClient: this.publicClient,
+        walletClient: this.walletClient ? this.walletClient : undefined,
+      });
     }
 
-    createCTokenWithExtensions(address: string, signerOrProvider: SignerOrProvider = this.provider) {
-      if (this.chainDeployment.CTokenFirstExtension) {
-        return new Contract(
-          address,
-          [...CErc20DelegateABI, ...CTokenFirstExtensionABI],
-          signerOrProvider
-        ) as CTokenWithExtensions;
-      }
-
-      return new Contract(address, CErc20DelegateABI, signerOrProvider) as CTokenWithExtensions;
+    createFlywheelStaticRewards(address: string) {
+      return getContract({
+        address: getAddress(address),
+        abi: FlywheelStaticRewardsABI,
+        publicClient: this.publicClient,
+        walletClient: this.walletClient ? this.walletClient : undefined,
+      });
     }
 
-    createCErc20PluginRewardsDelegate(cTokenAddress: string, signerOrProvider: SignerOrProvider = this.provider) {
-      return new Contract(
-        cTokenAddress,
-        CErc20PluginRewardsDelegateABI,
-        signerOrProvider
-      ) as CErc20PluginRewardsDelegate;
+    createJumpRateModel(address: string) {
+      return getContract({
+        address: getAddress(address),
+        abi: JumpRateModelABI,
+        publicClient: this.publicClient,
+        walletClient: this.walletClient ? this.walletClient : undefined,
+      });
     }
 
-    createMasterPriceOracle(signerOrProvider: SignerOrProvider = this.provider) {
-      return new Contract(
-        this.chainDeployment.MasterPriceOracle.address,
-        MasterPriceOracleABI,
-        signerOrProvider
-      ) as MasterPriceOracle;
+    createComptroller(comptrollerAddress: string) {
+      return getContract({
+        address: getAddress(comptrollerAddress),
+        abi: ComptrollerABI,
+        publicClient: this.publicClient,
+        walletClient: this.walletClient ? this.walletClient : undefined,
+      });
     }
 
-    createCompoundMarketERC4626(address: string, signerOrProvider: SignerOrProvider = this.provider) {
-      return new Contract(address, CompoundMarketERC4626ABI, signerOrProvider) as CompoundMarketERC4626;
+    createComptrollerFirstExtension(comptrollerAddress: string) {
+      return getContract({
+        address: getAddress(comptrollerAddress),
+        abi: ComptrollerFirstExtensionABI,
+        publicClient: this.publicClient,
+        walletClient: this.walletClient ? this.walletClient : undefined,
+      });
     }
 
-    createOptimizedAPRVault(address: string, signerOrProvider: SignerOrProvider = this.provider) {
-      return new Contract(
-        address,
-        [...OptimizedAPRVaultFirstExtensionABI, ...OptimizedAPRVaultSecondExtensionABI],
-        signerOrProvider
-      ) as OptimizedAPRVaultWithExtensions;
+    createCErc20Delegate(address: string) {
+      return getContract({
+        address: getAddress(address),
+        abi: CErc20DelegateABI,
+        publicClient: this.publicClient,
+        walletClient: this.walletClient ? this.walletClient : undefined,
+      });
     }
 
-    createOptimizedVaultsRegistry(signerOrProvider: SignerOrProvider = this.provider) {
-      return new Contract(
-        this.chainDeployment.OptimizedVaultsRegistry.address,
-        OptimizedVaultsRegistryABI,
-        signerOrProvider
-      ) as OptimizedVaultsRegistry;
+    createCTokenWithExtensions(address: string) {
+      return getContract({
+        address: getAddress(address),
+        abi: CTokenFirstExtensionABI,
+        publicClient: this.publicClient,
+        walletClient: this.walletClient ? this.walletClient : undefined,
+      });
     }
 
-    createMidasFlywheelLensRouter(signerOrProvider: SignerOrProvider = this.provider) {
-      return new Contract(
-        this.chainDeployment.MidasFlywheelLensRouter.address,
-        MidasFlywheelLensRouterABI,
-        signerOrProvider
-      ) as MidasFlywheelLensRouter;
+    createCErc20PluginRewardsDelegate(cTokenAddress: string) {
+      return getContract({
+        address: getAddress(cTokenAddress),
+        abi: CErc20PluginRewardsDelegateABI,
+        publicClient: this.publicClient,
+        walletClient: this.walletClient ? this.walletClient : undefined,
+      });
+    }
+
+    createMasterPriceOracle() {
+      return getContract({
+        address: getAddress(this.chainDeployment.MasterPriceOracle.address),
+        abi: MasterPriceOracleABI,
+        publicClient: this.publicClient,
+        walletClient: this.walletClient ? this.walletClient : undefined,
+      });
+    }
+
+    createCompoundMarketERC4626(address: string) {
+      return getContract({
+        address: getAddress(address),
+        abi: CompoundMarketERC4626ABI,
+        publicClient: this.publicClient,
+        walletClient: this.walletClient ? this.walletClient : undefined,
+      });
+    }
+
+    createOptimizedAPRVaultFirstExtension(address: string) {
+      return getContract({
+        address: getAddress(address),
+        abi: OptimizedAPRVaultFirstExtensionABI,
+        publicClient: this.publicClient,
+        walletClient: this.walletClient ? this.walletClient : undefined,
+      });
+    }
+
+    createOptimizedAPRVaultSecondExtension(address: string) {
+      return getContract({
+        address: getAddress(address),
+        abi: OptimizedAPRVaultSecondExtensionABI,
+        publicClient: this.publicClient,
+        walletClient: this.walletClient ? this.walletClient : undefined,
+      });
+    }
+
+    createOptimizedVaultsRegistry() {
+      return getContract({
+        address: getAddress(this.chainDeployment.OptimizedVaultsRegistry.address),
+        abi: OptimizedVaultsRegistryABI,
+        publicClient: this.publicClient,
+        walletClient: this.walletClient ? this.walletClient : undefined,
+      });
+    }
+
+    createMidasFlywheelLensRouter() {
+      return getContract({
+        address: getAddress(this.chainDeployment.MidasFlywheelLensRouter.address),
+        abi: MidasFlywheelLensRouterABI,
+        publicClient: this.publicClient,
+        walletClient: this.walletClient ? this.walletClient : undefined,
+      });
     }
   };
 }

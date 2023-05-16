@@ -13,10 +13,7 @@ import type { PublicClient } from "viem";
 
 import ComptrollerABI from "../../abis/Comptroller";
 import UnitrollerAbi from "../../abis/Unitroller";
-import ComptrollerArtifact from "../../artifacts/Comptroller.json";
 import UnitrollerArtifact from "../../artifacts/Unitroller.json";
-import { Comptroller } from "../../typechain/Comptroller";
-import { Unitroller } from "../../typechain/Unitroller";
 
 export function filterOnlyObjectProperties(obj: any) {
   return Object.fromEntries(Object.entries(obj).filter(([k]) => isNaN(k as any))) as any;

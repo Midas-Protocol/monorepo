@@ -43,7 +43,7 @@ export const deployConfig: ChainDeployConfig = {
   nativeTokenSymbol: "MATIC",
   stableToken: underlying(assets, assetSymbols.USDC),
   wBTCToken: underlying(assets, assetSymbols.WBTC),
-  blocksPerYear: polygon.specificParams.blocksPerYear.toNumber(),
+  blocksPerYear: Number(polygon.specificParams.blocksPerYear),
   uniswap: {
     hardcoded: [],
     uniswapData: [

@@ -4,6 +4,7 @@ import { BigNumber, constants, ethers, utils } from "ethers";
 
 import CErc20DelegatorArtifact from "../../artifacts/CErc20Delegator.json";
 import { COMPTROLLER_ERROR_CODES } from "../MidasSdk/config";
+import { WeiPerEther } from "../MidasSdk/constants";
 
 import { withCreateContracts } from "./CreateContracts";
 import { withFlywheel } from "./Flywheel";
@@ -39,16 +40,16 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
       // TODO: find out if this is a number or string. If its a number, parseEther will not work. Also parse Units works if number is between 0 - 0.9
       const collateralFactorBN = utils.parseEther((config.collateralFactor / 100).toString());
       // Check collateral factor
-      if (!collateralFactorBN.gte(constants.Zero) || collateralFactorBN.gt(utils.parseEther("0.9")))
+      if (!collateralFactorBN.gte(BigInt(0)) || collateralFactorBN.gt(utils.parseEther("0.9")))
         throw Error("Collateral factor must range from 0 to 0.9.");
 
       // Check reserve factor + admin fee + Fuse fee
-      if (!reserveFactorBN.gte(constants.Zero)) throw Error("Reserve factor cannot be negative.");
-      if (!adminFeeBN.gte(constants.Zero)) throw Error("Admin fee cannot be negative.");
+      if (!reserveFactorBN.gte(BigInt(0))) throw Error("Reserve factor cannot be negative.");
+      if (!adminFeeBN.gte(BigInt(0))) throw Error("Admin fee cannot be negative.");
 
       // If reserveFactor or adminFee is greater than zero, we get fuse fee.
       // Sum of reserveFactor and adminFee should not be greater than fuse fee. ? i think
-      if (reserveFactorBN.gt(constants.Zero) || adminFeeBN.gt(constants.Zero)) {
+      if (reserveFactorBN.gt(BigInt(0)) || adminFeeBN.gt(BigInt(0))) {
         const fuseFee = await this.contracts.FuseFeeDistributor.interestFeeRate();
         if (reserveFactorBN.add(adminFeeBN).add(BigNumber.from(fuseFee)).gt(constants.WeiPerEther))
           throw Error(
@@ -64,7 +65,7 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
       const adminFeeBN = utils.parseUnits((config.adminFee / 100).toString());
       const collateralFactorBN = utils.parseUnits((config.collateralFactor / 100).toString());
 
-      const comptroller = this.createComptroller(config.comptroller, this.signer);
+      const comptroller = this.createComptroller(config.comptroller);
 
       // Use Default CErc20Delegate
       const implementationAddress = this.chainDeployment.CErc20Delegate.address;
@@ -124,15 +125,15 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
       return [cErc20DelegatorAddress, implementationAddress, receipt];
     }
 
-    async getUpdatedAssets(mode: FundOperationMode, index: number, assets: NativePricedFuseAsset[], amount: BigNumber) {
+    async getUpdatedAssets(mode: FundOperationMode, index: number, assets: NativePricedFuseAsset[], amount: bigint) {
       const assetToBeUpdated = assets[index];
       const interestRateModel = await this.getInterestRateModel(assetToBeUpdated.cToken);
 
       let updatedAsset: NativePricedFuseAsset;
 
       if (mode === FundOperationMode.SUPPLY) {
-        const supplyBalance = assetToBeUpdated.supplyBalance.add(amount);
-        const totalSupply = assetToBeUpdated.totalSupply.add(amount);
+        const supplyBalance = assetToBeUpdated.supplyBalance + amount;
+        const totalSupply = assetToBeUpdated.totalSupply + amount;
         updatedAsset = {
           ...assetToBeUpdated,
           supplyBalance,
@@ -141,14 +142,12 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
             Number(utils.formatUnits(supplyBalance, assetToBeUpdated.underlyingDecimals)) *
             Number(utils.formatUnits(assetToBeUpdated.underlyingPrice, 18)),
           supplyRatePerBlock: interestRateModel.getSupplyRate(
-            totalSupply.gt(constants.Zero)
-              ? assetToBeUpdated.totalBorrow.mul(constants.WeiPerEther).div(totalSupply)
-              : constants.Zero
+            totalSupply > BigInt(0) ? (assetToBeUpdated.totalBorrow * WeiPerEther) / totalSupply : BigInt(0)
           ),
         };
       } else if (mode === FundOperationMode.WITHDRAW) {
-        const supplyBalance = assetToBeUpdated.supplyBalance.sub(amount);
-        const totalSupply = assetToBeUpdated.totalSupply.sub(amount);
+        const supplyBalance = assetToBeUpdated.supplyBalance - amount;
+        const totalSupply = assetToBeUpdated.totalSupply - amount;
         updatedAsset = {
           ...assetToBeUpdated,
           supplyBalance,
@@ -157,14 +156,12 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
             Number(utils.formatUnits(supplyBalance, assetToBeUpdated.underlyingDecimals)) *
             Number(utils.formatUnits(assetToBeUpdated.underlyingPrice, 18)),
           supplyRatePerBlock: interestRateModel.getSupplyRate(
-            totalSupply.gt(constants.Zero)
-              ? assetToBeUpdated.totalBorrow.mul(constants.WeiPerEther).div(totalSupply)
-              : constants.Zero
+            totalSupply > BigInt(0) ? (assetToBeUpdated.totalBorrow * WeiPerEther) / totalSupply : BigInt(0)
           ),
         };
       } else if (mode === FundOperationMode.BORROW) {
-        const borrowBalance = assetToBeUpdated.borrowBalance.add(amount);
-        const totalBorrow = assetToBeUpdated.totalBorrow.add(amount);
+        const borrowBalance = assetToBeUpdated.borrowBalance + amount;
+        const totalBorrow = assetToBeUpdated.totalBorrow + amount;
         updatedAsset = {
           ...assetToBeUpdated,
           borrowBalance,
@@ -173,18 +170,18 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
             Number(utils.formatUnits(borrowBalance, assetToBeUpdated.underlyingDecimals)) *
             Number(utils.formatUnits(assetToBeUpdated.underlyingPrice, 18)),
           borrowRatePerBlock: interestRateModel.getBorrowRate(
-            assetToBeUpdated.totalSupply.gt(constants.Zero)
-              ? totalBorrow.mul(constants.WeiPerEther).div(assetToBeUpdated.totalSupply)
-              : constants.Zero
+            assetToBeUpdated.totalSupply > BigInt(0)
+              ? (totalBorrow * WeiPerEther) / assetToBeUpdated.totalSupply
+              : BigInt(0)
           ),
         };
       } else if (mode === FundOperationMode.REPAY) {
-        const borrowBalance = assetToBeUpdated.borrowBalance.sub(amount);
-        const totalBorrow = assetToBeUpdated.totalBorrow.sub(amount);
+        const borrowBalance = assetToBeUpdated.borrowBalance - amount;
+        const totalBorrow = assetToBeUpdated.totalBorrow - amount;
         const borrowRatePerBlock = interestRateModel.getBorrowRate(
-          assetToBeUpdated.totalSupply.gt(constants.Zero)
-            ? totalBorrow.mul(constants.WeiPerEther).div(assetToBeUpdated.totalSupply)
-            : constants.Zero
+          assetToBeUpdated.totalSupply > BigInt(0)
+            ? (totalBorrow * WeiPerEther) / assetToBeUpdated.totalSupply
+            : BigInt(0)
         );
 
         updatedAsset = {

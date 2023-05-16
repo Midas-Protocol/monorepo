@@ -29,7 +29,7 @@ export const deployConfig: ChainDeployConfig = {
   nativeTokenSymbol: "GLMR",
   stableToken: underlying(assets, assetSymbols.multiUSDC),
   nativeTokenUsdChainlinkFeed: "0x4497B606be93e773bbA5eaCFCb2ac5E2214220Eb",
-  blocksPerYear: moonbeam.specificParams.blocksPerYear.toNumber(), // 12 second blocks, 5 blocks per minute// 12 second blocks, 5 blocks per minute
+  blocksPerYear: Number(moonbeam.specificParams.blocksPerYear), // 12 second blocks, 5 blocks per minute// 12 second blocks, 5 blocks per minute
   uniswap: {
     hardcoded: [],
     uniswapData: [],

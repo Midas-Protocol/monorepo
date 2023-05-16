@@ -14,7 +14,7 @@ export const deployConfig: ChainDeployConfig = {
   nativeTokenName: "Neon (Testnet)",
   nativeTokenSymbol: "NEON",
   stableToken: underlying(assets, assetSymbols.USDC),
-  blocksPerYear: neondevnet.specificParams.blocksPerYear.toNumber(),
+  blocksPerYear: Number(neondevnet.specificParams.blocksPerYear),
   uniswap: {
     hardcoded: [],
     uniswapData: [],
