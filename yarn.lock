@@ -3695,7 +3695,7 @@ __metadata:
     typechain: ^8.1.1
     typescript: ^5.0.4
     utf-8-validate: ^6.0.3
-    viem: ^0.3.24
+    viem: ^0.3.26
   languageName: unknown
   linkType: soft
 
@@ -3727,7 +3727,7 @@ __metadata:
     ts-node: ^10.8.1
     typescript: ^4.8.2
     utf-8-validate: ^5.0.9
-    viem: ^0.3.24
+    viem: ^0.3.26
   languageName: unknown
   linkType: soft
 
@@ -3743,7 +3743,7 @@ __metadata:
     tsup: ^6.5.0
     typescript: ^4.7.4
     utf-8-validate: ^5.0.9
-    viem: ^0.3.24
+    viem: ^0.3.26
   languageName: unknown
   linkType: soft
 
@@ -3810,7 +3810,7 @@ __metadata:
     react-jazzicon: ^1.0.4
     recharts: ^2.6.2
     typescript: 5.0.4
-    viem: ^0.3.24
+    viem: ^0.3.26
     wagmi: ^1.0.2
     yup: ^1.1.1
   languageName: unknown
@@ -25854,9 +25854,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"viem@npm:^0.3.24":
-  version: 0.3.24
-  resolution: "viem@npm:0.3.24"
+"viem@npm:^0.3.26":
+  version: 0.3.26
+  resolution: "viem@npm:0.3.26"
   dependencies:
     "@adraffy/ens-normalize": 1.9.0
     "@noble/curves": 1.0.0
@@ -25867,7 +25867,7 @@ __metadata:
     abitype: 0.8.2
     isomorphic-ws: 5.0.0
     ws: 8.12.0
-  checksum: 2322a6d865b3854c79225a13b38835da332d3490346c948558a579bcb74e83107cbb967212fe7041fa06aa13ffad9541b1efa05417eb44509c725834d8ae1a05
+  checksum: 430f5d05fb3f28cc5bae6e8337dbb0165f6eca94865ce061ef6879462cacdc65d1da80100ffd7cedc361eb1d9bf55b4766e7ed418c1cad43f615059a22c94100
   languageName: node
   linkType: hard
 

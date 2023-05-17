@@ -45,9 +45,6 @@ import WhitePaperInterestRateModel from "./irm/WhitePaperInterestRateModel";
 import { getPoolAddress } from "./utils";
 
 export type WalletOrPublicClient = WalletClient | PublicClient;
-export type StaticContracts = {
-  [contractName: string]: any;
-};
 
 export interface Logger {
   trace(message?: string, ...optionalParams: any[]): void;
@@ -64,7 +61,6 @@ export class MidasBase {
   public _walletClient: WalletClient | null;
   public _account: Account | null;
 
-  public _contracts: StaticContracts | undefined;
   public chainConfig: ChainConfig;
   public availableOracles: Array<string>;
   public chainId: SupportedChains;
@@ -98,46 +94,6 @@ export class MidasBase {
     }
 
     return this._account;
-  }
-
-  public set contracts(newContracts: Partial<StaticContracts>) {
-    this._contracts = { ...this._contracts, ...newContracts } as StaticContracts;
-  }
-
-  public get contracts(): StaticContracts {
-    return {
-      FusePoolDirectory: getContract({
-        address: getAddress(this.chainDeployment.FusePoolDirectory.address),
-        abi: FusePoolDirectoryABI,
-        publicClient: this.publicClient,
-      }),
-      FusePoolLens: getContract({
-        address: getAddress(this.chainDeployment.FusePoolLens.address),
-        abi: FusePoolLensABI,
-        publicClient: this.publicClient,
-      }),
-      FusePoolLensSecondary: getContract({
-        address: getAddress(this.chainDeployment.FusePoolLensSecondary.address),
-        abi: FusePoolLensSecondaryABI,
-        publicClient: this.publicClient,
-      }),
-      FuseSafeLiquidator: getContract({
-        address: getAddress(this.chainDeployment.FuseSafeLiquidator.address),
-        abi: FuseSafeLiquidatorABI,
-        publicClient: this.publicClient,
-      }),
-      FuseFeeDistributor: getContract({
-        address: getAddress(this.chainDeployment.FuseFeeDistributor.address),
-        abi: FuseFeeDistributorABI,
-        publicClient: this.publicClient,
-      }),
-      MidasFlywheelLensRouter: getContract({
-        address: getAddress(this.chainDeployment.MidasFlywheelLensRouter.address),
-        abi: MidasFlywheelLensRouterABI,
-        publicClient: this.publicClient,
-      }),
-      ...this._contracts,
-    };
   }
 
   setWalletClient(publicClient: PublicClient, walletClient: WalletClient) {

@@ -1,8 +1,19 @@
-import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import { FundOperationMode, MarketConfig, NativePricedFuseAsset } from "@midas-capital/types";
-import { BigNumber, constants, ethers, utils } from "ethers";
-import { encodeAbiParameters, getAddress, parseAbiParameters, parseEther } from "viem";
+import {
+  encodeAbiParameters,
+  encodePacked,
+  formatUnits,
+  getAddress,
+  getContractAddress,
+  keccak256,
+  numberToHex,
+  parseAbiParameters,
+  parseEther,
+  TransactionReceipt,
+} from "viem";
 
+import ComptrollerABI from "../../abis/Comptroller";
+import FuseFeeDistributorABI from "../../abis/FuseFeeDistributor";
 import CErc20DelegatorArtifact from "../../artifacts/CErc20Delegator.json";
 import { COMPTROLLER_ERROR_CODES } from "../MidasSdk/config";
 import { WeiPerEther } from "../MidasSdk/constants";
@@ -34,27 +45,31 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
     async #validateConfiguration(config: MarketConfig) {
       // BigNumbers
       // 10% -> 0.1 * 1e18
-      const reserveFactorBN = utils.parseEther((config.reserveFactor / 100).toString());
+      const reserveFactor = parseEther(`${config.reserveFactor / 100}`);
       // 5% -> 0.05 * 1e18
-      const adminFeeBN = utils.parseEther((config.adminFee / 100).toString());
+      const adminFee = parseEther(`${config.adminFee / 100}`);
       // 50% -> 0.5 * 1e18
       // TODO: find out if this is a number or string. If its a number, parseEther will not work. Also parse Units works if number is between 0 - 0.9
-      const collateralFactorBN = utils.parseEther((config.collateralFactor / 100).toString());
+      const collateralFactor = parseEther(`${config.collateralFactor / 100}`);
       // Check collateral factor
-      if (!collateralFactorBN.gte(BigInt(0)) || collateralFactorBN.gt(utils.parseEther("0.9")))
+      if (collateralFactor < BigInt(0) || collateralFactor > parseEther(`${0.9}`))
         throw Error("Collateral factor must range from 0 to 0.9.");
 
       // Check reserve factor + admin fee + Fuse fee
-      if (!reserveFactorBN.gte(BigInt(0))) throw Error("Reserve factor cannot be negative.");
-      if (!adminFeeBN.gte(BigInt(0))) throw Error("Admin fee cannot be negative.");
+      if (reserveFactor < BigInt(0)) throw Error("Reserve factor cannot be negative.");
+      if (adminFee < BigInt(0)) throw Error("Admin fee cannot be negative.");
 
       // If reserveFactor or adminFee is greater than zero, we get fuse fee.
       // Sum of reserveFactor and adminFee should not be greater than fuse fee. ? i think
-      if (reserveFactorBN.gt(BigInt(0)) || adminFeeBN.gt(BigInt(0))) {
-        const fuseFee = await this.contracts.FuseFeeDistributor.interestFeeRate();
-        if (reserveFactorBN.add(adminFeeBN).add(BigNumber.from(fuseFee)).gt(constants.WeiPerEther))
+      if (reserveFactor > BigInt(0) || adminFee > BigInt(0)) {
+        const fuseFee = await this.publicClient.readContract({
+          address: getAddress(this.chainDeployment.FuseFeeDistributor.address),
+          abi: FuseFeeDistributorABI,
+          functionName: "interestFeeRate",
+        });
+        if (reserveFactor + adminFee + fuseFee > WeiPerEther)
           throw Error(
-            "Sum of reserve factor and admin fee should range from 0 to " + (1 - fuseFee.div(1e18).toNumber()) + "."
+            "Sum of reserve factor and admin fee should range from 0 to " + (1 - Number(fuseFee / WeiPerEther)) + "."
           );
       }
     }
@@ -64,57 +79,66 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
       const adminFee = parseEther(`${config.adminFee / 100}`);
       const collateralFactor = parseEther(`${config.collateralFactor / 100}`);
 
-      const comptroller = this.createComptroller(config.comptroller);
-
       // Use Default CErc20Delegate
       const implementationAddress = getAddress(this.chainDeployment.CErc20Delegate.address);
       const implementationData = "0x00";
 
       // Prepare Transaction Data
-      const deployArgs = [
-        config.underlying,
-        config.comptroller,
-        config.fuseFeeDistributor,
-        config.interestRateModel,
-        config.name,
-        config.symbol,
-        implementationAddress,
-        implementationData,
-        reserveFactor,
-        adminFee,
-      ];
-
       const constructorData = encodeAbiParameters(
         parseAbiParameters("address,address,address,address,string,string,address,bytes,uint256,uint256"),
-        deployArgs
+        [
+          getAddress(config.underlying),
+          getAddress(config.comptroller),
+          getAddress(config.fuseFeeDistributor),
+          getAddress(config.interestRateModel),
+          config.name,
+          config.symbol,
+          implementationAddress,
+          numberToHex(BigInt(implementationData)),
+          reserveFactor,
+          adminFee,
+        ]
       );
 
       // Test Transaction
-      const sim = await comptroller.simulate._deployMarket([false, constructorData, collateralFactor]);
 
-      if (sim.result !== BigInt(0)) {
-        throw `Unable to _deployMarket: ${this.COMPTROLLER_ERROR_CODES[Number(sim.result)]}`;
+      const { request, result } = await this.publicClient.simulateContract({
+        address: getAddress(config.comptroller),
+        abi: ComptrollerABI,
+        functionName: "_deployMarket",
+        account: this.account,
+        args: [false, constructorData, collateralFactor],
+      });
+
+      if (result !== BigInt(0)) {
+        throw `Unable to _deployMarket: ${this.COMPTROLLER_ERROR_CODES[Number(result)]}`;
       }
 
       // Make actual Transaction
-      const tx = await comptroller.write._deployMarket([false, constructorData, collateralFactor]);
-      const receipt = await this.publicClient.waitForTransactionReceipt({ hash: tx });
+      const tx = await this.walletClient.writeContract(request);
+      const receipt: TransactionReceipt = await this.publicClient.waitForTransactionReceipt({ hash: tx });
       // Recreate Address of Deployed Market
       if (receipt.status != "success") {
         throw "Failed to deploy market ";
       }
-      const marketCounter = await this.contracts.FuseFeeDistributor.callStatic.marketsCounter();
 
-      const saltsHash = utils.solidityKeccak256(
-        ["address", "address", "uint"],
-        [config.comptroller, config.underlying, marketCounter]
+      const marketsCounter = await this.publicClient.readContract({
+        address: getAddress(this.chainDeployment.FuseFeeDistributor.address),
+        abi: FuseFeeDistributorABI,
+        functionName: "marketsCounter",
+      });
+      const saltsHash = keccak256(
+        encodePacked(
+          ["address", "address", "uint"],
+          [getAddress(config.comptroller), getAddress(config.underlying), marketsCounter]
+        )
       );
-      const byteCodeHash = utils.keccak256(CErc20DelegatorArtifact.bytecode.object + constructorData.substring(2));
-      const cErc20DelegatorAddress = utils.getCreate2Address(
-        this.chainDeployment.FuseFeeDistributor.address,
-        saltsHash,
-        byteCodeHash
-      );
+      const cErc20DelegatorAddress = getContractAddress({
+        bytecode: numberToHex(BigInt(CErc20DelegatorArtifact.bytecode.object + constructorData.substring(2))),
+        from: getAddress(this.chainDeployment.FuseFeeDistributor.address),
+        opcode: "CREATE2",
+        salt: saltsHash,
+      });
 
       // Return cToken proxy and implementation contract addresses
       return [cErc20DelegatorAddress, implementationAddress, receipt];
@@ -134,8 +158,8 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
           supplyBalance,
           totalSupply,
           supplyBalanceNative:
-            Number(utils.formatUnits(supplyBalance, assetToBeUpdated.underlyingDecimals)) *
-            Number(utils.formatUnits(assetToBeUpdated.underlyingPrice, 18)),
+            Number(formatUnits(supplyBalance, Number(assetToBeUpdated.underlyingDecimals))) *
+            Number(formatUnits(assetToBeUpdated.underlyingPrice, 18)),
           supplyRatePerBlock: interestRateModel.getSupplyRate(
             totalSupply > BigInt(0) ? (assetToBeUpdated.totalBorrow * WeiPerEther) / totalSupply : BigInt(0)
           ),
@@ -148,8 +172,8 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
           supplyBalance,
           totalSupply,
           supplyBalanceNative:
-            Number(utils.formatUnits(supplyBalance, assetToBeUpdated.underlyingDecimals)) *
-            Number(utils.formatUnits(assetToBeUpdated.underlyingPrice, 18)),
+            Number(formatUnits(supplyBalance, Number(assetToBeUpdated.underlyingDecimals))) *
+            Number(formatUnits(assetToBeUpdated.underlyingPrice, 18)),
           supplyRatePerBlock: interestRateModel.getSupplyRate(
             totalSupply > BigInt(0) ? (assetToBeUpdated.totalBorrow * WeiPerEther) / totalSupply : BigInt(0)
           ),
@@ -162,8 +186,8 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
           borrowBalance,
           totalBorrow,
           borrowBalanceNative:
-            Number(utils.formatUnits(borrowBalance, assetToBeUpdated.underlyingDecimals)) *
-            Number(utils.formatUnits(assetToBeUpdated.underlyingPrice, 18)),
+            Number(formatUnits(borrowBalance, Number(assetToBeUpdated.underlyingDecimals))) *
+            Number(formatUnits(assetToBeUpdated.underlyingPrice, 18)),
           borrowRatePerBlock: interestRateModel.getBorrowRate(
             assetToBeUpdated.totalSupply > BigInt(0)
               ? (totalBorrow * WeiPerEther) / assetToBeUpdated.totalSupply
@@ -184,8 +208,8 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
           borrowBalance,
           totalBorrow,
           borrowBalanceNative:
-            Number(utils.formatUnits(borrowBalance, assetToBeUpdated.underlyingDecimals)) *
-            Number(utils.formatUnits(assetToBeUpdated.underlyingPrice, 18)),
+            Number(formatUnits(borrowBalance, Number(assetToBeUpdated.underlyingDecimals))) *
+            Number(formatUnits(assetToBeUpdated.underlyingPrice, 18)),
           borrowRatePerBlock,
         };
       }

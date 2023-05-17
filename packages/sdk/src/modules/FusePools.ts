@@ -18,19 +18,13 @@ import {
   SupportedAsset,
   SupportedChains,
 } from "@midas-capital/types";
-import { BigNumberish, CallOverrides, constants, utils } from "ethers";
+import { formatUnits, getAddress } from "viem";
 
 import { MidasBaseConstructor } from "..";
-import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
-import { FusePoolLens } from "../../typechain/FusePoolLens";
+import FusePoolDirectoryABI from "../../abis/FusePoolDirectory";
+import FusePoolLensABI from "../../abis/FusePoolLens";
+import { AddressZero } from "../MidasSdk/constants";
 import { filterOnlyObjectProperties, filterPoolName } from "../MidasSdk/utils";
-
-export type LensPoolsWithData = [
-  ids: BigNumberish[],
-  fusePools: FusePoolDirectory.FusePoolStructOutput[],
-  fusePoolsData: FusePoolLens.FusePoolDataStructOutput[],
-  errors: boolean[]
-];
 
 export const ChainSupportedAssets: ChainSupportedAssetsType = {
   [SupportedChains.bsc]: bsc.assets,
@@ -48,22 +42,28 @@ export const ChainSupportedAssets: ChainSupportedAssetsType = {
 
 export function withFusePools<TBase extends MidasBaseConstructor>(Base: TBase) {
   return class FusePools extends Base {
-    async fetchFusePoolData(poolId: string, overrides: CallOverrides = {}): Promise<FusePoolData | null> {
-      const {
-        comptroller,
-        name: _unfiliteredName,
-        creator,
-        blockPosted,
-        timestampPosted,
-      } = await this.contracts.FusePoolDirectory.callStatic.pools(Number(poolId), overrides);
-      if (comptroller === constants.AddressZero) {
+    async fetchFusePoolData(poolId: string): Promise<FusePoolData | null> {
+      const [_unfiliteredName, creator, comptroller, blockPosted, timestampPosted] =
+        await this.publicClient.readContract({
+          address: getAddress(this.chainDeployment.FusePoolDirectory.address),
+          abi: FusePoolDirectoryABI,
+          functionName: "pools",
+          args: [BigInt(poolId)],
+        });
+
+      if (comptroller === AddressZero) {
         return null;
       }
       const name = filterPoolName(_unfiliteredName);
 
-      const assets: NativePricedFuseAsset[] = (
-        await this.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(comptroller, overrides)
-      ).map(filterOnlyObjectProperties);
+      const { result } = await this.publicClient.simulateContract({
+        address: getAddress(this.chainDeployment.FusePoolLens.address),
+        abi: FusePoolLensABI,
+        functionName: "getPoolAssetsWithData",
+        args: [comptroller],
+      });
+
+      const assets: NativePricedFuseAsset[] = result.map(filterOnlyObjectProperties);
 
       let totalLiquidityNative = 0;
       let totalAvailableLiquidityNative = 0;
@@ -95,22 +95,22 @@ export function withFusePools<TBase extends MidasBaseConstructor>(Base: TBase) {
         }
 
         asset.supplyBalanceNative =
-          Number(utils.formatUnits(asset.supplyBalance, asset.underlyingDecimals)) *
-          Number(utils.formatUnits(asset.underlyingPrice, 18));
+          Number(formatUnits(asset.supplyBalance, Number(asset.underlyingDecimals))) *
+          Number(formatUnits(asset.underlyingPrice, 18));
 
         asset.borrowBalanceNative =
-          Number(utils.formatUnits(asset.borrowBalance, asset.underlyingDecimals)) *
-          Number(utils.formatUnits(asset.underlyingPrice, 18));
+          Number(formatUnits(asset.borrowBalance, Number(asset.underlyingDecimals))) *
+          Number(formatUnits(asset.underlyingPrice, 18));
 
         totalSupplyBalanceNative += asset.supplyBalanceNative;
         totalBorrowBalanceNative += asset.borrowBalanceNative;
 
         asset.totalSupplyNative =
-          Number(utils.formatUnits(asset.totalSupply, asset.underlyingDecimals)) *
-          Number(utils.formatUnits(asset.underlyingPrice, 18));
+          Number(formatUnits(asset.totalSupply, Number(asset.underlyingDecimals))) *
+          Number(formatUnits(asset.underlyingPrice, 18));
         asset.totalBorrowNative =
-          Number(utils.formatUnits(asset.totalBorrow, asset.underlyingDecimals)) *
-          Number(utils.formatUnits(asset.underlyingPrice, 18));
+          Number(formatUnits(asset.totalBorrow, Number(asset.underlyingDecimals))) *
+          Number(formatUnits(asset.underlyingPrice, 18));
 
         if (asset.totalSupplyNative === 0) {
           asset.utilization = 0;
@@ -122,8 +122,8 @@ export function withFusePools<TBase extends MidasBaseConstructor>(Base: TBase) {
         totalBorrowedNative += asset.totalBorrowNative;
 
         const assetLiquidityNative =
-          Number(utils.formatUnits(asset.liquidity, asset.underlyingDecimals)) *
-          Number(utils.formatUnits(asset.underlyingPrice, 18));
+          Number(formatUnits(asset.liquidity, Number(asset.underlyingDecimals))) *
+          Number(formatUnits(asset.underlyingPrice, 18));
         asset.liquidityNative = assetLiquidityNative;
 
         totalAvailableLiquidityNative += asset.isBorrowPaused ? 0 : assetLiquidityNative;
@@ -170,8 +170,12 @@ export function withFusePools<TBase extends MidasBaseConstructor>(Base: TBase) {
       };
     }
 
-    async fetchPoolsManual(overrides: CallOverrides = {}): Promise<(FusePoolData | null)[] | undefined> {
-      const [poolIndexes, pools] = await this.contracts.FusePoolDirectory.callStatic.getActivePools(overrides);
+    async fetchPoolsManual(): Promise<(FusePoolData | null)[] | undefined> {
+      const [poolIndexes, pools] = await this.publicClient.readContract({
+        address: getAddress(this.chainDeployment.FusePoolDirectory.address),
+        abi: FusePoolDirectoryABI,
+        functionName: "getActivePools",
+      });
 
       if (!pools.length || !poolIndexes.length) {
         return undefined;
@@ -179,7 +183,7 @@ export function withFusePools<TBase extends MidasBaseConstructor>(Base: TBase) {
 
       const poolData = await Promise.all(
         poolIndexes.map((poolId) => {
-          return this.fetchFusePoolData(poolId.toString(), overrides).catch((error) => {
+          return this.fetchFusePoolData(poolId.toString()).catch((error) => {
             this.logger.error(`Pool ID ${poolId} wasn't able to be fetched from FusePoolLens without error.`, error);
             return null;
           });
@@ -187,47 +191,6 @@ export function withFusePools<TBase extends MidasBaseConstructor>(Base: TBase) {
       );
 
       return poolData.filter((p) => !!p);
-    }
-
-    async fetchPools({
-      filter,
-      options,
-    }: {
-      filter: string | null;
-      options: { from: string };
-    }): Promise<FusePoolData[]> {
-      const isCreatedPools = filter === "created-pools";
-      const isVerifiedPools = filter === "verified-pools";
-      const isUnverifiedPools = filter === "unverified-pools";
-
-      const req = isCreatedPools
-        ? this.contracts.FusePoolLens.callStatic.getPoolsByAccountWithData(options.from)
-        : isVerifiedPools
-        ? this.contracts.FusePoolDirectory.callStatic.getPublicPoolsByVerification(true)
-        : isUnverifiedPools
-        ? this.contracts.FusePoolDirectory.callStatic.getPublicPoolsByVerification(false)
-        : this.contracts.FusePoolLens.callStatic.getPublicPoolsWithData();
-
-      const whitelistedPoolsRequest = this.contracts.FusePoolLens.callStatic.getWhitelistedPoolsByAccountWithData(
-        options.from
-      );
-
-      const responses = await Promise.all([req, whitelistedPoolsRequest]);
-
-      const [pools, whitelistedPools] = await Promise.all(
-        responses.map(async (poolData) => {
-          return await Promise.all(
-            poolData[0].map((_id) => {
-              return this.fetchFusePoolData(_id.toString());
-            })
-          );
-        })
-      );
-
-      const whitelistedIds = whitelistedPools.map((pool) => pool?.id);
-      const filteredPools = pools.filter((pool) => !whitelistedIds.includes(pool?.id));
-
-      return [...filteredPools, ...whitelistedPools].filter((p) => !!p) as FusePoolData[];
     }
   };
 }

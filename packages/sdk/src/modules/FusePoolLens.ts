@@ -1,9 +1,10 @@
 import { chainIdToConfig } from "@midas-capital/chains";
 import { SupportedAsset } from "@midas-capital/types";
-import { BigNumber } from "ethers";
+import { getAddress } from "viem";
 
 import { MidasBaseConstructor } from "..";
-import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
+import FusePoolDirectoryABI from "../../abis/FusePoolDirectory";
+import FusePoolLensABI from "../../abis/FusePoolLens";
 
 export function withFusePoolLens<TBase extends MidasBaseConstructor>(Base: TBase) {
   return class FusePoolLens extends Base {
@@ -11,22 +12,38 @@ export function withFusePoolLens<TBase extends MidasBaseConstructor>(Base: TBase
      * @returns the TVL on current chain in native asset value
      */
     async getTotalValueLocked(whitelistedAdmin = true) {
-      const { 2: fusePoolDataStructs } =
-        await this.contracts.FusePoolLens.callStatic.getPublicPoolsByVerificationWithData(whitelistedAdmin);
+      const {
+        result: { 2: fusePoolDataStructs },
+      } = await this.publicClient.simulateContract({
+        address: getAddress(this.chainDeployment.FusePoolLens.address),
+        abi: FusePoolLensABI,
+        functionName: "getPublicPoolsByVerificationWithData",
+        args: [whitelistedAdmin],
+      });
 
-      return fusePoolDataStructs
-        .map((data) => data.totalSupply)
-        .reduce((prev, cur) => prev.add(cur), BigNumber.from(0));
+      return fusePoolDataStructs.map((data) => data.totalSupply).reduce((prev, cur) => prev + cur, BigInt(0));
     }
     /**
      * @returns a set of the currently live assets on our platform on the current chain
      */
     async getLiveAssets(): Promise<Set<SupportedAsset>> {
-      const pools: FusePoolDirectory.FusePoolStruct[] = await this.contracts.FusePoolDirectory.callStatic.getAllPools();
+      const pools = await this.publicClient.readContract({
+        address: getAddress(this.chainDeployment.FusePoolDirectory.address),
+        abi: FusePoolDirectoryABI,
+        functionName: "getAllPools",
+      });
 
       const allAssets = new Set<SupportedAsset>();
       for (const pool of pools) {
-        const [, , ulTokens] = await this.contracts.FusePoolLens.callStatic.getPoolSummary(pool.comptroller);
+        const {
+          result: [, , ulTokens],
+        } = await this.publicClient.simulateContract({
+          address: getAddress(this.chainDeployment.FusePoolLens.address),
+          abi: FusePoolLensABI,
+          functionName: "getPoolSummary",
+          args: [getAddress(pool.comptroller)],
+        });
+
         for (const token of ulTokens) {
           const asset = chainIdToConfig[this.chainId].assets.find((x) => x.underlying === token);
           if (!asset) {

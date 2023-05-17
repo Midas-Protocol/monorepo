@@ -1,4 +1,4 @@
-import { getAddress, getContract, GetContractReturnType } from "viem";
+import { getAddress, getContract } from "viem";
 
 import { MidasBaseConstructor } from "..";
 import CErc20DelegateABI from "../../abis/CErc20Delegate";
@@ -8,6 +8,11 @@ import ComptrollerABI from "../../abis/Comptroller";
 import ComptrollerFirstExtensionABI from "../../abis/ComptrollerFirstExtension";
 import CTokenFirstExtensionABI from "../../abis/CTokenFirstExtension";
 import FlywheelStaticRewardsABI from "../../abis/FlywheelStaticRewards";
+import FuseFeeDistributorABI from "../../abis/FuseFeeDistributor";
+import FusePoolDirectoryABI from "../../abis/FusePoolDirectory";
+import FusePoolLensABI from "../../abis/FusePoolLens";
+import FusePoolLensSecondaryABI from "../../abis/FusePoolLensSecondary";
+import FuseSafeLiquidatorABI from "../../abis/FuseSafeLiquidator";
 import JumpRateModelABI from "../../abis/JumpRateModel";
 import MasterPriceOracleABI from "../../abis/MasterPriceOracle";
 import MidasFlywheelABI from "../../abis/MidasFlywheel";
@@ -33,6 +38,60 @@ export function withCreateContracts<TBase extends MidasBaseConstructor>(Base: TB
     // createMidasFlywheel = this.createContractInstance(MidasFlywheelABI);
     // createFlywheelStaticRewards = this.createContractInstance(FlywheelStaticRewardsABI);
     // createJumpRateModel = this.createContractInstance(JumpRateModelABI);
+    createFusePoolDirectory() {
+      return getContract({
+        address: getAddress(this.chainDeployment.FusePoolDirectory.address),
+        abi: FusePoolDirectoryABI,
+        publicClient: this.publicClient,
+        walletClient: this.walletClient ? this.walletClient : undefined,
+      });
+    }
+
+    createFusePoolLens() {
+      return getContract({
+        address: getAddress(this.chainDeployment.FusePoolLens.address),
+        abi: FusePoolLensABI,
+        publicClient: this.publicClient,
+        walletClient: this.walletClient ? this.walletClient : undefined,
+      });
+    }
+
+    createFusePoolLensSecondary() {
+      return getContract({
+        address: getAddress(this.chainDeployment.FusePoolLensSecondary.address),
+        abi: FusePoolLensSecondaryABI,
+        publicClient: this.publicClient,
+        walletClient: this.walletClient ? this.walletClient : undefined,
+      });
+    }
+
+    createFuseSafeLiquidator() {
+      return getContract({
+        address: getAddress(this.chainDeployment.FuseSafeLiquidator.address),
+        abi: FuseSafeLiquidatorABI,
+        publicClient: this.publicClient,
+        walletClient: this.walletClient ? this.walletClient : undefined,
+      });
+    }
+
+    createFuseFeeDistributor() {
+      return getContract({
+        address: getAddress(this.chainDeployment.FuseFeeDistributor.address),
+        abi: FuseFeeDistributorABI,
+        publicClient: this.publicClient,
+        walletClient: this.walletClient ? this.walletClient : undefined,
+      });
+    }
+
+    createMidasFlywheelLensRouter() {
+      return getContract({
+        address: getAddress(this.chainDeployment.MidasFlywheelLensRouter.address),
+        abi: MidasFlywheelLensRouterABI,
+        publicClient: this.publicClient,
+        walletClient: this.walletClient ? this.walletClient : undefined,
+      });
+    }
+
     createUnitroller(address: string) {
       return getContract({
         address: getAddress(address),
@@ -154,15 +213,6 @@ export function withCreateContracts<TBase extends MidasBaseConstructor>(Base: TB
       return getContract({
         address: getAddress(this.chainDeployment.OptimizedVaultsRegistry.address),
         abi: OptimizedVaultsRegistryABI,
-        publicClient: this.publicClient,
-        walletClient: this.walletClient ? this.walletClient : undefined,
-      });
-    }
-
-    createMidasFlywheelLensRouter() {
-      return getContract({
-        address: getAddress(this.chainDeployment.MidasFlywheelLensRouter.address),
-        abi: MidasFlywheelLensRouterABI,
         publicClient: this.publicClient,
         walletClient: this.walletClient ? this.walletClient : undefined,
       });
