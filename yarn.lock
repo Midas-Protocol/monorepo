@@ -3569,7 +3569,7 @@ __metadata:
     rimraf: ^3.0.2
     ts-node: ^10.7.0
     typescript: 4.7.4
-    viem: ^0.3.29
+    viem: ^0.3.30
   languageName: unknown
   linkType: soft
 
@@ -3693,7 +3693,7 @@ __metadata:
     typechain: ^8.1.1
     typescript: ^5.0.4
     utf-8-validate: ^6.0.3
-    viem: ^0.3.29
+    viem: ^0.3.30
   languageName: unknown
   linkType: soft
 
@@ -3725,7 +3725,7 @@ __metadata:
     ts-node: ^10.9.1
     typescript: ^5.0.4
     utf-8-validate: ^6.0.3
-    viem: ^0.3.29
+    viem: ^0.3.30
   languageName: unknown
   linkType: soft
 
@@ -3741,7 +3741,7 @@ __metadata:
     tsup: ^6.7.0
     typescript: ^5.0.4
     utf-8-validate: ^6.0.3
-    viem: ^0.3.29
+    viem: ^0.3.30
   languageName: unknown
   linkType: soft
 
@@ -3808,7 +3808,7 @@ __metadata:
     react-jazzicon: ^1.0.4
     recharts: ^2.6.2
     typescript: 5.0.4
-    viem: ^0.3.29
+    viem: ^0.3.30
     wagmi: ^1.0.5
     yup: ^1.1.1
   languageName: unknown
@@ -25492,7 +25492,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"viem@npm:^0.3.29":
+"viem@npm:^0.3.30":
   version: 0.3.30
   resolution: "viem@npm:0.3.30"
   dependencies:

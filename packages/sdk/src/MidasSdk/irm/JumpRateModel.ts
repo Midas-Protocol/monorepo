@@ -1,5 +1,5 @@
 import { InterestRateModel } from "@midas-capital/types";
-import { getAddress, getContract, keccak256, numberToHex, parseEther } from "viem";
+import { getAddress, keccak256, numberToHex, parseEther } from "viem";
 import type { PublicClient } from "viem";
 
 import CTokenInterfaceAbi from "../../../abis/CTokenInterface";
@@ -17,17 +17,6 @@ export default class JumpRateModel implements InterestRateModel {
   reserveFactorMantissa: bigint | undefined;
 
   async init(interestRateModelAddress: string, assetAddress: string, publicClient: PublicClient): Promise<void> {
-    const interestRateModelContract = getContract({
-      address: getAddress(interestRateModelAddress),
-      abi: JumpRateModelAbi,
-      publicClient,
-    });
-    const cTokenContract = getContract({
-      address: getAddress(assetAddress),
-      abi: CTokenInterfaceAbi,
-      publicClient,
-    });
-
     const [
       baseRatePerBlock,
       multiplierPerBlock,
@@ -37,13 +26,41 @@ export default class JumpRateModel implements InterestRateModel {
       adminFeeMantissa,
       fuseFeeMantissa,
     ] = await Promise.all([
-      interestRateModelContract.read.baseRatePerBlock(),
-      interestRateModelContract.read.multiplierPerBlock(),
-      interestRateModelContract.read.jumpMultiplierPerBlock(),
-      interestRateModelContract.read.kink(),
-      cTokenContract.read.reserveFactorMantissa(),
-      cTokenContract.read.adminFeeMantissa(),
-      cTokenContract.read.fuseFeeMantissa(),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: JumpRateModelAbi,
+        functionName: "baseRatePerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: JumpRateModelAbi,
+        functionName: "multiplierPerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: JumpRateModelAbi,
+        functionName: "jumpMultiplierPerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: JumpRateModelAbi,
+        functionName: "kink",
+      }),
+      publicClient.readContract({
+        address: getAddress(assetAddress),
+        abi: CTokenInterfaceAbi,
+        functionName: "reserveFactorMantissa",
+      }),
+      publicClient.readContract({
+        address: getAddress(assetAddress),
+        abi: CTokenInterfaceAbi,
+        functionName: "adminFeeMantissa",
+      }),
+      publicClient.readContract({
+        address: getAddress(assetAddress),
+        abi: CTokenInterfaceAbi,
+        functionName: "fuseFeeMantissa",
+      }),
     ]);
 
     this.baseRatePerBlock = baseRatePerBlock;
@@ -61,17 +78,27 @@ export default class JumpRateModel implements InterestRateModel {
     fuseFeeMantissa: bigint,
     publicClient: PublicClient
   ): Promise<void> {
-    const jumpRateModelContract = getContract({
-      address: getAddress(interestRateModelAddress),
-      abi: JumpRateModelAbi,
-      publicClient,
-    });
-
     const [baseRatePerBlock, multiplierPerBlock, jumpMultiplierPerBlock, kink] = await Promise.all([
-      jumpRateModelContract.read.baseRatePerBlock(),
-      jumpRateModelContract.read.multiplierPerBlock(),
-      jumpRateModelContract.read.jumpMultiplierPerBlock(),
-      jumpRateModelContract.read.kink(),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: JumpRateModelAbi,
+        functionName: "baseRatePerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: JumpRateModelAbi,
+        functionName: "multiplierPerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: JumpRateModelAbi,
+        functionName: "jumpMultiplierPerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: JumpRateModelAbi,
+        functionName: "kink",
+      }),
     ]);
 
     this.baseRatePerBlock = baseRatePerBlock;

@@ -1,5 +1,5 @@
 import { InterestRateModel } from "@midas-capital/types";
-import { getAddress, getContract, parseEther } from "viem";
+import { getAddress, parseEther } from "viem";
 import type { PublicClient } from "viem";
 
 import AnkrCertificateInterestRateModelAbi from "../../../abis/AnkrCertificateInterestRateModel";
@@ -14,13 +14,6 @@ export default class AnkrCertificateInterestRateModel implements InterestRateMod
   reserveFactorMantissa: bigint | undefined;
 
   async init(interestRateModelAddress: string, assetAddress: string, publicClient: PublicClient): Promise<void> {
-    const jumpRateModelContract = getContract({
-      address: getAddress(interestRateModelAddress),
-      abi: AnkrCertificateInterestRateModelAbi,
-      publicClient,
-    });
-    const cTokenContract = getContract({ address: getAddress(assetAddress), abi: CTokenInterfaceAbi, publicClient });
-
     const [
       multiplierPerBlock,
       jumpMultiplierPerBlock,
@@ -30,13 +23,41 @@ export default class AnkrCertificateInterestRateModel implements InterestRateMod
       adminFeeMantissa,
       fuseFeeMantissa,
     ] = await Promise.all([
-      jumpRateModelContract.read.getMultiplierPerBlock(),
-      jumpRateModelContract.read.jumpMultiplierPerBlock(),
-      jumpRateModelContract.read.getBaseRatePerBlock(),
-      jumpRateModelContract.read.kink(),
-      cTokenContract.read.reserveFactorMantissa(),
-      cTokenContract.read.adminFeeMantissa(),
-      cTokenContract.read.fuseFeeMantissa(),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: AnkrCertificateInterestRateModelAbi,
+        functionName: "getMultiplierPerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: AnkrCertificateInterestRateModelAbi,
+        functionName: "jumpMultiplierPerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: AnkrCertificateInterestRateModelAbi,
+        functionName: "getBaseRatePerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: AnkrCertificateInterestRateModelAbi,
+        functionName: "kink",
+      }),
+      publicClient.readContract({
+        address: getAddress(assetAddress),
+        abi: CTokenInterfaceAbi,
+        functionName: "reserveFactorMantissa",
+      }),
+      publicClient.readContract({
+        address: getAddress(assetAddress),
+        abi: CTokenInterfaceAbi,
+        functionName: "adminFeeMantissa",
+      }),
+      publicClient.readContract({
+        address: getAddress(assetAddress),
+        abi: CTokenInterfaceAbi,
+        functionName: "fuseFeeMantissa",
+      }),
     ]);
 
     this.multiplierPerBlock = multiplierPerBlock;
@@ -54,17 +75,27 @@ export default class AnkrCertificateInterestRateModel implements InterestRateMod
     fuseFeeMantissa: bigint,
     publicClient: PublicClient
   ): Promise<void> {
-    const jumpRateModelContract = getContract({
-      address: getAddress(interestRateModelAddress),
-      abi: AnkrCertificateInterestRateModelAbi,
-      publicClient,
-    });
-
     const [multiplierPerBlock, jumpMultiplierPerBlock, baseRatePerBlock, kink] = await Promise.all([
-      jumpRateModelContract.read.getMultiplierPerBlock(),
-      jumpRateModelContract.read.jumpMultiplierPerBlock(),
-      jumpRateModelContract.read.getBaseRatePerBlock(),
-      jumpRateModelContract.read.kink(),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: AnkrCertificateInterestRateModelAbi,
+        functionName: "getMultiplierPerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: AnkrCertificateInterestRateModelAbi,
+        functionName: "jumpMultiplierPerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: AnkrCertificateInterestRateModelAbi,
+        functionName: "getBaseRatePerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: AnkrCertificateInterestRateModelAbi,
+        functionName: "kink",
+      }),
     ]);
 
     this.multiplierPerBlock = multiplierPerBlock;

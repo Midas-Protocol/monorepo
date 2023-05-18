@@ -1,5 +1,5 @@
 import { InterestRateModel } from "@midas-capital/types";
-import { getAddress, getContract, keccak256, numberToHex } from "viem";
+import { getAddress, keccak256, numberToHex } from "viem";
 import type { PublicClient } from "viem";
 
 import CTokenInterfaceAbi from "../../../abis/CTokenInterface";
@@ -18,24 +18,33 @@ export default class WhitePaperInterestRateModel implements InterestRateModel {
   reserveFactorMantissa: bigint | undefined;
 
   async init(interestRateModelAddress: string, assetAddress: string, publicClient: PublicClient) {
-    const whitePaperModelContract = getContract({
-      address: getAddress(interestRateModelAddress),
-      abi: WhitePaperInterestRateModelAbi,
-      publicClient,
-    });
-    const cTokenContract = getContract({
-      address: getAddress(assetAddress),
-      abi: CTokenInterfaceAbi,
-      publicClient,
-    });
-
     const [baseRatePerBlock, multiplierPerBlock, reserveFactorMantissa, adminFeeMantissa, fuseFeeMantissa] =
       await Promise.all([
-        whitePaperModelContract.read.baseRatePerBlock(),
-        whitePaperModelContract.read.multiplierPerBlock(),
-        cTokenContract.read.reserveFactorMantissa(),
-        cTokenContract.read.adminFeeMantissa(),
-        cTokenContract.read.fuseFeeMantissa(),
+        publicClient.readContract({
+          address: getAddress(interestRateModelAddress),
+          abi: WhitePaperInterestRateModelAbi,
+          functionName: "baseRatePerBlock",
+        }),
+        publicClient.readContract({
+          address: getAddress(interestRateModelAddress),
+          abi: WhitePaperInterestRateModelAbi,
+          functionName: "multiplierPerBlock",
+        }),
+        publicClient.readContract({
+          address: getAddress(assetAddress),
+          abi: CTokenInterfaceAbi,
+          functionName: "reserveFactorMantissa",
+        }),
+        publicClient.readContract({
+          address: getAddress(assetAddress),
+          abi: CTokenInterfaceAbi,
+          functionName: "adminFeeMantissa",
+        }),
+        publicClient.readContract({
+          address: getAddress(assetAddress),
+          abi: CTokenInterfaceAbi,
+          functionName: "fuseFeeMantissa",
+        }),
       ]);
 
     this.baseRatePerBlock = baseRatePerBlock;
@@ -51,15 +60,17 @@ export default class WhitePaperInterestRateModel implements InterestRateModel {
     fuseFeeMantissa: bigint,
     publicClient: PublicClient
   ) {
-    const whitePaperModelContract = getContract({
-      address: getAddress(interestRateModelAddress),
-      abi: WhitePaperInterestRateModelAbi,
-      publicClient,
-    });
-
     const [baseRatePerBlock, multiplierPerBlock] = await Promise.all([
-      whitePaperModelContract.read.baseRatePerBlock(),
-      whitePaperModelContract.read.multiplierPerBlock(),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: WhitePaperInterestRateModelAbi,
+        functionName: "baseRatePerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: WhitePaperInterestRateModelAbi,
+        functionName: "multiplierPerBlock",
+      }),
     ]);
 
     this.baseRatePerBlock = baseRatePerBlock;

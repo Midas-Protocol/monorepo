@@ -1,4 +1,4 @@
-import { getAddress, getContract, keccak256, numberToHex } from "viem";
+import { getAddress, keccak256, numberToHex } from "viem";
 import type { PublicClient } from "viem";
 
 import CTokenInterfacesAbi from "../../../abis/CTokenInterface";
@@ -20,18 +20,27 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
   async init(interestRateModelAddress: string, assetAddress: string, publicClient: PublicClient) {
     await super.init(interestRateModelAddress, assetAddress, publicClient);
 
-    const interestRateContract = getContract({
-      address: getAddress(interestRateModelAddress),
-      abi: DAIInterestRateModelV2Abi,
-      publicClient,
-    });
-    const cTokenContract = getContract({ address: getAddress(assetAddress), abi: CTokenInterfacesAbi, publicClient });
-
     const [dsrPerBlock, cash, borrows, reserves] = await Promise.all([
-      interestRateContract.read.dsrPerBlock(),
-      cTokenContract.read.getCash(),
-      cTokenContract.read.totalBorrows(),
-      cTokenContract.read.totalReserves(),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: DAIInterestRateModelV2Abi,
+        functionName: "dsrPerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(assetAddress),
+        abi: CTokenInterfacesAbi,
+        functionName: "getCash",
+      }),
+      publicClient.readContract({
+        address: getAddress(assetAddress),
+        abi: CTokenInterfacesAbi,
+        functionName: "totalBorrows",
+      }),
+      publicClient.readContract({
+        address: getAddress(assetAddress),
+        abi: CTokenInterfacesAbi,
+        functionName: "totalReserves",
+      }),
     ]);
 
     this.dsrPerBlock = dsrPerBlock;
@@ -49,12 +58,11 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
   ) {
     await super._init(interestRateModelAddress, reserveFactorMantissa, adminFeeMantissa, fuseFeeMantissa, publicClient);
 
-    const interestRateContract = getContract({
+    this.dsrPerBlock = await publicClient.readContract({
       address: getAddress(interestRateModelAddress),
       abi: DAIInterestRateModelV2Abi,
-      publicClient,
+      functionName: "dsrPerBlock",
     });
-    this.dsrPerBlock = await interestRateContract.read.dsrPerBlock();
     this.cash = BigInt(0);
     this.borrows = BigInt(0);
     this.reserves = BigInt(0);

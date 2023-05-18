@@ -1,4 +1,4 @@
-import { getAddress, getContract, keccak256, numberToHex } from "viem";
+import { getAddress, keccak256, numberToHex } from "viem";
 import type { PublicClient } from "viem";
 
 import AdjustableAnkrBNBIrmAbi from "../../../abis/AdjustableAnkrBNBIrm";
@@ -11,17 +11,6 @@ export default class AdjustableAnkrBNBIrm extends JumpRateModel {
   static RUNTIME_BYTECODE_HASH = keccak256(numberToHex(BigInt(AdjustableAnkrBNBIrmArtifact.deployedBytecode.object)));
 
   async init(interestRateModelAddress: string, assetAddress: string, publicClient: PublicClient): Promise<void> {
-    const interestRateModelContract = getContract({
-      address: getAddress(interestRateModelAddress),
-      abi: AdjustableAnkrBNBIrmAbi,
-      publicClient,
-    });
-    const cTokenContract = getContract({
-      address: getAddress(assetAddress),
-      abi: CTokenInterfaceAbi,
-      publicClient,
-    });
-
     const [
       baseRatePerBlock,
       multiplierPerBlock,
@@ -31,13 +20,41 @@ export default class AdjustableAnkrBNBIrm extends JumpRateModel {
       adminFeeMantissa,
       fuseFeeMantissa,
     ] = await Promise.all([
-      interestRateModelContract.read.getBaseRatePerBlock(),
-      interestRateModelContract.read.getMultiplierPerBlock(),
-      interestRateModelContract.read.jumpMultiplierPerBlock(),
-      interestRateModelContract.read.kink(),
-      cTokenContract.read.reserveFactorMantissa(),
-      cTokenContract.read.adminFeeMantissa(),
-      cTokenContract.read.fuseFeeMantissa(),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: AdjustableAnkrBNBIrmAbi,
+        functionName: "getBaseRatePerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: AdjustableAnkrBNBIrmAbi,
+        functionName: "getMultiplierPerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: AdjustableAnkrBNBIrmAbi,
+        functionName: "jumpMultiplierPerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: AdjustableAnkrBNBIrmAbi,
+        functionName: "kink",
+      }),
+      publicClient.readContract({
+        address: getAddress(assetAddress),
+        abi: CTokenInterfaceAbi,
+        functionName: "reserveFactorMantissa",
+      }),
+      publicClient.readContract({
+        address: getAddress(assetAddress),
+        abi: CTokenInterfaceAbi,
+        functionName: "adminFeeMantissa",
+      }),
+      publicClient.readContract({
+        address: getAddress(assetAddress),
+        abi: CTokenInterfaceAbi,
+        functionName: "fuseFeeMantissa",
+      }),
     ]);
 
     this.baseRatePerBlock = baseRatePerBlock;
@@ -56,17 +73,27 @@ export default class AdjustableAnkrBNBIrm extends JumpRateModel {
     fuseFeeMantissa: bigint,
     publicClient: PublicClient
   ): Promise<void> {
-    const interestRateModelContract = getContract({
-      address: getAddress(interestRateModelAddress),
-      abi: AdjustableAnkrBNBIrmAbi,
-      publicClient,
-    });
-
     const [baseRatePerBlock, multiplierPerBlock, jumpMultiplierPerBlock, kink] = await Promise.all([
-      interestRateModelContract.read.getBaseRatePerBlock(),
-      interestRateModelContract.read.getMultiplierPerBlock(),
-      interestRateModelContract.read.jumpMultiplierPerBlock(),
-      interestRateModelContract.read.kink(),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: AdjustableAnkrBNBIrmAbi,
+        functionName: "getBaseRatePerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: AdjustableAnkrBNBIrmAbi,
+        functionName: "getMultiplierPerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: AdjustableAnkrBNBIrmAbi,
+        functionName: "jumpMultiplierPerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: AdjustableAnkrBNBIrmAbi,
+        functionName: "kink",
+      }),
     ]);
 
     this.baseRatePerBlock = baseRatePerBlock;
