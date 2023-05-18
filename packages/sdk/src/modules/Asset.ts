@@ -9,8 +9,8 @@ import {
   numberToHex,
   parseAbiParameters,
   parseEther,
-  TransactionReceipt,
 } from "viem";
+import type { TransactionReceipt } from "viem";
 
 import { MidasBaseConstructor } from "..";
 import ComptrollerABI from "../../abis/Comptroller";

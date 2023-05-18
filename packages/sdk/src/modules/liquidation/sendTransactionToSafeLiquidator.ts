@@ -1,11 +1,5 @@
-import {
-  encodeFunctionData,
-  EstimateGasParameters,
-  getAddress,
-  SendTransactionParameters,
-  TransactionReceipt,
-  zeroAddress,
-} from "viem";
+import { encodeFunctionData, getAddress, zeroAddress } from "viem";
+import type { EstimateGasParameters, SendTransactionParameters, TransactionReceipt } from "viem";
 
 import FuseSafeLiquidatorABI from "../../../abis/FuseSafeLiquidator";
 import { MidasBase } from "../../MidasSdk";

@@ -1,5 +1,6 @@
 import { FuseAsset, LiquidationStrategy } from "@midas-capital/types";
-import { EstimateGasParameters, formatEther } from "viem";
+import { formatEther } from "viem";
+import type { EstimateGasParameters } from "viem";
 
 import { MidasBase } from "../../MidasSdk";
 
