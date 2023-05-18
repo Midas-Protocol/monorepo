@@ -1,5 +1,4 @@
 import { LiquidationStrategy } from "@midas-capital/types";
-import { BigNumber } from "ethers";
 
 import { MidasBase } from "../../MidasSdk";
 
@@ -12,7 +11,7 @@ export default async function encodeLiquidateTx(
   borrower: FusePoolUserWithAssets,
   exchangeToTokenAddress: string,
   strategiesAndDatas: StrategiesAndDatas,
-  liquidationAmount: BigNumber,
+  liquidationAmount: bigint,
   flashSwapPair: string,
   debtFundingStrategies: any[],
   debtFundingStrategiesData: any[]
@@ -42,7 +41,7 @@ export default async function encodeLiquidateTx(
           strategiesAndDatas.strategies,
           strategiesAndDatas.datas,
         ],
-        value: BigNumber.from(0),
+        value: BigInt(0),
       };
     case LiquidationStrategy.UNISWAP:
       return {
@@ -65,7 +64,7 @@ export default async function encodeLiquidateTx(
             debtFundingStrategiesData,
           },
         ],
-        value: BigNumber.from(0),
+        value: BigInt(0),
       };
   }
 }

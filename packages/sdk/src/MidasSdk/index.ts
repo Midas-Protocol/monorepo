@@ -320,41 +320,41 @@ export class MidasBase {
     return oracle;
   }
 
-  getEIP20TokenInstance(address: string) {
-    return getContract({
-      address: getAddress(address),
-      abi: EIP20InterfaceABI,
-      publicClient: this.publicClient,
-      walletClient: this.walletClient,
-    });
-  }
+  // getEIP20TokenInstance(address: string) {
+  //   return getContract({
+  //     address: getAddress(address),
+  //     abi: EIP20InterfaceABI,
+  //     publicClient: this.publicClient,
+  //     walletClient: this.walletClient,
+  //   });
+  // }
 
-  getUnitrollerInstance(address: string) {
-    return getContract({
-      address: getAddress(address),
-      abi: UnitrollerABI,
-      publicClient: this.publicClient,
-      walletClient: this.walletClient,
-    });
-  }
+  // getUnitrollerInstance(address: string) {
+  //   return getContract({
+  //     address: getAddress(address),
+  //     abi: UnitrollerABI,
+  //     publicClient: this.publicClient,
+  //     walletClient: this.walletClient,
+  //   });
+  // }
 
-  getFusePoolDirectoryInstance() {
-    return getContract({
-      address: getAddress(this.chainDeployment.FusePoolDirectory.address),
-      abi: FusePoolDirectoryABI,
-      publicClient: this.publicClient,
-      walletClient: this.walletClient,
-    });
-  }
+  // getFusePoolDirectoryInstance() {
+  //   return getContract({
+  //     address: getAddress(this.chainDeployment.FusePoolDirectory.address),
+  //     abi: FusePoolDirectoryABI,
+  //     publicClient: this.publicClient,
+  //     walletClient: this.walletClient,
+  //   });
+  // }
 
-  getMidasErc4626PluginInstance(address: string) {
-    return getContract({
-      address: getAddress(address),
-      abi: MidasERC4626ABI,
-      publicClient: this.publicClient,
-      walletClient: this.walletClient,
-    });
-  }
+  // getMidasErc4626PluginInstance(address: string) {
+  //   return getContract({
+  //     address: getAddress(address),
+  //     abi: MidasERC4626ABI,
+  //     publicClient: this.publicClient,
+  //     walletClient: this.walletClient,
+  //   });
+  // }
 }
 
 const MidasBaseWithModules = withFusePoolLens(

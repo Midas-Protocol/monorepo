@@ -52,18 +52,18 @@ export const getPoolAddress = (
   });
 };
 
-export const getPoolUnitroller = (poolAddress: string, publicClient: PublicClient) => {
-  return getContract({
-    address: getAddress(poolAddress),
-    abi: UnitrollerAbi,
-    publicClient,
-  });
-};
+// export const getPoolUnitroller = (poolAddress: string, publicClient: PublicClient) => {
+//   return getContract({
+//     address: getAddress(poolAddress),
+//     abi: UnitrollerAbi,
+//     publicClient,
+//   });
+// };
 
-export const getPoolComptroller = (poolAddress: string, publicClient: PublicClient) => {
-  return getContract({
-    address: getAddress(poolAddress),
-    abi: ComptrollerABI,
-    publicClient,
-  });
-};
+// export const getPoolComptroller = (poolAddress: string, publicClient: PublicClient) => {
+//   return getContract({
+//     address: getAddress(poolAddress),
+//     abi: ComptrollerABI,
+//     publicClient,
+//   });
+// };

@@ -4,10 +4,6 @@
 {
   "extends": "./tsconfig-sdk.json",
   "compilerOptions": {
-    "baseUrl": "../..",
-    "paths": {
-      "*": ["node_modules/*"]
-    },
     "module": "CommonJS",
     "outDir": "./dist/cjs",
     "skipLibCheck": true

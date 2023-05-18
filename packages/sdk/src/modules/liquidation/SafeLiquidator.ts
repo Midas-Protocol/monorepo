@@ -1,5 +1,5 @@
 import { TransactionResponse } from "@ethersproject/providers";
-import { BigNumber, utils } from "ethers";
+import { parseEther } from "viem";
 
 import { MidasSdk } from "../..";
 import { CreateContractsModule } from "../CreateContracts";
@@ -16,7 +16,7 @@ export function withSafeLiquidator<TBase extends CreateContractsModule>(Base: TB
 
     async getPotentialLiquidations(
       excludedComptrollers: Array<string> = [],
-      maxHealthFactor: BigNumber = utils.parseEther("1"),
+      maxHealthFactor: bigint = parseEther(`${1}`),
       configOverrides?: ChainLiquidationConfig
     ): Promise<[Array<LiquidatablePool>, Array<ErroredPool>]> {
       // Get potential liquidations from public pools

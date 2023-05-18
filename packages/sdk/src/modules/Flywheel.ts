@@ -53,9 +53,11 @@ export function withFlywheel<TBase extends CreateContractsModule = CreateContrac
       ]);
       const strategiesOfFlywheels = await Promise.all(
         flywheelsOfPool.map(async (fwAddress) => {
-          const fw = this.createMidasFlywheel(fwAddress);
-
-          return await fw.read.getAllStrategies();
+          return await this.publicClient.readContract({
+            address: getAddress(fwAddress),
+            abi: MidasFlywheelABI,
+            functionName: "getAllStrategies",
+          });
         })
       );
 
@@ -68,9 +70,13 @@ export function withFlywheel<TBase extends CreateContractsModule = CreateContrac
               .filter((_, fwIndex) => strategiesOfFlywheels[fwIndex].includes(market))
               // TODO also check marketState?
               .map(async (fwAddress) => {
-                const fw = this.createMidasFlywheel(fwAddress);
-                const rewardToken = await fw.read.rewardToken();
+                const rewardToken = await this.publicClient.readContract({
+                  address: getAddress(fwAddress),
+                  abi: MidasFlywheelABI,
+                  functionName: "rewardToken",
+                });
                 rewardTokens.push(rewardToken);
+
                 return {
                   rewardToken,
                   flywheel: fwAddress,
@@ -151,7 +157,6 @@ export function withFlywheel<TBase extends CreateContractsModule = CreateContrac
 
       const flywheelWithRewards: FlywheelClaimableRewards[] = [];
       for (const rewardDistributor of rewardDistributorsOfPool) {
-        const flywheel = this.createMidasFlywheel(rewardDistributor);
         const rewards: FlywheelClaimableRewards["rewards"] = [];
         for (const market of marketsOfPool) {
           const { result } = await this.publicClient.simulateContract({
@@ -169,9 +174,15 @@ export function withFlywheel<TBase extends CreateContractsModule = CreateContrac
           }
         }
         if (rewards.length > 0) {
+          const rewardToken = await this.publicClient.readContract({
+            address: getAddress(rewardDistributor),
+            abi: MidasFlywheelABI,
+            functionName: "rewardToken",
+          });
+
           flywheelWithRewards.push({
             flywheel: rewardDistributor,
-            rewardToken: await flywheel.read.rewardToken(),
+            rewardToken,
             rewards,
           });
         }
@@ -220,7 +231,7 @@ export function withFlywheel<TBase extends CreateContractsModule = CreateContrac
               rewards,
             });
           }
-        } catch (e) {
+        } catch (e: any) {
           console.error(`Error while calling accrue for market ${market} and account ${account}: ${e.message}`);
         }
       }

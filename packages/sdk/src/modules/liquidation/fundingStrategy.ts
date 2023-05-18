@@ -1,12 +1,13 @@
 import { FundingStrategyContract } from "@midas-capital/types";
-import { BytesLike, constants, ethers } from "ethers";
+import { encodeAbiParameters, getAddress, parseAbiParameters } from "viem";
 
-import { IUniswapV2Factory__factory } from "../../../typechain/factories/IUniswapV2Factory__factory";
+import IUniswapV2FactoryABI from "../../../abis/IUniswapV2Factory";
 import { MidasBase } from "../../MidasSdk";
+import { AddressZero } from "../../MidasSdk/constants";
 
 export type FundingStrategiesAndDatas = {
   strategies: string[];
-  datas: BytesLike[];
+  datas: string[];
   flashSwapFundingToken: string;
 };
 
@@ -14,13 +15,8 @@ export const getFundingStrategiesAndDatas = async (
   midasSdk: MidasBase,
   debtToken: string
 ): Promise<FundingStrategiesAndDatas> => {
-  const uniswapV2Factory = IUniswapV2Factory__factory.connect(
-    midasSdk.chainSpecificAddresses.UNISWAP_V2_FACTORY,
-    midasSdk.provider
-  );
-
   const strategies: string[] = [];
-  const datas: BytesLike[] = [];
+  const datas: string[] = [];
   const tokenPath: string[] = [];
 
   let fundingToken = debtToken;
@@ -31,8 +27,14 @@ export const getFundingStrategiesAndDatas = async (
     // avoid going in an endless loop
     if (tokenPath.find((p) => p == inputToken)) {
       // if we can supply the funding token with flash loan on uniswap, that's enough
-      const pair = await uniswapV2Factory.callStatic.getPair(midasSdk.chainSpecificAddresses.W_TOKEN, fundingToken);
-      if (pair !== constants.AddressZero) {
+      const pair = await midasSdk.publicClient.readContract({
+        address: getAddress(midasSdk.chainSpecificAddresses.UNISWAP_V2_FACTORY),
+        abi: IUniswapV2FactoryABI,
+        functionName: "getPair",
+        args: [getAddress(midasSdk.chainSpecificAddresses.W_TOKEN), getAddress(fundingToken)],
+      });
+
+      if (pair !== AddressZero) {
         break;
       } else {
         throw new Error(
@@ -73,16 +75,14 @@ function getStrategyData(
     case FundingStrategyContract.UniswapV3LiquidatorFunder:
       const quoter = midasSdk.chainDeployment["Quoter"].address;
 
-      return new ethers.utils.AbiCoder().encode(
-        ["address", "address", "uint24", "address", "address"],
-        [
-          inputToken,
-          fundingToken,
-          midasSdk.chainConfig.specificParams.metadata.uniswapV3Fees?.[inputToken][fundingToken] || 1000,
-          midasSdk.chainConfig.chainAddresses.UNISWAP_V3_ROUTER,
-          quoter,
-        ]
-      );
+      return encodeAbiParameters(parseAbiParameters("address, address, uint24, address, address"), [
+        getAddress(inputToken),
+        getAddress(fundingToken),
+        midasSdk.chainConfig.specificParams.metadata.uniswapV3Fees?.[inputToken][fundingToken] || 1000,
+        getAddress(midasSdk.chainConfig.chainAddresses.UNISWAP_V3_ROUTER ?? AddressZero),
+        getAddress(quoter),
+      ]);
+
     case FundingStrategyContract.JarvisLiquidatorFunder:
       const jarvisPool = midasSdk.chainConfig.liquidationDefaults.jarvisPools.find(
         (p) => p.collateralToken == inputToken && p.syntheticToken == fundingToken
@@ -94,21 +94,28 @@ function getStrategyData(
       }
       const poolAddress = jarvisPool.liquidityPoolAddress;
       const expirationTime = jarvisPool.expirationTime;
-      return new ethers.utils.AbiCoder().encode(
-        ["address", "address", "uint256"],
-        [inputToken, poolAddress, expirationTime]
-      );
+
+      return encodeAbiParameters(parseAbiParameters("address, address, uint256"), [
+        getAddress(inputToken),
+        getAddress(poolAddress),
+        BigInt(expirationTime),
+      ]);
+
     case FundingStrategyContract.XBombLiquidatorFunder:
-      return new ethers.utils.AbiCoder().encode(["address"], [inputToken]);
+      return encodeAbiParameters(parseAbiParameters("address"), [getAddress(inputToken)]);
     case FundingStrategyContract.CurveSwapLiquidatorFunder:
       const curveV1Oracle = midasSdk.chainDeployment.CurveLpTokenPriceOracleNoRegistry;
       const curveV2Oracle = midasSdk.chainDeployment.CurveV2LpTokenPriceOracleNoRegistry;
-      const curveV1OracleAddress = curveV1Oracle ? curveV1Oracle.address : constants.AddressZero;
-      const curveV2OracleAddress = curveV2Oracle ? curveV2Oracle.address : constants.AddressZero;
-      return new ethers.utils.AbiCoder().encode(
-        ["address", "address", "address", "address", "address"],
-        [curveV1OracleAddress, curveV2OracleAddress, inputToken, fundingToken, midasSdk.chainSpecificAddresses.W_TOKEN]
-      );
+      const curveV1OracleAddress = curveV1Oracle ? curveV1Oracle.address : AddressZero;
+      const curveV2OracleAddress = curveV2Oracle ? curveV2Oracle.address : AddressZero;
+
+      return encodeAbiParameters(parseAbiParameters("address, address, address, address, address"), [
+        getAddress(curveV1OracleAddress),
+        getAddress(curveV2OracleAddress),
+        getAddress(inputToken),
+        getAddress(fundingToken),
+        getAddress(midasSdk.chainSpecificAddresses.W_TOKEN),
+      ]);
     default:
       return "";
   }

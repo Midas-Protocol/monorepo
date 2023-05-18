@@ -1,6 +1,7 @@
 import { LiquidationStrategy } from "@midas-capital/types";
-import { BigNumber } from "ethers";
+import { getAddress, numberToHex, zeroAddress } from "viem";
 
+import FuseSafeLiquidatorABI from "../../../abis/FuseSafeLiquidator";
 import { MidasBase } from "../../MidasSdk";
 
 import { getUniswapV2Router, StrategiesAndDatas } from "./redemptionStrategy";
@@ -10,7 +11,7 @@ const estimateGas = async (
   fuse: MidasBase,
   borrower: FusePoolUserWithAssets,
   exchangeToTokenAddress: string,
-  liquidationAmount: BigNumber,
+  liquidationAmount: bigint,
   strategiesAndDatas: StrategiesAndDatas,
   flashSwapPair: string,
   liquidationStrategy: LiquidationStrategy,
@@ -19,46 +20,50 @@ const estimateGas = async (
 ) => {
   switch (liquidationStrategy) {
     case LiquidationStrategy.DEFAULT:
-      return await fuse.contracts.FuseSafeLiquidator.estimateGas[
-        "safeLiquidate(address,uint256,address,address,uint256,address,address,address[],bytes[])"
-      ](
-        borrower.account,
-        liquidationAmount,
-        borrower.debt[0].cToken,
-        borrower.collateral[0].cToken,
-        0,
-        exchangeToTokenAddress,
-        fuse.chainSpecificAddresses.UNISWAP_V2_ROUTER,
-        strategiesAndDatas.strategies,
-        strategiesAndDatas.datas,
-        {
-          gasLimit: 1e9,
-          from: process.env.ETHEREUM_ADMIN_ACCOUNT,
-        }
-      );
+      return await fuse.publicClient.estimateContractGas({
+        address: getAddress(fuse.chainDeployment.FuseSafeLiquidator.address),
+        abi: FuseSafeLiquidatorABI,
+        functionName: "safeLiquidate",
+        args: [
+          getAddress(borrower.account),
+          liquidationAmount,
+          borrower.debt[0].cToken,
+          borrower.collateral[0].cToken,
+          BigInt(0),
+          getAddress(exchangeToTokenAddress),
+          getAddress(fuse.chainSpecificAddresses.UNISWAP_V2_ROUTER),
+          strategiesAndDatas.strategies.map((st) => getAddress(st)),
+          strategiesAndDatas.datas.map((data) => numberToHex(BigInt(data))),
+        ],
+        account: process.env.ETHEREUM_ADMIN_ACCOUNT ? getAddress(process.env.ETHEREUM_ADMIN_ACCOUNT) : zeroAddress,
+        gas: 10n ** 9n,
+      });
     case LiquidationStrategy.UNISWAP:
-      return await fuse.contracts.FuseSafeLiquidator.estimateGas.safeLiquidateToTokensWithFlashLoan(
-        {
-          borrower: borrower.account,
-          repayAmount: liquidationAmount,
-          cErc20: borrower.debt[0].cToken,
-          cTokenCollateral: borrower.collateral[0].cToken,
-          minProfitAmount: 0,
-          exchangeProfitTo: exchangeToTokenAddress,
-          uniswapV2RouterForBorrow: fuse.chainSpecificAddresses.UNISWAP_V2_ROUTER, // TODO ASSET_SPECIFIC_ROUTER
-          uniswapV2RouterForCollateral: getUniswapV2Router(fuse, borrower.collateral[0].cToken),
-          redemptionStrategies: strategiesAndDatas.strategies,
-          strategyData: strategiesAndDatas.datas,
-          flashSwapPair,
-          ethToCoinbase: 0,
-          debtFundingStrategies,
-          debtFundingStrategiesData,
-        },
-        {
-          gasLimit: 1e9,
-          from: process.env.ETHEREUM_ADMIN_ACCOUNT,
-        }
-      );
+      return await fuse.publicClient.estimateContractGas({
+        address: getAddress(fuse.chainDeployment.FuseSafeLiquidator.address),
+        abi: FuseSafeLiquidatorABI,
+        functionName: "safeLiquidateToTokensWithFlashLoan",
+        args: [
+          {
+            borrower: getAddress(borrower.account),
+            repayAmount: liquidationAmount,
+            cErc20: borrower.debt[0].cToken,
+            cTokenCollateral: borrower.collateral[0].cToken,
+            minProfitAmount: BigInt(0),
+            exchangeProfitTo: getAddress(exchangeToTokenAddress),
+            uniswapV2RouterForBorrow: getAddress(fuse.chainSpecificAddresses.UNISWAP_V2_ROUTER), // TODO ASSET_SPECIFIC_ROUTER
+            uniswapV2RouterForCollateral: getAddress(getUniswapV2Router(fuse, borrower.collateral[0].cToken)),
+            redemptionStrategies: strategiesAndDatas.strategies.map((st) => getAddress(st)),
+            strategyData: strategiesAndDatas.datas.map((data) => numberToHex(BigInt(data))),
+            flashSwapPair: getAddress(flashSwapPair),
+            ethToCoinbase: BigInt(0),
+            debtFundingStrategies,
+            debtFundingStrategiesData,
+          },
+        ],
+        account: process.env.ETHEREUM_ADMIN_ACCOUNT ? getAddress(process.env.ETHEREUM_ADMIN_ACCOUNT) : zeroAddress,
+        gas: 10n ** 9n,
+      });
   }
 };
 

@@ -3546,8 +3546,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@midas-capital/liquidator@workspace:packages/bots/liquidator"
   dependencies:
-    "@ethersproject/contracts": ^5.6.0
-    "@ethersproject/providers": ^5.6.0
     "@midas-capital/chains": "workspace:*"
     "@midas-capital/sdk": "workspace:*"
     "@midas-capital/types": "workspace:*"
@@ -3565,13 +3563,13 @@ __metadata:
     eslint-import-resolver-typescript: ^3.1.2
     eslint-plugin-import: ^2.26.0
     eslint-plugin-prettier: ^4.2.1
-    ethers: ^5.6.5
     pino: ^8.0.0
     pino-pretty: ^9.1.1
     prettier: 2.7.1
     rimraf: ^3.0.2
     ts-node: ^10.7.0
     typescript: 4.7.4
+    viem: ^0.3.29
   languageName: unknown
   linkType: soft
 
@@ -3695,7 +3693,7 @@ __metadata:
     typechain: ^8.1.1
     typescript: ^5.0.4
     utf-8-validate: ^6.0.3
-    viem: ^0.3.26
+    viem: ^0.3.29
   languageName: unknown
   linkType: soft
 
@@ -3727,7 +3725,7 @@ __metadata:
     ts-node: ^10.8.1
     typescript: ^4.8.2
     utf-8-validate: ^5.0.9
-    viem: ^0.3.26
+    viem: ^0.3.29
   languageName: unknown
   linkType: soft
 
@@ -3743,7 +3741,7 @@ __metadata:
     tsup: ^6.5.0
     typescript: ^4.7.4
     utf-8-validate: ^5.0.9
-    viem: ^0.3.26
+    viem: ^0.3.29
   languageName: unknown
   linkType: soft
 
@@ -3810,7 +3808,7 @@ __metadata:
     react-jazzicon: ^1.0.4
     recharts: ^2.6.2
     typescript: 5.0.4
-    viem: ^0.3.26
+    viem: ^0.3.29
     wagmi: ^1.0.2
     yup: ^1.1.1
   languageName: unknown
@@ -25854,9 +25852,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"viem@npm:^0.3.26":
-  version: 0.3.26
-  resolution: "viem@npm:0.3.26"
+"viem@npm:^0.3.29":
+  version: 0.3.29
+  resolution: "viem@npm:0.3.29"
   dependencies:
     "@adraffy/ens-normalize": 1.9.0
     "@noble/curves": 1.0.0
@@ -25867,7 +25865,7 @@ __metadata:
     abitype: 0.8.2
     isomorphic-ws: 5.0.0
     ws: 8.12.0
-  checksum: 430f5d05fb3f28cc5bae6e8337dbb0165f6eca94865ce061ef6879462cacdc65d1da80100ffd7cedc361eb1d9bf55b4766e7ed418c1cad43f615059a22c94100
+  checksum: 8ae2bbcfc9129fc8de2c6c84f93d2b0791cfeba5966d44424667ecc4a675a5856110dabf461c360f469530c4be05461278a7f2a7e501e382806ab162a7f41a50
   languageName: node
   linkType: hard
 

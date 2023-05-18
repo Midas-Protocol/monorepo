@@ -46,7 +46,7 @@
     "react-icons": "^4.8.0",
     "react-jazzicon": "^1.0.4",
     "recharts": "^2.6.2",
-    "viem": "^0.3.26",
+    "viem": "^0.3.29",
     "wagmi": "^1.0.2",
     "yup": "^1.1.1"
   },
