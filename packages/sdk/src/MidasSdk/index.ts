@@ -195,8 +195,7 @@ export class MidasBase {
           console.log(receipt.logs);
           const registerEvent = receipt.logs?.pop();
           console.log({ registerEvent });
-          poolId =
-            registerEvent && registerEvent.args && registerEvent.args[0] ? registerEvent.args[0].toNumber() : undefined;
+          poolId = registerEvent && registerEvent && registerEvent[0] ? registerEvent[0].toNumber() : undefined;
         } catch (e) {
           this.logger.warn("Unable to retrieve pool ID from receipt events", e);
         }
