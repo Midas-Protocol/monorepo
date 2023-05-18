@@ -10,23 +10,15 @@ import {
   SupportedAsset,
   SupportedChains,
 } from "@midas-capital/types";
-import { encodeAbiParameters, getAddress, getContract, keccak256, parseAbiParameters } from "viem";
+import { encodeAbiParameters, getAddress, keccak256, parseAbiParameters } from "viem";
 import type { Account, PublicClient, TransactionReceipt, WalletClient } from "viem";
 
 import ComptrollerABI from "../../abis/Comptroller";
 import CTokenInterfaceABI from "../../abis/CTokenInterface";
-import EIP20InterfaceABI from "../../abis/EIP20Interface";
-import FuseFeeDistributorABI from "../../abis/FuseFeeDistributor";
 import FusePoolDirectoryABI from "../../abis/FusePoolDirectory";
-import FusePoolLensABI from "../../abis/FusePoolLens";
-import FusePoolLensSecondaryABI from "../../abis/FusePoolLensSecondary";
-import FuseSafeLiquidatorABI from "../../abis/FuseSafeLiquidator";
-import MidasERC4626ABI from "../../abis/MidasERC4626";
-import MidasFlywheelLensRouterABI from "../../abis/MidasFlywheelLensRouter";
 import UnitrollerABI from "../../abis/Unitroller";
 import { withAsset } from "../modules/Asset";
 import { withConvertMantissa } from "../modules/ConvertMantissa";
-import { withCreateContracts } from "../modules/CreateContracts";
 import { withFlywheel } from "../modules/Flywheel";
 import { withFundOperations } from "../modules/FundOperations";
 import { withFusePoolLens } from "../modules/FusePoolLens";
@@ -319,49 +311,11 @@ export class MidasBase {
 
     return oracle;
   }
-
-  // getEIP20TokenInstance(address: string) {
-  //   return getContract({
-  //     address: getAddress(address),
-  //     abi: EIP20InterfaceABI,
-  //     publicClient: this.publicClient,
-  //     walletClient: this.walletClient,
-  //   });
-  // }
-
-  // getUnitrollerInstance(address: string) {
-  //   return getContract({
-  //     address: getAddress(address),
-  //     abi: UnitrollerABI,
-  //     publicClient: this.publicClient,
-  //     walletClient: this.walletClient,
-  //   });
-  // }
-
-  // getFusePoolDirectoryInstance() {
-  //   return getContract({
-  //     address: getAddress(this.chainDeployment.FusePoolDirectory.address),
-  //     abi: FusePoolDirectoryABI,
-  //     publicClient: this.publicClient,
-  //     walletClient: this.walletClient,
-  //   });
-  // }
-
-  // getMidasErc4626PluginInstance(address: string) {
-  //   return getContract({
-  //     address: getAddress(address),
-  //     abi: MidasERC4626ABI,
-  //     publicClient: this.publicClient,
-  //     walletClient: this.walletClient,
-  //   });
-  // }
 }
 
 const MidasBaseWithModules = withFusePoolLens(
   withFundOperations(
-    withSafeLiquidator(
-      withFusePools(withAsset(withFlywheel(withVaults(withCreateContracts(withConvertMantissa(MidasBase))))))
-    )
+    withSafeLiquidator(withFusePools(withAsset(withFlywheel(withVaults(withConvertMantissa(MidasBase))))))
   )
 );
 export class MidasSdk extends MidasBaseWithModules {}

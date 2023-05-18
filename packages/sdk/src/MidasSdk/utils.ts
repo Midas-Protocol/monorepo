@@ -3,16 +3,12 @@ import {
   encodeAbiParameters,
   encodePacked,
   getAddress,
-  getContract,
   getContractAddress,
   keccak256,
   numberToHex,
   parseAbiParameters,
 } from "viem";
-import type { PublicClient } from "viem";
 
-import ComptrollerABI from "../../abis/Comptroller";
-import UnitrollerAbi from "../../abis/Unitroller";
 import UnitrollerArtifact from "../../artifacts/Unitroller.json";
 
 export function filterOnlyObjectProperties(obj: any) {
@@ -51,19 +47,3 @@ export const getPoolAddress = (
     salt: numberToHex(BigInt(getSaltsHash(from, poolName, marketsCounter))),
   });
 };
-
-// export const getPoolUnitroller = (poolAddress: string, publicClient: PublicClient) => {
-//   return getContract({
-//     address: getAddress(poolAddress),
-//     abi: UnitrollerAbi,
-//     publicClient,
-//   });
-// };
-
-// export const getPoolComptroller = (poolAddress: string, publicClient: PublicClient) => {
-//   return getContract({
-//     address: getAddress(poolAddress),
-//     abi: ComptrollerABI,
-//     publicClient,
-//   });
-// };
