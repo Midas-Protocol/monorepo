@@ -3,15 +3,15 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "@supabase/supabase-js": "^2.7.1",
-    "axios": "^1.3.2",
+    "@supabase/supabase-js": "^2.22.0",
+    "axios": "^1.4.0",
     "dotenv": "^16.0.3",
     "ethers": "^5.7.2",
-    "typescript": "^4.9.5",
-    "zod": "^3.20.6"
+    "typescript": "^5.0.4",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@netlify/functions": "^1.4.0"
+    "@netlify/functions": "^1.6.0"
   },
   "scripts": {
     "build": "tsc",
