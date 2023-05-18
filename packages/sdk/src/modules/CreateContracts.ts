@@ -199,5 +199,3 @@ export function withCreateContracts<TBase extends MidasBaseConstructor>(Base: TB
     // }
   };
 }
-
-export type CreateContractsModule = ReturnType<typeof withCreateContracts<MidasBaseConstructor>>;

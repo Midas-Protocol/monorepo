@@ -12,18 +12,14 @@ import {
   TransactionReceipt,
 } from "viem";
 
+import { MidasBaseConstructor } from "..";
 import ComptrollerABI from "../../abis/Comptroller";
 import FuseFeeDistributorABI from "../../abis/FuseFeeDistributor";
 import CErc20DelegatorArtifact from "../../artifacts/CErc20Delegator.json";
 import { COMPTROLLER_ERROR_CODES } from "../MidasSdk/config";
 import { WeiPerEther } from "../MidasSdk/constants";
 
-import { withCreateContracts } from "./CreateContracts";
-import { withFlywheel } from "./Flywheel";
-
-type FuseBaseConstructorWithModules = ReturnType<typeof withCreateContracts> & ReturnType<typeof withFlywheel>;
-
-export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TBase) {
+export function withAsset<TBase extends MidasBaseConstructor>(Base: TBase) {
   return class PoolAsset extends Base {
     public COMPTROLLER_ERROR_CODES: Array<string> = COMPTROLLER_ERROR_CODES;
 

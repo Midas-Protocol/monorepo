@@ -1,6 +1,7 @@
 import { FlywheelRewardsInfoForVault, FundOperationMode, SupportedChains, VaultData } from "@midas-capital/types";
 import { formatUnits, getAddress } from "viem";
 
+import { MidasBaseConstructor } from "..";
 import EIP20InterfaceABI from "../../abis/EIP20Interface";
 import MasterPriceOracleABI from "../../abis/MasterPriceOracle";
 import OptimizedAPRVaultFirstExtensionABI from "../../abis/OptimizedAPRVaultFirstExtension";
@@ -8,10 +9,9 @@ import OptimizedAPRVaultSecondExtensionABI from "../../abis/OptimizedAPRVaultSec
 import OptimizedVaultsRegistryABI from "../../abis/OptimizedVaultsRegistry";
 import { MaxUint256 } from "../MidasSdk/constants";
 
-import { CreateContractsModule } from "./CreateContracts";
 import { ChainSupportedAssets } from "./FusePools";
 
-export function withVaults<TBase extends CreateContractsModule = CreateContractsModule>(Base: TBase) {
+export function withVaults<TBase extends MidasBaseConstructor>(Base: TBase) {
   return class Vaults extends Base {
     async getAllVaults(): Promise<VaultData[]> {
       if (this.chainId === SupportedChains.chapel) {

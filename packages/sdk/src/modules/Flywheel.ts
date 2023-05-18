@@ -1,18 +1,12 @@
 import { getAddress } from "viem";
 
+import { MidasBaseConstructor } from "..";
 import ComptrollerABI from "../../abis/Comptroller";
 import ComptrollerFirstExtensionABI from "../../abis/ComptrollerFirstExtension";
 import FlywheelStaticRewardsABI from "../../abis/FlywheelStaticRewards";
 import FusePoolLensSecondaryABI from "../../abis/FusePoolLensSecondary";
 import MidasFlywheelABI from "../../abis/MidasFlywheel";
 import MidasFlywheelLensRouterABI from "../../abis/MidasFlywheelLensRouter";
-import FlywheelStaticRewardsArtifact from "../../artifacts/FlywheelStaticRewards.json";
-import MidasFlywheelArtifact from "../../artifacts/MidasFlywheel.json";
-import { FlywheelStaticRewards } from "../../typechain/FlywheelStaticRewards";
-import { MidasFlywheel } from "../../typechain/MidasFlywheel";
-import { MidasFlywheelLensRouter } from "../../typechain/MidasFlywheelLensRouter";
-
-import { CreateContractsModule } from "./CreateContracts";
 
 export interface FlywheelClaimableRewards {
   flywheel: string;
@@ -35,7 +29,7 @@ export type FlywheelMarketRewardsInfo = {
   }[];
 };
 
-export function withFlywheel<TBase extends CreateContractsModule = CreateContractsModule>(Base: TBase) {
+export function withFlywheel<TBase extends MidasBaseConstructor>(Base: TBase) {
   return class Flywheel extends Base {
     /** READ */
     async getFlywheelMarketRewardsByPools(pools: string[]) {
