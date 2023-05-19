@@ -12,7 +12,11 @@
     "outDir": "./dist/esm",
     "declaration": true,
     "skipLibCheck": true,
-    "useUnknownInCatchVariables": false
+    "useUnknownInCatchVariables": false,
+    "baseUrl": "../..",
+    "paths": {
+      "*": ["node_modules/*"]
+    }
   },
   "include": ["./src"],
   "exclude": ["./typechain"]
