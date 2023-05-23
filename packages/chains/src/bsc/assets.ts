@@ -86,6 +86,8 @@ const solidlyVolatileAMM_HAY_ankrBNB = "0xC6dB38F34DA75393E9aac841c08104348997D5
 
 const solidlyStableAMM_stkBNB_WBNB = "0x2B3510f57365aA17bFF8E6360EA67C136175dC6D";
 const solidlyGammaStable_stkBNB_WBNB = "0x86b481fCe116DCd01fBeBb963f1358bcc466668C";
+const solidlyGammaNarrow_BTCB_WBNB = "0xD3C480EC7a47596fF8D63396227d1F7dC728A7f0";
+const solidlyGammaNarrow_ETH_WBNB = "0x10bf6e7B28b1cfFb1c047D7F815953931e5Ee947";
 
 const assets: SupportedAsset[] = [
   {
@@ -647,7 +649,23 @@ const assets: SupportedAsset[] = [
     name: "Fusion V2 AMM - Stable stkBNB/WBNB",
     decimals: 18,
     oracle: OracleTypes.GammaPoolPriceOracle,
-    extraDocs: thenaDocsV2(WBNB, stkBNB, solidlyGammaStable_stkBNB_WBNB, true),
+    extraDocs: thenaDocsV2(WBNB, stkBNB, solidlyGammaStable_stkBNB_WBNB, "GAMMA_STABLE"),
+  },
+  {
+    symbol: assetSymbols.aWBNB_BTCB,
+    underlying: solidlyGammaNarrow_BTCB_WBNB,
+    name: "Fusion V2 AMM - Stable BTCB/WBNB",
+    decimals: 18,
+    oracle: OracleTypes.GammaPoolPriceOracle,
+    extraDocs: thenaDocsV2(BTCB, WBNB, solidlyGammaNarrow_BTCB_WBNB, "GAMMA_NARROW"),
+  },
+  {
+    symbol: assetSymbols.aWBNB_ETH,
+    underlying: solidlyGammaNarrow_ETH_WBNB,
+    name: "Fusion V2 AMM - Stable ETH/WBNB",
+    decimals: 18,
+    oracle: OracleTypes.GammaPoolPriceOracle,
+    extraDocs: thenaDocsV2(ETH, WBNB, solidlyGammaNarrow_ETH_WBNB, "GAMMA_NARROW"),
   },
 ];
 

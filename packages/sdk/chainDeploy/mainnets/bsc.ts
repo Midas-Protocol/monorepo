@@ -337,6 +337,12 @@ const gammaLps: GammaLpAsset[] = [
   {
     lpTokenAddress: underlying(assets, assetSymbols.aWBNB_STKBNB),
   },
+  {
+    lpTokenAddress: underlying(assets, assetSymbols.aWBNB_BTCB),
+  },
+  {
+    lpTokenAddress: underlying(assets, assetSymbols.aWBNB_ETH),
+  },
 ];
 
 const solidlyOracleSupportedStables: string[] = [
