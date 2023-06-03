@@ -7,6 +7,7 @@ import type { BigNumber } from 'ethers';
 import { constants } from 'ethers';
 import { useEffect, useMemo, useState } from 'react';
 import { getContract } from 'sdk/dist/cjs/src/MidasSdk/utils';
+import { getAddress } from 'viem';
 
 import { AmountInput } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/RepayModal/AmountInput';
 import { Balance } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/RepayModal/Balance';
@@ -121,6 +122,14 @@ export const RepayModal = ({
       if (optionToWrap) {
         try {
           setActiveStep(1);
+          currentSdk.walletClient.writeContract({
+            abi: EIP20InterfaceABI,
+            account: currentSdk.walletClient.account,
+            address: getAddress(currentSdk.chainSpecificAddresses.W_TOKEN),
+            args: [getAddress(vault), MaxUint256],
+            chain: currentSdk.walletClient.chain,
+            functionName: 'deposit',
+          });
           const WToken = getContract(
             currentSdk.chainSpecificAddresses.W_TOKEN,
             WETHAbi,

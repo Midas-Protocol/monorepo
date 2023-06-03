@@ -14,7 +14,7 @@ export const deployConfig: ChainDeployConfig = {
   nativeTokenName: "Base (Goerli)",
   nativeTokenSymbol: "ETH",
   stableToken: underlying(assets, assetSymbols.USDC),
-  blocksPerYear: basegoerli.specificParams.blocksPerYear.toNumber(),
+  blocksPerYear: Number(basegoerli.specificParams.blocksPerYear),
   uniswap: {
     hardcoded: [],
     uniswapData: [],

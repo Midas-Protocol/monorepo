@@ -28,7 +28,7 @@ export const deployConfig: ChainDeployConfig = {
   nativeTokenName: "Wrapped Fantom",
   nativeTokenSymbol: "FTM",
   nativeTokenUsdChainlinkFeed: "0xf4766552D15AE4d256Ad41B6cf2933482B0680dc",
-  blocksPerYear: fantom.specificParams.blocksPerYear.toNumber(), // 12 second blocks, 5 blocks per minute// 12 second blocks, 5 blocks per minute
+  blocksPerYear: Number(fantom.specificParams.blocksPerYear), // 12 second blocks, 5 blocks per minute// 12 second blocks, 5 blocks per minute
   uniswap: {
     hardcoded: [],
     uniswapData: [],

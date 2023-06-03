@@ -44,7 +44,7 @@ export const deployConfig: ChainDeployConfig = {
   nativeTokenSymbol: "BNB",
   stableToken: underlying(assets, assetSymbols.BUSD),
   wBTCToken: underlying(assets, assetSymbols.BTCB),
-  blocksPerYear: bsc.specificParams.blocksPerYear.toNumber(),
+  blocksPerYear: Number(bsc.specificParams.blocksPerYear),
   uniswap: {
     hardcoded: [],
     uniswapData: [

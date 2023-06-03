@@ -20,7 +20,7 @@ export const deployConfig: ChainDeployConfig = {
   nativeTokenSymbol: "TBNB",
   stableToken: assets.find((a: SupportedAsset) => a.symbol === assetSymbols.BUSD)!.underlying,
   wBTCToken: assets.find((a: SupportedAsset) => a.symbol === assetSymbols.BTCB)!.underlying,
-  blocksPerYear: chapel.specificParams.blocksPerYear.toNumber(),
+  blocksPerYear: Number(chapel.specificParams.blocksPerYear),
   uniswap: {
     hardcoded: [
       {

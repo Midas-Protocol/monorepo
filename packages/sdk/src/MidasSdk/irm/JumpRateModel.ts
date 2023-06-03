@@ -1,80 +1,132 @@
-import { Web3Provider } from "@ethersproject/providers";
 import { InterestRateModel } from "@midas-capital/types";
-import { BigNumber, BigNumberish, utils } from "ethers";
+import { getAddress, keccak256, numberToHex, parseEther } from "viem";
+import type { PublicClient } from "viem";
 
-import CTokenInterfaceArtifact from "../../../artifacts/CTokenInterface.json";
+import CTokenInterfaceAbi from "../../../abis/CTokenInterface";
+import JumpRateModelAbi from "../../../abis/JumpRateModel";
 import JumpRateModelArtifact from "../../../artifacts/JumpRateModel.json";
-import { getContract } from "../utils";
 
 export default class JumpRateModel implements InterestRateModel {
-  static RUNTIME_BYTECODE_HASH = utils.keccak256(JumpRateModelArtifact.deployedBytecode.object);
+  static RUNTIME_BYTECODE_HASH = keccak256(numberToHex(BigInt(JumpRateModelArtifact.deployedBytecode.object)));
 
   initialized: boolean | undefined;
-  baseRatePerBlock: BigNumber | undefined;
-  multiplierPerBlock: BigNumber | undefined;
-  jumpMultiplierPerBlock: BigNumber | undefined;
-  kink: BigNumber | undefined;
-  reserveFactorMantissa: BigNumber | undefined;
+  baseRatePerBlock: bigint | undefined;
+  multiplierPerBlock: bigint | undefined;
+  jumpMultiplierPerBlock: bigint | undefined;
+  kink: bigint | undefined;
+  reserveFactorMantissa: bigint | undefined;
 
-  async init(interestRateModelAddress: string, assetAddress: string, provider: Web3Provider): Promise<void> {
-    const jumpRateModelContract = getContract(interestRateModelAddress, JumpRateModelArtifact.abi, provider);
-    this.baseRatePerBlock = BigNumber.from(await jumpRateModelContract.callStatic.baseRatePerBlock());
-    this.multiplierPerBlock = BigNumber.from(await jumpRateModelContract.callStatic.multiplierPerBlock());
-    this.jumpMultiplierPerBlock = BigNumber.from(await jumpRateModelContract.callStatic.jumpMultiplierPerBlock());
-    this.kink = BigNumber.from(await jumpRateModelContract.callStatic.kink());
-    const cTokenContract = getContract(assetAddress, CTokenInterfaceArtifact.abi, provider);
-    this.reserveFactorMantissa = BigNumber.from(await cTokenContract.callStatic.reserveFactorMantissa());
-    this.reserveFactorMantissa = this.reserveFactorMantissa.add(
-      BigNumber.from(await cTokenContract.callStatic.adminFeeMantissa())
-    );
-    this.reserveFactorMantissa = this.reserveFactorMantissa.add(
-      BigNumber.from(await cTokenContract.callStatic.fuseFeeMantissa())
-    );
+  async init(interestRateModelAddress: string, assetAddress: string, publicClient: PublicClient): Promise<void> {
+    const [
+      baseRatePerBlock,
+      multiplierPerBlock,
+      jumpMultiplierPerBlock,
+      kink,
+      reserveFactorMantissa,
+      adminFeeMantissa,
+      fuseFeeMantissa,
+    ] = await Promise.all([
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: JumpRateModelAbi,
+        functionName: "baseRatePerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: JumpRateModelAbi,
+        functionName: "multiplierPerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: JumpRateModelAbi,
+        functionName: "jumpMultiplierPerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: JumpRateModelAbi,
+        functionName: "kink",
+      }),
+      publicClient.readContract({
+        address: getAddress(assetAddress),
+        abi: CTokenInterfaceAbi,
+        functionName: "reserveFactorMantissa",
+      }),
+      publicClient.readContract({
+        address: getAddress(assetAddress),
+        abi: CTokenInterfaceAbi,
+        functionName: "adminFeeMantissa",
+      }),
+      publicClient.readContract({
+        address: getAddress(assetAddress),
+        abi: CTokenInterfaceAbi,
+        functionName: "fuseFeeMantissa",
+      }),
+    ]);
+
+    this.baseRatePerBlock = baseRatePerBlock;
+    this.multiplierPerBlock = multiplierPerBlock;
+    this.jumpMultiplierPerBlock = jumpMultiplierPerBlock;
+    this.kink = kink;
+    this.reserveFactorMantissa = reserveFactorMantissa + adminFeeMantissa + fuseFeeMantissa;
     this.initialized = true;
   }
 
   async _init(
     interestRateModelAddress: string,
-    reserveFactorMantissa: BigNumberish,
-    adminFeeMantissa: BigNumberish,
-    fuseFeeMantissa: BigNumberish,
-    provider: Web3Provider
+    reserveFactorMantissa: bigint,
+    adminFeeMantissa: bigint,
+    fuseFeeMantissa: bigint,
+    publicClient: PublicClient
   ): Promise<void> {
-    const jumpRateModelContract = getContract(interestRateModelAddress, JumpRateModelArtifact.abi, provider);
-    this.baseRatePerBlock = BigNumber.from(await jumpRateModelContract.callStatic.baseRatePerBlock());
-    this.multiplierPerBlock = BigNumber.from(await jumpRateModelContract.callStatic.multiplierPerBlock());
-    this.jumpMultiplierPerBlock = BigNumber.from(await jumpRateModelContract.callStatic.jumpMultiplierPerBlock());
-    this.kink = BigNumber.from(await jumpRateModelContract.callStatic.kink());
+    const [baseRatePerBlock, multiplierPerBlock, jumpMultiplierPerBlock, kink] = await Promise.all([
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: JumpRateModelAbi,
+        functionName: "baseRatePerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: JumpRateModelAbi,
+        functionName: "multiplierPerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: JumpRateModelAbi,
+        functionName: "jumpMultiplierPerBlock",
+      }),
+      publicClient.readContract({
+        address: getAddress(interestRateModelAddress),
+        abi: JumpRateModelAbi,
+        functionName: "kink",
+      }),
+    ]);
 
-    this.reserveFactorMantissa = BigNumber.from(reserveFactorMantissa);
-    this.reserveFactorMantissa = this.reserveFactorMantissa.add(BigNumber.from(adminFeeMantissa));
-    this.reserveFactorMantissa = this.reserveFactorMantissa.add(BigNumber.from(fuseFeeMantissa));
-
+    this.baseRatePerBlock = baseRatePerBlock;
+    this.multiplierPerBlock = multiplierPerBlock;
+    this.jumpMultiplierPerBlock = jumpMultiplierPerBlock;
+    this.kink = kink;
+    this.reserveFactorMantissa = reserveFactorMantissa + adminFeeMantissa + fuseFeeMantissa;
     this.initialized = true;
   }
 
   async __init(
-    baseRatePerBlock: BigNumberish,
-    multiplierPerBlock: BigNumberish,
-    jumpMultiplierPerBlock: BigNumberish,
-    kink: BigNumberish,
-    reserveFactorMantissa: BigNumberish,
-    adminFeeMantissa: BigNumberish,
-    fuseFeeMantissa: BigNumberish
+    baseRatePerBlock: bigint,
+    multiplierPerBlock: bigint,
+    jumpMultiplierPerBlock: bigint,
+    kink: bigint,
+    reserveFactorMantissa: bigint,
+    adminFeeMantissa: bigint,
+    fuseFeeMantissa: bigint
   ) {
-    this.baseRatePerBlock = BigNumber.from(baseRatePerBlock);
-    this.multiplierPerBlock = BigNumber.from(multiplierPerBlock);
-    this.jumpMultiplierPerBlock = BigNumber.from(jumpMultiplierPerBlock);
-    this.kink = BigNumber.from(kink);
-
-    this.reserveFactorMantissa = BigNumber.from(reserveFactorMantissa);
-    this.reserveFactorMantissa = this.reserveFactorMantissa.add(BigNumber.from(adminFeeMantissa));
-    this.reserveFactorMantissa = this.reserveFactorMantissa.add(BigNumber.from(fuseFeeMantissa));
-
+    this.baseRatePerBlock = baseRatePerBlock;
+    this.multiplierPerBlock = multiplierPerBlock;
+    this.jumpMultiplierPerBlock = jumpMultiplierPerBlock;
+    this.kink = kink;
+    this.reserveFactorMantissa = reserveFactorMantissa + adminFeeMantissa + fuseFeeMantissa;
     this.initialized = true;
   }
 
-  getBorrowRate(utilizationRate: BigNumber) {
+  getBorrowRate(utilizationRate: bigint) {
     if (
       !this.initialized ||
       !this.kink ||
@@ -83,20 +135,20 @@ export default class JumpRateModel implements InterestRateModel {
       !this.jumpMultiplierPerBlock
     )
       throw new Error("Interest rate model class not initialized.");
-    if (utilizationRate.lte(this.kink)) {
-      return utilizationRate.mul(this.multiplierPerBlock).div(utils.parseEther("1")).add(this.baseRatePerBlock);
+    if (utilizationRate <= this.kink) {
+      return (utilizationRate * this.multiplierPerBlock) / parseEther("1") + this.baseRatePerBlock;
     } else {
-      const normalRate = this.kink.mul(this.multiplierPerBlock).div(utils.parseEther("1")).add(this.baseRatePerBlock);
-      const excessUtil = utilizationRate.sub(this.kink);
-      return excessUtil.mul(this.jumpMultiplierPerBlock).div(utils.parseEther("1")).add(normalRate);
+      const normalRate = (this.kink * this.multiplierPerBlock) / parseEther("1") + this.baseRatePerBlock;
+      const excessUtil = utilizationRate - this.kink;
+      return (excessUtil * this.jumpMultiplierPerBlock) / parseEther("1") + normalRate;
     }
   }
 
-  getSupplyRate(utilizationRate: BigNumber) {
+  getSupplyRate(utilizationRate: bigint) {
     if (!this.initialized || !this.reserveFactorMantissa) throw new Error("Interest rate model class not initialized.");
-    const oneMinusReserveFactor = utils.parseEther("1").sub(this.reserveFactorMantissa);
+    const oneMinusReserveFactor = parseEther("1") - this.reserveFactorMantissa;
     const borrowRate = this.getBorrowRate(utilizationRate);
-    const rateToPool = borrowRate.mul(oneMinusReserveFactor).div(utils.parseEther("1"));
-    return utilizationRate.mul(rateToPool).div(utils.parseEther("1"));
+    const rateToPool = (borrowRate * oneMinusReserveFactor) / parseEther("1");
+    return (utilizationRate * rateToPool) / parseEther("1");
   }
 }

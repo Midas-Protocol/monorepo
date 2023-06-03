@@ -1,30 +1,28 @@
-import { BigNumber } from "ethers";
-
 import { SupportedChains } from "./enums";
 
 export interface VaultData {
   chainId: SupportedChains;
-  totalSupply: BigNumber;
+  totalSupply: bigint;
   totalSupplyNative: number;
   asset: string;
   symbol: string;
-  supplyApy: BigNumber;
+  supplyApy: bigint;
   adaptersCount: number;
   isEmergencyStopped: boolean;
   adapters: Adapter[];
   decimals: number;
-  underlyingPrice: BigNumber;
+  underlyingPrice: bigint;
   vault: string;
   extraDocs: string | undefined;
-  performanceFee: BigNumber;
-  depositFee: BigNumber;
-  withdrawalFee: BigNumber;
-  managementFee: BigNumber;
+  performanceFee: bigint;
+  depositFee: bigint;
+  withdrawalFee: bigint;
+  managementFee: bigint;
 }
 
 export interface Adapter {
   adapter: string;
-  allocation: BigNumber;
+  allocation: bigint;
   market: string;
   pool: string;
 }
@@ -44,7 +42,7 @@ export type FlywheelRewardsInfoForVault = {
 export interface RewardsInfo {
   rewardToken: string;
   flywheel: string;
-  rewards: BigNumber;
+  rewards: bigint;
   rewardTokenDecimals: number;
   rewardTokenSymbol: string;
 }

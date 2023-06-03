@@ -1,5 +1,3 @@
-import { LogLevel } from "@ethersproject/logger";
-import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 import {
   ChainAddresses,
   ChainConfig,
@@ -12,31 +10,15 @@ import {
   SupportedAsset,
   SupportedChains,
 } from "@midas-capital/types";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { BigNumber, Contract, Signer, utils } from "ethers";
+import { encodeAbiParameters, getAddress, keccak256, parseAbiParameters } from "viem";
+import type { Account, PublicClient, TransactionReceipt, WalletClient } from "viem";
 
+import ComptrollerABI from "../../abis/Comptroller";
 import CTokenInterfaceABI from "../../abis/CTokenInterface";
-import EIP20InterfaceABI from "../../abis/EIP20Interface";
-import FuseFeeDistributorABI from "../../abis/FuseFeeDistributor";
 import FusePoolDirectoryABI from "../../abis/FusePoolDirectory";
-import FusePoolLensABI from "../../abis/FusePoolLens";
-import FusePoolLensSecondaryABI from "../../abis/FusePoolLensSecondary";
-import FuseSafeLiquidatorABI from "../../abis/FuseSafeLiquidator";
-import MidasERC4626ABI from "../../abis/MidasERC4626";
-import MidasFlywheelLensRouterABI from "../../abis/MidasFlywheelLensRouter";
 import UnitrollerABI from "../../abis/Unitroller";
-import { EIP20Interface } from "../../typechain/EIP20Interface";
-import { FuseFeeDistributor } from "../../typechain/FuseFeeDistributor";
-import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
-import { FusePoolLens } from "../../typechain/FusePoolLens";
-import { FusePoolLensSecondary } from "../../typechain/FusePoolLensSecondary";
-import { FuseSafeLiquidator } from "../../typechain/FuseSafeLiquidator";
-import { MidasERC4626 } from "../../typechain/MidasERC4626";
-import { MidasFlywheelLensRouter } from "../../typechain/MidasFlywheelLensRouter";
-import { Unitroller } from "../../typechain/Unitroller";
 import { withAsset } from "../modules/Asset";
 import { withConvertMantissa } from "../modules/ConvertMantissa";
-import { withCreateContracts } from "../modules/CreateContracts";
 import { withFlywheel } from "../modules/Flywheel";
 import { withFundOperations } from "../modules/FundOperations";
 import { withFusePoolLens } from "../modules/FusePoolLens";
@@ -52,22 +34,9 @@ import AnkrBNBInterestRateModel from "./irm/AnkrBNBInterestRateModel";
 import AnkrFTMInterestRateModel from "./irm/AnkrFTMInterestRateModel";
 import JumpRateModel from "./irm/JumpRateModel";
 import WhitePaperInterestRateModel from "./irm/WhitePaperInterestRateModel";
-import { getContract, getPoolAddress, getPoolComptroller, getPoolUnitroller } from "./utils";
+import { getPoolAddress } from "./utils";
 
-utils.Logger.setLogLevel(LogLevel.OFF);
-
-export type SupportedProvider = JsonRpcProvider | Web3Provider;
-export type SupportedSigners = Signer | SignerWithAddress;
-export type SignerOrProvider = SupportedSigners | SupportedProvider;
-export type StaticContracts = {
-  FuseFeeDistributor: FuseFeeDistributor;
-  MidasFlywheelLensRouter: MidasFlywheelLensRouter;
-  FusePoolDirectory: FusePoolDirectory;
-  FusePoolLens: FusePoolLens;
-  FusePoolLensSecondary: FusePoolLensSecondary;
-  FuseSafeLiquidator: FuseSafeLiquidator;
-  [contractName: string]: Contract;
-};
+export type WalletOrPublicClient = WalletClient | PublicClient;
 
 export interface Logger {
   trace(message?: string, ...optionalParams: any[]): void;
@@ -80,19 +49,10 @@ export interface Logger {
 
 export class MidasBase {
   static CTOKEN_ERROR_CODES = CTOKEN_ERROR_CODES;
-  public _provider: SupportedProvider;
-  public _signer: SupportedSigners | null;
-  static isSupportedProvider(provider: unknown): provider is SupportedProvider {
-    return SignerWithAddress.isSigner(provider) || Signer.isSigner(provider);
-  }
-  static isSupportedSigner(signer: unknown): signer is SupportedSigners {
-    return SignerWithAddress.isSigner(signer) || Signer.isSigner(signer);
-  }
-  static isSupportedSignerOrProvider(signerOrProvider: unknown): signerOrProvider is SignerOrProvider {
-    return MidasBase.isSupportedSigner(signerOrProvider) || MidasBase.isSupportedProvider(signerOrProvider);
-  }
+  public _publicClient: PublicClient;
+  public _walletClient: WalletClient | null;
+  public _account: Account | null;
 
-  public _contracts: StaticContracts | undefined;
   public chainConfig: ChainConfig;
   public availableOracles: Array<string>;
   public chainId: SupportedChains;
@@ -108,84 +68,64 @@ export class MidasBase {
 
   public logger: Logger;
 
-  public get provider(): SupportedProvider {
-    return this._provider;
+  public get publicClient(): PublicClient {
+    return this._publicClient;
   }
 
-  public get signer() {
-    if (!this._signer) {
-      throw new Error("No Signer available.");
+  public get walletClient(): WalletClient {
+    if (!this._walletClient) {
+      throw new Error("No Wallet Client available.");
     }
-    return this._signer;
+
+    return this._walletClient;
   }
 
-  public set contracts(newContracts: Partial<StaticContracts>) {
-    this._contracts = { ...this._contracts, ...newContracts } as StaticContracts;
+  public get account(): Account {
+    if (!this._account) {
+      throw new Error("No Wallet Account available.");
+    }
+
+    return this._account;
   }
 
-  public get contracts(): StaticContracts {
-    return {
-      FusePoolDirectory: new Contract(
-        this.chainDeployment.FusePoolDirectory.address,
-        FusePoolDirectoryABI,
-        this.provider
-      ) as FusePoolDirectory,
-      FusePoolLens: new Contract(
-        this.chainDeployment.FusePoolLens.address,
-        FusePoolLensABI,
-        this.provider
-      ) as FusePoolLens,
-      FusePoolLensSecondary: new Contract(
-        this.chainDeployment.FusePoolLensSecondary.address,
-        FusePoolLensSecondaryABI,
-        this.provider
-      ) as FusePoolLensSecondary,
-      FuseSafeLiquidator: new Contract(
-        this.chainDeployment.FuseSafeLiquidator.address,
-        FuseSafeLiquidatorABI,
-        this.provider
-      ) as FuseSafeLiquidator,
-      FuseFeeDistributor: new Contract(
-        this.chainDeployment.FuseFeeDistributor.address,
-        FuseFeeDistributorABI,
-        this.provider
-      ) as FuseFeeDistributor,
-      MidasFlywheelLensRouter: new Contract(
-        this.chainDeployment.MidasFlywheelLensRouter.address,
-        MidasFlywheelLensRouterABI,
-        this.provider
-      ) as MidasFlywheelLensRouter,
-      ...this._contracts,
-    };
-  }
+  setWalletClient(publicClient: PublicClient, walletClient: WalletClient) {
+    this._publicClient = publicClient;
+    this._walletClient = walletClient;
 
-  setSigner(signer: Signer) {
-    this._provider = signer.provider as SupportedProvider;
-    this._signer = signer;
+    if (walletClient.account) {
+      this._account = walletClient.account;
+    }
 
     return this;
   }
 
-  removeSigner(provider: SupportedProvider) {
-    this._provider = provider;
-    this._signer = null;
-
-    return this;
+  removeWalletClient(publicClient: PublicClient) {
+    this._publicClient = publicClient;
+    this._walletClient = null;
   }
 
-  constructor(signerOrProvider: SignerOrProvider, chainConfig: ChainConfig, logger: Logger = console) {
+  constructor(
+    publicClient: PublicClient,
+    walletClient: WalletClient | null,
+    chainConfig: ChainConfig,
+    logger: Logger = console
+  ) {
     this.logger = logger;
-    if (!signerOrProvider) throw Error("No Provider or Signer");
+    if (!publicClient) throw Error("No Public Client.");
 
-    if (SignerWithAddress.isSigner(signerOrProvider) || Signer.isSigner(signerOrProvider)) {
-      this._provider = signerOrProvider.provider as any;
-      this._signer = signerOrProvider;
-    } else if (JsonRpcProvider.isProvider(signerOrProvider) || Web3Provider.isProvider(signerOrProvider)) {
-      this._provider = signerOrProvider;
-      this._signer = signerOrProvider.getSigner ? signerOrProvider.getSigner() : null;
+    this._publicClient = publicClient;
+
+    if (walletClient) {
+      this._walletClient = walletClient;
+
+      if (walletClient.account) {
+        this._account = walletClient.account;
+      } else {
+        this._account = null;
+      }
     } else {
-      this.logger.warn(`Incompatible Provider or Signer: signerOrProvider`);
-      throw Error("Signer or Provider not compatible");
+      this._walletClient = null;
+      this._account = null;
     }
 
     this.chainConfig = chainConfig;
@@ -213,8 +153,8 @@ export class MidasBase {
   async deployPool(
     poolName: string,
     enforceWhitelist: boolean,
-    closeFactor: BigNumber,
-    liquidationIncentive: BigNumber,
+    closeFactor: bigint,
+    liquidationIncentive: bigint,
     priceOracle: string, // Contract address
     whitelist: string[] // An array of whitelisted addresses
   ): Promise<[string, string, string, number?]> {
@@ -222,61 +162,92 @@ export class MidasBase {
       // Deploy Comptroller implementation if necessary
       const implementationAddress = this.chainDeployment.Comptroller.address;
 
-      // Register new pool with FusePoolDirectory
-      const contract = this.contracts.FusePoolDirectory.connect(this.signer);
+      if (this.walletClient) {
+        // Register new pool with FusePoolDirectory
+        const [account] = await this.walletClient.getAddresses();
 
-      const deployTx = await contract.deployPool(
-        poolName,
-        implementationAddress,
-        new utils.AbiCoder().encode(["address"], [this.chainDeployment.FuseFeeDistributor.address]),
-        enforceWhitelist,
-        closeFactor,
-        liquidationIncentive,
-        priceOracle
-      );
-      const deployReceipt = await deployTx.wait();
-      this.logger.info(`Deployment of pool ${poolName} succeeded!`, deployReceipt.status);
+        const hash = await this.walletClient.writeContract({
+          address: getAddress(this.chainDeployment.FusePoolDirectory.address),
+          abi: FusePoolDirectoryABI,
+          functionName: "deployPool",
+          args: [
+            poolName,
+            getAddress(implementationAddress),
+            encodeAbiParameters(parseAbiParameters("address"), [
+              getAddress(this.chainDeployment.FuseFeeDistributor.address),
+            ]),
+            enforceWhitelist,
+            closeFactor,
+            liquidationIncentive,
+            getAddress(priceOracle),
+          ],
+          account,
+          chain: this.walletClient.chain,
+        });
 
-      let poolId: number | undefined;
-      try {
-        // Latest Event is PoolRegistered which includes the poolId
-        const registerEvent = deployReceipt.events?.pop();
-        poolId =
-          registerEvent && registerEvent.args && registerEvent.args[0]
-            ? (registerEvent.args[0] as BigNumber).toNumber()
-            : undefined;
-      } catch (e) {
-        this.logger.warn("Unable to retrieve pool ID from receipt events", e);
+        const receipt: TransactionReceipt = await this.publicClient.waitForTransactionReceipt({ hash });
+
+        this.logger.info(`Deployment of pool ${poolName} succeeded!`, receipt.status);
+
+        let poolId: number | undefined;
+        try {
+          // Latest Event is PoolRegistered which includes the poolId
+          console.log(receipt.logs);
+          const registerEvent = receipt.logs?.pop();
+          console.log({ registerEvent });
+          poolId = registerEvent && registerEvent && registerEvent[0] ? registerEvent[0].toNumber() : undefined;
+        } catch (e) {
+          this.logger.warn("Unable to retrieve pool ID from receipt events", e);
+        }
+
+        const [, existingPools] = await this.publicClient.readContract({
+          address: getAddress(this.chainDeployment.FusePoolDirectory.address),
+          abi: FusePoolDirectoryABI,
+          functionName: "getActivePools",
+        });
+
+        // Compute Unitroller address
+        const poolAddress = getPoolAddress(
+          account,
+          poolName,
+          existingPools.length,
+          this.chainDeployment.FuseFeeDistributor.address,
+          this.chainDeployment.FusePoolDirectory.address
+        );
+
+        // Accept admin status via Unitroller
+        const acceptTx = await this.walletClient.writeContract({
+          address: getAddress(poolAddress),
+          abi: UnitrollerABI,
+          functionName: "_acceptAdmin",
+          account,
+          chain: this.walletClient.chain,
+        });
+
+        const acceptReceipt = await this.publicClient.waitForTransactionReceipt({ hash: acceptTx });
+        this.logger.info(`Accepted admin status for admin: ${acceptReceipt.status}`);
+
+        // Whitelist
+        this.logger.info(`enforceWhitelist: ${enforceWhitelist}`);
+        if (enforceWhitelist) {
+          const whitelistTx = await this.walletClient.writeContract({
+            address: getAddress(poolAddress),
+            abi: ComptrollerABI,
+            functionName: "_setWhitelistStatuses",
+            args: [whitelist.map((addr) => getAddress(addr)), Array(whitelist.length).fill(true)],
+            account,
+            chain: this.walletClient.chain,
+          });
+
+          // Was enforced by pool deployment, now just add addresses
+          const whitelistReceipt = await this.publicClient.waitForTransactionReceipt({ hash: whitelistTx });
+          this.logger.info(`Whitelist updated: ${whitelistReceipt.status}`);
+        }
+
+        return [poolAddress, implementationAddress, priceOracle, poolId];
+      } else {
+        throw Error("Wallet Client not found");
       }
-      const [, existingPools] = await contract.callStatic.getActivePools();
-      // Compute Unitroller address
-      const addressOfSigner = await this.signer.getAddress();
-      const poolAddress = getPoolAddress(
-        addressOfSigner,
-        poolName,
-        existingPools.length,
-        this.chainDeployment.FuseFeeDistributor.address,
-        this.chainDeployment.FusePoolDirectory.address
-      );
-
-      // Accept admin status via Unitroller
-      const unitroller = getPoolUnitroller(poolAddress, this.signer);
-      const acceptTx = await unitroller._acceptAdmin();
-      const acceptReceipt = await acceptTx.wait();
-      this.logger.info(`Accepted admin status for admin: ${acceptReceipt.status}`);
-
-      // Whitelist
-      this.logger.info(`enforceWhitelist: ${enforceWhitelist}`);
-      if (enforceWhitelist) {
-        const comptroller = getPoolComptroller(poolAddress, this.signer);
-
-        // Was enforced by pool deployment, now just add addresses
-        const whitelistTx = await comptroller._setWhitelistStatuses(whitelist, Array(whitelist.length).fill(true));
-        const whitelistReceipt = await whitelistTx.wait();
-        this.logger.info(`Whitelist updated: ${whitelistReceipt.status}`);
-      }
-
-      return [poolAddress, implementationAddress, priceOracle, poolId];
     } catch (error) {
       throw Error(`Deployment of new Fuse pool failed:  ${error instanceof Error ? error.message : error}`);
     }
@@ -292,7 +263,13 @@ export class MidasBase {
       AdjustableJumpRateModel: AdjustableJumpRateModel,
       AdjustableAnkrBNBIrm: AdjustableAnkrBNBIrm,
     };
-    const runtimeBytecodeHash = utils.keccak256(await this.provider.getCode(interestRateModelAddress));
+    const bytecode = await this.publicClient.getBytecode({ address: getAddress(interestRateModelAddress) });
+
+    if (!bytecode) {
+      throw Error("Bytecode not found");
+    }
+
+    const runtimeBytecodeHash = keccak256(bytecode);
 
     let irmModel = null;
 
@@ -310,14 +287,17 @@ export class MidasBase {
 
   async getInterestRateModel(assetAddress: string): Promise<InterestRateModel> {
     // Get interest rate model address from asset address
-    const assetContract = getContract(assetAddress, CTokenInterfaceABI, this.provider);
-    const interestRateModelAddress: string = await assetContract.callStatic.interestRateModel();
+    const interestRateModelAddress: string = await this.publicClient.readContract({
+      address: getAddress(assetAddress),
+      abi: CTokenInterfaceABI,
+      functionName: "interestRateModel",
+    });
 
     const interestRateModel = await this.identifyInterestRateModel(interestRateModelAddress);
     if (!interestRateModel) {
       throw Error(`No Interest Rate Model found for asset: ${assetAddress}`);
     }
-    await interestRateModel.init(interestRateModelAddress, assetAddress, this.provider);
+    await interestRateModel.init(interestRateModelAddress, assetAddress, this.publicClient);
     return interestRateModel;
   }
 
@@ -330,29 +310,11 @@ export class MidasBase {
 
     return oracle;
   }
-
-  getEIP20TokenInstance(address: string, signerOrProvider: SignerOrProvider = this.provider) {
-    return new Contract(address, EIP20InterfaceABI, signerOrProvider) as EIP20Interface;
-  }
-
-  getUnitrollerInstance(address: string, signerOrProvider: SignerOrProvider = this.provider) {
-    return new Contract(address, UnitrollerABI, signerOrProvider) as Unitroller;
-  }
-
-  getFusePoolDirectoryInstance(signerOrProvider: SignerOrProvider = this.provider) {
-    return new Contract(this.chainDeployment.FusePoolDirectory.address, FusePoolDirectoryABI, signerOrProvider);
-  }
-
-  getMidasErc4626PluginInstance(address: string, signerOrProvider: SignerOrProvider = this.provider) {
-    return new Contract(address, MidasERC4626ABI, signerOrProvider) as MidasERC4626;
-  }
 }
 
 const MidasBaseWithModules = withFusePoolLens(
   withFundOperations(
-    withSafeLiquidator(
-      withFusePools(withAsset(withFlywheel(withVaults(withCreateContracts(withConvertMantissa(MidasBase))))))
-    )
+    withSafeLiquidator(withFusePools(withAsset(withFlywheel(withVaults(withConvertMantissa(MidasBase))))))
   )
 );
 export class MidasSdk extends MidasBaseWithModules {}

@@ -20,7 +20,7 @@ export const deployConfig: ChainDeployConfig = {
   wtoken: wevmos,
   nativeTokenName: "EMVOS",
   nativeTokenSymbol: "EMVOS",
-  blocksPerYear: evmos.specificParams.blocksPerYear.toNumber(), // 12 second blocks, 5 blocks per minute,
+  blocksPerYear: Number(evmos.specificParams.blocksPerYear), // 12 second blocks, 5 blocks per minute,
   stableToken: underlying(assets, assetSymbols.gUSDC),
   wBTCToken: underlying(assets, assetSymbols.gWBTC),
   uniswap: {

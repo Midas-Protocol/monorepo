@@ -1,5 +1,6 @@
 import { assetSymbols, LiquidationDefaults, LiquidationStrategy, underlying } from "@midas-capital/types";
-import { BigNumber, constants } from "ethers";
+
+import { AddressZero } from "../constants";
 
 import chainAddresses from "./addresses";
 import assets, { ankrBNB, BUSD, HAY, WBNB } from "./assets";
@@ -14,10 +15,10 @@ const liquidationDefaults: LiquidationDefaults = {
     [underlying(assets, assetSymbols["vAMM-ANKR/ankrBNB"])]: "0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109",
     [underlying(assets, assetSymbols["sAMM-jBRL/BRZ"])]: "0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109",
   },
-  SUPPORTED_OUTPUT_CURRENCIES: [constants.AddressZero, ankrBNB, WBNB, HAY, BUSD],
-  SUPPORTED_INPUT_CURRENCIES: [constants.AddressZero, WBNB],
+  SUPPORTED_OUTPUT_CURRENCIES: [AddressZero, ankrBNB, WBNB, HAY, BUSD],
+  SUPPORTED_INPUT_CURRENCIES: [AddressZero, WBNB],
   LIQUIDATION_STRATEGY: LiquidationStrategy.UNISWAP,
-  MINIMUM_PROFIT_NATIVE: BigNumber.from(0),
+  MINIMUM_PROFIT_NATIVE: BigInt(0),
   LIQUIDATION_INTERVAL_SECONDS: 60,
   jarvisPools: [
     {

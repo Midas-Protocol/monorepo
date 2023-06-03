@@ -1,20 +1,26 @@
 import { FlywheelRewardsInfoForVault, FundOperationMode, SupportedChains, VaultData } from "@midas-capital/types";
-import { BigNumber, constants, ContractTransaction, utils } from "ethers";
+import { formatUnits, getAddress } from "viem";
 
+import { MidasBaseConstructor } from "..";
 import EIP20InterfaceABI from "../../abis/EIP20Interface";
-import { getContract } from "../MidasSdk/utils";
+import MasterPriceOracleABI from "../../abis/MasterPriceOracle";
+import OptimizedAPRVaultFirstExtensionABI from "../../abis/OptimizedAPRVaultFirstExtension";
+import OptimizedAPRVaultSecondExtensionABI from "../../abis/OptimizedAPRVaultSecondExtension";
+import OptimizedVaultsRegistryABI from "../../abis/OptimizedVaultsRegistry";
+import { MaxUint256 } from "../MidasSdk/constants";
 
-import { CreateContractsModule } from "./CreateContracts";
 import { ChainSupportedAssets } from "./FusePools";
 
-export function withVaults<TBase extends CreateContractsModule = CreateContractsModule>(Base: TBase) {
+export function withVaults<TBase extends MidasBaseConstructor>(Base: TBase) {
   return class Vaults extends Base {
     async getAllVaults(): Promise<VaultData[]> {
       if (this.chainId === SupportedChains.chapel) {
         try {
-          const optimizedVaultsRegistry = this.createOptimizedVaultsRegistry();
-          const vaultsData = await optimizedVaultsRegistry.callStatic.getVaultsData();
-          const mpo = this.createMasterPriceOracle();
+          const vaultsData = await this.publicClient.readContract({
+            address: getAddress(this.chainDeployment.OptimizedVaultsRegistry.address),
+            abi: OptimizedVaultsRegistryABI,
+            functionName: "getVaultsData",
+          });
 
           return await Promise.all(
             vaultsData.map(async (data) => {
@@ -30,10 +36,25 @@ export function withVaults<TBase extends CreateContractsModule = CreateContracts
                 extraDocs = asset.extraDocs;
               }
 
-              const underlyingPrice = await mpo.callStatic.price(data.asset);
+              const underlyingPrice = await this.publicClient.readContract({
+                address: getAddress(this.chainDeployment.MasterPriceOracle.address),
+                abi: MasterPriceOracleABI,
+                functionName: "price",
+                args: [data.asset],
+              });
+
               const totalSupplyNative =
-                Number(utils.formatUnits(data.estimatedTotalAssets, data.assetDecimals)) *
-                Number(utils.formatUnits(underlyingPrice, 18));
+                Number(formatUnits(data.estimatedTotalAssets, data.assetDecimals)) *
+                Number(formatUnits(underlyingPrice, 18));
+
+              const adapters = data.adaptersData.map((data) => {
+                return {
+                  adapter: data.adapter.toString(),
+                  allocation: data.allocation,
+                  market: data.market.toString(),
+                  pool: data.pool.toString(),
+                };
+              });
 
               return {
                 vault: data.vault,
@@ -45,7 +66,7 @@ export function withVaults<TBase extends CreateContractsModule = CreateContracts
                 supplyApy: data.apr,
                 adaptersCount: Number(data.adaptersCount),
                 isEmergencyStopped: data.isEmergencyStopped,
-                adapters: data.adaptersData,
+                adapters,
                 decimals: data.assetDecimals,
                 underlyingPrice,
                 extraDocs,
@@ -72,11 +93,16 @@ export function withVaults<TBase extends CreateContractsModule = CreateContracts
       if (this.chainId === SupportedChains.chapel) {
         try {
           const rewardsInfoForVaults: FlywheelRewardsInfoForVault[] = [];
-          const optimizedVaultsRegistry = this.createOptimizedVaultsRegistry();
-          const claimableRewards = await optimizedVaultsRegistry.callStatic.getClaimableRewards(account);
 
-          claimableRewards.map((reward) => {
-            if (reward.rewards.gt(0)) {
+          const { result } = await this.publicClient.simulateContract({
+            address: getAddress(this.chainDeployment.OptimizedVaultsRegistry.address),
+            abi: OptimizedVaultsRegistryABI,
+            functionName: "getClaimableRewards",
+            args: [getAddress(account)],
+          });
+
+          result.map((reward) => {
+            if (reward.rewards > 0n) {
               const vault = reward.vault;
               const chainId = Number(this.chainId);
 
@@ -120,35 +146,65 @@ export function withVaults<TBase extends CreateContractsModule = CreateContracts
     }
 
     async vaultApprove(vault: string, asset: string) {
-      const token = getContract(asset, EIP20InterfaceABI, this.signer);
-      const tx = await token.approve(vault, constants.MaxUint256);
+      this.walletClient.writeContract({
+        address: getAddress(asset),
+        abi: EIP20InterfaceABI,
+        functionName: "approve",
+        args: [getAddress(vault), MaxUint256],
+        account: this.account,
+        chain: this.walletClient.chain,
+      });
+      const { request } = await this.publicClient.simulateContract({
+        address: getAddress(asset),
+        abi: EIP20InterfaceABI,
+        functionName: "approve",
+        args: [getAddress(vault), MaxUint256],
+      });
+      const tx = await this.walletClient.writeContract(request);
 
       return tx;
     }
 
-    async vaultDeposit(vault: string, amount: BigNumber) {
-      const optimizedAPRVault = this.createOptimizedAPRVault(vault, this.signer);
-      const tx: ContractTransaction = await optimizedAPRVault["deposit(uint256)"](amount);
+    async vaultDeposit(vault: string, amount: bigint) {
+      const { request } = await this.publicClient.simulateContract({
+        address: getAddress(vault),
+        abi: OptimizedAPRVaultSecondExtensionABI,
+        functionName: "deposit",
+        args: [amount],
+      });
+
+      const tx = await this.walletClient.writeContract(request);
 
       return { tx };
     }
 
-    async vaultWithdraw(vault: string, amount: BigNumber) {
-      const optimizedAPRVault = this.createOptimizedAPRVault(vault, this.signer);
-      const tx: ContractTransaction = await optimizedAPRVault["withdraw(uint256)"](amount);
+    async vaultWithdraw(vault: string, amount: bigint) {
+      const { request } = await this.publicClient.simulateContract({
+        address: getAddress(vault),
+        abi: OptimizedAPRVaultSecondExtensionABI,
+        functionName: "withdraw",
+        args: [amount],
+      });
+
+      const tx = await this.walletClient.writeContract(request);
 
       return { tx };
     }
 
-    async getUpdatedVault(mode: FundOperationMode, vault: VaultData, amount: BigNumber) {
+    async getUpdatedVault(mode: FundOperationMode, vault: VaultData, amount: bigint) {
       let updatedVault: VaultData = vault;
-      const optimizedAPRVault = this.createOptimizedAPRVault(vault.vault);
 
       if (mode === FundOperationMode.SUPPLY) {
-        const totalSupply = vault.totalSupply.add(amount);
+        const totalSupply = vault.totalSupply + amount;
         const totalSupplyNative =
-          Number(utils.formatUnits(totalSupply, vault.decimals)) * Number(utils.formatUnits(vault.underlyingPrice, 18));
-        const supplyApy = await optimizedAPRVault.callStatic.supplyAPY(amount);
+          Number(formatUnits(totalSupply, vault.decimals)) * Number(formatUnits(vault.underlyingPrice, 18));
+        const supplyApy = await this.publicClient.readContract({
+          address: getAddress(vault.vault),
+          abi: OptimizedAPRVaultSecondExtensionABI,
+          functionName: "supplyAPY",
+          args: [amount],
+        });
+
         updatedVault = {
           ...vault,
           totalSupply,
@@ -156,10 +212,16 @@ export function withVaults<TBase extends CreateContractsModule = CreateContracts
           supplyApy,
         };
       } else if (mode === FundOperationMode.WITHDRAW) {
-        const totalSupply = vault.totalSupply.sub(amount);
+        const totalSupply = vault.totalSupply - amount;
         const totalSupplyNative =
-          Number(utils.formatUnits(totalSupply, vault.decimals)) * Number(utils.formatUnits(vault.underlyingPrice, 18));
-        const supplyApy = await optimizedAPRVault.callStatic.supplyAPY(amount);
+          Number(formatUnits(totalSupply, vault.decimals)) * Number(formatUnits(vault.underlyingPrice, 18));
+        const supplyApy = await this.publicClient.readContract({
+          address: getAddress(vault.vault),
+          abi: OptimizedAPRVaultSecondExtensionABI,
+          functionName: "supplyAPY",
+          args: [amount],
+        });
+
         updatedVault = {
           ...vault,
           totalSupply,
@@ -172,20 +234,31 @@ export function withVaults<TBase extends CreateContractsModule = CreateContracts
     }
 
     async getMaxWithdrawVault(vault: string) {
-      const optimizedAPRVault = this.createOptimizedAPRVault(vault, this.signer);
-
-      return await optimizedAPRVault.callStatic.maxWithdraw(await this.signer.getAddress());
+      return await this.publicClient.readContract({
+        address: getAddress(vault),
+        abi: OptimizedAPRVaultSecondExtensionABI,
+        functionName: "maxWithdraw",
+        args: [this.account.address],
+      });
     }
 
     async getMaxDepositVault(vault: string) {
-      const optimizedAPRVault = this.createOptimizedAPRVault(vault, this.signer);
-
-      return await optimizedAPRVault.callStatic.maxDeposit(await this.signer.getAddress());
+      return await this.publicClient.readContract({
+        address: getAddress(vault),
+        abi: OptimizedAPRVaultSecondExtensionABI,
+        functionName: "maxDeposit",
+        args: [this.account.address],
+      });
     }
 
     async claimRewardsForVault(vault: string) {
-      const optimizedAPRVault = this.createOptimizedAPRVault(vault, this.signer);
-      const tx: ContractTransaction = await optimizedAPRVault.claimRewards();
+      const { request } = await this.publicClient.simulateContract({
+        address: getAddress(vault),
+        abi: OptimizedAPRVaultFirstExtensionABI,
+        functionName: "claimRewards",
+      });
+
+      const tx = await this.walletClient.writeContract(request);
 
       return { tx };
     }

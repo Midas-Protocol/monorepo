@@ -1,10 +1,9 @@
 import { assetSymbols, ChainParams } from "@midas-capital/types";
-import { BigNumber } from "ethers";
 
 import chainAddresses from "./addresses";
 
 const specificParams: ChainParams = {
-  blocksPerYear: BigNumber.from((20 * 24 * 365 * 60).toString()),
+  blocksPerYear: 20n * 24n * 365n * 60n,
   cgId: "binancecoin-chapel",
   metadata: {
     chainIdHex: "0x61",

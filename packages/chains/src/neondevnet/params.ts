@@ -1,8 +1,7 @@
 import { assetSymbols, ChainParams } from "@midas-capital/types";
-import { BigNumber } from "ethers";
 
 const specificParams: ChainParams = {
-  blocksPerYear: BigNumber.from((5 * 24 * 365 * 60).toString()),
+  blocksPerYear: 5n * 24n * 365n * 60n,
   cgId: "neon",
   metadata: {
     chainIdHex: "0xE9AC0CE",

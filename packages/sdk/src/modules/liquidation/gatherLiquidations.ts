@@ -1,11 +1,14 @@
 import { BigNumber } from "ethers";
+import { getAddress } from "viem";
 
+import FusePoolLensABI from "../../../abis/FusePoolLens";
 import { MidasSdk } from "../../MidasSdk";
 
 import { ChainLiquidationConfig } from "./config";
 import {
   EncodedLiquidationTx,
   ErroredPool,
+  ExtendedFusePoolAssetStructOutput,
   FusePoolUserStruct,
   FusePoolUserWithAssets,
   LiquidatablePool,
@@ -22,12 +25,18 @@ async function getLiquidatableUsers(
 ): Promise<Array<EncodedLiquidationTx>> {
   const users: Array<EncodedLiquidationTx> = [];
   for (const user of poolUsers) {
-    const userAssets = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsByUser(pool.comptroller, user.account);
+    const { result } = await sdk.publicClient.simulateContract({
+      address: getAddress(sdk.chainDeployment.FusePoolLens.address),
+      abi: FusePoolLensABI,
+      functionName: "getPoolAssetsByUser",
+      args: [getAddress(pool.comptroller), getAddress(user.account)],
+    });
+
     const userWithAssets: FusePoolUserWithAssets = {
       ...user,
       debt: [],
       collateral: [],
-      assets: userAssets,
+      assets: result as ExtendedFusePoolAssetStructOutput[],
     };
 
     const encodedLiquidationTX = await getPotentialLiquidation(

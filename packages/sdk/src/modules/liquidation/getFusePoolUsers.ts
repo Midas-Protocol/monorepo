@@ -1,71 +1,95 @@
-import { BigNumber, ethers } from "ethers";
+import { formatEther, getAddress, parseEther } from "viem";
 
-import { FusePoolLens as FusePoolLensType } from "../../../typechain/FusePoolLens";
+import ComptrollerABI from "../../../abis/Comptroller";
+import ComptrollerFirstExtensionABI from "../../../abis/ComptrollerFirstExtension";
+import FusePoolDirectoryABI from "../../../abis/FusePoolDirectory";
+import FusePoolLensABI from "../../../abis/FusePoolLens";
 import { MidasSdk } from "../../MidasSdk";
 
-import { ErroredPool, FusePoolUserStruct, PublicPoolUserWithData } from "./utils";
+import { ErroredPool, ExtendedFusePoolAssetStructOutput, FusePoolUserStruct, PublicPoolUserWithData } from "./utils";
 
-function getUserTotals(assets: FusePoolLensType.FusePoolAssetStructOutput[]): {
-  totalBorrow: BigNumber;
-  totalCollateral: BigNumber;
+function getUserTotals(assets: ExtendedFusePoolAssetStructOutput[]): {
+  totalBorrow: bigint;
+  totalCollateral: bigint;
 } {
-  let totalBorrow = BigNumber.from(0);
-  let totalCollateral = BigNumber.from(0);
+  let totalBorrow = BigInt(0);
+  let totalCollateral = BigInt(0);
 
   for (const a of assets) {
-    totalBorrow = totalBorrow.add(a.borrowBalance.mul(a.underlyingPrice).div(ethers.utils.parseEther("1")));
+    totalBorrow = totalBorrow + (a.borrowBalance * a.underlyingPrice) / parseEther(`${1}`);
     if (a.membership) {
-      totalCollateral = totalCollateral.add(
-        a.supplyBalance
-          .mul(a.underlyingPrice)
-          .div(ethers.utils.parseEther("1"))
-          .mul(a.collateralFactor)
-          .div(ethers.utils.parseEther("1"))
-      );
+      totalCollateral =
+        totalCollateral +
+        (((a.supplyBalance * a.underlyingPrice) / parseEther(`${1}`)) * a.collateralFactor) / parseEther(`${1}`);
     }
   }
   return { totalBorrow, totalCollateral };
 }
 
-function getPositionHealth(totalBorrow: BigNumber, totalCollateral: BigNumber): BigNumber {
-  return totalBorrow.gt(BigNumber.from(0))
-    ? totalCollateral.mul(ethers.utils.parseEther("1")).div(totalBorrow)
-    : BigNumber.from(10).pow(36);
+function getPositionHealth(totalBorrow: bigint, totalCollateral: bigint): bigint {
+  return totalBorrow > BigInt(0) ? (totalCollateral * parseEther(`${1}`)) / totalBorrow : 10n ** 36n;
 }
 
 async function getFusePoolUsers(
   sdk: MidasSdk,
   comptroller: string,
-  maxHealth: BigNumber
+  maxHealth: bigint
 ): Promise<PublicPoolUserWithData> {
   const poolUsers: FusePoolUserStruct[] = [];
-  const comptrollerInstance = sdk.createComptroller(comptroller);
-  const users = await comptrollerInstance.callStatic.getAllBorrowers();
+  const [users, closeFactor, liquidationIncentive] = await Promise.all([
+    sdk.publicClient.readContract({
+      address: getAddress(comptroller),
+      abi: ComptrollerFirstExtensionABI,
+      functionName: "getAllBorrowers",
+    }),
+    sdk.publicClient.readContract({
+      address: getAddress(comptroller),
+      abi: ComptrollerFirstExtensionABI,
+      functionName: "closeFactorMantissa",
+    }),
+    sdk.publicClient.readContract({
+      address: getAddress(comptroller),
+      abi: ComptrollerFirstExtensionABI,
+      functionName: "liquidationIncentiveMantissa",
+    }),
+  ]);
   for (const user of users) {
-    const assets = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(comptrollerInstance.address, {
-      from: user,
+    const { result: assets } = await sdk.publicClient.simulateContract({
+      address: getAddress(sdk.chainDeployment.FusePoolLens.address),
+      abi: FusePoolLensABI,
+      functionName: "getPoolAssetsWithData",
+      args: [getAddress(comptroller)],
+      account: user,
     });
 
-    const { totalBorrow, totalCollateral } = getUserTotals(assets);
+    const { totalBorrow, totalCollateral } = getUserTotals(assets as ExtendedFusePoolAssetStructOutput[]);
     const health = getPositionHealth(totalBorrow, totalCollateral);
 
-    if (maxHealth.gt(health)) {
+    if (maxHealth > health) {
       poolUsers.push({ account: user, totalBorrow, totalCollateral, health });
     }
   }
   return {
     comptroller,
     users: poolUsers,
-    closeFactor: await comptrollerInstance.callStatic.closeFactorMantissa(),
-    liquidationIncentive: await comptrollerInstance.callStatic.liquidationIncentiveMantissa(),
+    closeFactor,
+    liquidationIncentive,
   };
 }
 
 async function getPoolsWithShortfall(sdk: MidasSdk, comptroller: string) {
-  const comptrollerInstance = sdk.createComptroller(comptroller);
-  const users = await comptrollerInstance.callStatic.getAllBorrowers();
+  const users = await sdk.publicClient.readContract({
+    address: getAddress(comptroller),
+    abi: ComptrollerFirstExtensionABI,
+    functionName: "getAllBorrowers",
+  });
   const promises = users.map((user) => {
-    return comptrollerInstance.callStatic.getAccountLiquidity(user);
+    return sdk.publicClient.readContract({
+      address: getAddress(comptroller),
+      abi: ComptrollerABI,
+      functionName: "getAccountLiquidity",
+      args: [user],
+    });
   });
   const allResults = await Promise.all(promises.map((p) => p.catch((e) => e)));
 
@@ -78,16 +102,21 @@ async function getPoolsWithShortfall(sdk: MidasSdk, comptroller: string) {
   const results = validResults.map((r, i) => {
     return { user: users[i], liquidity: r[1], shortfall: r[2] };
   });
-  const minimumTransactionCost = await sdk.provider.getGasPrice().then((g) => g.mul(BigNumber.from(500000)));
-  return results.filter((user) => user.shortfall.gt(minimumTransactionCost));
+  const minimumTransactionCost = await sdk.publicClient.getGasPrice().then((g) => g * 500000n);
+
+  return results.filter((user) => user.shortfall > minimumTransactionCost);
 }
 
 export default async function getAllFusePoolUsers(
   sdk: MidasSdk,
-  maxHealth: BigNumber,
+  maxHealth: bigint,
   excludedComptrollers: Array<string>
 ): Promise<[PublicPoolUserWithData[], Array<ErroredPool>]> {
-  const [, allPools] = await sdk.contracts.FusePoolDirectory.callStatic.getActivePools();
+  const [, allPools] = await sdk.publicClient.readContract({
+    address: getAddress(sdk.chainDeployment.FusePoolDirectory.address),
+    abi: FusePoolDirectoryABI,
+    functionName: "getActivePools",
+  });
   const fusePoolUsers: PublicPoolUserWithData[] = [];
   const erroredPools: Array<ErroredPool> = [];
   for (const pool of allPools) {
@@ -97,7 +126,7 @@ export default async function getAllFusePoolUsers(
         const hasShortfall = await getPoolsWithShortfall(sdk, comptroller);
         if (hasShortfall.length > 0) {
           const users = hasShortfall.map((user) => {
-            return `- user: ${user.user}, shortfall: ${ethers.utils.formatEther(user.shortfall)}\n`;
+            return `- user: ${user.user}, shortfall: ${formatEther(user.shortfall)}\n`;
           });
           sdk.logger.info(`Pool ${name} (${comptroller}) has ${hasShortfall.length} users with shortfall: \n${users}`);
           try {

@@ -26,7 +26,7 @@ export default task("irm:deploy:custom-jrm", "deploys custom JRM")
 
     if (_irm === "JumpRateModel") {
       args = [
-        sdk.chainSpecificParams.blocksPerYear.toNumber(),
+        Number(sdk.chainSpecificParams.blocksPerYear),
         baseRatePerYear.toString(),
         multiplierPerYear.toString(),
         jumpMultiplierPerYear.toString(),
@@ -36,7 +36,7 @@ export default task("irm:deploy:custom-jrm", "deploys custom JRM")
     } else if (_irm === "AdjustableJumpRateModel") {
       args = [
         {
-          blocksPerYear: sdk.chainSpecificParams.blocksPerYear.toNumber(),
+          blocksPerYear: Number(sdk.chainSpecificParams.blocksPerYear),
           baseRatePerYear: baseRatePerYear.toString(),
           multiplierPerYear: multiplierPerYear.toString(),
           jumpMultiplierPerYear: jumpMultiplierPerYear.toString(),
@@ -96,7 +96,7 @@ task("irm:edit:adjustable-jrm-params", "Edit adjustable JRM parameters")
       .map((a: string) => ethers.utils.parseEther(a));
 
     const args = {
-      blocksPerYear: sdk.chainSpecificParams.blocksPerYear.toNumber(),
+      blocksPerYear: Number(sdk.chainSpecificParams.blocksPerYear),
       baseRatePerYear: baseRatePerYear.toString(),
       multiplierPerYear: multiplierPerYear.toString(),
       jumpMultiplierPerYear: jumpMultiplierPerYear.toString(),

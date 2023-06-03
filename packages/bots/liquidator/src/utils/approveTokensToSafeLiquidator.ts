@@ -1,7 +1,9 @@
 import { TransactionRequest, TransactionResponse } from "@ethersproject/providers";
-import { ERC20Abi, MidasSdk } from "@midas-capital/sdk";
+import { Constants, ERC20Abi, MidasSdk } from "@midas-capital/sdk";
+import FuseSafeLiquidatorABI from "@midas-capital/sdk/abis/FuseSafeLiquidator";
 import { LiquidationStrategy } from "@midas-capital/types";
 import { BigNumber, constants, Contract, Wallet } from "ethers";
+import { encodeFunctionData, EstimateGasParameters } from "viem";
 
 import config from "../config";
 import { Liquidator } from "../services";
@@ -12,7 +14,7 @@ export default async function approveTokensToSafeLiquidator(liquidator: Liquidat
   const { chainLiquidationConfig, logger } = liquidator.sdk;
   if (chainLiquidationConfig.LIQUIDATION_STRATEGY === LiquidationStrategy.DEFAULT) {
     for (const tokenAddress of chainLiquidationConfig.SUPPORTED_OUTPUT_CURRENCIES) {
-      if (tokenAddress !== constants.AddressZero) {
+      if (tokenAddress !== Constants.AddressZero) {
         logger.info(`Sending approve transaction for ${tokenAddress}`);
         await approveTokenToSafeLiquidator(liquidator.sdk, tokenAddress);
         logger.info(`Approve transaction for ${tokenAddress} sent`);
@@ -29,13 +31,19 @@ async function approveTokenToSafeLiquidator(midasSdk: MidasSdk, erc20Address: st
   token = await token.connect(signer);
   const txCount = await midasSdk.provider.getTransactionCount(config.adminAccount);
 
+  const data = encodeFunctionData({
+    abi: ERC20Abi,
+    functionName: "approve",
+    args: [midasSdk.contracts.FuseSafeLiquidator.address, Constants.MaxUint256],
+  });
+
   const data = token.interface.encodeFunctionData("approve", [
     midasSdk.contracts.FuseSafeLiquidator.address,
     constants.MaxUint256,
   ]);
 
   // Build transaction
-  const tx = {
+  const tx: EstimateGasParameters = {
     from: config.adminAccount,
     to: erc20Address,
     value: BigNumber.from(0),

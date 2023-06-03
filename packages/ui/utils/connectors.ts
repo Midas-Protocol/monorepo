@@ -25,7 +25,7 @@ const supportedChains: Chain[] = Object.values(getSupportedChains()).map((data) 
   };
 });
 
-export const { chains, provider } = configureChains(supportedChains, [
+export const { chains, publicClient } = configureChains(supportedChains, [
   publicProvider(),
   jsonRpcProvider({
     rpc: (chain) => ({
