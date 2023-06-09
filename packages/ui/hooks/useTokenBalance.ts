@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { BigNumber } from 'ethers';
 
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useSdk } from '@ui/hooks/fuse/useSdk';
 
 export const fetchTokenBalance = async (
   tokenAddress: string,
@@ -21,25 +22,24 @@ export const fetchTokenBalance = async (
   return balance;
 };
 
-export function useTokenBalance(tokenAddress: string, customAddress?: string, sdk?: MidasSdk) {
-  const { currentSdk, currentChain, address } = useMultiMidas();
+export function useTokenBalance(tokenAddress: string, chainId: number, customAddress?: string) {
+  const { address } = useMultiMidas();
+  const sdk = useSdk(chainId);
 
   const addressToCheck = customAddress ?? address;
-  const chainId = sdk?.chainId ?? currentChain?.id;
-  const midasSdk = sdk ?? currentSdk;
 
   return useQuery(
-    ['TokenBalance', chainId, tokenAddress, addressToCheck, midasSdk?.chainId],
+    ['TokenBalance', tokenAddress, addressToCheck, sdk?.chainId],
     async () => {
-      if (midasSdk) {
-        return await fetchTokenBalance(tokenAddress, midasSdk, addressToCheck);
+      if (sdk) {
+        return await fetchTokenBalance(tokenAddress, sdk, addressToCheck);
       } else {
         return null;
       }
     },
     {
       cacheTime: Infinity,
-      enabled: !!chainId && !!tokenAddress && !!addressToCheck && !!midasSdk,
+      enabled: !!tokenAddress && !!addressToCheck && !!sdk,
       staleTime: Infinity,
     }
   );

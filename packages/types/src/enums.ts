@@ -23,6 +23,7 @@ export enum RedemptionStrategyContract {
   UniswapLpTokenLiquidator = "UniswapLpTokenLiquidator",
   UniswapV2LiquidatorFunder = "UniswapV2LiquidatorFunder",
   GelatoGUniLiquidator = "GelatoGUniLiquidator",
+  GammaLpTokenLiquidator = "GammaLpTokenLiquidator",
   CurveSwapLiquidator = "CurveSwapLiquidator",
   SaddleLpTokenLiquidator = "SaddleLpTokenLiquidator",
   BalancerLpTokenLiquidator = "BalancerLpTokenLiquidator",
@@ -31,6 +32,7 @@ export enum RedemptionStrategyContract {
   AlgebraSwapLiquidator = "AlgebraSwapLiquidator",
   SolidlyLiquidator = "SolidlyLiquidator",
   SolidlyLpTokenLiquidator = "SolidlyLpTokenLiquidator",
+  SolidlySwapLiquidator = "SolidlySwapLiquidator",
 }
 
 export enum FundingStrategyContract {
@@ -249,6 +251,7 @@ export enum assetSymbols {
   ANKR = "ANKR",
   SD = "SD", // stader labs
   THE = "THE",
+  RDNT = "RDNT",
 
   // thena
   "sAMM-jBRL/BRZ" = "sAMM-jBRL-BRZ",
@@ -258,6 +261,14 @@ export enum assetSymbols {
   "vAMM-ANKR/HAY" = "vAMM-ANKR-HAY",
   "vAMM-HAY/ankrBNB" = "vAMM-HAY-ankrBNB",
   aWBNB_STKBNB = "aWBNB-STKBNB",
+  aWBNB_BTCB = "aWBNB-BTCB",
+  aWBNB_ETH = "aWBNB-ETH",
+  aANKRBNB_ANKR_W = "aANKRBNB-ANKR-W",
+  aANKRBNB_ANKR_N = "aANKRBNB-ANKR-N",
+  aANKRBNB_RDNT_W = "aANKRBNB-RDNT-W",
+  aANKRBNB_RDNT_N = "aANKRBNB-RDNT-N",
+  aANKRBNB_THE_W = "aANKRBNB-THE-W",
+  aANKRBNB_THE_N = "aANKRBNB-THE-N",
 
   "WOMBATLP-WBNB" = "WOMBATLP-WBNB",
 
@@ -395,6 +406,9 @@ export enum assetSymbols {
   GNS = "GNS",
   "DAI-GNS" = "DAI-GNS",
   "IXT-USDT" = "IXT-USDT",
+  USDR = "USDR",
+  USDR3CRV = "USDR3CRV",
+  TNGBL = "TNGBL",
 
   // Balancer
   MIMO_PAR_80_20 = "MIMO80-PAR20 BLP",
@@ -409,8 +423,8 @@ export enum assetSymbols {
   TETU_LINEAR_USDC = "TETU_LINEAR USDC",
   TETU_LINEAR_DAI = "TETU_LINEAR DAI",
   AAVE_LINEAR_WMATIC = "AAVE_LINEAR WMATIC",
-  MaticX_bbaWMATIC = "MaticX-​bbaWMATIC",
-  StMatic_bbaWMATIC = "StMatic-​bbaWMATIC",
+  MaticX_bbaWMATIC = "MaticX-bba-WMATIC",
+  StMatic_bbaWMATIC = "StMatic-bba-WMATIC",
 
   // Arrakis Vaults [arrakis_pair_fee_tier]
   arrakis_USDC_WETH_005 = "Arrakis Vault V1 USDC-WETH (0.05)",
@@ -450,7 +464,14 @@ export enum assetSymbols {
 
   // Mainnet
   realYieldUSD = "realYieldUSD",
+  realYieldETH = "realYieldETH",
   ethBtcTrend = "ethBtcTrend",
   ethBtcMomentum = "ethBtcMomentum",
   wstETH = "wstETH",
+  stETH = "stETH",
+  swETH = "swETH",
+  rETH = "rETH",
+  cbETH = "cbETH",
+  ankrETH = "ankrETH",
+  SWETH_BBA_WETH_BPT = "swETH-bba-WETH-BPT",
 }

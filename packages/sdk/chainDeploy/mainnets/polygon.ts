@@ -99,6 +99,12 @@ const uniswapV3OracleTokens: Array<ConcentratedLiquidityOracleConfig> = [
     twapWindow: ethers.BigNumber.from(30 * 60),
     baseToken: underlying(assets, assetSymbols.WMATIC),
   },
+  {
+    assetAddress: underlying(assets, assetSymbols.TNGBL),
+    poolAddress: "0xDC8a5c5975726235402cFac9B28268EEccd42813",
+    twapWindow: ethers.BigNumber.from(30 * 60),
+    baseToken: underlying(assets, assetSymbols.DAI),
+  },
 ];
 
 const algebraOracleTokens: Array<ConcentratedLiquidityOracleConfig> = [
@@ -107,6 +113,12 @@ const algebraOracleTokens: Array<ConcentratedLiquidityOracleConfig> = [
     poolAddress: "0xD6e486c197606559946384AE2624367d750A160f",
     twapWindow: ethers.BigNumber.from(30 * 60),
     baseToken: underlying(assets, assetSymbols.USDT),
+  },
+  {
+    assetAddress: underlying(assets, assetSymbols.SD),
+    poolAddress: "0x5D0aCfa39A0FCA603147f1c14e53f46BE76984BC",
+    twapWindow: ethers.BigNumber.from(30 * 60),
+    baseToken: underlying(assets, assetSymbols.USDC),
   },
 ];
 
@@ -415,6 +427,16 @@ const curvePools: CurvePoolConfig[] = [
       underlying(assets, assetSymbols.USDT),
     ],
   },
+  {
+    lpToken: underlying(assets, assetSymbols.USDR3CRV),
+    pool: "0xa138341185a9D0429B0021A11FB717B225e13e1F",
+    underlyings: [
+      underlying(assets, assetSymbols.USDR),
+      underlying(assets, assetSymbols.DAI),
+      underlying(assets, assetSymbols.USDC),
+      underlying(assets, assetSymbols.USDT),
+    ],
+  },
 ];
 
 const gelatoAssets: GelatoGUniAsset[] = [
@@ -480,6 +502,12 @@ const diaAssets: DiaAsset[] = [
     underlying: underlying(assets, assetSymbols.PAR),
     feed: "0xd3709072C338689F94a4072a26Bb993559D9a026",
     key: "PAR/USD",
+  },
+  {
+    symbol: assetSymbols.USDR,
+    underlying: underlying(assets, assetSymbols.USDR),
+    feed: "0x763F20F3Fcdd30e11EF633A70B4396B91C149189",
+    key: "USDR/USD",
   },
 ];
 
@@ -673,7 +701,15 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
     certificateAssetSymbol: assetSymbols.aMATICc,
   });
 
-  //// Liquidator Redemption Strategies
+  // Plugins & Rewards
+  const dynamicFlywheels = await deployFlywheelWithDynamicRewards({
+    ethers,
+    getNamedAccounts,
+    deployments,
+    run,
+    deployConfig,
+  });
+  console.log("deployed dynamicFlywheels: ", dynamicFlywheels);
 
   // Quoter
   const quoter = await deployments.deploy("Quoter", {
@@ -683,6 +719,8 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
     waitConfirmations: 1,
   });
   console.log("Quoter: ", quoter.address);
+
+  //// Liquidator Redemption Strategies
 
   //// UniswapLpTokenLiquidator
   const uniswapLpTokenLiquidator = await deployments.deploy("UniswapLpTokenLiquidator", {
@@ -751,26 +789,15 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
     await ethers.provider.waitForTransaction(curveSwapLiquidator.transactionHash);
   console.log("CurveSwapLiquidator: ", curveSwapLiquidator.address);
 
-  // curve swap liquidator funder - TODO replace the CurveSwapLiquidator above
-  const curveSwapLiquidatorFunder = await deployments.deploy("CurveSwapLiquidatorFunder", {
+  // Gamma LP token liquidator
+  const gammaLpTokenLiquidator = await deployments.deploy("GammaLpTokenLiquidator", {
     from: deployer,
     args: [],
     log: true,
-    waitConfirmations: 1,
   });
-  if (curveSwapLiquidatorFunder.transactionHash)
-    await ethers.provider.waitForTransaction(curveSwapLiquidatorFunder.transactionHash);
-  console.log("CurveSwapLiquidatorFunder: ", curveSwapLiquidatorFunder.address);
-
-  // Plugins & Rewards
-  const dynamicFlywheels = await deployFlywheelWithDynamicRewards({
-    ethers,
-    getNamedAccounts,
-    deployments,
-    run,
-    deployConfig,
-  });
-  console.log("deployed dynamicFlywheels: ", dynamicFlywheels);
+  if (gammaLpTokenLiquidator.transactionHash)
+    await ethers.provider.waitForTransaction(gammaLpTokenLiquidator.transactionHash);
+  console.log("GammaLpTokenLiquidator: ", gammaLpTokenLiquidator.address);
 
   //// Gelato GUNI Liquidator
   const gelatoGUniLiquidator = await deployments.deploy("GelatoGUniLiquidator", {
@@ -783,6 +810,17 @@ export const deploy = async ({ run, ethers, getNamedAccounts, deployments }: Cha
     await ethers.provider.waitForTransaction(gelatoGUniLiquidator.transactionHash);
   }
   console.log("GelatoGUniLiquidator: ", gelatoGUniLiquidator.address);
+
+  // curve swap liquidator funder - TODO replace the CurveSwapLiquidator above
+  const curveSwapLiquidatorFunder = await deployments.deploy("CurveSwapLiquidatorFunder", {
+    from: deployer,
+    args: [],
+    log: true,
+    waitConfirmations: 1,
+  });
+  if (curveSwapLiquidatorFunder.transactionHash)
+    await ethers.provider.waitForTransaction(curveSwapLiquidatorFunder.transactionHash);
+  console.log("CurveSwapLiquidatorFunder: ", curveSwapLiquidatorFunder.address);
 
   //// JarvisLiquidatorFunder
   const jarvisLiquidatorFunder = await deployments.deploy("JarvisLiquidatorFunder", {

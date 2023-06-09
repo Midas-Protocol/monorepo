@@ -261,6 +261,12 @@ export const jarvisDocs = (v: string) => {
   <p>You can acquire this asset on the <a href="https://${v}-app.jarvis.exchange/" target="_blank" style="color: #BCAC83;">Jarvis Network</a> website.</p>`;
 };
 
+export const tangibleDocsUsdr = () => {
+  return `
+  <p><b>How to acquire this token</b><p/><br />
+  <p>You can acquire this asset on the <a href="https://www.tangible.store/realusd?action=Mint" target="_blank" style="color: #BCAC83;">Tangible</a> website.</p>`;
+};
+
 export const oneInchDocs = (url: `https://${string}`) => `
 <p><b>How to acquire this token</b><p/><br />
 <p>You can acquire this asset for example via the <a href="${url}" target="_blank" style="color: #BCAC83;">1inch decentralized exchange</a>.</p>
@@ -292,6 +298,20 @@ export const thenaDocs = (poolAddress: string) => {
   <p>This will credit your wallet with the Thena LP Tokens.</p><br />
   <p> 4. Come back back here and hit "MAX" to deposit them all in this pool.</p><br />
   <p> <b>NOTE</b>: do not stake the LPs on Thena, Midas will do that for you! </p>
+  `;
+};
+
+type ThenaStrategy = "GAMMA_NARROW" | "GAMMA_STABLE" | "GAMMA_WIDE";
+
+export const thenaDocsV2 = (token0: string, token1: string, poolAddress: string, strategy: ThenaStrategy) => {
+  return `
+  <p><b>How to acquire this token</b><p/><br /><p> 1. Make sure you are connected to BNB Network on your browser wallet.</p><br />
+  <p> 2. Head to the <a href="https://thena.fi/liquidity/fusion?currency0=${token0}&currency1=${token1}&strategy=${strategy}" target="_blank" style="color: #BCAC83;"> Thena.fi Exchange </a> and deposit the desired amount of token pairs.</p>
+  <p><b>NOTE:</b> You might have to convert between tokens and/or have to approve Thena to spend them. </p><br />
+  <p> 3. Click on "Add Liquidty".</p>
+  <p>This will credit your wallet with the Thena LP Tokens (${poolAddress}).</p><br />
+  <p> 4. Come back back here and hit "MAX" to deposit them all in this pool.</p><br />
+  <p> <b>NOTE</b>: <p> - Do not stake the LPs on Thena, Midas will do that for you! </p>  <p> - Make sure to use "AUTOMATIC" range for stable LPs </p> </p>
   `;
 };
 

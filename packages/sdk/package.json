@@ -1,7 +1,7 @@
 {
   "name": "@midas-capital/sdk",
   "repository": "git://github.com:midas-protocol/monorepo.git",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "access": "public"
@@ -58,6 +58,7 @@
     "deploy:neondevnet": "hardhat --network neondevnet deploy --tags prod --no-compile",
     "deploy:basegoerli": "hardhat --network basegoerli deploy --tags prod --no-compile",
     "deploy:localhost": "hardhat --network localhost deploy --tags prod --no-compile",
+    "deploy:localeth": "hardhat --network localeth deploy --tags prod --no-compile",
     "forge": "forge",
     "hardhat": "hardhat"
   },

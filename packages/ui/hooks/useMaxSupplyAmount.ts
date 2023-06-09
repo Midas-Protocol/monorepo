@@ -10,7 +10,7 @@ import type { TokenData } from '@ui/types/ComponentPropsType';
 import type { MarketData } from '@ui/types/TokensDataMap';
 
 export function useMaxSupplyAmount(
-  asset: NativePricedFuseAsset,
+  asset: Pick<NativePricedFuseAsset, 'cToken' | 'underlyingDecimals' | 'underlyingToken'>,
   comptrollerAddress: string,
   chainId: number
 ) {
@@ -27,6 +27,7 @@ export function useMaxSupplyAmount(
       'useMaxSupplyAmount',
       asset.underlyingToken,
       asset.cToken,
+      asset.underlyingDecimals,
       comptrollerAddress,
       sdk?.chainId,
       address,

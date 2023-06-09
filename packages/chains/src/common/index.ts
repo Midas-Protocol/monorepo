@@ -19,11 +19,13 @@ export {
   curveFinanceMoonbeamDocs,
   curveFinanceFantomDocs,
   jarvisDocs,
+  tangibleDocsUsdr,
   wrappedAssetDocs,
   lidoFinanceDocs,
   stellaSwapDocs,
   stellaSwapStableDocs,
   thenaDocs,
+  thenaDocsV2,
   wombatDocs,
   sommFinanceMainnetDocs,
 } from "./docs";
