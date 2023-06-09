@@ -22,6 +22,7 @@ import { AmountInput } from '@ui/components/pages/PoolPage/MarketsList/Additiona
 import { Balance } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/XSupplyModal/Balance';
 import { EnableCollateral } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/XSupplyModal/EnableCollateral';
 import { PendingTransaction } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/XSupplyModal/PendingTransaction';
+import { SelectCrossToken } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/XSupplyModal/SelectCrossToken';
 import { Banner } from '@ui/components/shared/Banner';
 import { EllipsisText } from '@ui/components/shared/EllipsisText';
 import { Column, Row } from '@ui/components/shared/Flex';
@@ -103,7 +104,7 @@ export const XSupplyModal = ({
   const { data: tokenData } = useTokenData(asset.underlyingToken, poolChainId);
   const [amount, setAmount] = useState<BigNumber>(constants.Zero);
   const [enableAsCollateral, setEnableAsCollateral] = useState(!asset.membership);
-  const { cCard } = useColors();
+  const { cCard, cPage } = useColors();
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [isSupplying, setIsSupplying] = useState(false);
   const [activeStep, setActiveStep] = useState<number>(0);
@@ -521,6 +522,8 @@ export const XSupplyModal = ({
 
               <Divider />
 
+              <SelectCrossToken asset={asset} />
+
               <Column
                 crossAxisAlignment="center"
                 gap={4}
@@ -615,6 +618,27 @@ export const XSupplyModal = ({
         </Column>
       }
       isOpen={isOpen}
+      modalBodyProps={{
+        css: {
+          '&::-webkit-scrollbar': {
+            display: 'block',
+            height: '4px',
+            width: '4px',
+          },
+          '&::-webkit-scrollbar-corner': {
+            display: 'none',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: cPage.primary.borderColor,
+          },
+          '&::-webkit-scrollbar-track': {
+            height: '4px',
+            width: '4px',
+          },
+        },
+        maxHeight: '100vh',
+        overflowY: 'scroll',
+      }}
       modalCloseButtonProps={{ hidden: isSupplying }}
       onClose={onModalClose}
     />
