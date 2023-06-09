@@ -543,7 +543,7 @@ export const XSupplyModal = ({
                         />
                       )}
 
-                      {fromAsset && <Balance asset={fromAsset} />}
+                      {fromAsset && <Balance asset={fromAsset} chainId={poolChainId} />}
                     </Column>
                     <StatsColumn
                       amount={supplyAmount}

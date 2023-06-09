@@ -8,13 +8,16 @@ import { useMultiMidas } from '@ui/context/MultiMidasContext';
 import { useTokenBalance } from '@ui/hooks/useTokenBalance';
 import type { TokenData } from '@ui/types/ComponentPropsType';
 
-export const Balance = ({ asset }: { asset: TokenData }) => {
+export const Balance = ({ asset, chainId }: { asset: TokenData; chainId: number }) => {
   const { currentSdk, currentChain } = useMultiMidas();
 
   if (!currentChain || !currentSdk) throw new Error('Connect your wallet');
 
-  const { data: myBalance } = useTokenBalance(asset.address);
-  const { data: myNativeBalance } = useTokenBalance('NO_ADDRESS_HERE_USE_WETH_FOR_ADDRESS');
+  const { data: myBalance } = useTokenBalance(asset.address, chainId);
+  const { data: myNativeBalance } = useTokenBalance(
+    'NO_ADDRESS_HERE_USE_WETH_FOR_ADDRESS',
+    chainId
+  );
   const nativeSymbol = currentChain.nativeCurrency?.symbol;
   const optionToWrap =
     getAddress(asset.address) === getAddress(currentSdk.chainSpecificAddresses.W_TOKEN) &&
