@@ -82,6 +82,10 @@ export function getEnabledChains() {
     enabledChains.push(SupportedChains.evmos);
   }
 
+  if (config.isEthereumEnabled) {
+    enabledChains.push(SupportedChains.ethereum);
+  }
+
   if (config.isTestnetEnabled) {
     enabledChains.push(SupportedChains.neon_devnet);
     enabledChains.push(SupportedChains.chapel);
