@@ -89,10 +89,19 @@ export function withFusePools<TBase extends MidasBaseConstructor>(Base: TBase) {
         );
 
         if (_asset) {
-          asset.underlyingSymbol = _asset.symbol;
-          asset.logoUrl = "https://d1912tcoux65lj.cloudfront.net/token/96x96/" + _asset.symbol.toLowerCase() + ".png";
+          asset.underlyingSymbol = _asset.symbol ?? "";
+          asset.logoUrl = _asset.symbol
+            ? "https://d1912tcoux65lj.cloudfront.net/token/96x96/" + _asset.symbol.toLowerCase() + ".png"
+            : "";
           asset.originalSymbol = _asset.originalSymbol ? _asset.originalSymbol : undefined;
         }
+
+        asset.netSupplyBalance = asset.supplyBalance.gt(asset.borrowBalance)
+          ? asset.supplyBalance.sub(asset.borrowBalance)
+          : constants.Zero;
+        asset.netSupplyBalanceNative =
+          Number(utils.formatUnits(asset.netSupplyBalance, asset.underlyingDecimals)) *
+          Number(utils.formatUnits(asset.underlyingPrice, 18));
 
         asset.supplyBalanceNative =
           Number(utils.formatUnits(asset.supplyBalance, asset.underlyingDecimals)) *
