@@ -12,13 +12,13 @@
       "address": "0x38742363597fBaE312B0bdcC351fCc6107E9E27E"
     },
     "CErc20Delegate": {
-      "address": "0x4df89538CA447D704EcfC8a7Ec9518f60d4D169D"
+      "address": "0x12f455CA7cf0b90aDAF31f58dA6BeeD7DFe28bBf"
     },
     "CErc20PluginDelegate": {
-      "address": "0x0cE84Ab95eE87b5Ec1E0DF25aB2e60E38229F5e1"
+      "address": "0x4C28C6c18481AE068b89e842bACEebB3150e84b8"
     },
     "CErc20PluginRewardsDelegate": {
-      "address": "0xBF22E893B0B3e2a13599d8A445c399fdf92FA238"
+      "address": "0x22CD1CBe8f10111d6007bdF9aEdd519D7dd3f0F3"
     },
     "CErc20RewardsDelegate": {
       "address": "0x99d485eF4425862D90C8301725DF670c4b8B71EC"
@@ -30,7 +30,7 @@
       "address": "0xe17eD87fb21A3730611e2988909f717ab84D88c7"
     },
     "ChainlinkPriceOracleV2": {
-      "address": "0x39eaA0bB0dB6B5356e08CB4b9212585Ba7aA2E0B"
+      "address": "0x219f7a75925D6d0312d1B62cEE6a4eE6F1A85217"
     },
     "ChapelBombERC20": {
       "address": "0xe45589fBad3A1FB90F5b2A8A3E8958a8BAB5f768"
@@ -90,7 +90,7 @@
       "address": "0x3379523a4ef49B19f411123053D455D5eC21C0aA"
     },
     "Comptroller": {
-      "address": "0x857131E62b8A19FF7C8138b170071eb8450F53f9"
+      "address": "0xFe5aF5765A7cCD1538E4ee4B501BC7fe93ec8EBa"
     },
     "ComptrollerFirstExtension": {
       "address": "0x7B5AC45507a13406B69C5C7f89fcf7EFee245F10"
@@ -162,7 +162,7 @@
       "address": "0x67419AE30cBb8723c49E1F03bca0Ddcc245da3AA"
     },
     "LeveredPositionFactoryExtension": {
-      "address": "0x8BD40eff4f4293810974518d954303CB49E95080"
+      "address": "0xD14E433151c5a567DBcC60aa3c80782898F5cd55"
     },
     "LeveredPositionsLens": {
       "address": "0x1023e4f4cC27E59620c7D42c6fE72f509fe26a54"
@@ -192,7 +192,7 @@
       "address": "0x429041250873643235cb3788871447c6fF3205aA"
     },
     "MidasFlywheelLensRouter": {
-      "address": "0xF5eb414FAFfc0Ff4eD7f409b31db44F95A484154"
+      "address": "0x9B4910cEAfb03056DddF9A1CB284C58f1d85d8A4"
     },
     "MidasFlywheel_Implementation": {
       "address": "0x7b08D19832eD5Ec09b4898eA928991ea7b145457"

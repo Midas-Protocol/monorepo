@@ -38,7 +38,7 @@ export const AdditionalInfo = ({ row }: { row: Row<PoolRowData> }) => {
     }
   }, [usdPrices, pool.chainId]);
   const rewardTokens = useRewardTokensOfPool(pool.comptroller, pool.chainId);
-  const poolDetails = usePoolDetails(pool.assets, pool.chainId);
+  const { data: poolDetails } = usePoolDetails(pool.assets, pool.chainId);
   const sdk = useMemo(() => getSdk(pool.chainId), [getSdk, pool.chainId]);
   const scanUrl = useMemo(() => getScanUrlByChainId(pool.chainId), [pool.chainId]);
 
@@ -145,11 +145,7 @@ export const AdditionalInfo = ({ row }: { row: Row<PoolRowData> }) => {
                 </AvatarGroup>
               </VStack>
             )}
-            <ClaimPoolRewardsButton
-              poolAddress={pool.comptroller}
-              poolChainId={pool.chainId}
-              poolMarkets={pool.assets.map((asset) => asset.cToken)}
-            />
+            <ClaimPoolRewardsButton poolAddress={pool.comptroller} poolChainId={pool.chainId} />
           </Grid>
         </VStack>
         <VStack>
