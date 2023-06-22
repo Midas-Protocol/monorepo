@@ -22,7 +22,11 @@ export const useFusePoolData = (poolId: string, poolChainId: number) => {
     ['useFusePoolData', poolId, address, sdk?.chainId, usdPrice],
     async () => {
       if (usdPrice && sdk?.chainId && poolId) {
-        const response = await sdk.fetchFusePoolData(poolId, { from: address });
+        const response = await sdk.fetchFusePoolData(poolId, { from: address }).catch((e) => {
+          console.warn(`Getting fuse pool data error: `, { address, poolChainId, poolId }, e);
+
+          return null;
+        });
         if (response === null) {
           return null;
         }
@@ -35,6 +39,7 @@ export const useFusePoolData = (poolId: string, poolChainId: number) => {
               ...asset,
               borrowBalanceFiat: asset.borrowBalanceNative * usdPrice,
               liquidityFiat: asset.liquidityNative * usdPrice,
+              netSupplyBalanceFiat: asset.netSupplyBalanceNative * usdPrice,
               supplyBalanceFiat: asset.supplyBalanceNative * usdPrice,
               totalBorrowFiat: asset.totalBorrowNative * usdPrice,
               totalSupplyFiat: asset.totalSupplyNative * usdPrice,

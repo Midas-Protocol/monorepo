@@ -1,7 +1,7 @@
 import { AvatarGroup, Box, HStack, Text, useDisclosure } from '@chakra-ui/react';
 import type { FlywheelClaimableRewards } from '@midas-capital/sdk/dist/cjs/src/modules/Flywheel';
 
-import ClaimRewardsModal from '@ui/components/pages/Fuse/Modals/ClaimRewardsModal/index';
+import { ClaimMarketRewardsModal } from '@ui/components/pages/Fuse/Modals/ClaimMarketRewardsModal/index';
 import { GradientButton } from '@ui/components/shared/GradientButton';
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
@@ -10,10 +10,10 @@ import { useColors } from '@ui/hooks/useColors';
 
 const ClaimAssetRewardsButton = ({
   poolAddress,
-  assetAddress,
+  marketAddress,
   poolChainId,
 }: {
-  assetAddress: string;
+  marketAddress: string;
   poolAddress: string;
   poolChainId: number;
 }) => {
@@ -30,18 +30,7 @@ const ClaimAssetRewardsButton = ({
     refetch: refetchRewards,
     isLoading,
     isRefetching,
-  } = useAssetClaimableRewards({
-    assetAddress,
-    poolAddress,
-    poolChainId,
-  });
-
-  const claimableRewardsOfChain: { [chainId: string]: FlywheelClaimableRewards[] } =
-    claimableRewards && claimableRewards.length > 0
-      ? {
-          [poolChainId]: claimableRewards,
-        }
-      : {};
+  } = useAssetClaimableRewards(marketAddress, poolAddress, poolChainId);
 
   return (
     <>
@@ -70,12 +59,12 @@ const ClaimAssetRewardsButton = ({
         </GradientButton>
       )}
       <Box position="absolute">
-        <ClaimRewardsModal
-          claimableRewards={claimableRewardsOfChain}
+        <ClaimMarketRewardsModal
           isLoading={isLoading || isRefetching}
           isOpen={isClaimModalOpen}
+          marketAddress={marketAddress}
           onClose={closeClaimModal}
-          refetch={refetchRewards}
+          poolAddress={poolAddress}
         />
       </Box>
     </>

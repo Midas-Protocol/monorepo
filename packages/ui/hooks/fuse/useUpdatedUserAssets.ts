@@ -48,7 +48,13 @@ const useUpdatedUserAssets = <T extends MarketData>({
     async () => {
       if (!assets || !assets.length || !usdPrice || !currentSdk) return [];
 
-      const resAssets = await currentSdk.getUpdatedAssets(mode, index, assets, amount);
+      const resAssets = await currentSdk
+        .getUpdatedAssets(mode, index, assets, amount)
+        .catch((e) => {
+          console.warn(`Updated assets error: `, { amount, assets, index, mode }, e);
+
+          return [];
+        });
       const assetsWithPrice: MarketData[] = [];
       if (resAssets && resAssets.length !== 0) {
         resAssets.map((asset) => {
@@ -56,6 +62,7 @@ const useUpdatedUserAssets = <T extends MarketData>({
             ...asset,
             borrowBalanceFiat: asset.borrowBalanceNative * usdPrice,
             liquidityFiat: asset.liquidityNative * usdPrice,
+            netSupplyBalanceFiat: asset.netSupplyBalanceNative * usdPrice,
             supplyBalanceFiat: asset.supplyBalanceNative * usdPrice,
             totalBorrowFiat: asset.totalBorrowNative * usdPrice,
             totalSupplyFiat: asset.totalSupplyNative * usdPrice,

@@ -2,7 +2,7 @@ import { AvatarGroup, Box, HStack, Text, useDisclosure } from '@chakra-ui/react'
 import type { FlywheelClaimableRewards } from '@midas-capital/sdk/dist/cjs/src/modules/Flywheel';
 import React from 'react';
 
-import ClaimRewardsModal from '@ui/components/pages/Fuse/Modals/ClaimRewardsModal/index';
+import { ClaimPoolRewardsModal } from '@ui/components/pages/Fuse/Modals/ClaimPoolRewardsModal/index';
 import { GradientButton } from '@ui/components/shared//GradientButton';
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
@@ -29,17 +29,7 @@ const ClaimPoolRewardsButton = ({
     refetch: refetchRewards,
     isLoading,
     isRefetching,
-  } = usePoolClaimableRewards({
-    poolAddress,
-    poolChainId,
-  });
-
-  const claimableRewardsOfChain: { [chainId: string]: FlywheelClaimableRewards[] } =
-    claimableRewards && claimableRewards.length > 0
-      ? {
-          [poolChainId]: claimableRewards,
-        }
-      : {};
+  } = usePoolClaimableRewards(poolAddress, poolChainId);
 
   return (
     <>
@@ -74,12 +64,12 @@ const ClaimPoolRewardsButton = ({
       )}
 
       <Box position="absolute">
-        <ClaimRewardsModal
-          claimableRewards={claimableRewardsOfChain}
+        <ClaimPoolRewardsModal
           isLoading={isLoading || isRefetching}
           isOpen={isClaimModalOpen}
           onClose={closeClaimModal}
-          refetch={refetchRewards}
+          poolAddress={poolAddress}
+          poolChainId={poolChainId}
         />
       </Box>
     </>

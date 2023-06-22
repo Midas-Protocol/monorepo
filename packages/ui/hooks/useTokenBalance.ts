@@ -1,6 +1,6 @@
 import type { MidasSdk } from '@midas-capital/sdk';
 import { useQuery } from '@tanstack/react-query';
-import { BigNumber } from 'ethers';
+import { BigNumber, constants } from 'ethers';
 
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
 import { useSdk } from '@ui/hooks/fuse/useSdk';
@@ -10,14 +10,23 @@ export const fetchTokenBalance = async (
   sdk: MidasSdk,
   address?: string
 ): Promise<BigNumber> => {
-  let balance: BigNumber;
-  if (!address) {
-    balance = BigNumber.from(0);
-  } else if (tokenAddress === 'NO_ADDRESS_HERE_USE_WETH_FOR_ADDRESS') {
-    balance = await sdk.provider.getBalance(address);
-  } else {
-    const contract = sdk.createCTokenWithExtensions(tokenAddress);
-    balance = (await contract.callStatic.balanceOf(address)) as BigNumber;
+  let balance = constants.Zero;
+
+  try {
+    if (!address) {
+      balance = BigNumber.from(0);
+    } else if (tokenAddress === 'NO_ADDRESS_HERE_USE_WETH_FOR_ADDRESS') {
+      balance = await sdk.provider.getBalance(address);
+    } else {
+      const contract = sdk.createCTokenWithExtensions(tokenAddress);
+      balance = (await contract.callStatic.balanceOf(address)) as BigNumber;
+    }
+  } catch (e) {
+    console.warn(
+      `Fetching token balance error: `,
+      { address, chainId: sdk.chainId, tokenAddress },
+      e
+    );
   }
   return balance;
 };

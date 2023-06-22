@@ -20,10 +20,18 @@ export const useBorrowMinimum = (asset: FuseAsset, poolChainId: number) => {
   const response = useQuery(
     [`useBorrowMinimum`, currentSdk?.chainId, asset.cToken],
     async () => {
-      if (currentSdk && currentSdk.chainId == poolChainId) {
-        return await currentSdk.contracts.FuseFeeDistributor.callStatic.getMinBorrowEth(
-          asset.cToken
-        );
+      if (currentSdk) {
+        return await currentSdk.contracts.FuseFeeDistributor.callStatic
+          .getMinBorrowEth(asset.cToken)
+          .catch((e) => {
+            console.warn(
+              `Getting min borrow eth error: `,
+              { cToken: asset.cToken, poolChainId },
+              e
+            );
+
+            return null;
+          });
       } else {
         return null;
       }
