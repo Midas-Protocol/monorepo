@@ -152,7 +152,7 @@ export const MultiMidasProvider = ({ children }: MultiMidasProviderProps = { chi
       }
 
       return enabledChainsForConnext.filter(
-        (c) => c != chainId && SUPPORTED_CHAINS_XMINT[c].swapAddress
+        (c) => c != chainId && SUPPORTED_CHAINS_XMINT[c] && SUPPORTED_CHAINS_XMINT[c].swapAddress
       );
     },
     [enabledChainsForConnext]
