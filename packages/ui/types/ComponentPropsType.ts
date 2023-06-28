@@ -256,6 +256,14 @@ export type PoolsPerChainStatus = {
   };
 };
 
+export type TokensPerChainStatus = {
+  [chainId: string]: {
+    data?: Partial<TokenData>[] | null | undefined;
+    error: Error | undefined;
+    isLoading: boolean;
+  };
+};
+
 export type VaultsPerChainStatus = {
   [chainId: string]: {
     data?: VaultData[] | null | undefined;

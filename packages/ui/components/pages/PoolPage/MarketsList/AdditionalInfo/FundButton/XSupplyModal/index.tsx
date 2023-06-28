@@ -456,7 +456,7 @@ export const XSupplyModal = ({
                 <Text variant="title">From</Text>
                 <Select
                   defaultValue={{
-                    label: SUPPORTED_CHAINS_BY_CONNEXT[currentChain.id].name,
+                    label: SUPPORTED_CHAINS_BY_CONNEXT[currentChain.id]?.name,
                     value: currentChain.id,
                   }}
                   isMulti={false}
@@ -522,7 +522,7 @@ export const XSupplyModal = ({
 
               <Divider />
 
-              <SelectCrossToken asset={asset} />
+              <SelectCrossToken asset={asset} availableFromChains={availableFromChains} />
 
               <Column
                 crossAxisAlignment="center"

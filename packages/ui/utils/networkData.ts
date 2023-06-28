@@ -132,6 +132,6 @@ export const tokenListUrls: { [chainId: string]: string } = {
   [SupportedChains.neon_devnet]: '',
   [SupportedChains.arbitrum]: 'https://gateway.ipfs.io/ipns/tokens.uniswap.org',
   [SupportedChains.fantom]: '',
-  [SupportedChains.basegoerli]: '',
+  [SupportedChains.lineagoerli]: '',
   [SupportedChains.ethereum]: 'https://gateway.ipfs.io/ipns/tokens.uniswap.org',
 };
