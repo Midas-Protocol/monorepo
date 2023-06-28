@@ -69,7 +69,7 @@ export const SelectCrossToken = ({
       });
     }
 
-    if (globalFilter.includes(SEARCH)) {
+    if (searchText && globalFilter.includes(SEARCH)) {
       _tokens = _tokens.filter(
         (token) =>
           token.address?.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -89,6 +89,15 @@ export const SelectCrossToken = ({
       setSelectedToken(undefined);
     }
   }, [tokens]);
+
+  useEffect(() => {
+    if (searchText) {
+      setGlobalFilter([...globalFilter, SEARCH]);
+    } else {
+      setGlobalFilter(globalFilter.filter((f) => f !== SEARCH));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchText]);
 
   const onFilter = (filter: SupportedChains | string) => {
     let _globalFilter: (SupportedChains | string)[] = [];
