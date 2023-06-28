@@ -4,8 +4,13 @@ import { useQueries } from '@tanstack/react-query';
 import axios from 'axios';
 import { useMemo } from 'react';
 
-import type { Err, TokenData, TokensPerChainStatus } from '@ui/types/ComponentPropsType';
+import type { Err, ExtraData, TokenData, TokensPerChainStatus } from '@ui/types/ComponentPropsType';
 import { tokenListUrls } from '@ui/utils/networkData';
+
+export type ExtraTokenType = Omit<TokenData, 'extraData'> & {
+  chainId: SupportedChains;
+  extraData?: ExtraData;
+};
 
 export const useCrossTokens = (chainIds: SupportedChains[]) => {
   const tokensQueries = useQueries({
@@ -18,7 +23,7 @@ export const useCrossTokens = (chainIds: SupportedChains[]) => {
             try {
               const { data } = await axios.get(tokenListUrls[chainId.toString()]);
 
-              const tokens: Partial<TokenData>[] = [];
+              const tokens: ExtraTokenType[] = [];
 
               if (data && data.tokens) {
                 data.tokens
@@ -27,6 +32,7 @@ export const useCrossTokens = (chainIds: SupportedChains[]) => {
                   .map((t: any) => {
                     tokens.push({
                       address: t.address,
+                      chainId,
                       color: t.symbol,
                       decimals: t.decimals,
                       extraData: undefined,
@@ -56,7 +62,7 @@ export const useCrossTokens = (chainIds: SupportedChains[]) => {
 
   const [allTokens, tokensPerChain, isLoading, error] = useMemo(() => {
     const _tokensPerChain: TokensPerChainStatus = {};
-    const allTokens: Partial<TokenData>[] = [];
+    const allTokens: ExtraTokenType[] = [];
 
     let isLoading = false;
     let isError = false;

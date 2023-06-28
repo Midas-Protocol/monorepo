@@ -23,10 +23,10 @@ import { ChainFilterButtons } from '@ui/components/pages/Fuse/FusePoolsPage/Fuse
 import { ChainFilterDropdown } from '@ui/components/pages/Fuse/FusePoolsPage/FusePoolList/FusePoolRow/ChainFilterDropdown';
 import { Banner } from '@ui/components/shared/Banner';
 import { ALL, SEARCH } from '@ui/constants/index';
+import type { ExtraTokenType } from '@ui/hooks/fuse/useCrossTokens';
 import { useCrossTokens } from '@ui/hooks/fuse/useCrossTokens';
 import { useColors } from '@ui/hooks/useColors';
 import { useDebounce } from '@ui/hooks/useDebounce';
-import type { TokenData } from '@ui/types/ComponentPropsType';
 import type { MarketData } from '@ui/types/TokensDataMap';
 
 export const SelectCrossToken = ({
@@ -37,11 +37,12 @@ export const SelectCrossToken = ({
   availableFromChains: SupportedChains[];
 }) => {
   const { cCard } = useColors();
-  const [tokens, setTokens] = useState<Partial<TokenData>[]>([]);
+  const [tokens, setTokens] = useState<ExtraTokenType[]>([]);
   const [searchText, setSearchText] = useState('');
   const [globalFilter, setGlobalFilter] = useState<(SupportedChains | string)[]>([ALL]);
   const { tokensPerChain, isLoading, allTokens } = useCrossTokens(availableFromChains);
   const { cPage } = useColors();
+  const [selectedToken, setSelectedToken] = useState<string>();
 
   const loadingStatusPerChain = useMemo(() => {
     const _loadingStatusPerChain: { [chainId: string]: boolean } = {};
@@ -54,7 +55,7 @@ export const SelectCrossToken = ({
   }, [tokensPerChain]);
 
   useEffect(() => {
-    let _tokens: Partial<TokenData>[] = [];
+    let _tokens: ExtraTokenType[] = [];
 
     if (globalFilter.includes(ALL)) {
       _tokens = [...allTokens];
@@ -80,6 +81,14 @@ export const SelectCrossToken = ({
     setTokens(_tokens);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [globalFilter, Object.values(tokensPerChain).join(','), allTokens.join(','), searchText]);
+
+  useEffect(() => {
+    if (tokens.length > 0) {
+      setSelectedToken(tokens[0].address);
+    } else {
+      setSelectedToken(undefined);
+    }
+  }, [tokens]);
 
   const onFilter = (filter: SupportedChains | string) => {
     let _globalFilter: (SupportedChains | string)[] = [];
@@ -113,6 +122,10 @@ export const SelectCrossToken = ({
     } else {
       setGlobalFilter([..._globalFilter]);
     }
+  };
+
+  const onChange = (address: string) => {
+    setSelectedToken(address);
   };
 
   return (
@@ -203,7 +216,7 @@ export const SelectCrossToken = ({
                     overflow="auto"
                     width="100%"
                   >
-                    <RadioGroup defaultValue={tokens[0].address}>
+                    <RadioGroup onChange={onChange} value={selectedToken}>
                       <VStack>
                         <Grid
                           alignItems="stretch"
