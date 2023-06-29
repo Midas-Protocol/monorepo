@@ -522,7 +522,11 @@ export const XSupplyModal = ({
 
               <Divider />
 
-              <SelectCrossToken asset={asset} availableFromChains={availableFromChains} />
+              <SelectCrossToken
+                asset={asset}
+                availableFromChains={availableFromChains}
+                poolChainId={poolChainId}
+              />
 
               <Column
                 crossAxisAlignment="center"
