@@ -9,7 +9,9 @@ import { CErc20Delegate } from "../../typechain/CErc20Delegate";
 import { Comptroller } from "../../typechain/Comptroller";
 import { getContract } from "../MidasSdk/utils";
 
-export function withFundOperations<TBase extends MidasBaseConstructor>(Base: TBase) {
+import { CreateContractsModule } from "./CreateContracts";
+
+export function withFundOperations<TBase extends CreateContractsModule = CreateContractsModule>(Base: TBase) {
   return class FundOperations extends Base {
     async fetchGasForCall(amount: BigNumber, address: string) {
       const estimatedGas = BigNumber.from(
@@ -103,6 +105,22 @@ export function withFundOperations<TBase extends MidasBaseConstructor>(Base: TBa
         return { errorCode };
       }
       const tx: ContractTransaction = await cToken.redeemUnderlying(amount);
+
+      return { tx, errorCode: null };
+    }
+
+    async maxWithdrawForNonBorrower(cTokenAddress: string) {
+      const cToken = this.createCTokenWithExtensions(cTokenAddress, this.signer);
+      const ownerAddress = await this.signer.getAddress();
+      const balance = await cToken.callStatic.balanceOf(ownerAddress);
+
+      const response = (await cToken.callStatic.redeem(balance)) as BigNumber;
+
+      if (response.toString() !== "0") {
+        const errorCode = parseInt(response.toString());
+        return { errorCode };
+      }
+      const tx: ContractTransaction = await cToken.redeem(balance);
 
       return { tx, errorCode: null };
     }
