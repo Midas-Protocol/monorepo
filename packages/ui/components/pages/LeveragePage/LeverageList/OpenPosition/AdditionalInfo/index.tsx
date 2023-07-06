@@ -1,5 +1,5 @@
-import { Box, Button, Flex, Grid, GridItem, HStack } from '@chakra-ui/react';
-import type { OpenPosition } from '@midas-capital/types';
+import { Box, Button, Flex, Grid, GridItem } from '@chakra-ui/react';
+import type { OpenPosition, PositionInfo } from '@midas-capital/types';
 import { useChainModal, useConnectModal } from '@rainbow-me/rainbowkit';
 import type { Row } from '@tanstack/react-table';
 import { useMemo } from 'react';
@@ -19,7 +19,13 @@ export interface ComptrollerToPool {
   [comptroller: string]: { allocation: number; chainId: number; poolId: number; poolName: string };
 }
 
-export const AdditionalInfo = ({ row }: { row: Row<OpenPositionRowData> }) => {
+export const AdditionalInfo = ({
+  positionInfo,
+  row,
+}: {
+  positionInfo: PositionInfo | null;
+  row: Row<OpenPositionRowData>;
+}) => {
   const position: OpenPosition = row.original.collateralAsset;
 
   const chainId = Number(position.chainId);
@@ -42,7 +48,7 @@ export const AdditionalInfo = ({ row }: { row: Row<OpenPositionRowData> }) => {
     <Box minWidth="400px" width="100%">
       <Flex
         alignItems="center"
-        flexDirection={{ base: 'column', lg: 'row' }}
+        flexDirection={{ base: 'column', xl: 'row' }}
         gap={4}
         justifyContent="flex-end"
       >
@@ -58,37 +64,17 @@ export const AdditionalInfo = ({ row }: { row: Row<OpenPositionRowData> }) => {
               Switch {chainConfig ? ` to ${chainConfig.specificParams.metadata.name}` : ' Network'}
             </Button>
           </Box>
-        ) : position.borrowable.isPositionClosed ? (
-          <HStack>
-            <ReopenPositionButton
-              borrowAsset={position.borrowable}
-              chainId={position.chainId}
-              collateralAsset={position.collateral}
-            />
-            <RemovePositionButton
-              borrowAsset={position.borrowable}
-              chainId={position.chainId}
-              collateralAsset={position.collateral}
-            />
-          </HStack>
+        ) : position.isClosed ? (
+          <>
+            <ReopenPositionButton position={position} />
+            <RemovePositionButton position={position} />
+          </>
         ) : (
-          <HStack>
-            <AdjustRatioButton
-              borrowAsset={position.borrowable}
-              chainId={position.chainId}
-              collateralAsset={position.collateral}
-            />
-            <FundPositionButton
-              borrowAsset={position.borrowable}
-              chainId={position.chainId}
-              collateralAsset={position.collateral}
-            />
-            <ClosePositionButton
-              borrowAsset={position.borrowable}
-              chainId={position.chainId}
-              collateralAsset={position.collateral}
-            />
-          </HStack>
+          <>
+            <AdjustRatioButton position={position} />
+            <FundPositionButton position={position} />
+            <ClosePositionButton position={position} />
+          </>
         )}
       </Flex>
       <Grid
@@ -102,7 +88,7 @@ export const AdditionalInfo = ({ row }: { row: Row<OpenPositionRowData> }) => {
         w="100%"
       >
         <GridItem>
-          <PositionDetails position={position} />
+          <PositionDetails position={position} positionInfo={positionInfo} />
         </GridItem>
       </Grid>
     </Box>

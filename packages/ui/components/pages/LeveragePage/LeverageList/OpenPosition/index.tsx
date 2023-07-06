@@ -34,14 +34,16 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
+import { constants, utils } from 'ethers';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import * as React from 'react';
 
 import { Chain } from '@ui/components/pages/Fuse/FusePoolsPage/FusePoolList/FusePoolRow/Chain';
 import { AdditionalInfo } from '@ui/components/pages/LeveragePage/LeverageList/OpenPosition/AdditionalInfo/index';
-import { BorrowableAsset } from '@ui/components/pages/LeveragePage/LeverageList/OpenPosition/BorrowableAsset';
+import { DebtValue } from '@ui/components/pages/LeveragePage/LeverageList/OpenPosition/DebtValue';
 import { NetApy } from '@ui/components/pages/LeveragePage/LeverageList/OpenPosition/NetApy';
-import { SupplyApy } from '@ui/components/pages/LeveragePage/LeverageList/OpenPosition/SupplyApy';
+import { PositionValue } from '@ui/components/pages/LeveragePage/LeverageList/OpenPosition/PositionValue';
+import { SafetyBuffer } from '@ui/components/pages/LeveragePage/LeverageList/OpenPosition/SafetyBuffer';
 import { TokenName } from '@ui/components/pages/VaultsPage/VaultsList/TokenName';
 import { Banner } from '@ui/components/shared/Banner';
 import { MidasBox } from '@ui/components/shared/Box';
@@ -49,27 +51,35 @@ import { CIconButton } from '@ui/components/shared/Button';
 import { TableHeaderCell } from '@ui/components/shared/TableHeaderCell';
 import {
   ALL,
-  BORROWABLE_ASSET,
   CHAIN,
   COLLATERAL_ASSET,
+  DEBT_VALUE,
+  DEBT_VALUE_TOOLTIP,
   HIDDEN,
   MARKETS_COUNT_PER_PAGE,
   MIDAS_LOCALSTORAGE_KEYS,
   NET_APY,
+  NET_APY_TOOLTIP,
   POSITION_CREATION_PER_PAGE,
+  POSITION_VALUE,
+  POSITION_VALUE_TOOLTIP,
+  SAFETY_BUFFER,
+  SAFETY_BUFFER_TOOLTIP,
   SEARCH,
-  SUPPLY_APY,
 } from '@ui/constants/index';
+import { usePositionsInfo } from '@ui/hooks/leverage/usePositionInfo';
+import { usePositionsSupplyApy } from '@ui/hooks/leverage/usePositionsSupplyApy';
 import { useColors } from '@ui/hooks/useColors';
 import type { Err, PositionsPerChainStatus } from '@ui/types/ComponentPropsType';
 import { sortPositions } from '@ui/utils/sorts';
 
 export type OpenPositionRowData = {
-  borrowableAsset: OpenPosition;
   chain: OpenPosition;
   collateralAsset: OpenPosition;
+  debtValue: OpenPosition;
   netApy: OpenPosition;
-  supplyApy: OpenPosition;
+  positionValue: OpenPosition;
+  safetyBuffer: OpenPosition;
 };
 
 export const OpenPositionComp = ({
@@ -105,6 +115,22 @@ export const OpenPositionComp = ({
       return res;
     }, [] as OpenPosition[]);
   }, [positionsPerChain]);
+
+  const supplyApyPerMarket = usePositionsSupplyApy(
+    allOpenPositions.map((position) => position.collateral),
+    allOpenPositions.map((position) => position.chainId)
+  );
+  const { data: positionsInfo } = usePositionsInfo(
+    allOpenPositions.map((position) => position.address),
+    supplyApyPerMarket
+      ? allOpenPositions.map((position) =>
+          supplyApyPerMarket[position.collateral.cToken]
+            ? utils.parseUnits(supplyApyPerMarket[position.collateral.cToken].totalApy.toString())
+            : null
+        )
+      : undefined,
+    allOpenPositions.map((position) => position.chainId)
+  );
 
   useEffect(() => {
     const positions: OpenPosition[] = [];
@@ -149,39 +175,73 @@ export const OpenPositionComp = ({
     [initSearchText]
   );
 
-  const positionSort: SortingFn<OpenPositionRowData> = useCallback((rowA, rowB, columnId) => {
-    if (columnId === COLLATERAL_ASSET) {
-      return rowB.original.collateralAsset.collateral.symbol.localeCompare(
-        rowA.original.collateralAsset.collateral.symbol
-      );
-    } else if (columnId === CHAIN) {
-      return Number(rowB.original.collateralAsset.chainId) >
-        Number(rowA.original.collateralAsset.chainId)
-        ? 1
-        : -1;
-    } else if (columnId === SUPPLY_APY) {
-      return Number(rowB.original.collateralAsset.collateral.supplyRatePerBlock) >
-        Number(rowA.original.collateralAsset.collateral.supplyRatePerBlock)
-        ? 1
-        : -1;
-    } else if (columnId === NET_APY) {
-      return Number(rowB.original.collateralAsset.collateral.supplyRatePerBlock) >
-        Number(rowA.original.collateralAsset.collateral.supplyRatePerBlock)
-        ? 1
-        : -1;
-    } else {
-      return 0;
-    }
-  }, []);
+  const positionSort: SortingFn<OpenPositionRowData> = useCallback(
+    (rowA, rowB, columnId) => {
+      if (columnId === COLLATERAL_ASSET) {
+        return rowB.original.collateralAsset.collateral.symbol.localeCompare(
+          rowA.original.collateralAsset.collateral.symbol
+        );
+      } else if (columnId === CHAIN) {
+        return Number(rowB.original.collateralAsset.chainId) >
+          Number(rowA.original.collateralAsset.chainId)
+          ? 1
+          : -1;
+      } else if (columnId === POSITION_VALUE) {
+        const rowAPositionValue =
+          positionsInfo && positionsInfo[rowA.original.collateralAsset.address]
+            ? positionsInfo[rowA.original.collateralAsset.address].positionValue
+            : constants.Zero;
+        const rowBPositionValue =
+          positionsInfo && positionsInfo[rowB.original.collateralAsset.address]
+            ? positionsInfo[rowB.original.collateralAsset.address].positionValue
+            : constants.Zero;
+        return rowAPositionValue.gt(rowBPositionValue) ? 1 : -1;
+      } else if (columnId === DEBT_VALUE) {
+        const rowADebtValue =
+          positionsInfo && positionsInfo[rowA.original.collateralAsset.address]
+            ? positionsInfo[rowA.original.collateralAsset.address].debtValue
+            : constants.Zero;
+        const rowBDebtValue =
+          positionsInfo && positionsInfo[rowB.original.collateralAsset.address]
+            ? positionsInfo[rowB.original.collateralAsset.address].debtValue
+            : constants.Zero;
+        return rowADebtValue.gt(rowBDebtValue) ? 1 : -1;
+      } else if (columnId === NET_APY) {
+        const rowACurrentApy =
+          positionsInfo && positionsInfo[rowA.original.collateralAsset.address]
+            ? positionsInfo[rowA.original.collateralAsset.address].currentApy
+            : constants.Zero;
+        const rowBCurrentApy =
+          positionsInfo && positionsInfo[rowB.original.collateralAsset.address]
+            ? positionsInfo[rowB.original.collateralAsset.address].currentApy
+            : constants.Zero;
+        return rowACurrentApy.gt(rowBCurrentApy) ? 1 : -1;
+      } else if (columnId === SAFETY_BUFFER) {
+        const rowASafetyBuffer =
+          positionsInfo && positionsInfo[rowA.original.collateralAsset.address]
+            ? positionsInfo[rowA.original.collateralAsset.address].safetyBuffer
+            : constants.Zero;
+        const rowBSafetyBuffer =
+          positionsInfo && positionsInfo[rowB.original.collateralAsset.address]
+            ? positionsInfo[rowB.original.collateralAsset.address].safetyBuffer
+            : constants.Zero;
+        return rowASafetyBuffer.gt(rowBSafetyBuffer) ? 1 : -1;
+      } else {
+        return 0;
+      }
+    },
+    [positionsInfo]
+  );
 
   const data: OpenPositionRowData[] = useMemo(() => {
     return sortPositions(allOpenPositions).map((position) => {
       return {
-        borrowableAsset: position,
         chain: position,
         collateralAsset: position,
+        debtValue: position,
         netApy: position,
-        supplyApy: position,
+        positionValue: position,
+        safetyBuffer: position,
       };
     });
   }, [allOpenPositions]);
@@ -216,33 +276,89 @@ export const OpenPositionComp = ({
         sortingFn: positionSort,
       },
       {
-        accessorFn: (row) => row.supplyApy,
-        cell: ({ getValue }) => <SupplyApy position={getValue<OpenPosition>()} />,
+        accessorFn: (row) => row.positionValue,
+        cell: ({ getValue }) => (
+          <PositionValue
+            info={
+              positionsInfo && positionsInfo[getValue<OpenPosition>().address]
+                ? positionsInfo[getValue<OpenPosition>().address]
+                : undefined
+            }
+            position={getValue<OpenPosition>()}
+          />
+        ),
         footer: (props) => props.column.id,
-        header: (context) => <TableHeaderCell context={context}>{SUPPLY_APY}</TableHeaderCell>,
-        id: SUPPLY_APY,
+        header: (context) => (
+          <TableHeaderCell context={context} description={POSITION_VALUE_TOOLTIP}>
+            {POSITION_VALUE}
+          </TableHeaderCell>
+        ),
+        id: POSITION_VALUE,
+        sortingFn: positionSort,
+      },
+      {
+        accessorFn: (row) => row.debtValue,
+        cell: ({ getValue }) => (
+          <DebtValue
+            info={
+              positionsInfo && positionsInfo[getValue<OpenPosition>().address]
+                ? positionsInfo[getValue<OpenPosition>().address]
+                : undefined
+            }
+            position={getValue<OpenPosition>()}
+          />
+        ),
+        footer: (props) => props.column.id,
+        header: (context) => (
+          <TableHeaderCell context={context} description={DEBT_VALUE_TOOLTIP}>
+            {DEBT_VALUE}
+          </TableHeaderCell>
+        ),
+        id: DEBT_VALUE,
         sortingFn: positionSort,
       },
       {
         accessorFn: (row) => row.netApy,
-        cell: ({ getValue }) => <NetApy position={getValue<OpenPosition>()} />,
+        cell: ({ getValue }) => (
+          <NetApy
+            info={
+              positionsInfo && positionsInfo[getValue<OpenPosition>().address]
+                ? positionsInfo[getValue<OpenPosition>().address]
+                : undefined
+            }
+          />
+        ),
         footer: (props) => props.column.id,
-        header: (context) => <TableHeaderCell context={context}>{NET_APY}</TableHeaderCell>,
+        header: (context) => (
+          <TableHeaderCell context={context} description={NET_APY_TOOLTIP}>
+            {NET_APY}
+          </TableHeaderCell>
+        ),
         id: NET_APY,
         sortingFn: positionSort,
       },
       {
-        accessorFn: (row) => row.borrowableAsset,
-        cell: ({ getValue }) => <BorrowableAsset position={getValue<OpenPosition>()} />,
-        enableSorting: false,
+        accessorFn: (row) => row.safetyBuffer,
+        cell: ({ getValue }) => (
+          <SafetyBuffer
+            info={
+              positionsInfo && positionsInfo[getValue<OpenPosition>().address]
+                ? positionsInfo[getValue<OpenPosition>().address]
+                : undefined
+            }
+          />
+        ),
         footer: (props) => props.column.id,
         header: (context) => (
-          <TableHeaderCell context={context}>{BORROWABLE_ASSET}</TableHeaderCell>
+          <TableHeaderCell context={context} description={SAFETY_BUFFER_TOOLTIP}>
+            {SAFETY_BUFFER}
+          </TableHeaderCell>
         ),
-        id: BORROWABLE_ASSET,
+        id: SAFETY_BUFFER,
+        sortingFn: positionSort,
       },
     ];
-  }, [positionFilter, positionSort]);
+  }, [positionFilter, positionSort, positionsInfo]);
 
   const table = useReactTable({
     columns,
@@ -397,7 +513,16 @@ export const OpenPositionComp = ({
                       >
                         {/* 2nd row is a custom 1 cell row */}
                         <Td border="none" colSpan={row.getVisibleCells().length}>
-                          <AdditionalInfo row={row} />
+                          <AdditionalInfo
+                            positionInfo={
+                              positionsInfo
+                                ? positionsInfo[
+                                    row.getValue<OpenPosition>(COLLATERAL_ASSET).address
+                                  ]
+                                : null
+                            }
+                            row={row}
+                          />
                         </Td>
                       </Tr>
                     )}
@@ -428,7 +553,7 @@ export const OpenPositionComp = ({
         <Flex alignItems="center" className="pagination" gap={4} justifyContent="flex-end" p={4}>
           <HStack>
             <Hide below="lg">
-              <Text>Assets Per Page</Text>
+              <Text>Positions Per Page</Text>
             </Hide>
             <Select
               maxW="max-content"

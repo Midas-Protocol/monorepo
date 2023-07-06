@@ -27,6 +27,12 @@ export type ConcentratedLiquidityOracleConfig = {
   baseToken: string;
 };
 
+export type BalancerSwapTokenLiquidatorData = {
+  poolAddress: string;
+  inputToken: string;
+  outputToken: string;
+};
+
 export type ChainDeployConfig = {
   uniswap: {
     uniswapV2RouterAddress: string;
@@ -84,6 +90,8 @@ export type FluxAsset = {
   underlying: string;
   feed: string;
 };
+
+export type UmbrellaAsset = FluxAsset;
 
 export type AdrastiaAsset = {
   underlying: string;
@@ -179,6 +187,13 @@ export type DiaDeployFnParams = ChainDeployFnParams & {
 
 export type FluxDeployFnParams = ChainDeployFnParams & {
   fluxAssets: FluxAsset[];
+  deployConfig: ChainDeployConfig;
+  nativeUsdFeed: string;
+};
+
+export type UmbrellaDeployFnParams = ChainDeployFnParams & {
+  registryAddress: string;
+  umbrellaAssets: UmbrellaAsset[];
   deployConfig: ChainDeployConfig;
   nativeUsdFeed: string;
 };
