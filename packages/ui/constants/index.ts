@@ -1,5 +1,7 @@
-import { SupportedChainsArray } from '@midas-capital/types';
+import { arbitrum, bsc, polygon } from '@midas-capital/chains';
+import { assetSymbols, SupportedChainsArray } from '@midas-capital/types';
 
+import type { ChainXMintData } from '@ui/types/ChainMetaData';
 import type { TxStep } from '@ui/types/ComponentPropsType';
 
 export const SUPPORTED_NETWORKS_REGEX = new RegExp(SupportedChainsArray.join('|'));
@@ -293,6 +295,147 @@ export const FEATURE_REQUESTS_URL = 'https://midascapital.canny.io/feature-reque
 export const COINGECKO_API = 'https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=';
 export const DEFI_LLAMA_API = 'https://coins.llama.fi/prices/current/';
 export const HIGH_RISK_RATIO = 0.8;
+
+/**
+ * Domain IDs are unique to every bridge and differ from Chain IDs.
+ * Connext's xcall requires specifying which Domain ID should be the destination of a cross-chain transaction.
+ * Please refer the following link for more details. https://docs.connext.network/resources/supported-chains
+ **/
+export const SUPPORTED_CHAINS_BY_CONNEXT: Record<
+  number,
+  { domainId: string; name: string; network: string }
+> = {
+  1: {
+    domainId: '6648936',
+    // Ethereum Mainnet
+    name: 'Ethereum',
+    network: 'mainnet',
+  },
+  10: {
+    domainId: '1869640809',
+    // Optimism
+    name: 'Optimism',
+    network: 'mainnet',
+  },
+  100: {
+    domainId: '6778479',
+    // Gnosis Chain
+    name: 'Gnosis',
+    network: 'mainnet',
+  },
+  137: {
+    domainId: '1886350457',
+    // Polygon
+    name: 'Polygon',
+    network: 'mainnet',
+  },
+  420: {
+    domainId: '1735356532',
+    // Optimism-Goerli
+    name: 'OptGoerli',
+    network: 'testnet',
+  },
+  42161: {
+    domainId: '1634886255',
+    // Arbitrum One
+    name: 'Arbitrum',
+    network: 'mainnet',
+  },
+  421613: {
+    domainId: '1734439522',
+    // Arbitrum-Goerli
+    name: 'ArbGoerli',
+    network: 'testnet',
+  },
+  5: {
+    domainId: '1735353714',
+    // Goerli
+    name: 'Goerli',
+    network: 'testnet',
+  },
+  56: {
+    domainId: '6450786',
+    // BNB Chain
+    name: 'BNB',
+    network: 'mainnet',
+  },
+  80001: {
+    domainId: '9991',
+    // Mumbai
+    name: 'Mumbai',
+    network: 'testnet',
+  },
+};
+
+export const SUPPORTED_SYMBOLS_BY_CONNEXT: string[] = [
+  assetSymbols.ETH,
+  assetSymbols.WETH,
+  assetSymbols.USDC,
+];
+
+export const SUPPORTED_CHAINS_XMINT: {
+  [chainId: number]: ChainXMintData;
+} = {
+  [bsc.chainId]: {
+    assets: bsc.assets.filter((a) => SUPPORTED_SYMBOLS_BY_CONNEXT.includes(a.symbol)),
+    supported: true,
+    swapAddress: '0x119dd93154780d7604D50014c4545b4906928bFF',
+    targetAddress: '0x0b081b724CDC4DD9186E64F259b5fC589a4Fd7D0',
+    uniV3Address: '0x73D53460fc1ead8Eb4A7771Bc5023159E8730E68',
+    usdc: bsc.assets.find((a) => a.symbol === assetSymbols.USDC),
+    weth: bsc.assets.find((a) => a.symbol === assetSymbols.ETH),
+  },
+  [polygon.chainId]: {
+    assets: polygon.assets.filter((a) => SUPPORTED_SYMBOLS_BY_CONNEXT.includes(a.symbol)),
+    supported: true,
+    swapAddress: '0x6e92344d08F8443a9C704452ac66bEFB90D32E12',
+    targetAddress: '0xDF97CadbcCeE9cfdB12A3e9BB7663E6753A71a0C',
+    uniV3Address: '0xeC345E9be52f0Fca8aAd6aec3254Ed86151b060d',
+    usdc: polygon.assets.find((a) => a.symbol === assetSymbols.USDC),
+    weth: polygon.assets.find((a) => a.symbol === assetSymbols.WETH),
+  },
+  [arbitrum.chainId]: {
+    assets: arbitrum.assets.filter((a) => SUPPORTED_SYMBOLS_BY_CONNEXT.includes(a.symbol)),
+    supported: false,
+    swapAddress: '0xa28DE94d2e6F84659c2C32dF14334Daa08DD6461',
+    targetAddress: '',
+    uniV3Address: '0x924E679c3c23017aef214c9ea1fBC22e97ff9E2e',
+    usdc: arbitrum.assets.find((a) => a.symbol === assetSymbols.USDC),
+    weth: arbitrum.assets.find((a) => a.symbol === assetSymbols.WETH),
+  },
+  [10]: {
+    assets: [
+      {
+        decimals: 18,
+        name: 'USDC',
+        symbol: assetSymbols.USDC,
+        underlying: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
+      },
+      {
+        decimals: 18,
+        name: 'Wrapped ETH',
+        symbol: assetSymbols.WETH,
+        underlying: '0x4200000000000000000000000000000000000006',
+      },
+    ],
+    supported: false,
+    swapAddress: '0xeB35e251b29166ACD5652E00892AAdEb2b45F5D3',
+    targetAddress: '',
+    uniV3Address: '0x1135Cc96A7E9d8f161BE8B6bDB74F896A9658a08',
+    usdc: {
+      decimals: 18,
+      name: 'USDC',
+      symbol: assetSymbols.USDC,
+      underlying: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
+    },
+    weth: {
+      decimals: 18,
+      name: 'Wrapped ETH',
+      symbol: assetSymbols.WETH,
+      underlying: '0x4200000000000000000000000000000000000006',
+    },
+  },
+};
 
 export const VAULT_SUPPLY_STEPS = (symbol: string) =>
   [

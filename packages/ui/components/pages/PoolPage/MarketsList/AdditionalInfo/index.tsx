@@ -36,7 +36,7 @@ export const AdditionalInfo = ({
   const asset: MarketData = row.original.market;
   const assets: MarketData[] = rows.map((row) => row.original.market);
 
-  const { currentChain } = useMultiMidas();
+  const { currentChain, getAvailableFromChains } = useMultiMidas();
   const chainConfig = useMemo(() => getChainConfig(poolChainId), [poolChainId]);
   const { openConnectModal } = useConnectModal();
   const { openChainModal } = useChainModal();
@@ -50,6 +50,12 @@ export const AdditionalInfo = ({
       openChainModal();
     }
   };
+
+  const availableFromChains = useMemo(() => {
+    if (poolChainId) {
+      return getAvailableFromChains(poolChainId);
+    }
+  }, [getAvailableFromChains, poolChainId]);
 
   return (
     <Box width="100%">
@@ -65,7 +71,8 @@ export const AdditionalInfo = ({
               Connect Wallet
             </Button>
           </Box>
-        ) : currentChain.unsupported || currentChain.id !== poolChainId ? (
+        ) : currentChain.unsupported ||
+          (currentChain.id !== poolChainId && availableFromChains?.length == 0) ? (
           <Box>
             <Button onClick={handleSwitch} variant="_solid">
               Switch {chainConfig ? ` to ${chainConfig.specificParams.metadata.name}` : ' Network'}
@@ -90,7 +97,7 @@ export const AdditionalInfo = ({
               asset={asset}
               assets={assets}
               comptrollerAddress={comptrollerAddress}
-              isDisabled={asset.supplyBalanceFiat === 0}
+              isDisabled={asset.supplyBalanceFiat === 0 || currentChain.id !== poolChainId}
               mode={FundOperationMode.WITHDRAW}
               poolChainId={poolChainId}
             />
@@ -99,7 +106,9 @@ export const AdditionalInfo = ({
               assets={assets}
               borrowBalanceFiat={borrowBalanceFiat}
               comptrollerAddress={comptrollerAddress}
-              isDisabled={asset.isBorrowPaused || supplyBalanceFiat === 0}
+              isDisabled={
+                asset.isBorrowPaused || supplyBalanceFiat === 0 || currentChain.id !== poolChainId
+              }
               mode={FundOperationMode.BORROW}
               poolChainId={poolChainId}
             />
@@ -107,7 +116,7 @@ export const AdditionalInfo = ({
               asset={asset}
               assets={assets}
               comptrollerAddress={comptrollerAddress}
-              isDisabled={asset.borrowBalanceFiat === 0}
+              isDisabled={asset.borrowBalanceFiat === 0 || currentChain.id !== poolChainId}
               mode={FundOperationMode.REPAY}
               poolChainId={poolChainId}
             />

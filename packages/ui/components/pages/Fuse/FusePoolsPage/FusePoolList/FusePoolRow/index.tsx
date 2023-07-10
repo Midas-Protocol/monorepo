@@ -455,6 +455,7 @@ const PoolsRowList = ({
         width="100%"
       >
         <ChainFilterButtons
+          enabledChains={enabledChains}
           globalFilter={globalFilter}
           isLoading={isLoading}
           loadingStatusPerChain={loadingStatusPerChain}
@@ -462,6 +463,7 @@ const PoolsRowList = ({
           props={{ display: { base: 'none', lg: 'inline-flex' } }}
         />
         <ChainFilterDropdown
+          enabledChains={enabledChains}
           globalFilter={globalFilter}
           isLoading={isLoading}
           loadingStatusPerChain={loadingStatusPerChain}

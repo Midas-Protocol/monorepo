@@ -1,6 +1,9 @@
 import { Box, Button, useDisclosure } from '@chakra-ui/react';
 import { FundOperationMode } from '@midas-capital/types';
 import { useMemo } from 'react';
+import { useNetwork } from 'wagmi';
+
+import { XSupplyModal } from './XSupplyModal';
 
 import { BorrowModal } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/BorrowModal';
 import { RepayModal } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/RepayModal/index';
@@ -35,6 +38,8 @@ export const FundButton = ({
     return name;
   }, [mode]);
 
+  const { chain } = useNetwork();
+
   return (
     <Box>
       <Button
@@ -44,8 +49,18 @@ export const FundButton = ({
       >
         {modeName}
       </Button>
-      {mode === FundOperationMode.SUPPLY && (
+      {mode === FundOperationMode.SUPPLY && chain?.id === poolChainId && (
         <SupplyModal
+          asset={asset}
+          assets={assets}
+          comptrollerAddress={comptrollerAddress}
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          poolChainId={poolChainId}
+        />
+      )}
+      {mode === FundOperationMode.SUPPLY && chain?.id !== poolChainId && (
+        <XSupplyModal
           asset={asset}
           assets={assets}
           comptrollerAddress={comptrollerAddress}
