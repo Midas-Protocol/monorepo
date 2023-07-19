@@ -1,6 +1,6 @@
 import { Divider } from '@chakra-ui/react';
-import type { NativePricedFuseAsset } from '@midas-capital/types';
-import { ComptrollerErrorCodes, CTokenErrorCodes } from '@midas-capital/types';
+import type { NativePricedFuseAsset } from '@ionicprotocol/types';
+import { ComptrollerErrorCodes, CTokenErrorCodes } from '@ionicprotocol/types';
 import type { BigNumber, ContractFunction } from 'ethers';
 
 import { AdminFee } from '@ui/components/pages/EditPoolPage/AssetConfiguration/AssetSettings/AdminFee';
@@ -66,7 +66,7 @@ export const AssetSettings = ({
   selectedAsset,
   assets,
   poolChainId,
-  setSelectedAsset,
+  setSelectedAsset
 }: AssetSettingsProps) => {
   const { cToken: cTokenAddress } = selectedAsset;
   const { data: cTokenData } = useCTokenData(comptrollerAddress, cTokenAddress, poolChainId);

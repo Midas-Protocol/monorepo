@@ -1,4 +1,4 @@
-import { underlying } from "@midas-capital/types";
+import { underlying } from "@ionicprotocol/types";
 import { providers } from "ethers";
 
 import { AddressesProvider } from "../../../typechain/AddressesProvider";
@@ -12,16 +12,27 @@ export const deployChainlinkOracle = async ({
   deployments,
   deployConfig,
   assets,
-  chainlinkAssets,
+  chainlinkAssets
 }: ChainlinkDeployFnParams): Promise<{ cpo: any; chainLinkv2: any }> => {
   const { deployer } = await getNamedAccounts();
   let tx: providers.TransactionResponse;
 
   //// Chainlink Oracle
+
   const cpo = await deployments.deploy("ChainlinkPriceOracleV2", {
     from: deployer,
-    args: [deployer, true, deployConfig.wtoken, deployConfig.nativeTokenUsdChainlinkFeed],
+    args: [],
     log: true,
+    proxy: {
+      execute: {
+        init: {
+          methodName: "initialize",
+          args: [deployConfig.stableToken, deployConfig.nativeTokenUsdChainlinkFeed]
+        }
+      },
+      owner: deployer,
+      proxyContract: "OpenZeppelinTransparentProxy"
+    }
   });
   if (cpo.transactionHash) await ethers.provider.waitForTransaction(cpo.transactionHash);
   console.log("ChainlinkPriceOracleV2: ", cpo.address);

@@ -1,5 +1,5 @@
 import { Divider } from '@chakra-ui/react';
-import type { FundOperationMode } from '@midas-capital/types';
+import type { FundOperationMode } from '@ionicprotocol/types';
 import type { BigNumber } from 'ethers';
 import { utils } from 'ethers';
 import { useMemo } from 'react';
@@ -11,7 +11,7 @@ import { Supplied } from '@ui/components/pages/PoolPage/MarketsList/AdditionalIn
 import { SupplyAPY } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/StatsColumn/SupplyAPY';
 import { MidasBox } from '@ui/components/shared/Box';
 import { Column } from '@ui/components/shared/Flex';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import useUpdatedUserAssets from '@ui/hooks/fuse/useUpdatedUserAssets';
 import { useBorrowLimitMarket } from '@ui/hooks/useBorrowLimitMarket';
 import { useBorrowLimitTotal } from '@ui/hooks/useBorrowLimitTotal';
@@ -34,7 +34,7 @@ export const StatsColumn = ({
   amount,
   enableAsCollateral = false,
   poolChainId,
-  comptrollerAddress,
+  comptrollerAddress
 }: StatsColumnProps) => {
   const index = useMemo(() => assets.findIndex((a) => a.cToken === asset.cToken), [assets, asset]);
   // Get the new representation of a user's NativePricedFuseAssets after proposing a supply amount.
@@ -43,12 +43,12 @@ export const StatsColumn = ({
     assets,
     index,
     mode,
-    poolChainId,
+    poolChainId
   });
 
   const updatedAsset = updatedAssets ? updatedAssets[index] : undefined;
 
-  const { currentSdk, currentChain } = useMultiMidas();
+  const { currentSdk, currentChain } = useMultiIonic();
   if (!currentSdk || !currentChain) throw new Error("SDK doesn't exist!");
 
   const {
@@ -59,7 +59,7 @@ export const StatsColumn = ({
     supplyBalanceFrom,
     supplyBalanceTo,
     totalBorrows,
-    updatedTotalBorrows,
+    updatedTotalBorrows
   } = useMemo(() => {
     const blocksPerMinute = getBlockTimePerMinuteByChainId(currentChain.id);
     return {
@@ -82,14 +82,14 @@ export const StatsColumn = ({
         : undefined,
       updatedTotalBorrows: updatedAssets
         ? updatedAssets.reduce((acc, cur) => acc + cur.borrowBalanceFiat, 0)
-        : undefined,
+        : undefined
     };
   }, [currentChain, updatedAsset, asset, assets, updatedAssets, currentSdk]);
 
   // Calculate Old and new Borrow Limits
   const { data: borrowLimitTotal } = useBorrowLimitTotal(assets, poolChainId);
   const { data: updatedBorrowLimitTotal } = useBorrowLimitTotal(updatedAssets ?? [], poolChainId, {
-    ignoreIsEnabledCheckFor: enableAsCollateral ? asset.cToken : undefined,
+    ignoreIsEnabledCheckFor: enableAsCollateral ? asset.cToken : undefined
   });
   const { data: borrowLimitMarket } = useBorrowLimitMarket(
     asset,
@@ -103,7 +103,7 @@ export const StatsColumn = ({
     poolChainId,
     comptrollerAddress,
     {
-      ignoreIsEnabledCheckFor: enableAsCollateral ? asset.cToken : undefined,
+      ignoreIsEnabledCheckFor: enableAsCollateral ? asset.cToken : undefined
     }
   );
 

@@ -1,4 +1,4 @@
-import { SupportedChains } from "@midas-capital/types";
+import { SupportedChains } from "@ionicprotocol/types";
 
 export const defaultDocs = (blockExplorerUrl: string, tokenAddress: string): string => {
   return `
@@ -10,41 +10,32 @@ export const wrappedAssetDocs = (chainId: SupportedChains) => {
   const wrapAddress = {
     [SupportedChains.bsc]: {
       swapName: "PancakeSwap",
-      swapAddress: "https://pancakeswap.finance/swap?outputCurrency=0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+      swapAddress: "https://pancakeswap.finance/swap?outputCurrency=0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
     },
     [SupportedChains.polygon]: {
       swapName: "SushiSwap",
       swapAddress:
-        "https://app.sushi.com/swap?tokens=MATIC&tokens=0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270&chainId=137",
-    },
-    [SupportedChains.moonbeam]: {
-      swapName: "StellaSwap",
-      swapAddress: "https://app.stellaswap.com/exchange/swap",
+        "https://app.sushi.com/swap?tokens=MATIC&tokens=0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270&chainId=137"
     },
     [SupportedChains.arbitrum]: {
       swapName: "SushiSwap",
       swapAddress:
-        "https://app.sushi.com/swap?inputCurrency=ETH&outputCurrency=0x82aF49447D8a07e3bd95BD0d56f35241523fBab1&chainId=42161",
+        "https://app.sushi.com/swap?inputCurrency=ETH&outputCurrency=0x82aF49447D8a07e3bd95BD0d56f35241523fBab1&chainId=42161"
     },
     [SupportedChains.ganache]: {},
-    [SupportedChains.evmos]: {},
-    [SupportedChains.neon_devnet]: {
+    [SupportedChains.neon]: {
       swapName: "MoraSwap",
-      swapAddress: "https://moraswap.com/exchange/swap",
+      swapAddress: "https://moraswap.com/exchange/swap"
     },
     [SupportedChains.chapel]: {},
-    [SupportedChains.fantom]: {
-      swapName: "SpookySwap",
-      swapAddress: "https://spooky.fi/#/swap",
-    },
     [SupportedChains.lineagoerli]: {
       swapName: "Uniswap",
-      swapAddress: "https://swap.goerli.linea.build/#/swap",
+      swapAddress: "https://swap.goerli.linea.build/#/swap"
     },
     [SupportedChains.ethereum]: {
       swapName: "Uniswap",
-      swapAddress: "https://app.uniswap.org/#/swap?outputCurrency=0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    },
+      swapAddress: "https://app.uniswap.org/#/swap?outputCurrency=0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+    }
   }[chainId];
 
   return `
@@ -126,45 +117,6 @@ export const quickSwapDocs = (token0: string, token1: string, poolName: string, 
   `;
 };
 
-export const beamSwapDocs = (token0: string, token1: string, poolName: string, tokenAddress: string) => {
-  return `
-  <p><b>How to acquire this token</b><p/><br />
-  <p> 1. Head to <a href="https://app.beamswap.io/exchange/add/${token0}/${token1}" target="_blank" style="color: #BCAC83;">BeamSwap</a> and supply the desired liquidity pairs.</p>
-  <p><b>NOTE:</b> You might have to convert between tokens and/or have to approve BeamSwap to spend them.</p><br />
-  <p> 2. You will get back <a href="https://moonbeam.moonscan.com/token/${tokenAddress}" target="_blank" style="color: #BCAC83;">BeamSwap ${poolName} LP tokens</a> in your wallet.</p><br />
-  <p> 3. Come back here and hit "MAX" to deposit them all in this pool. </p>
-  `;
-};
-
-export const beamSwapStableDocs = (poolName: string, tokenAddress: string) => {
-  return `
-  <p><b>How to acquire this token</b><p/><br />
-  <p> 1. Head to <a href="https://app.beamswap.io/exchange/add/multi/${poolName}" target="_blank" style="color: #BCAC83;">BeamSwap</a> and supply the desired liquidity pairs.<p>
-  <p><b>NOTE:</b> You might have to convert between tokens and/or have to approve BeamSwap to spend them.</p><br />
-  <p> 2. You will get back <a href="https://moonbeam.moonscan.com/token/${tokenAddress}" target="_blank" style="color: #BCAC83;">BeamSwap ${poolName} Stable LP tokens</a> in your wallet.</p><br />
-  <p> 3. Come back here and hit "MAX" to deposit them all in this pool. </p>
-  `;
-};
-
-export const stellaSwapDocs = (token0: string, token1: string, poolName: string, tokenAddress: string) => {
-  return `
-  <p><b>How to acquire this token</b><p/><br />
-  <p> 1. Head to <a href="https://app.stellaswap.com/exchange/add/${token0}/${token1}" target="_blank" style="color: #BCAC83;">StellaSwap</a> and supply the desired liquidity pairs.</p>
-  <p><b>NOTE:</b> You might have to convert between tokens and/or have to approve StellaSwap to spend them.</p><br />
-  <p> 2. You will get back <a href="https://moonbeam.moonscan.com/token/${tokenAddress}" target="_blank" style="color: #BCAC83;">StellaSwap ${poolName} LP tokens</a> in your wallet.</p><br />
-  <p> 3. Come back here and hit "MAX" to deposit them all in this pool. </p>
-  `;
-};
-export const stellaSwapStableDocs = (poolAddress: string, poolName: string, tokenAddress: string) => {
-  return `
-  <p><b>How to acquire this token</b><p/><br />
-  <p> 1. Head to <a href="https://app.stellaswap.com/exchange/pool/stable/add/${poolAddress}" target="_blank" style="color: #BCAC83;">StellaSwap</a> and supply the desired liquidity pairs.</p>
-  <p><b>NOTE:</b> You might have to convert between tokens and/or have to approve StellaSwap to spend them.</p><br />
-  <p> 2. You will get back <a href="https://moonbeam.moonscan.com/token/${tokenAddress}" target="_blank" style="color: #BCAC83;">StellaSwap ${poolName} LP tokens</a> in your wallet.</p><br />
-  <p> 3. Come back here and hit "MAX" to deposit them all in this pool. </p>
-  `;
-};
-
 export const curveFinancePolygonDocs = (
   poolNumber: number | string,
   poolName: string,
@@ -198,16 +150,6 @@ export const balancerDocs = (chain: string, poolAddress: string, poolName: strin
   `;
 };
 
-export const beethovenXDocs = (poolAddress: string, poolName: string, tokenAddress: string) => {
-  return `
-  <p><b>How to acquire this token</b><p/><br />
-  <p> 1. Head over to the <a href="https://beets.fi/pool/${poolAddress}" target="_blank" style="color: #BCAC83;"> Balancer ${poolName} Pool</a>.</p><br />
-  <p> 2. You can then supply any of the underlying assets, and upon adding liquidity.</p>
-  <p>You will get back the <a href="https://polygonscan.com/token/${tokenAddress}" target="_blank" style="color: #BCAC83;"> Balancer ${poolName} LP tokens</a>.</p><br />
-  <p> 3. Come back back here and hit "MAX" to deposit them all in this pool.</p>
-  `;
-};
-
 export const curveFinanceArbitrumDocs = (poolName: string, tokenAddress: string) => {
   return `
   <p><b>How to acquire this token</b><p/><br />
@@ -218,39 +160,12 @@ export const curveFinanceArbitrumDocs = (poolName: string, tokenAddress: string)
   `;
 };
 
-export const curveFinanceFantomDocs = (poolName: string, tokenAddress: string) => {
-  return `
-  <p><b>How to acquire this token</b><p/><br />
-  <p> 1. Head over to the <a href="https://curve.fi/#/fantom/pools/${poolName}/deposit" target="_blank" style="color: #BCAC83;"> Curve ${poolName} Pool</a>.</p><br />
-  <p> 2. You can then supply any of the underlying assets, and upon adding liquidity.</p>
-  <p>You will get back the <a href="https://ftmscan.com/token/${tokenAddress}" target="_blank" style="color: #BCAC83;"> Curve ${poolName} LP tokens</a>.</p><br />
-  <p> 3. Come back back here and hit "MAX" to deposit them all in this pool.</p>
-  `;
-};
-
 export const saddleFinanceDocs = (poolName: string, tokenAddress: string) => {
   return `
   <p><b>How to acquire this token</b><p/><br />
   <p> 1. Head over to the <a href="https://saddle.exchange/#/pools/${poolName}/deposit" target="_blank" style="color: #BCAC83;"> Saddle ${poolName} Pool</a>.</p><br />
   <p> 2. You can then supply any of the underlying assets, and upon adding liquidity.</p>
   <p>You will get back the <a href="https://arbiscan.io/token/${tokenAddress}" target="_blank" style="color: #BCAC83;"> Saddle ${poolName} LP tokens</a>.</p><br />
-  <p> 3. Come back back here and hit "MAX" to deposit them all in this pool.</p>
-  `;
-};
-
-export const curveFinanceMoonbeamDocs = (
-  poolNumber: number,
-  poolName: string,
-  tokenAddress: string,
-  isFactory = false
-) => {
-  return `
-  <p><b>How to acquire this token</b><p/><br />
-  <p> 1. Head over to the <a href="https://moonbeam.curve.fi${
-    isFactory ? "/factory/" : "/"
-  }${poolNumber}/deposit" target="_blank" style="color: #BCAC83;"> Curve ${poolName} Pool</a>.</p><br />
-  <p> 2. You can then supply any of the underlying assets, and upon adding liquidity.</p>
-  <p>You will get back the <a href="https://moonbeam.moonscan.io/token/${tokenAddress}" target="_blank" style="color: #BCAC83;"> Curve ${poolName} LP tokens</a>.</p><br />
   <p> 3. Come back back here and hit "MAX" to deposit them all in this pool.</p>
   `;
 };

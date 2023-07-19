@@ -1,12 +1,10 @@
-import { bsc, evmos, moonbeam, polygon } from "@midas-capital/chains";
-import { underlying } from "@midas-capital/types";
+import { bsc, polygon } from "@ionicprotocol/chains";
+import { underlying } from "@ionicprotocol/types";
 import { task, types } from "hardhat/config";
 
 const underlyingsMapping = {
   [bsc.chainId]: bsc.assets,
-  [moonbeam.chainId]: moonbeam.assets,
-  [polygon.chainId]: polygon.assets,
-  [evmos.chainId]: evmos.assets,
+  [polygon.chainId]: polygon.assets
 };
 
 task("deploy-dynamic-rewards-market", "deploy dynamic rewards plugin with flywheels")
@@ -20,8 +18,8 @@ task("deploy-dynamic-rewards-market", "deploy dynamic rewards plugin with flywhe
   .setAction(async (taskArgs, { run, ethers, deployments }) => {
     const signer = await ethers.getNamedSigner(taskArgs.signer);
 
-    const midasSdkModule = await import("../midasSdk");
-    const sdk = await midasSdkModule.getOrCreateMidas();
+    const ionicSdkModule = await import("../ionicSdk");
+    const sdk = await ionicSdkModule.getOrCreateIonic();
     const underlyings = underlyingsMapping[sdk.chainId];
 
     // task argument parsing
@@ -53,12 +51,12 @@ task("deploy-dynamic-rewards-market", "deploy dynamic rewards plugin with flywhe
         execute: {
           init: {
             methodName: "initialize",
-            args: deployArgs,
-          },
+            args: deployArgs
+          }
         },
-        owner: signer.address,
+        owner: signer.address
       },
-      log: true,
+      log: true
     });
 
     console.log(deployment.transactionHash);
@@ -81,7 +79,7 @@ task("deploy-dynamic-rewards-market", "deploy dynamic rewards plugin with flywhe
     await run("plugin:whitelist", {
       oldImplementation: pluginAddress,
       newImplementation: pluginAddress,
-      admin: taskArgs.signer,
+      admin: taskArgs.signer
     });
 
     // STEP 3: whitelist upgradfe path from CErc20Delegate-> CErc20PluginRewardsDelegate
@@ -90,7 +88,7 @@ task("deploy-dynamic-rewards-market", "deploy dynamic rewards plugin with flywhe
     );
     await run("market:updatewhitelist", {
       oldPluginRewardsDelegate: cTokenImplementation,
-      admin: taskArgs.signer,
+      admin: taskArgs.signer
     });
     console.log("Upgrade path whitelisted");
 
@@ -101,14 +99,14 @@ task("deploy-dynamic-rewards-market", "deploy dynamic rewards plugin with flywhe
       underlying: underlyingAddress,
       implementationAddress: sdk.chainDeployment.CErc20PluginRewardsDelegate.address,
       pluginAddress: pluginAddress,
-      signer: taskArgs.signer,
+      signer: taskArgs.signer
     });
     console.log("Market upgraded");
 
     // for each token and its flywheel, set up the market and its rewards
     for (const [idx, rewardToken] of rewardTokens.entries()) {
       console.log(`Setting up market for reward token: ${rewardToken}, fwAddress: ${fwAddresses[idx]}`);
-      const flywheel = sdk.createMidasFlywheel(fwAddresses[idx]);
+      const flywheel = sdk.createIonicFlywheel(fwAddresses[idx]);
       const tokenRewards = await flywheel.callStatic.flywheelRewards();
       console.log(`token rewards ${tokenRewards}`);
 

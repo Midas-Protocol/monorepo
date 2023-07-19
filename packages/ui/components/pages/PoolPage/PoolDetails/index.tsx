@@ -10,7 +10,7 @@ import { MidasBox } from '@ui/components/shared/Box';
 import { ClipboardValueIconButton } from '@ui/components/shared/ClipboardValue';
 import { Center, Column, Row } from '@ui/components/shared/Flex';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useExtraPoolInfo } from '@ui/hooks/fuse/useExtraPoolInfo';
 import { useColors } from '@ui/hooks/useColors';
 import type { MarketData, PoolData } from '@ui/types/TokensDataMap';
@@ -25,7 +25,7 @@ const PoolDetails = ({ data: poolData }: { data?: PoolData | null }) => {
       comptroller: '',
       totalAvailableLiquidityFiat: 0,
       totalBorrowedFiat: 0,
-      totalSuppliedFiat: 0,
+      totalSuppliedFiat: 0
     };
 
   const { cCard } = useColors();
@@ -33,7 +33,7 @@ const PoolDetails = ({ data: poolData }: { data?: PoolData | null }) => {
   const poolId = router.query.poolId as string;
   const { data } = useExtraPoolInfo(poolData?.comptroller, poolData?.chainId);
 
-  const { setGlobalLoading, currentSdk } = useMultiMidas();
+  const { setGlobalLoading, currentSdk } = useMultiIonic();
   const addRecentTransaction = useAddRecentTransaction();
   const scanUrl = useMemo(
     () => poolData?.chainId && getScanUrlByChainId(poolData.chainId),
@@ -98,7 +98,7 @@ const PoolDetails = ({ data: poolData }: { data?: PoolData | null }) => {
               base: 'repeat(1, 1fr)',
               lg: 'repeat(4, 1fr)',
               md: 'repeat(2, 1fr)',
-              sm: 'repeat(2, 1fr)',
+              sm: 'repeat(2, 1fr)'
             }}
             width="100%"
           >

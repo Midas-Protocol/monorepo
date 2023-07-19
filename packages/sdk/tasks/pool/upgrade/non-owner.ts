@@ -2,8 +2,8 @@ import { constants } from "ethers";
 import { task, types } from "hardhat/config";
 
 import { Comptroller } from "../../../typechain/Comptroller";
-import { FuseFeeDistributor } from "../../../typechain/FuseFeeDistributor";
-import { FusePoolDirectory } from "../../../typechain/FusePoolDirectory";
+import { FeeDistributor } from "../../../typechain/FeeDistributor";
+import { PoolDirectory } from "../../../typechain/PoolDirectory";
 import { Unitroller } from "../../../typechain/Unitroller";
 
 task("non-owner-pool:upgrade")
@@ -11,7 +11,7 @@ task("non-owner-pool:upgrade")
   .addParam("poolAddress", "The pool address", undefined, types.string)
   .setAction(async ({ comptrollerAddress, poolAddress }, { ethers }) => {
     const signer = await ethers.getNamedSigner("deployer");
-    const fuseFeeDistributor = (await ethers.getContract("FuseFeeDistributor", signer)) as FuseFeeDistributor;
+    const fuseFeeDistributor = (await ethers.getContract("FeeDistributor", signer)) as FeeDistributor;
     // pools to upgrade
     const pools: string[] = [poolAddress];
     const firstExtension = await ethers.getContract("ComptrollerFirstExtension");
@@ -84,7 +84,7 @@ task("non-owner-pool:upgrade")
           [
             `0x89cd9855000000000000000000000000${firstExtension.address.slice(
               2
-            )}000000000000000000000000${constants.AddressZero.slice(2)}`,
+            )}000000000000000000000000${constants.AddressZero.slice(2)}`
           ]
         );
         await tx.wait();
@@ -98,7 +98,7 @@ task("non-owner-pool:upgrade")
 task("non-owner-pool:toggle-autoimpl:all")
   .addParam("enable", "If autoimpl should be enabled", false, types.boolean)
   .setAction(async ({ enable }, { ethers, run }) => {
-    const fusePoolDirectory = (await ethers.getContract("FusePoolDirectory")) as FusePoolDirectory;
+    const fusePoolDirectory = (await ethers.getContract("PoolDirectory")) as PoolDirectory;
     const [, pools] = await fusePoolDirectory.callStatic.getActivePools();
     for (let i = 0; i < pools.length; i++) {
       const pool = pools[i];
@@ -106,7 +106,7 @@ task("non-owner-pool:toggle-autoimpl:all")
 
       await run("non-owner-pool:toggle-autoimpl", {
         poolAddress: pool.comptroller,
-        enable: enable,
+        enable: enable
       });
     }
   });
@@ -116,7 +116,7 @@ task("non-owner-pool:toggle-autoimpl")
   .addParam("enable", "If autoimpl should be enabled", false, types.boolean)
   .setAction(async ({ poolAddress, enable }, { ethers }) => {
     const signer = await ethers.getNamedSigner("deployer");
-    const fuseFeeDistributor = (await ethers.getContract("FuseFeeDistributor", signer)) as FuseFeeDistributor;
+    const fuseFeeDistributor = (await ethers.getContract("FeeDistributor", signer)) as FeeDistributor;
     const sliced = poolAddress.slice(2);
     const comptroller = (await ethers.getContractAt("Comptroller", poolAddress, signer)) as Comptroller;
 
@@ -128,7 +128,7 @@ task("non-owner-pool:toggle-autoimpl")
     if (!isAutOn && enable) {
       const toggleOnTx = {
         to: fuseFeeDistributor.address,
-        data: `0xb01b86fd000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000001000000000000000000000000${sliced}0000000000000000000000000000000000000000000000000000000000000024d5333166000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000`,
+        data: `0xb01b86fd000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000001000000000000000000000000${sliced}0000000000000000000000000000000000000000000000000000000000000024d5333166000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000`
       };
 
       tx = await signer.sendTransaction(toggleOnTx);
@@ -137,7 +137,7 @@ task("non-owner-pool:toggle-autoimpl")
     } else if (isAutOn && !enable) {
       const toggleOffTx = {
         to: fuseFeeDistributor.address,
-        data: `0xb01b86fd000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000001000000000000000000000000${sliced}0000000000000000000000000000000000000000000000000000000000000024d5333166000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000`,
+        data: `0xb01b86fd000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000001000000000000000000000000${sliced}0000000000000000000000000000000000000000000000000000000000000024d5333166000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000`
       };
 
       tx = await signer.sendTransaction(toggleOffTx);

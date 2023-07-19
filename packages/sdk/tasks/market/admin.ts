@@ -5,7 +5,7 @@ import { task, types } from "hardhat/config";
 import { Comptroller } from "../../typechain/Comptroller";
 import { ComptrollerFirstExtension } from "../../typechain/ComptrollerFirstExtension";
 import { CToken } from "../../typechain/CToken";
-import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
+import { PoolDirectory } from "../../typechain/PoolDirectory";
 
 export default task("market:unsupport", "Unsupport a market")
   .addParam("comptroller", "Comptroller Address", undefined, types.string)
@@ -13,8 +13,8 @@ export default task("market:unsupport", "Unsupport a market")
   .setAction(async (taskArgs, { ethers }) => {
     const signer = await ethers.getNamedSigner("deployer");
 
-    const midasSdkModule = await import("../midasSdk");
-    const sdk = await midasSdkModule.getOrCreateMidas();
+    const ionicSdkModule = await import("../ionicSdk");
+    const sdk = await ionicSdkModule.getOrCreateIonic();
 
     const comptroller = await sdk.createComptroller(taskArgs.comptroller, signer);
     const tx = await comptroller._unsupportMarket(taskArgs.ctoken);
@@ -140,7 +140,7 @@ task("markets:all:pause", "Pauses borrowing on a market")
   .setAction(async (taskArgs, hre) => {
     const admin = await hre.ethers.getNamedSigner(taskArgs.admin);
 
-    const fusePoolDirectory = (await hre.ethers.getContract("FusePoolDirectory")) as FusePoolDirectory;
+    const fusePoolDirectory = (await hre.ethers.getContract("PoolDirectory")) as PoolDirectory;
 
     const [, poolData] = await fusePoolDirectory.callStatic.getActivePools();
 
@@ -154,10 +154,10 @@ task("markets:all:pause", "Pauses borrowing on a market")
       const markets = await poolExtension.callStatic.getAllMarkets();
 
       await hre.run("markets:borrow-pause", {
-        markets: markets.join(","),
+        markets: markets.join(",")
       });
       await hre.run("market:mint-pause", {
-        markets: markets.join(","),
+        markets: markets.join(",")
       });
     }
   });

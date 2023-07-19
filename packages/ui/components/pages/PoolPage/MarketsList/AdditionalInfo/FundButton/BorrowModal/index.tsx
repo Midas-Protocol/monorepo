@@ -1,5 +1,5 @@
 import { Box, Button, Checkbox, Divider, HStack, Text } from '@chakra-ui/react';
-import { FundOperationMode } from '@midas-capital/types';
+import { FundOperationMode } from '@ionicprotocol/types';
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit';
 import { useQueryClient } from '@tanstack/react-query';
 import type { BigNumber } from 'ethers';
@@ -19,7 +19,7 @@ import { Column } from '@ui/components/shared/Flex';
 import { MidasModal } from '@ui/components/shared/Modal';
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
 import { BORROW_STEPS, DEFAULT_DECIMALS, HIGH_RISK_RATIO } from '@ui/constants/index';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useAllUsdPrices } from '@ui/hooks/useAllUsdPrices';
 import { useBorrowCap } from '@ui/hooks/useBorrowCap';
 import { useBorrowLimitTotal } from '@ui/hooks/useBorrowLimitTotal';
@@ -51,9 +51,9 @@ export const BorrowModal = ({
   onClose,
   poolChainId,
   borrowBalanceFiat,
-  comptrollerAddress,
+  comptrollerAddress
 }: BorrowModalProps) => {
-  const { currentSdk, address, currentChain } = useMultiMidas();
+  const { currentSdk, address, currentChain } = useMultiIonic();
   if (!currentChain || !currentSdk) throw new Error("SDK doesn't exist");
 
   const addRecentTransaction = useAddRecentTransaction();
@@ -91,7 +91,7 @@ export const BorrowModal = ({
   const { data: borrowCaps } = useBorrowCap({
     chainId: poolChainId,
     comptroller: comptrollerAddress,
-    market: asset,
+    market: asset
   });
   const { data: maxBorrowAmount } = useMaxBorrowAmount(asset, comptrollerAddress, poolChainId);
 
@@ -133,7 +133,7 @@ export const BorrowModal = ({
 
   const {
     data: { minBorrowAsset, minBorrowUSD },
-    isLoading,
+    isLoading
   } = useBorrowMinimum(asset, poolChainId);
 
   useEffect(() => {
@@ -180,11 +180,11 @@ export const BorrowModal = ({
         const tx = resp.tx;
         addRecentTransaction({
           description: `${asset.underlyingSymbol} Token Borrow`,
-          hash: tx.hash,
+          hash: tx.hash
         });
         _steps[0] = {
           ..._steps[0],
-          txHash: tx.hash,
+          txHash: tx.hash
         };
         setSteps([..._steps]);
 
@@ -200,12 +200,12 @@ export const BorrowModal = ({
         _steps[0] = {
           ..._steps[0],
           done: true,
-          txHash: tx.hash,
+          txHash: tx.hash
         };
         setSteps([..._steps]);
         successToast({
           description: 'Successfully borrowed!',
-          id: 'Borrowed - ' + Math.random().toString(),
+          id: 'Borrowed - ' + Math.random().toString()
         });
       }
     } catch (error) {
@@ -214,11 +214,11 @@ export const BorrowModal = ({
         amount,
         chainId: currentSdk.chainId,
         comptroller: comptrollerAddress,
-        token: asset.cToken,
+        token: asset.cToken
       };
       const sentryInfo = {
         contextName: 'Borrowing',
-        properties: sentryProperties,
+        properties: sentryProperties
       };
       handleGenericError({ error, sentryInfo, toast: errorToast });
     } finally {
@@ -343,11 +343,11 @@ export const BorrowModal = ({
                         text: `${smallFormatter(borrowCaps.tokenCap)} ${
                           asset.underlyingSymbol
                         } / ${smallFormatter(borrowCaps.tokenCap)} ${asset.underlyingSymbol}`,
-                        textProps: { display: 'block', fontWeight: 'bold' },
+                        textProps: { display: 'block', fontWeight: 'bold' }
                       },
                       {
-                        text: 'The maximum borrow of assets for this asset has been reached. Once assets are repaid or the limit is increased you can again borrow from this market.',
-                      },
+                        text: 'The maximum borrow of assets for this asset has been reached. Once assets are repaid or the limit is increased you can again borrow from this market.'
+                      }
                     ]}
                   />
                 )}

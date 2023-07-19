@@ -1,9 +1,9 @@
-import { LiquidationStrategy } from "@midas-capital/types";
+import { LiquidationStrategy } from "@ionicprotocol/types";
 import { BigNumber, BytesLike, constants, utils } from "ethers";
 
 import { CErc20Delegate } from "../../../typechain/CErc20Delegate";
 import { IUniswapV2Factory__factory } from "../../../typechain/factories/IUniswapV2Factory__factory";
-import { MidasSdk } from "../../MidasSdk";
+import { IonicSdk } from "../../IonicSdk";
 
 import { ChainLiquidationConfig } from "./config";
 import encodeLiquidateTx from "./encodeLiquidateTx";
@@ -11,9 +11,9 @@ import { getFundingStrategiesAndDatas } from "./fundingStrategy";
 import { getRedemptionStrategiesAndDatas } from "./redemptionStrategy";
 import {
   EncodedLiquidationTx,
-  FusePoolUserWithAssets,
+  PoolUserWithAssets,
   SCALE_FACTOR_ONE_18_WEI,
-  SCALE_FACTOR_UNDERLYING_DECIMALS,
+  SCALE_FACTOR_UNDERLYING_DECIMALS
 } from "./utils";
 
 import { estimateGas } from "./index";
@@ -25,8 +25,8 @@ async function getLiquidationPenalty(collateralCToken: CErc20Delegate, liquidati
 }
 
 export default async function getPotentialLiquidation(
-  sdk: MidasSdk,
-  borrower: FusePoolUserWithAssets,
+  sdk: IonicSdk,
+  borrower: PoolUserWithAssets,
   closeFactor: BigNumber,
   liquidationIncentive: BigNumber,
   chainLiquidationConfig: ChainLiquidationConfig
@@ -179,7 +179,6 @@ export default async function getPotentialLiquidation(
     expectedGasAmount = await estimateGas(
       sdk,
       borrower,
-      exchangeToTokenAddress,
       repayAmount,
       strategyAndData,
       flashSwapPair,

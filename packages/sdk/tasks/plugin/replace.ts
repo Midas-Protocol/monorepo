@@ -1,18 +1,18 @@
-import { chainIdToConfig } from "@midas-capital/chains";
-import { DeployedPlugins } from "@midas-capital/types";
+import { chainIdToConfig } from "@ionicprotocol/chains";
+import { DeployedPlugins } from "@ionicprotocol/types";
 import { task, types } from "hardhat/config";
 
 import { CErc20PluginRewardsDelegate } from "../../typechain/CErc20PluginRewardsDelegate";
 import { Comptroller } from "../../typechain/Comptroller";
-import { FuseFeeDistributor } from "../../typechain/FuseFeeDistributor";
-import { MidasERC4626 } from "../../typechain/MidasERC4626";
+import { FeeDistributor } from "../../typechain/FeeDistributor";
+import { IonicERC4626 } from "../../typechain/IonicERC4626";
 
 task("plugins:deploy:upgradable", "Deploys the upgradable plugins from a config list").setAction(
   async ({}, { ethers, getChainId, deployments }) => {
     const deployer = await ethers.getNamedSigner("deployer");
 
     console.log({ deployer: deployer.address });
-    const ffd = (await ethers.getContract("FuseFeeDistributor", deployer)) as FuseFeeDistributor;
+    const ffd = (await ethers.getContract("FeeDistributor", deployer)) as FeeDistributor;
 
     const chainid = parseInt(await getChainId());
     const pluginConfigs: DeployedPlugins = chainIdToConfig[chainid].deployedPlugins;
@@ -56,12 +56,12 @@ task("plugins:deploy:upgradable", "Deploys the upgradable plugins from a config 
           execute: {
             init: {
               methodName: "initialize",
-              args: deployArgs,
-            },
+              args: deployArgs
+            }
           },
-          owner: deployer.address,
+          owner: deployer.address
         },
-        log: true,
+        log: true
       });
 
       if (deployment.transactionHash) await ethers.provider.waitForTransaction(deployment.transactionHash);
@@ -143,7 +143,7 @@ task("plugin:set-fee-recipient")
   .setAction(async ({ pluginAddress, feeRecipient }, { ethers }) => {
     const deployer = await ethers.getNamedSigner("deployer");
 
-    const plugin = (await ethers.getContractAt("MidasERC4626", pluginAddress, deployer)) as MidasERC4626;
+    const plugin = (await ethers.getContractAt("IonicERC4626", pluginAddress, deployer)) as IonicERC4626;
 
     const currentFee = await plugin.callStatic.performanceFee();
     const currentFr = await plugin.callStatic.feeRecipient();

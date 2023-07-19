@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { GradientText } from '@ui/components/shared/GradientText';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { usePoolClaimableRewards } from '@ui/hooks/rewards/usePoolClaimableRewards';
 import { useRewardTokensOfPool } from '@ui/hooks/rewards/useRewardTokensOfPool';
 import { useColors } from '@ui/hooks/useColors';
@@ -15,7 +15,7 @@ export const PoolName = ({
   chainId,
   poolName,
   poolId,
-  isDisabledTooltip,
+  isDisabledTooltip
 }: {
   chainId: number;
   comptroller: string;
@@ -23,7 +23,7 @@ export const PoolName = ({
   poolId: number;
   poolName: string;
 }) => {
-  const { setGlobalLoading } = useMultiMidas();
+  const { setGlobalLoading } = useMultiIonic();
   const rewardTokens = useRewardTokensOfPool(comptroller, chainId);
   const { data: claimableRewards } = usePoolClaimableRewards(comptroller, chainId);
   const { cCard } = useColors();

@@ -3,7 +3,7 @@ import { task, types } from "hardhat/config";
 
 import { CErc20Delegate } from "../typechain/CErc20Delegate";
 import { ERC20 } from "../typechain/ERC20";
-import { FuseSafeLiquidator } from "../typechain/FuseSafeLiquidator";
+import { IonicLiquidator } from "../typechain/IonicLiquidator";
 
 export default task("get-liquidations", "Get potential liquidations")
   .addOptionalParam(
@@ -14,8 +14,8 @@ export default task("get-liquidations", "Get potential liquidations")
   )
   .addOptionalParam("maxHealth", "Filter pools by max health", "1", types.string)
   .setAction(async (taskArgs, hre) => {
-    const midasSdkModule = await import("./midasSdk");
-    const sdk = await midasSdkModule.getOrCreateMidas();
+    const ionicSdkModule = await import("./ionicSdk");
+    const sdk = await ionicSdkModule.getOrCreateIonic();
 
     let excludedComptrollers: Array<string> = [];
     if (taskArgs.excludedComptrollers) excludedComptrollers = taskArgs.excludedComptrollers.split(",");
@@ -74,7 +74,7 @@ task("liquidate", "Liquidate a position without a flash loan")
     let receipt: providers.TransactionReceipt;
     const signer = await hre.ethers.getNamedSigner(taskArgs.signer);
     const repayAmount = BigNumber.from(taskArgs.repayAmount);
-    const fuseSafeLiquidator = (await hre.ethers.getContract("FuseSafeLiquidator", signer)) as FuseSafeLiquidator;
+    const fuseSafeLiquidator = (await hre.ethers.getContract("IonicLiquidator", signer)) as IonicLiquidator;
 
     const debtToken = (await hre.ethers.getContractAt("CErc20", taskArgs.debtCerc20, signer)) as CErc20Delegate;
 
@@ -124,7 +124,7 @@ task("liquidate:nonfl:hardcoded").setAction(async ({}, { run }) => {
     exchangeSeizedTo: "0x191cf2602Ca2e534c5Ccae7BCBF4C46a704bb949",
     uniswapV2Router: "0x70085a09D30D6f8C4ecF6eE10120d1847383BB57",
     redemptionStrategies: [],
-    strategyData: [],
+    strategyData: []
   });
 });
 
@@ -132,10 +132,10 @@ task("liquidate:nonfl:hardcoded").setAction(async ({}, { run }) => {
 
 task("liquidate:hardcoded", "Liquidate a position without a flash loan").setAction(async (taskArgs, hre) => {
   const signer = await hre.ethers.getNamedSigner("deployer");
-  const fuseSafeLiquidator = (await hre.ethers.getContract("FuseSafeLiquidator", signer)) as FuseSafeLiquidator;
+  const fuseSafeLiquidator = (await hre.ethers.getContract("IonicLiquidator", signer)) as IonicLiquidator;
 
   console.log(`Liquidating...`);
-  const vars: FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVarsStruct = {
+  const vars: IonicLiquidator.LiquidateToTokensWithFlashSwapVarsStruct = {
     borrower: "0xF93A5F0A4925EeC32cD585641c88a498523f383C",
     repayAmount: "1372091245495",
     cErc20: "0xa9736bA05de1213145F688e4619E5A7e0dcf4C72",
@@ -150,11 +150,11 @@ task("liquidate:hardcoded", "Liquidate a position without a flash loan").setActi
     ethToCoinbase: BigNumber.from(0),
     debtFundingStrategies: ["0xB8423EE8aa0476a909786D079dF5C0766cB09142"],
     debtFundingStrategiesData: [
-      "0x00000000000000000000000070085a09d30d6f8c4ecf6ee10120d1847383bb5700000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000002000000000000000000000000931715FEE2d06333043d11F658C8CE934aC61D0c000000000000000000000000ffffffff1fcacbd218edc0eba20fc2308c778080",
-    ],
+      "0x00000000000000000000000070085a09d30d6f8c4ecf6ee10120d1847383bb5700000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000002000000000000000000000000931715FEE2d06333043d11F658C8CE934aC61D0c000000000000000000000000ffffffff1fcacbd218edc0eba20fc2308c778080"
+    ]
   };
   const tx: providers.TransactionResponse = await fuseSafeLiquidator.safeLiquidateToTokensWithFlashLoan(vars, {
-    gasLimit: 2100000,
+    gasLimit: 2100000
   });
   const receipt: providers.TransactionReceipt = await tx.wait();
   console.log(`Liquidated ${receipt.transactionHash}`);

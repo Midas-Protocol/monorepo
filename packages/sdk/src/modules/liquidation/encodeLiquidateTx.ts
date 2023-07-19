@@ -1,15 +1,15 @@
-import { LiquidationStrategy } from "@midas-capital/types";
+import { LiquidationStrategy } from "@ionicprotocol/types";
 import { BigNumber } from "ethers";
 
-import { MidasBase } from "../../MidasSdk";
+import { IonicBase } from "../../IonicSdk";
 
 import { StrategiesAndDatas } from "./redemptionStrategy";
-import { EncodedLiquidationTx, FusePoolUserWithAssets, logLiquidation } from "./utils";
+import { EncodedLiquidationTx, logLiquidation, PoolUserWithAssets } from "./utils";
 
 export default async function encodeLiquidateTx(
-  sdk: MidasBase,
+  sdk: IonicBase,
   liquidationStrategy: LiquidationStrategy,
-  borrower: FusePoolUserWithAssets,
+  borrower: PoolUserWithAssets,
   exchangeToTokenAddress: string,
   strategiesAndDatas: StrategiesAndDatas,
   liquidationAmount: BigNumber,
@@ -40,9 +40,9 @@ export default async function encodeLiquidateTx(
           exchangeToTokenAddress,
           sdk.chainSpecificAddresses.UNISWAP_V2_ROUTER,
           strategiesAndDatas.strategies,
-          strategiesAndDatas.datas,
+          strategiesAndDatas.datas
         ],
-        value: BigNumber.from(0),
+        value: BigNumber.from(0)
       };
     case LiquidationStrategy.UNISWAP:
       return {
@@ -62,10 +62,10 @@ export default async function encodeLiquidateTx(
             strategyData: strategiesAndDatas.datas,
             ethToCoinbase: 0,
             debtFundingStrategies,
-            debtFundingStrategiesData,
-          },
+            debtFundingStrategiesData
+          }
         ],
-        value: BigNumber.from(0),
+        value: BigNumber.from(0)
       };
   }
 }

@@ -1,5 +1,5 @@
 import { Text } from '@chakra-ui/react';
-import type { SupportedChains } from '@midas-capital/types';
+import type { SupportedChains } from '@ionicprotocol/types';
 import type { BigNumber } from 'ethers';
 import { utils } from 'ethers';
 
@@ -12,7 +12,7 @@ export const Balance = ({
   chainId,
   underlyingDecimals,
   underlyingToken,
-  underlyingSymbol,
+  underlyingSymbol
 }: {
   chainId: SupportedChains;
   underlyingDecimals: BigNumber;

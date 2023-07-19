@@ -15,15 +15,15 @@ import {
   Th,
   Thead,
   Tr,
-  VStack,
+  VStack
 } from '@chakra-ui/react';
-import type { OpenPosition, SupportedChains } from '@midas-capital/types';
+import type { OpenPosition, SupportedChains } from '@ionicprotocol/types';
 import type {
   ColumnDef,
   FilterFn,
   PaginationState,
   SortingFn,
-  SortingState,
+  SortingState
 } from '@tanstack/react-table';
 import {
   flexRender,
@@ -32,7 +32,7 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  useReactTable,
+  useReactTable
 } from '@tanstack/react-table';
 import { constants, utils } from 'ethers';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
@@ -56,8 +56,8 @@ import {
   DEBT_VALUE,
   DEBT_VALUE_TOOLTIP,
   HIDDEN,
+  IONIC_LOCALSTORAGE_KEYS,
   MARKETS_COUNT_PER_PAGE,
-  MIDAS_LOCALSTORAGE_KEYS,
   NET_APY,
   NET_APY_TOOLTIP,
   POSITION_CREATION_PER_PAGE,
@@ -65,7 +65,7 @@ import {
   POSITION_VALUE_TOOLTIP,
   SAFETY_BUFFER,
   SAFETY_BUFFER_TOOLTIP,
-  SEARCH,
+  SEARCH
 } from '@ui/constants/index';
 import { usePositionsInfo } from '@ui/hooks/leverage/usePositionInfo';
 import { usePositionsSupplyApy } from '@ui/hooks/leverage/usePositionsSupplyApy';
@@ -88,7 +88,7 @@ export const OpenPositionComp = ({
   isLoading,
   positionsPerChain,
   initSearchText,
-  setGlobalFilter,
+  setGlobalFilter
 }: {
   initGlobalFilter: (SupportedChains | string)[];
   initSearchText: string;
@@ -103,7 +103,7 @@ export const OpenPositionComp = ({
   const [sorting, setSorting] = useState<SortingState>(initSorting);
   const [pagination, onPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: POSITION_CREATION_PER_PAGE[0],
+    pageSize: POSITION_CREATION_PER_PAGE[0]
   });
 
   const allOpenPositions = useMemo(() => {
@@ -241,7 +241,7 @@ export const OpenPositionComp = ({
         debtValue: position,
         netApy: position,
         positionValue: position,
-        safetyBuffer: position,
+        safetyBuffer: position
       };
     });
   }, [allOpenPositions]);
@@ -255,7 +255,7 @@ export const OpenPositionComp = ({
         footer: (props) => props.column.id,
         header: () => null,
         id: CHAIN,
-        sortingFn: positionSort,
+        sortingFn: positionSort
       },
       {
         accessorFn: (row) => row.collateralAsset,
@@ -273,7 +273,7 @@ export const OpenPositionComp = ({
           <TableHeaderCell context={context}>{COLLATERAL_ASSET}</TableHeaderCell>
         ),
         id: COLLATERAL_ASSET,
-        sortingFn: positionSort,
+        sortingFn: positionSort
       },
       {
         accessorFn: (row) => row.positionValue,
@@ -294,7 +294,7 @@ export const OpenPositionComp = ({
           </TableHeaderCell>
         ),
         id: POSITION_VALUE,
-        sortingFn: positionSort,
+        sortingFn: positionSort
       },
       {
         accessorFn: (row) => row.debtValue,
@@ -315,7 +315,7 @@ export const OpenPositionComp = ({
           </TableHeaderCell>
         ),
         id: DEBT_VALUE,
-        sortingFn: positionSort,
+        sortingFn: positionSort
       },
       {
         accessorFn: (row) => row.netApy,
@@ -335,7 +335,7 @@ export const OpenPositionComp = ({
           </TableHeaderCell>
         ),
         id: NET_APY,
-        sortingFn: positionSort,
+        sortingFn: positionSort
       },
       {
         accessorFn: (row) => row.safetyBuffer,
@@ -355,8 +355,8 @@ export const OpenPositionComp = ({
           </TableHeaderCell>
         ),
         id: SAFETY_BUFFER,
-        sortingFn: positionSort,
-      },
+        sortingFn: positionSort
+      }
     ];
   }, [positionFilter, positionSort, positionsInfo]);
 
@@ -378,21 +378,21 @@ export const OpenPositionComp = ({
     state: {
       globalFilter: initGlobalFilter,
       pagination,
-      sorting,
-    },
+      sorting
+    }
   });
 
   const { cCard } = useColors();
 
   useEffect(() => {
-    const oldData = localStorage.getItem(MIDAS_LOCALSTORAGE_KEYS);
+    const oldData = localStorage.getItem(IONIC_LOCALSTORAGE_KEYS);
     let oldObj;
     if (oldData) {
       oldObj = JSON.parse(oldData);
     }
 
     const data = { ...oldObj, openPositionSorting: sorting };
-    localStorage.setItem(MIDAS_LOCALSTORAGE_KEYS, JSON.stringify(data));
+    localStorage.setItem(IONIC_LOCALSTORAGE_KEYS, JSON.stringify(data));
   }, [sorting]);
 
   useEffect(() => {
@@ -435,12 +435,12 @@ export const OpenPositionComp = ({
               height: '2xs',
               justifyContent: 'center',
               status: 'warning',
-              textAlign: 'center',
+              textAlign: 'center'
             }}
             descriptions={[
               {
-                text: `Unable to retrieve positions. Please try again later.`,
-              },
+                text: `Unable to retrieve positions. Please try again later.`
+              }
             ]}
             title={err.reason ? err.reason : 'Unexpected Error'}
           />
@@ -458,7 +458,7 @@ export const OpenPositionComp = ({
                         onClick={header.column.getToggleSortingHandler()}
                         px={{
                           base: header.column.id === COLLATERAL_ASSET ? 2 : 1,
-                          lg: header.column.id === COLLATERAL_ASSET ? 4 : 2,
+                          lg: header.column.id === COLLATERAL_ASSET ? 4 : 2
                         }}
                         py={6}
                         textTransform="capitalize"

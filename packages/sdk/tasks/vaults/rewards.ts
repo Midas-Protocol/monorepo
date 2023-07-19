@@ -6,8 +6,8 @@ import { Comptroller } from "../../typechain/Comptroller";
 import { ComptrollerFirstExtension } from "../../typechain/ComptrollerFirstExtension";
 import { IERC20MetadataUpgradeable as IERC20 } from "../../typechain/IERC20MetadataUpgradeable";
 import { IERC20Mintable } from "../../typechain/IERC20Mintable";
+import { IonicFlywheel } from "../../typechain/IonicFlywheel";
 import { MasterPriceOracle } from "../../typechain/MasterPriceOracle";
-import { MidasFlywheel } from "../../typechain/MidasFlywheel";
 import { OptimizedAPRVaultFirstExtension } from "../../typechain/OptimizedAPRVaultFirstExtension";
 import { OptimizedVaultsRegistry } from "../../typechain/OptimizedVaultsRegistry";
 import { SimplePriceOracle } from "../../typechain/SimplePriceOracle";
@@ -30,12 +30,12 @@ export default task("deploy-market-with-rewards").setAction(
           execute: {
             init: {
               methodName: "initialize",
-              args: ["Testing Bomb Token", "TBOMB"],
-            },
+              args: ["Testing Bomb Token", "TBOMB"]
+            }
           },
           proxyContract: "OpenZeppelinTransparentProxy",
-          owner: deployer,
-        },
+          owner: deployer
+        }
       });
       if (testingBombErc20.transactionHash) await ethers.provider.waitForTransaction(testingBombErc20.transactionHash);
       console.log(`deployed a dummy bomb token at ${testingBombErc20.address}`);
@@ -60,12 +60,12 @@ export default task("deploy-market-with-rewards").setAction(
           execute: {
             init: {
               methodName: "initialize",
-              args: ["Testing Rewards Token", "TRT"],
-            },
+              args: ["Testing Rewards Token", "TRT"]
+            }
           },
           proxyContract: "OpenZeppelinTransparentProxy",
-          owner: deployer,
-        },
+          owner: deployer
+        }
       });
       if (rewardsErc20.transactionHash) await ethers.provider.waitForTransaction(rewardsErc20.transactionHash);
       console.log(`deployed a dummy rewards token at ${rewardsErc20.address}`);
@@ -81,14 +81,14 @@ export default task("deploy-market-with-rewards").setAction(
       await tx.wait();
       console.log(`minted ${mintingAmount} tokens to the deployer ${deployer}`);
 
-      const midasPoolAddress = "0x044c436b2f3EF29D30f89c121f9240cf0a08Ca4b";
-      const midasPool = (await ethers.getContractAt("Comptroller", midasPoolAddress, deployer)) as Comptroller;
-      const midasPoolAsExt = (await ethers.getContractAt(
+      const ionicPoolAddress = "0x044c436b2f3EF29D30f89c121f9240cf0a08Ca4b";
+      const ionicPool = (await ethers.getContractAt("Comptroller", ionicPoolAddress, deployer)) as Comptroller;
+      const ionicPoolAsExt = (await ethers.getContractAt(
         "ComptrollerFirstExtension",
-        midasPoolAddress,
+        ionicPoolAddress,
         deployer
       )) as ComptrollerFirstExtension;
-      const ffd = await ethers.getContract("FuseFeeDistributor");
+      const ffd = await ethers.getContract("FeeDistributor");
       const jrm = await ethers.getContract("JumpRateModel");
       const rewardsDelegate = await ethers.getContract("CErc20RewardsDelegate");
       const spo = (await ethers.getContract("SimplePriceOracle", deployer)) as SimplePriceOracle;
@@ -105,7 +105,7 @@ export default task("deploy-market-with-rewards").setAction(
         ["address", "address", "address", "address", "string", "string", "address", "bytes", "uint256", "uint256"],
         [
           bombToken.address,
-          midasPool.address,
+          ionicPool.address,
           ffd.address,
           jrm.address,
           "M Testing BOMB",
@@ -113,15 +113,15 @@ export default task("deploy-market-with-rewards").setAction(
           rewardsDelegate.address,
           new ethers.utils.AbiCoder().encode([], []),
           0,
-          0,
+          0
         ]
       );
-      tx = await midasPool._deployMarket(false, constructorData, ethers.utils.parseEther("0.9"));
+      tx = await ionicPool._deployMarket(false, constructorData, ethers.utils.parseEther("0.9"));
       console.log(`mining tx ${tx.hash}`);
       await tx.wait();
       console.log(`deployed a testing BOMB market`);
 
-      const allMarkets = await midasPoolAsExt.callStatic.getAllMarkets();
+      const allMarkets = await ionicPoolAsExt.callStatic.getAllMarkets();
       const newMarketAddress = allMarkets[allMarkets.length - 1];
 
       const testingBombToken = (await ethers.getContractAt("IERC20", testingBombErc20.address, deployer)) as IERC20;
@@ -145,32 +145,32 @@ export default task("deploy-market-with-rewards").setAction(
       {
         const flywheelDeployment = await deployments.deploy("ChapelRewardsFlywheel", {
           from: deployer,
-          contract: "MidasFlywheel",
+          contract: "IonicFlywheel",
           log: true,
           waitConfirmations: 1,
           proxy: {
             execute: {
               init: {
                 methodName: "initialize",
-                args: [rewardsErc20.address, constants.AddressZero, constants.AddressZero, deployer],
-              },
+                args: [rewardsErc20.address, constants.AddressZero, constants.AddressZero, deployer]
+              }
             },
             proxyContract: "OpenZeppelinTransparentProxy",
-            owner: deployer,
-          },
+            owner: deployer
+          }
         });
         const rewardsDeployment = await deployments.deploy("ChapelRewardsContract", {
           from: deployer,
           contract: "FuseFlywheelDynamicRewards",
           log: true,
           waitConfirmations: 1,
-          args: [flywheelDeployment.address, 60 * 10], // new cycle every 10 minutes
+          args: [flywheelDeployment.address, 60 * 10] // new cycle every 10 minutes
         });
         const flywheel = (await ethers.getContractAt(
-          "MidasFlywheel",
+          "IonicFlywheel",
           flywheelDeployment.address,
           deployer
-        )) as MidasFlywheel;
+        )) as IonicFlywheel;
         tx = await flywheel.setFlywheelRewards(rewardsDeployment.address);
         await tx.wait();
         console.log(`configured the flywheel rewards`);
@@ -183,7 +183,7 @@ export default task("deploy-market-with-rewards").setAction(
         await tx.wait();
         console.log(`added the testing BOMB market for rewards in the flywheel`);
 
-        tx = await midasPool._addRewardsDistributor(flywheel.address);
+        tx = await ionicPool._addRewardsDistributor(flywheel.address);
         await tx.wait();
         console.log(`added the flywheel to the pool rewards distributors`);
       }
@@ -232,7 +232,7 @@ task("claim-chapel-rewards").setAction(async ({}, { ethers, getNamedAccounts }) 
 
   const flywheels = await vaultAsFirstExt.getAllFlywheels();
   for (const flywheelAddress of flywheels) {
-    const flywheel = (await ethers.getContractAt("MidasFlywheel", flywheelAddress, deployer)) as MidasFlywheel;
+    const flywheel = (await ethers.getContractAt("IonicFlywheel", flywheelAddress, deployer)) as IonicFlywheel;
     tx = await flywheel["accrue(address,address)"](market, deployer);
     await tx.wait();
     console.log(`accrued in the vault fw`);

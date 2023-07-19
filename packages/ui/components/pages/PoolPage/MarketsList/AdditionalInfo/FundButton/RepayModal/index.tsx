@@ -1,7 +1,7 @@
 import { Box, Button, Divider, HStack, Text } from '@chakra-ui/react';
-import { WETHAbi } from '@midas-capital/sdk';
-import { getContract } from '@midas-capital/sdk/dist/cjs/src/MidasSdk/utils';
-import { FundOperationMode } from '@midas-capital/types';
+import { WETHAbi } from '@ionicprotocol/sdk';
+import { getContract } from '@ionicprotocol/sdk/dist/cjs/src/IonicSdk/utils';
+import { FundOperationMode } from '@ionicprotocol/types';
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit';
 import { useQueryClient } from '@tanstack/react-query';
 import type { BigNumber } from 'ethers';
@@ -18,7 +18,7 @@ import { Column } from '@ui/components/shared/Flex';
 import { MidasModal } from '@ui/components/shared/Modal';
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
 import { REPAY_STEPS } from '@ui/constants/index';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useColors } from '@ui/hooks/useColors';
 import { useMaxRepayAmount } from '@ui/hooks/useMaxRepayAmount';
 import { useErrorToast, useSuccessToast } from '@ui/hooks/useToast';
@@ -43,9 +43,9 @@ export const RepayModal = ({
   assets,
   onClose,
   poolChainId,
-  comptrollerAddress,
+  comptrollerAddress
 }: RepayModalProps) => {
-  const { currentSdk, address, currentChain } = useMultiMidas();
+  const { currentSdk, address, currentChain } = useMultiIonic();
   const addRecentTransaction = useAddRecentTransaction();
   if (!currentChain || !currentSdk) throw new Error("SDK doesn't exist");
 
@@ -82,7 +82,7 @@ export const RepayModal = ({
     asset.underlyingToken,
     currentSdk.chainSpecificAddresses.W_TOKEN,
     myBalance,
-    myNativeBalance,
+    myNativeBalance
   ]);
 
   const queryClient = useQueryClient();
@@ -132,23 +132,23 @@ export const RepayModal = ({
           const tx = await WToken.deposit({ from: address, value: amount });
           addRecentTransaction({
             description: `Wrap ${nativeSymbol}`,
-            hash: tx.hash,
+            hash: tx.hash
           });
           _steps[0] = {
             ..._steps[0],
-            txHash: tx.hash,
+            txHash: tx.hash
           };
           setConfirmedSteps([..._steps]);
           await tx.wait();
           _steps[0] = {
             ..._steps[0],
             done: true,
-            txHash: tx.hash,
+            txHash: tx.hash
           };
           setConfirmedSteps([..._steps]);
           successToast({
             description: 'Successfully Wrapped!',
-            id: 'Wrapped - ' + Math.random().toString(),
+            id: 'Wrapped - ' + Math.random().toString()
           });
         } catch (error) {
           setFailedStep(1);
@@ -168,11 +168,11 @@ export const RepayModal = ({
 
           addRecentTransaction({
             description: `Approve ${asset.underlyingSymbol}`,
-            hash: tx.hash,
+            hash: tx.hash
           });
           _steps[optionToWrap ? 1 : 0] = {
             ..._steps[optionToWrap ? 1 : 0],
-            txHash: tx.hash,
+            txHash: tx.hash
           };
           setConfirmedSteps([..._steps]);
 
@@ -181,18 +181,18 @@ export const RepayModal = ({
           _steps[optionToWrap ? 1 : 0] = {
             ..._steps[optionToWrap ? 1 : 0],
             done: true,
-            txHash: tx.hash,
+            txHash: tx.hash
           };
           setConfirmedSteps([..._steps]);
           successToast({
             description: 'Successfully Approved!',
-            id: 'Approved - ' + Math.random().toString(),
+            id: 'Approved - ' + Math.random().toString()
           });
         } else {
           _steps[optionToWrap ? 1 : 0] = {
             ..._steps[optionToWrap ? 1 : 0],
             desc: 'Already approved!',
-            done: true,
+            done: true
           };
           setConfirmedSteps([..._steps]);
         }
@@ -212,11 +212,11 @@ export const RepayModal = ({
           const tx = resp.tx;
           addRecentTransaction({
             description: `${asset.underlyingSymbol} Token Repay`,
-            hash: tx.hash,
+            hash: tx.hash
           });
           _steps[optionToWrap ? 2 : 1] = {
             ..._steps[optionToWrap ? 2 : 1],
-            txHash: tx.hash,
+            txHash: tx.hash
           };
           setConfirmedSteps([..._steps]);
 
@@ -232,13 +232,13 @@ export const RepayModal = ({
           _steps[optionToWrap ? 2 : 1] = {
             ..._steps[optionToWrap ? 2 : 1],
             done: true,
-            txHash: tx.hash,
+            txHash: tx.hash
           };
           setConfirmedSteps([..._steps]);
         }
         successToast({
           description: 'Repaid!',
-          id: 'Repaid - ' + Math.random().toString(),
+          id: 'Repaid - ' + Math.random().toString()
         });
       } catch (error) {
         setFailedStep(optionToWrap ? 3 : 2);
@@ -248,11 +248,11 @@ export const RepayModal = ({
       const sentryProperties = {
         chainId: currentSdk.chainId,
         comptroller: comptrollerAddress,
-        token: asset.cToken,
+        token: asset.cToken
       };
       const sentryInfo = {
         contextName: 'Repay - Approving',
-        properties: sentryProperties,
+        properties: sentryProperties
       };
       handleGenericError({ error, sentryInfo, toast: errorToast });
     }
@@ -264,7 +264,7 @@ export const RepayModal = ({
     optionToWrap
       ? setSteps([
           { desc: 'Wrap Native Token', done: false, title: 'Wrap Native Token' },
-          ...REPAY_STEPS(asset.underlyingSymbol),
+          ...REPAY_STEPS(asset.underlyingSymbol)
         ])
       : setSteps([...REPAY_STEPS(asset.underlyingSymbol)]);
   }, [optionToWrap, asset.underlyingSymbol]);
@@ -360,7 +360,7 @@ export const RepayModal = ({
           optionToWrap
             ? setSteps([
                 { desc: 'Wrap Native Token', done: false, title: 'Wrap Native Token' },
-                ...REPAY_STEPS(asset.underlyingSymbol),
+                ...REPAY_STEPS(asset.underlyingSymbol)
               ])
             : setSteps([...REPAY_STEPS(asset.underlyingSymbol)]);
         }

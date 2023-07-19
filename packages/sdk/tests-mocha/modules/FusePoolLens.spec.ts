@@ -1,15 +1,15 @@
-import { ganache } from "@midas-capital/chains";
+import { ganache } from "@ionicprotocol/chains";
 import { expect } from "chai";
 import { BigNumber, Contract, providers } from "ethers";
 import { createStubInstance, SinonStubbedInstance, stub } from "sinon";
 
-import { MidasBaseConstructor } from "../../src";
-import { MidasBase } from "../../src/MidasSdk/index";
-import { withFusePoolLens } from "../../src/modules/FusePoolLens";
+import { IonicBaseConstructor } from "../../src";
+import { IonicBase } from "../../src/IonicSdk/index";
+import { withPoolLens } from "../../src/modules/PoolLens";
 import { mkAddress } from "../helpers";
 
-describe("FusePoolLens", () => {
-  let FusePoolLens: MidasBaseConstructor;
+describe("PoolLens", () => {
+  let PoolLens: IonicBaseConstructor;
   let fusePoolLens: any;
   let mockContract: SinonStubbedInstance<Contract>;
   const totalLockedData = {
@@ -17,8 +17,8 @@ describe("FusePoolLens", () => {
       { totalSupply: BigNumber.from(1) },
       { totalSupply: BigNumber.from(1) },
       { totalSupply: BigNumber.from(1) },
-      { totalSupply: BigNumber.from(1) },
-    ],
+      { totalSupply: BigNumber.from(1) }
+    ]
   };
 
   beforeEach(() => {
@@ -28,15 +28,15 @@ describe("FusePoolLens", () => {
     (mockProvider as any).getSigner = () => mkAddress("0xabcd");
     mockContract = createStubInstance(Contract);
 
-    FusePoolLens = withFusePoolLens(MidasBase);
-    fusePoolLens = new FusePoolLens(mockProvider, ganache);
+    PoolLens = withPoolLens(IonicBase);
+    fusePoolLens = new PoolLens(mockProvider, ganache);
 
     Object.defineProperty(mockContract, "callStatic", {
       value: {
-        getPublicPoolsByVerificationWithData: stub().resolves(totalLockedData),
-      },
+        getPublicPoolsByVerificationWithData: stub().resolves(totalLockedData)
+      }
     });
-    fusePoolLens.contracts = { FusePoolLens: mockContract };
+    fusePoolLens.contracts = { PoolLens: mockContract };
   });
 
   it("getTotalValueLocked", async () => {

@@ -1,6 +1,6 @@
 import { task, types } from "hardhat/config";
 
-import { FuseFeeDistributor } from "../../typechain/FuseFeeDistributor";
+import { FeeDistributor } from "../../typechain/FeeDistributor";
 
 export default task("irm:set", "Set new IRM to ctoken")
   .addParam("ctokens", "cToken for which to set the IRM", undefined, types.string)
@@ -8,8 +8,8 @@ export default task("irm:set", "Set new IRM to ctoken")
   .setAction(async ({ ctokens: _ctokens, irmAddress: _irmAddress }, { ethers }) => {
     const { deployer } = await ethers.getNamedSigners();
 
-    const midasSdkModule = await import("../midasSdk");
-    const sdk = await midasSdkModule.getOrCreateMidas();
+    const ionicSdkModule = await import("../ionicSdk");
+    const sdk = await ionicSdkModule.getOrCreateIonic();
 
     const ctokens = _ctokens.split(",");
 
@@ -26,7 +26,7 @@ task("irm:set-non-owner", "Set new IRM to ctoken")
   .addParam("irmAddress", "Irm address to use ", undefined, types.string)
   .setAction(async ({ ctokens: _ctokens, irmAddress: _irmAddress }, { ethers }) => {
     const { deployer } = await ethers.getNamedSigners();
-    const fuseFeeDistributor = (await ethers.getContract("FuseFeeDistributor", deployer)) as FuseFeeDistributor;
+    const fuseFeeDistributor = (await ethers.getContract("FeeDistributor", deployer)) as FeeDistributor;
     const sliced = _irmAddress.slice(2);
     const cTokens = _ctokens.split(",");
 

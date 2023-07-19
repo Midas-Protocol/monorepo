@@ -1,9 +1,8 @@
-import { OracleTypes } from "@midas-capital/types";
+import { OracleTypes } from "@ionicprotocol/types";
 import { Contract } from "ethers";
 
 import ChainlinkPriceOracleV2ABI from "../../../../../../sdk/abis/ChainlinkPriceOracleV2";
 import DiaPriceOracleABI from "../../../../../../sdk/abis/DiaPriceOracle";
-import FluxPriceOracleABI from "../../../../../../sdk/abis/FluxPriceOracle";
 import UniswapTwapPriceOracleV2ABI from "../../../../../../sdk/abis/UniswapTwapPriceOracleV2";
 import { logger } from "../../../logger";
 import {
@@ -41,9 +40,6 @@ export class FeedVerifier extends AbstractOracleVerifier {
         case OracleTypes.DiaPriceOracle:
           this.underlyingOracle = new Contract(oracleAddress, DiaPriceOracleABI, provider);
           break;
-        case OracleTypes.FluxPriceOracle:
-          this.underlyingOracle = new Contract(oracleAddress, FluxPriceOracleABI, provider);
-          break;
         case OracleTypes.UniswapTwapPriceOracleV2:
           this.underlyingOracle = new Contract(oracleAddress, UniswapTwapPriceOracleV2ABI, provider);
           break;
@@ -65,7 +61,7 @@ export class FeedVerifier extends AbstractOracleVerifier {
   public async verify(): Promise<PriceFeedValidity> {
     const { sdk, asset, underlyingOracle } = this;
     const feedArgs: VerifyFeedParams = {
-      midasSdk: sdk,
+      ionicSdk: sdk,
       underlyingOracle: underlyingOracle,
       asset,
     };

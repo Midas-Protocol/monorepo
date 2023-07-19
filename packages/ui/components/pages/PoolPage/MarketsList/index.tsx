@@ -17,7 +17,7 @@ import {
   Th,
   Thead,
   Tr,
-  VStack,
+  VStack
 } from '@chakra-ui/react';
 import type {
   ColumnDef,
@@ -25,7 +25,7 @@ import type {
   PaginationState,
   SortingFn,
   SortingState,
-  VisibilityState,
+  VisibilityState
 } from '@tanstack/react-table';
 import {
   flexRender,
@@ -34,7 +34,7 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  useReactTable,
+  useReactTable
 } from '@tanstack/react-table';
 import * as React from 'react';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
@@ -63,10 +63,10 @@ import {
   BORROWABLE,
   COLLATERAL,
   HIDDEN,
+  IONIC_LOCALSTORAGE_KEYS,
   LIQUIDITY,
   MARKET_LTV,
   MARKETS_COUNT_PER_PAGE,
-  MIDAS_LOCALSTORAGE_KEYS,
   PAUSED,
   PROTECTED,
   REWARDS,
@@ -74,9 +74,9 @@ import {
   SUPPLY_APY,
   SUPPLY_BALANCE,
   TOTAL_BORROW,
-  TOTAL_SUPPLY,
+  TOTAL_SUPPLY
 } from '@ui/constants/index';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useSdk } from '@ui/hooks/fuse/useSdk';
 import { useAssetsClaimableRewards } from '@ui/hooks/rewards/useAssetClaimableRewards';
 import { useAssets } from '@ui/hooks/useAssets';
@@ -105,7 +105,7 @@ export const MarketsList = ({
   rewards = {},
   initSorting,
   initColumnVisibility,
-  initHidden,
+  initHidden
 }: {
   initColumnVisibility: VisibilityState;
   initHidden: boolean;
@@ -118,16 +118,16 @@ export const MarketsList = ({
     comptroller: comptrollerAddress,
     totalSupplyBalanceFiat: supplyBalanceFiat,
     totalBorrowBalanceFiat: borrowBalanceFiat,
-    chainId: poolChainId,
+    chainId: poolChainId
   } = poolData;
   const sdk = useSdk(poolChainId);
-  const { address } = useMultiMidas();
+  const { address } = useMultiIonic();
   const [isHidden, setIsHidden] = useState<boolean>(initHidden);
 
   const { data: allClaimableRewards } = useAssetsClaimableRewards({
     assetsAddress: assets.map((asset) => asset.cToken).sort(),
     poolAddress: comptrollerAddress,
-    poolChainId,
+    poolChainId
   });
 
   const { data: assetInfos } = useAssets([poolChainId]);
@@ -137,7 +137,7 @@ export const MarketsList = ({
       assets.filter((asset) => asset.membership).length,
       assets.filter((asset) => asset.isBorrowPaused && !asset.isSupplyPaused).length,
       assets.filter((asset) => !asset.isBorrowPaused).length,
-      assets.filter((asset) => asset.isBorrowPaused && asset.isSupplyPaused).length,
+      assets.filter((asset) => asset.isBorrowPaused && asset.isSupplyPaused).length
     ];
   }, [assets]);
 
@@ -261,7 +261,7 @@ export const MarketsList = ({
         supplyApy: asset,
         supplyBalance: asset,
         totalBorrow: asset,
-        totalSupply: asset,
+        totalSupply: asset
       };
     });
   }, [assets]);
@@ -283,7 +283,7 @@ export const MarketsList = ({
         footer: (props) => props.column.id,
         header: (context) => <TableHeaderCell context={context}>Market / LTV</TableHeaderCell>,
         id: MARKET_LTV,
-        sortingFn: assetSort,
+        sortingFn: assetSort
       },
       {
         accessorFn: (row) => row.supplyApy,
@@ -304,7 +304,7 @@ export const MarketsList = ({
 
         header: (context) => <TableHeaderCell context={context}>Supply APY</TableHeaderCell>,
         id: SUPPLY_APY,
-        sortingFn: assetSort,
+        sortingFn: assetSort
       },
       {
         accessorFn: (row) => row.borrowApy,
@@ -314,7 +314,7 @@ export const MarketsList = ({
         footer: (props) => props.column.id,
         header: (context) => <TableHeaderCell context={context}>Borrow APY</TableHeaderCell>,
         id: BORROW_APY,
-        sortingFn: assetSort,
+        sortingFn: assetSort
       },
       {
         accessorFn: (row) => row.supplyBalance,
@@ -325,7 +325,7 @@ export const MarketsList = ({
         header: (context) => <TableHeaderCell context={context}>Supply Balance</TableHeaderCell>,
 
         id: SUPPLY_BALANCE,
-        sortingFn: assetSort,
+        sortingFn: assetSort
       },
       {
         accessorFn: (row) => row.borrowBalance,
@@ -336,7 +336,7 @@ export const MarketsList = ({
         header: (context) => <TableHeaderCell context={context}>Borrow Balance</TableHeaderCell>,
 
         id: BORROW_BALANCE,
-        sortingFn: assetSort,
+        sortingFn: assetSort
       },
       {
         accessorFn: (row) => row.totalSupply,
@@ -351,7 +351,7 @@ export const MarketsList = ({
         header: (context) => <TableHeaderCell context={context}>Total Supply</TableHeaderCell>,
 
         id: TOTAL_SUPPLY,
-        sortingFn: assetSort,
+        sortingFn: assetSort
       },
       {
         accessorFn: (row) => row.totalBorrow,
@@ -366,7 +366,7 @@ export const MarketsList = ({
         header: (context) => <TableHeaderCell context={context}>Total Borrow</TableHeaderCell>,
 
         id: TOTAL_BORROW,
-        sortingFn: assetSort,
+        sortingFn: assetSort
       },
       {
         accessorFn: (row) => row.liquidity,
@@ -377,8 +377,8 @@ export const MarketsList = ({
         header: (context) => <TableHeaderCell context={context}>Liquidity</TableHeaderCell>,
 
         id: LIQUIDITY,
-        sortingFn: assetSort,
-      },
+        sortingFn: assetSort
+      }
     ];
   }, [
     rewards,
@@ -388,13 +388,13 @@ export const MarketsList = ({
     assetSort,
     assets,
     borrowApyPerAsset,
-    poolChainId,
+    poolChainId
   ]);
 
   const [sorting, setSorting] = useState<SortingState>(initSorting);
   const [pagination, onPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: MARKETS_COUNT_PER_PAGE[0],
+    pageSize: MARKETS_COUNT_PER_PAGE[0]
   });
   const isSemiSmallScreen = useIsSemiSmallScreen();
 
@@ -421,8 +421,8 @@ export const MarketsList = ({
       columnVisibility,
       globalFilter,
       pagination,
-      sorting,
-    },
+      sorting
+    }
   });
 
   const { cCard } = useColors();
@@ -459,19 +459,19 @@ export const MarketsList = ({
       setGlobalFilter(globalFilter.filter((f) => f !== HIDDEN));
     }
 
-    const oldData = localStorage.getItem(MIDAS_LOCALSTORAGE_KEYS);
+    const oldData = localStorage.getItem(IONIC_LOCALSTORAGE_KEYS);
     let oldObj;
     if (oldData) {
       oldObj = JSON.parse(oldData);
     }
 
     const data = { ...oldObj, isHidden };
-    localStorage.setItem(MIDAS_LOCALSTORAGE_KEYS, JSON.stringify(data));
+    localStorage.setItem(IONIC_LOCALSTORAGE_KEYS, JSON.stringify(data));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isHidden]);
 
   useEffect(() => {
-    const oldData = localStorage.getItem(MIDAS_LOCALSTORAGE_KEYS);
+    const oldData = localStorage.getItem(IONIC_LOCALSTORAGE_KEYS);
     let oldObj;
     if (oldData) {
       oldObj = JSON.parse(oldData);
@@ -483,7 +483,7 @@ export const MarketsList = ({
       }
     });
     const data = { ...oldObj, marketColumnVisibility: arr, marketSorting: sorting };
-    localStorage.setItem(MIDAS_LOCALSTORAGE_KEYS, JSON.stringify(data));
+    localStorage.setItem(IONIC_LOCALSTORAGE_KEYS, JSON.stringify(data));
   }, [sorting, columnVisibility]);
 
   return (

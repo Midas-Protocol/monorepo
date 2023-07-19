@@ -1,5 +1,5 @@
 import { Box, Button, Divider, HStack, Text } from '@chakra-ui/react';
-import type { OpenPosition } from '@midas-capital/types';
+import type { OpenPosition } from '@ionicprotocol/types';
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -10,7 +10,7 @@ import { Column } from '@ui/components/shared/Flex';
 import { MidasModal } from '@ui/components/shared/Modal';
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
 import { REMOVE_CLOSED_POSITION_STEPS } from '@ui/constants/index';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useColors } from '@ui/hooks/useColors';
 import { useErrorToast, useSuccessToast } from '@ui/hooks/useToast';
 import { useTokenData } from '@ui/hooks/useTokenData';
@@ -20,7 +20,7 @@ import { handleGenericError } from '@ui/utils/errorHandling';
 export const RemovePositionModal = ({
   isOpen,
   onClose,
-  position,
+  position
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -28,7 +28,7 @@ export const RemovePositionModal = ({
 }) => {
   const { collateral: collateralAsset, chainId, address: positionAddress } = position;
   const { underlyingToken, symbol } = collateralAsset;
-  const { currentSdk, address } = useMultiMidas();
+  const { currentSdk, address } = useMultiIonic();
   const addRecentTransaction = useAddRecentTransaction();
 
   const errorToast = useErrorToast();
@@ -51,7 +51,7 @@ export const RemovePositionModal = ({
 
     const sentryProperties = {
       chainId: currentSdk.chainId,
-      position: positionAddress,
+      position: positionAddress
     };
 
     setIsConfirmed(true);
@@ -68,12 +68,12 @@ export const RemovePositionModal = ({
 
         addRecentTransaction({
           description: 'Removing closed position.',
-          hash: tx.hash,
+          hash: tx.hash
         });
 
         _steps[0] = {
           ..._steps[0],
-          txHash: tx.hash,
+          txHash: tx.hash
         };
         setConfirmedSteps([..._steps]);
 
@@ -84,14 +84,14 @@ export const RemovePositionModal = ({
         _steps[0] = {
           ..._steps[0],
           done: true,
-          txHash: tx.hash,
+          txHash: tx.hash
         };
         setConfirmedSteps([..._steps]);
 
         successToast({
           description: 'Successfully removed closed position',
           id: 'Remove closed position - ' + Math.random().toString(),
-          title: 'Removed',
+          title: 'Removed'
         });
       } catch (error) {
         setFailedStep(1);
@@ -100,7 +100,7 @@ export const RemovePositionModal = ({
     } catch (error) {
       const sentryInfo = {
         contextName: 'Position - Removing',
-        properties: sentryProperties,
+        properties: sentryProperties
       };
       handleGenericError({ error, sentryInfo, toast: errorToast });
     }

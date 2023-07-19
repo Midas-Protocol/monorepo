@@ -17,16 +17,16 @@ import {
   Th,
   Thead,
   Tr,
-  VStack,
+  VStack
 } from '@chakra-ui/react';
-import type { SupportedChains } from '@midas-capital/types';
+import type { SupportedChains } from '@ionicprotocol/types';
 import type {
   ColumnDef,
   FilterFn,
   PaginationState,
   SortingFn,
   SortingState,
-  VisibilityState,
+  VisibilityState
 } from '@tanstack/react-table';
 import {
   flexRender,
@@ -35,7 +35,7 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  useReactTable,
+  useReactTable
 } from '@tanstack/react-table';
 import { useRouter } from 'next/router';
 import * as React from 'react';
@@ -63,16 +63,16 @@ import {
   BORROW_BALANCE,
   CHAIN,
   EXPANDER,
-  MIDAS_LOCALSTORAGE_KEYS,
+  IONIC_LOCALSTORAGE_KEYS,
   POOL_NAME,
   POOLS_COLUMNS,
   POOLS_COUNT_PER_PAGE,
   SEARCH,
   SUPPLY_BALANCE,
   TOTAL_BORROW,
-  TOTAL_SUPPLY,
+  TOTAL_SUPPLY
 } from '@ui/constants/index';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useEnabledChains } from '@ui/hooks/useChainConfig';
 import { useColors } from '@ui/hooks/useColors';
 import { useDebounce } from '@ui/hooks/useDebounce';
@@ -93,21 +93,21 @@ export type PoolRowData = {
 
 const PoolsRowList = ({
   poolsPerChain,
-  isLoading,
+  isLoading
 }: {
   isLoading: boolean;
   poolsPerChain: PoolsPerChainStatus;
 }) => {
-  const { address, setGlobalLoading } = useMultiMidas();
+  const { address, setGlobalLoading } = useMultiIonic();
   const [err, setErr] = useState<Err | undefined>();
   const [isLoadingPerChain, setIsLoadingPerChain] = useState(false);
   const [selectedFilteredPools, setSelectedFilteredPools] = useState<PoolData[]>([]);
   const [sorting, setSorting] = useState<SortingState>([
-    { desc: true, id: address ? SUPPLY_BALANCE : TOTAL_SUPPLY },
+    { desc: true, id: address ? SUPPLY_BALANCE : TOTAL_SUPPLY }
   ]);
   const [pagination, onPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: POOLS_COUNT_PER_PAGE[0],
+    pageSize: POOLS_COUNT_PER_PAGE[0]
   });
   const [globalFilter, setGlobalFilter] = useState<(SupportedChains | string)[]>([ALL]);
   const [columnVisibility, setColumnVisibility] = useState({});
@@ -215,7 +215,7 @@ const PoolsRowList = ({
         poolName: pool,
         supplyBalance: pool,
         totalBorrow: pool,
-        totalSupply: pool,
+        totalSupply: pool
       };
     });
   }, [allPools]);
@@ -229,7 +229,7 @@ const PoolsRowList = ({
         enableSorting: false,
         footer: (props) => props.column.id,
         header: () => null,
-        id: CHAIN,
+        id: CHAIN
       },
       {
         accessorFn: (row) => row.poolName,
@@ -246,7 +246,7 @@ const PoolsRowList = ({
         footer: (props) => props.column.id,
         header: (context) => <TableHeaderCell context={context}>Pool Name</TableHeaderCell>,
         id: POOL_NAME,
-        sortingFn: poolSort,
+        sortingFn: poolSort
       },
       {
         accessorFn: (row) => row.assets,
@@ -254,7 +254,7 @@ const PoolsRowList = ({
         enableSorting: false,
         footer: (props) => props.column.id,
         header: (context) => <TableHeaderCell context={context}>Assets</TableHeaderCell>,
-        id: ASSETS,
+        id: ASSETS
       },
       {
         accessorFn: (row) => row.supplyBalance,
@@ -262,7 +262,7 @@ const PoolsRowList = ({
         footer: (props) => props.column.id,
         header: (context) => <TableHeaderCell context={context}>Supply Balance</TableHeaderCell>,
         id: SUPPLY_BALANCE,
-        sortingFn: poolSort,
+        sortingFn: poolSort
       },
       {
         accessorFn: (row) => row.borrowBalance,
@@ -270,7 +270,7 @@ const PoolsRowList = ({
         footer: (props) => props.column.id,
         header: (context) => <TableHeaderCell context={context}>Borrow Balance</TableHeaderCell>,
         id: BORROW_BALANCE,
-        sortingFn: poolSort,
+        sortingFn: poolSort
       },
       {
         accessorFn: (row) => row.totalSupply,
@@ -278,7 +278,7 @@ const PoolsRowList = ({
         footer: (props) => props.column.id,
         header: (context) => <TableHeaderCell context={context}>Total Supply</TableHeaderCell>,
         id: TOTAL_SUPPLY,
-        sortingFn: poolSort,
+        sortingFn: poolSort
       },
       {
         accessorFn: (row) => row.totalBorrow,
@@ -286,7 +286,7 @@ const PoolsRowList = ({
         footer: (props) => props.column.id,
         header: (context) => <TableHeaderCell context={context}>Total Borrow</TableHeaderCell>,
         id: TOTAL_BORROW,
-        sortingFn: poolSort,
+        sortingFn: poolSort
       },
       {
         cell: ({ row }) => {
@@ -300,8 +300,8 @@ const PoolsRowList = ({
         },
         enableHiding: false,
         header: () => null,
-        id: EXPANDER,
-      },
+        id: EXPANDER
+      }
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -326,8 +326,8 @@ const PoolsRowList = ({
       columnVisibility,
       globalFilter,
       pagination,
-      sorting,
-    },
+      sorting
+    }
   });
 
   const { cCard } = useColors();
@@ -376,7 +376,7 @@ const PoolsRowList = ({
 
   useEffect(() => {
     if (mounted.current) {
-      const oldData = localStorage.getItem(MIDAS_LOCALSTORAGE_KEYS);
+      const oldData = localStorage.getItem(IONIC_LOCALSTORAGE_KEYS);
       let oldObj;
       if (oldData) {
         oldObj = JSON.parse(oldData);
@@ -388,7 +388,7 @@ const PoolsRowList = ({
         }
       });
       const data = { ...oldObj, globalFilter, poolsListColumnVisibility: arr, searchText, sorting };
-      localStorage.setItem(MIDAS_LOCALSTORAGE_KEYS, JSON.stringify(data));
+      localStorage.setItem(IONIC_LOCALSTORAGE_KEYS, JSON.stringify(data));
     }
   }, [searchText, globalFilter, sorting, columnVisibility]);
 
@@ -408,7 +408,7 @@ const PoolsRowList = ({
   useEffect(() => {
     mounted.current = true;
 
-    const data = localStorage.getItem(MIDAS_LOCALSTORAGE_KEYS);
+    const data = localStorage.getItem(IONIC_LOCALSTORAGE_KEYS);
     if (data && mounted.current) {
       const obj = JSON.parse(data);
       const _globalFilter = (obj.globalFilter as (SupportedChains | string)[]) || [ALL];
@@ -554,12 +554,12 @@ const PoolsRowList = ({
                         height: '2xs',
                         justifyContent: 'center',
                         status: 'warning',
-                        textAlign: 'center',
+                        textAlign: 'center'
                       }}
                       descriptions={[
                         {
-                          text: `Unable to retrieve Pools. Please try again later.`,
-                        },
+                          text: `Unable to retrieve Pools. Please try again later.`
+                        }
                       ]}
                       title={err.reason ? err.reason : 'Unexpected Error'}
                     />
@@ -591,7 +591,7 @@ const PoolsRowList = ({
                             minW={10}
                             px={{
                               base:
-                                cell.column.id === POOL_NAME || cell.column.id === ASSETS ? 0 : 2,
+                                cell.column.id === POOL_NAME || cell.column.id === ASSETS ? 0 : 2
                             }}
                             py={0}
                           >
@@ -715,7 +715,7 @@ const ControlledSearchInput = ({ onUpdate }: { onUpdate: (value: string) => void
   useEffect(() => {
     mounted.current = true;
 
-    const data = localStorage.getItem(MIDAS_LOCALSTORAGE_KEYS);
+    const data = localStorage.getItem(IONIC_LOCALSTORAGE_KEYS);
     if (data && mounted.current) {
       const obj = JSON.parse(data);
       const _searchText = obj.searchText || '';

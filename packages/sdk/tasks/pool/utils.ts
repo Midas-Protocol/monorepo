@@ -1,10 +1,10 @@
 // pool utilities used across downstream tests
-import { FusePool, FusePoolData } from "@midas-capital/types";
+import { FusePool, FusePoolData } from "@ionicprotocol/types";
 
-import { MidasSdk } from "../../src";
+import { IonicSdk } from "../../src";
 
-export const getPoolIndex = async (poolAddress: string, sdk: MidasSdk) => {
-  const [indexes, publicPools] = await sdk.contracts.FusePoolLens.callStatic.getPublicPoolsWithData();
+export const getPoolIndex = async (poolAddress: string, sdk: IonicSdk) => {
+  const [indexes, publicPools] = await sdk.contracts.PoolLens.callStatic.getPublicPoolsWithData();
   for (let j = 0; j < publicPools.length; j++) {
     if (publicPools[j].comptroller === poolAddress) {
       return indexes[j];
@@ -13,33 +13,33 @@ export const getPoolIndex = async (poolAddress: string, sdk: MidasSdk) => {
   return null;
 };
 
-export const getPoolByName = async (name: string, sdk: MidasSdk, address?: string): Promise<FusePoolData | null> => {
-  const [, publicPools] = await sdk.contracts.FusePoolLens.callStatic.getPublicPoolsWithData();
+export const getPoolByName = async (name: string, sdk: IonicSdk, address?: string): Promise<FusePoolData | null> => {
+  const [, publicPools] = await sdk.contracts.PoolLens.callStatic.getPublicPoolsWithData();
   for (let j = 0; j < publicPools.length; j++) {
     if (publicPools[j].name === name) {
       const poolIndex = await getPoolIndex(publicPools[j].comptroller, sdk);
-      return await sdk.fetchFusePoolData(poolIndex!.toString(), { from: address });
+      return await sdk.fetchPoolData(poolIndex!.toString(), { from: address });
     }
   }
   return null;
 };
 
-export const getAllPools = async (sdk: MidasSdk): Promise<FusePool[]> => {
-  const [, publicPools] = await sdk.contracts.FusePoolLens.callStatic.getPublicPoolsWithData();
+export const getAllPools = async (sdk: IonicSdk): Promise<FusePool[]> => {
+  const [, publicPools] = await sdk.contracts.PoolLens.callStatic.getPublicPoolsWithData();
   return publicPools.map((pp) => {
     return {
       name: pp.name,
       comptroller: pp.comptroller,
       creator: pp.creator,
       blockPosted: pp.blockPosted.toNumber(),
-      timestampPosted: pp.timestampPosted.toNumber(),
+      timestampPosted: pp.timestampPosted.toNumber()
     };
   });
 };
 
-export const logPoolData = async (poolAddress: string, sdk: MidasSdk) => {
+export const logPoolData = async (poolAddress: string, sdk: IonicSdk) => {
   const poolIndex = await getPoolIndex(poolAddress, sdk);
-  const fusePoolData = await sdk.fetchFusePoolData(poolIndex!.toString());
+  const fusePoolData = await sdk.fetchPoolData(poolIndex!.toString());
   if (!fusePoolData) {
     throw `Pool with address ${poolAddress} is deprecated or cannot be found`;
   }

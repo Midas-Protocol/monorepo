@@ -13,9 +13,9 @@ import {
   Th,
   Thead,
   Tr,
-  useDisclosure,
+  useDisclosure
 } from '@chakra-ui/react';
-import type { SupportedChains } from '@midas-capital/types';
+import type { SupportedChains } from '@ionicprotocol/types';
 import { utils } from 'ethers';
 import React, { useCallback, useMemo, useState } from 'react';
 
@@ -28,7 +28,7 @@ import { Center, Column } from '@ui/components/shared/Flex';
 import { TokenIconGroup } from '@ui/components/shared/TokenIconGroup';
 import { config } from '@ui/config/index';
 import { DEFAULT_DECIMALS } from '@ui/constants/index';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useIsEditableAdmin } from '@ui/hooks/fuse/useIsEditableAdmin';
 import { useIsUpgradeable } from '@ui/hooks/fuse/useIsUpgradable';
 import { useCTokensUnderlying } from '@ui/hooks/rewards/useCTokensUnderlying';
@@ -49,7 +49,7 @@ const FlywheelEdit = ({ pool }: { pool: PoolData }) => {
   const {
     data: flywheels,
     refetch: refetchFlywheels,
-    isLoading,
+    isLoading
   } = useFlywheelsForPool(pool.comptroller, pool.chainId);
   const isUpgradeable = useIsUpgradeable(pool.comptroller, pool.chainId);
 
@@ -153,13 +153,13 @@ const FlywheelEdit = ({ pool }: { pool: PoolData }) => {
 const FlywheelRow = ({
   flywheel,
   pool,
-  onClick,
+  onClick
 }: {
   flywheel: Flywheel;
   onClick: (fw: Flywheel) => void;
   pool: PoolData;
 }) => {
-  const { address, currentSdk } = useMultiMidas();
+  const { address, currentSdk } = useMultiIonic();
 
   // TODO check authority here as well.
   const isAdmin = address === flywheel.owner;

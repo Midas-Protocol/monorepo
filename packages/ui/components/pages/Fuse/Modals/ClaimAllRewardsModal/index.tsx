@@ -1,6 +1,6 @@
 import { Box, Button, HStack, Img, Spinner, Text, VStack } from '@chakra-ui/react';
-import type { FlywheelClaimableRewards } from '@midas-capital/sdk/dist/cjs/src/modules/Flywheel';
-import type { SupportedAsset } from '@midas-capital/types';
+import type { FlywheelClaimableRewards } from '@ionicprotocol/sdk/dist/cjs/src/modules/Flywheel';
+import type { SupportedAsset } from '@ionicprotocol/types';
 import { useAddRecentTransaction, useChainModal } from '@rainbow-me/rainbowkit';
 import { useQueryClient } from '@tanstack/react-query';
 import { utils } from 'ethers';
@@ -13,7 +13,7 @@ import { Center } from '@ui/components/shared/Flex';
 import { MidasModal } from '@ui/components/shared/Modal';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useAllClaimableRewards } from '@ui/hooks/rewards/useAllClaimableRewards';
 import { useChainConfig, useEnabledChains } from '@ui/hooks/useChainConfig';
 import { useErrorToast } from '@ui/hooks/useToast';
@@ -27,7 +27,7 @@ const ClaimableToken = ({
   data,
   isClaiming,
   onClick,
-  rewardChainId,
+  rewardChainId
 }: {
   data: Pick<FlywheelClaimableRewards, 'amount' | 'rewardToken'>;
   isClaiming: boolean;
@@ -35,7 +35,7 @@ const ClaimableToken = ({
   rewardChainId: string;
 }) => {
   const { amount, rewardToken } = data;
-  const { currentChain } = useMultiMidas();
+  const { currentChain } = useMultiIonic();
   const { data: tokenData } = useTokenData(rewardToken, Number(rewardChainId));
   const { openChainModal } = useChainModal();
   const { switchNetworkAsync } = useSwitchNetwork();
@@ -71,7 +71,7 @@ const ClaimableToken = ({
           >
             {dynamicFormatter(Number(utils.formatUnits(amount, tokenData?.decimals)), {
               maximumFractionDigits: 8,
-              minimumFractionDigits: 4,
+              minimumFractionDigits: 4
             })}
           </Text>
         </SimpleTooltip>
@@ -133,13 +133,13 @@ const ClaimableToken = ({
 export const ClaimAllRewardsModal = ({
   isOpen,
   isLoading,
-  onClose,
+  onClose
 }: {
   isLoading: boolean;
   isOpen: boolean;
   onClose: () => void;
 }) => {
-  const { currentSdk, currentChain } = useMultiMidas();
+  const { currentSdk, currentChain } = useMultiIonic();
   const addRecentTransaction = useAddRecentTransaction();
   const errorToast = useErrorToast();
   const chainConfig = useChainConfig(Number(currentSdk?.chainId));
@@ -165,7 +165,7 @@ export const ClaimAllRewardsModal = ({
         if (reward.chainId === currentSdk.chainId) {
           rewards.push({
             amount: reward.amount,
-            rewardToken: reward.rewardToken,
+            rewardToken: reward.rewardToken
           });
         }
       });
@@ -190,8 +190,8 @@ export const ClaimAllRewardsModal = ({
         {
           desc: `Claim ${asset ? asset.symbol : ''} rewards from Midas`,
           done: false,
-          title: `Claim rewards on ${currentChain.network}`,
-        },
+          title: `Claim rewards on ${currentChain.network}`
+        }
       ];
 
       setSteps(_steps);
@@ -203,12 +203,12 @@ export const ClaimAllRewardsModal = ({
 
         addRecentTransaction({
           description: `Claiming ${asset ? asset.symbol : ''} rewards`,
-          hash: tx.hash,
+          hash: tx.hash
         });
 
         _steps[0] = {
           ..._steps[0],
-          txHash: tx.hash,
+          txHash: tx.hash
         };
 
         setSteps([..._steps]);
@@ -218,7 +218,7 @@ export const ClaimAllRewardsModal = ({
         _steps[0] = {
           ..._steps[0],
           done: true,
-          txHash: tx.hash,
+          txHash: tx.hash
         };
         setSteps([..._steps]);
 
@@ -226,11 +226,11 @@ export const ClaimAllRewardsModal = ({
       } catch (error) {
         const sentryProperties = {
           chainId: currentSdk.chainId,
-          rewardToken,
+          rewardToken
         };
         const sentryInfo = {
           contextName: `Claiming ${asset ? asset.symbol : ''} rewards`,
-          properties: sentryProperties,
+          properties: sentryProperties
         };
         handleGenericError({ error, sentryInfo, toast: errorToast });
         setFailedStep(1);
@@ -263,8 +263,8 @@ export const ClaimAllRewardsModal = ({
           .filter((symbol) => !!symbol)
           .join(', ')} rewards from Midas`,
         done: false,
-        title: `Claim rewards on ${currentChain.network}`,
-      },
+        title: `Claim rewards on ${currentChain.network}`
+      }
     ];
 
     setSteps(_steps);
@@ -277,12 +277,12 @@ export const ClaimAllRewardsModal = ({
 
       addRecentTransaction({
         description: `Claim all rewards`,
-        hash: tx.hash,
+        hash: tx.hash
       });
 
       _steps[0] = {
         ..._steps[0],
-        txHash: tx.hash,
+        txHash: tx.hash
       };
 
       setSteps([..._steps]);
@@ -292,18 +292,18 @@ export const ClaimAllRewardsModal = ({
       _steps[0] = {
         ..._steps[0],
         done: true,
-        txHash: tx.hash,
+        txHash: tx.hash
       };
       setSteps([..._steps]);
 
       await queryClient.refetchQueries({ queryKey: ['useAllClaimableRewards'] });
     } catch (error) {
       const sentryProperties = {
-        chainId: currentSdk.chainId,
+        chainId: currentSdk.chainId
       };
       const sentryInfo = {
         contextName: 'Claiming all rewards',
-        properties: sentryProperties,
+        properties: sentryProperties
       };
       handleGenericError({ error, sentryInfo, toast: errorToast });
       setFailedStep(1);

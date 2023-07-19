@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import { CollateralModal } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/Collateral/CollateralModal/index';
 import { Row } from '@ui/components/shared/Flex';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useColors } from '@ui/hooks/useColors';
 import { useIsMobile } from '@ui/hooks/useScreenSize';
 import type { MarketData } from '@ui/types/TokensDataMap';
@@ -12,14 +12,14 @@ export const Collateral = ({
   asset,
   assets,
   comptrollerAddress,
-  poolChainId,
+  poolChainId
 }: {
   asset: MarketData;
   assets: MarketData[];
   comptrollerAddress: string;
   poolChainId: number;
 }) => {
-  const { currentChain } = useMultiMidas();
+  const { currentChain } = useMultiIonic();
   const isMobile = useIsMobile();
   const { cPage } = useColors();
   const { isOpen: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure();

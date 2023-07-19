@@ -17,9 +17,9 @@ import {
   StatLabel,
   StatNumber,
   Text,
-  VStack,
+  VStack
 } from '@chakra-ui/react';
-import type { SupportedChains } from '@midas-capital/types';
+import type { SupportedChains } from '@ionicprotocol/types';
 import { utils } from 'ethers';
 import { formatUnits } from 'ethers/lib/utils';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -29,7 +29,7 @@ import ClipboardValue from '@ui/components/shared/ClipboardValue';
 import { Center } from '@ui/components/shared/Flex';
 import { MidasModal } from '@ui/components/shared/Modal';
 import { DEFAULT_DECIMALS } from '@ui/constants/index';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useFlywheelEnabledMarkets } from '@ui/hooks/rewards/useFlywheelEnabledMarkets';
 import { useRewardsInfoForMarket } from '@ui/hooks/rewards/useRewardsInfoForMarket';
 import { useColors } from '@ui/hooks/useColors';
@@ -49,14 +49,14 @@ const EditFlywheelModal = ({
   flywheel,
   pool,
   isOpen,
-  onClose,
+  onClose
 }: {
   flywheel: Flywheel;
   isOpen: boolean;
   onClose: () => void;
   pool: PoolData;
 }) => {
-  const { currentSdk, address } = useMultiMidas();
+  const { currentSdk, address } = useMultiIonic();
 
   const { data: tokenData } = useTokenData(flywheel.rewardToken, currentSdk?.chainId);
   const isAdmin = address === flywheel.owner;
@@ -136,11 +136,11 @@ const EditFlywheelModal = ({
         amount: fundingAmount,
         chainId: currentSdk.chainId,
         rewardToken: flywheel.rewardToken,
-        rewards: flywheel.rewards,
+        rewards: flywheel.rewards
       };
       const sentryInfo = {
         contextName: 'Funding flywheel rewards contract',
-        properties: sentryProperties,
+        properties: sentryProperties
       };
       handleGenericError({ error, sentryInfo, toast: errorToast });
     } finally {
@@ -153,7 +153,7 @@ const EditFlywheelModal = ({
     fundingAmount,
     refetchRewardsBalance,
     errorToast,
-    rewardTokenDecimal,
+    rewardTokenDecimal
   ]);
 
   const updateRewardInfo = useCallback(async () => {
@@ -167,7 +167,7 @@ const EditFlywheelModal = ({
       const tx = await currentSdk.setStaticRewardInfo(flywheel.rewards, selectedMarket.cToken, {
         // TODO enable in UI
         rewardsEndTimestamp: endDate ? endDate.getTime() / 1000 : 0,
-        rewardsPerSecond: utils.parseUnits(supplySpeed, rewardTokenDecimal),
+        rewardsPerSecond: utils.parseUnits(supplySpeed, rewardTokenDecimal)
       });
 
       await tx.wait();
@@ -178,11 +178,11 @@ const EditFlywheelModal = ({
         rewards: flywheel.rewards,
         rewardsEndTimestamp: endDate ? endDate.getTime() / 1000 : 0,
         rewardsPerSecond: utils.parseUnits(supplySpeed, rewardTokenDecimal),
-        token: selectedMarket.cToken,
+        token: selectedMarket.cToken
       };
       const sentryInfo = {
         contextName: 'Updating rewards info',
-        properties: sentryProperties,
+        properties: sentryProperties
       };
       handleGenericError({ error, sentryInfo, toast: errorToast });
     } finally {
@@ -199,7 +199,7 @@ const EditFlywheelModal = ({
     selectedMarket,
     refetchRewardsInfo,
     errorToast,
-    rewardTokenDecimal,
+    rewardTokenDecimal
   ]);
 
   const enableForRewards = useCallback(
@@ -217,11 +217,11 @@ const EditFlywheelModal = ({
         const sentryProperties = {
           chainId: currentSdk.chainId,
           flywheel: flywheel.address,
-          token: market,
+          token: market
         };
         const sentryInfo = {
           contextName: 'Enabling rewards',
-          properties: sentryProperties,
+          properties: sentryProperties
         };
         handleGenericError({ error, sentryInfo, toast: errorToast });
       } finally {

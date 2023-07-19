@@ -1,5 +1,5 @@
 import { Box, Button, Divider, HStack, Text } from '@chakra-ui/react';
-import type { OpenPosition } from '@midas-capital/types';
+import type { OpenPosition } from '@ionicprotocol/types';
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
@@ -12,7 +12,7 @@ import { Column } from '@ui/components/shared/Flex';
 import { MidasModal } from '@ui/components/shared/Modal';
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
 import { ADJUST_LEVERAGE_RATIO_STEPS } from '@ui/constants/index';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useCurrentLeverageRatio } from '@ui/hooks/leverage/useCurrentLeverageRatio';
 import { useColors } from '@ui/hooks/useColors';
 import { useDebounce } from '@ui/hooks/useDebounce';
@@ -24,7 +24,7 @@ import { handleGenericError } from '@ui/utils/errorHandling';
 export const AdjustRatioModal = ({
   position,
   isOpen,
-  onClose,
+  onClose
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -34,10 +34,10 @@ export const AdjustRatioModal = ({
     collateral: collateralAsset,
     borrowable: borrowAsset,
     chainId,
-    address: positionAddress,
+    address: positionAddress
   } = position;
   const { underlyingToken, symbol, cToken } = collateralAsset;
-  const { currentSdk, address, currentChain } = useMultiMidas();
+  const { currentSdk, address, currentChain } = useMultiIonic();
   const addRecentTransaction = useAddRecentTransaction();
 
   const errorToast = useErrorToast();
@@ -74,7 +74,7 @@ export const AdjustRatioModal = ({
       chainId: currentSdk.chainId,
       collateralCToken: cToken,
       fundingAsset: underlyingToken,
-      leverageValue: debouncedLeverageNum,
+      leverageValue: debouncedLeverageNum
     };
 
     setIsConfirmed(true);
@@ -92,12 +92,12 @@ export const AdjustRatioModal = ({
 
         addRecentTransaction({
           description: 'Adjust leverage ratio.',
-          hash: tx.hash,
+          hash: tx.hash
         });
 
         _steps[0] = {
           ..._steps[0],
-          txHash: tx.hash,
+          txHash: tx.hash
         };
         setConfirmedSteps([..._steps]);
 
@@ -110,14 +110,14 @@ export const AdjustRatioModal = ({
         _steps[0] = {
           ..._steps[0],
           done: true,
-          txHash: tx.hash,
+          txHash: tx.hash
         };
         setConfirmedSteps([..._steps]);
 
         successToast({
           description: 'Successfully adjusted leverage ratio',
           id: 'Adjust leverage ratio - ' + Math.random().toString(),
-          title: 'Adjusted',
+          title: 'Adjusted'
         });
       } catch (error) {
         setFailedStep(1);
@@ -126,7 +126,7 @@ export const AdjustRatioModal = ({
     } catch (error) {
       const sentryInfo = {
         contextName: 'Position - Creating',
-        properties: sentryProperties,
+        properties: sentryProperties
       };
       handleGenericError({ error, sentryInfo, toast: errorToast });
     }

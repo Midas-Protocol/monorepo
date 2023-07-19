@@ -1,17 +1,6 @@
-import {
-  arbitrum,
-  bsc,
-  chapel,
-  ethereum,
-  evmos,
-  fantom,
-  ganache,
-  moonbeam,
-  neondevnet,
-  polygon,
-} from '@midas-capital/chains';
-import type { DeployedPlugins as DeployedPluginsType } from '@midas-capital/types';
-import { SupportedChains } from '@midas-capital/types';
+import { arbitrum, bsc, chapel, ethereum, ganache, neon, polygon } from '@ionicprotocol/chains';
+import type { DeployedPlugins as DeployedPluginsType } from '@ionicprotocol/types';
+import { SupportedChains } from '@ionicprotocol/types';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import * as yup from 'yup';
 
@@ -19,7 +8,7 @@ import { SUPPORTED_NETWORKS_REGEX, VALID_ADDRESS_REGEX } from '@ui/constants/ind
 
 const querySchema = yup.object().shape({
   chainId: yup.string().matches(SUPPORTED_NETWORKS_REGEX, 'Not a supported Network').required(),
-  marketAddress: yup.string().matches(VALID_ADDRESS_REGEX, 'Not a valid market address').required(),
+  marketAddress: yup.string().matches(VALID_ADDRESS_REGEX, 'Not a valid market address').required()
 });
 type Query = yup.InferType<typeof querySchema>;
 
@@ -27,13 +16,10 @@ export const deployedPlugins: { [chainId: string]: DeployedPluginsType } = {
   [SupportedChains.bsc]: bsc.deployedPlugins,
   [SupportedChains.polygon]: polygon.deployedPlugins,
   [SupportedChains.ganache]: ganache.deployedPlugins,
-  [SupportedChains.evmos]: evmos.deployedPlugins,
   [SupportedChains.chapel]: chapel.deployedPlugins,
-  [SupportedChains.moonbeam]: moonbeam.deployedPlugins,
-  [SupportedChains.neon_devnet]: neondevnet.deployedPlugins,
+  [SupportedChains.neon]: neon.deployedPlugins,
   [SupportedChains.arbitrum]: arbitrum.deployedPlugins,
-  [SupportedChains.fantom]: fantom.deployedPlugins,
-  [SupportedChains.ethereum]: ethereum.deployedPlugins,
+  [SupportedChains.ethereum]: ethereum.deployedPlugins
 };
 
 const handler = (request: NextApiRequest, response: NextApiResponse<string>) => {

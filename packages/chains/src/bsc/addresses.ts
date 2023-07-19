@@ -1,4 +1,4 @@
-import { ChainAddresses } from "@midas-capital/types";
+import { ChainAddresses } from "@ionicprotocol/types";
 import { ethers } from "ethers";
 
 import { BTCB, BUSD, WBNB } from "./assets";
@@ -12,7 +12,7 @@ const chainAddresses: ChainAddresses = {
   STABLE_TOKEN: BUSD,
   W_BTC_TOKEN: BTCB,
   ALGEBRA_SWAP_ROUTER: "0x327Dd3208f0bCF590A66110aCB6e5e6941A4EfA0",
-  SOLIDLY_SWAP_ROUTER: "0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109",
+  SOLIDLY_SWAP_ROUTER: "0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109"
 };
 
 export default chainAddresses;

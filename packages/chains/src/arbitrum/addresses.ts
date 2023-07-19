@@ -1,4 +1,4 @@
-import { assetSymbols, ChainAddresses, underlying } from "@midas-capital/types";
+import { assetSymbols, ChainAddresses, underlying } from "@ionicprotocol/types";
 import { ethers } from "ethers";
 
 import { UNISWAP_V3_ADDRESSES } from "../common/addresses";
@@ -14,7 +14,7 @@ const chainAddresses: ChainAddresses = {
   PAIR_INIT_HASH: ethers.utils.hexlify("0xe18a34eb0e04b04f7a0ac29a6e80748dca96319b42c54d679cb821dca90c6303"),
   STABLE_TOKEN: underlying(assets, assetSymbols.USDC),
   W_BTC_TOKEN: underlying(assets, assetSymbols.WBTC),
-  UNISWAP_V3: UNISWAP_V3_ADDRESSES,
+  UNISWAP_V3: UNISWAP_V3_ADDRESSES
 };
 
 export default chainAddresses;

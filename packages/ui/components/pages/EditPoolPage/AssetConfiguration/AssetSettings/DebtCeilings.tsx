@@ -13,9 +13,9 @@ import {
   NumberInputField,
   Select,
   Spacer,
-  Text,
+  Text
 } from '@chakra-ui/react';
-import type { NativePricedFuseAsset } from '@midas-capital/types';
+import type { NativePricedFuseAsset } from '@ionicprotocol/types';
 import { useQueryClient } from '@tanstack/react-query';
 import { utils } from 'ethers';
 import { useEffect, useMemo, useState } from 'react';
@@ -25,7 +25,7 @@ import { CButton } from '@ui/components/shared/Button';
 import { Column } from '@ui/components/shared/Flex';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
 import { DEBT_CEILING, DEFAULT_DECIMALS } from '@ui/constants/index';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useCTokenData } from '@ui/hooks/fuse/useCTokenData';
 import { useIsEditableAdmin } from '@ui/hooks/fuse/useIsEditableAdmin';
 import { useAllUsdPrices } from '@ui/hooks/useAllUsdPrices';
@@ -46,10 +46,10 @@ export const DebtCeilings = ({
   comptrollerAddress,
   selectedAsset,
   assets,
-  poolChainId,
+  poolChainId
 }: DebtCeilingsProps) => {
   const { cToken: cTokenAddress } = selectedAsset;
-  const { currentSdk } = useMultiMidas();
+  const { currentSdk } = useMultiIonic();
   const { data: usdPrices } = useAllUsdPrices();
   const usdPrice = useMemo(() => {
     if (usdPrices && usdPrices[poolChainId.toString()]) {
@@ -77,13 +77,13 @@ export const DebtCeilings = ({
     setValue,
     register,
     watch,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting }
   } = useForm({
     defaultValues: {
       collateralAsset:
         assets.find((a) => a.cToken !== selectedAsset.cToken)?.cToken ?? assets[0].cToken,
-      debtCeiling: DEBT_CEILING.DEFAULT,
-    },
+      debtCeiling: DEBT_CEILING.DEFAULT
+    }
   });
   const isEditableAdmin = useIsEditableAdmin(comptrollerAddress, poolChainId);
 
@@ -105,7 +105,7 @@ export const DebtCeilings = ({
     assets: [selectedAsset],
     collaterals: assets,
     comptroller: comptrollerAddress,
-    poolChainId,
+    poolChainId
   });
 
   useEffect(() => {
@@ -133,7 +133,7 @@ export const DebtCeilings = ({
 
   const updateDebtCeiling = async ({
     collateralAsset: collateralAssetAddress,
-    debtCeiling,
+    debtCeiling
   }: {
     collateralAsset: string;
     debtCeiling: number | string;
@@ -176,15 +176,15 @@ export const DebtCeilings = ({
       }
 
       await queryClient.refetchQueries({
-        queryKey: ['useDebtCeilingForAssetForCollateral'],
+        queryKey: ['useDebtCeilingForAssetForCollateral']
       });
       await queryClient.refetchQueries({
-        queryKey: ['useCTokenData'],
+        queryKey: ['useCTokenData']
       });
 
       successToast({
         description: `Successfully updated '${collateralAsset.underlyingSymbol}' debt ceiling for '${selectedAsset.underlyingSymbol}'!`,
-        id: 'Updated debt ceiling - ' + Math.random().toString(),
+        id: 'Updated debt ceiling - ' + Math.random().toString()
       });
     } catch (error) {
       const sentryProperties = {
@@ -192,11 +192,11 @@ export const DebtCeilings = ({
         collateralAsset,
         comptroller: comptrollerAddress,
         debtCeiling,
-        token: cTokenAddress,
+        token: cTokenAddress
       };
       const sentryInfo = {
         contextName: 'Updating debt ceiling',
-        properties: sentryProperties,
+        properties: sentryProperties
       };
       handleGenericError({ error, sentryInfo, toast: errorToast });
       setDebtCeilingsDefault();
@@ -246,7 +246,7 @@ export const DebtCeilings = ({
               <Select
                 id="collateralAsset"
                 {...register('collateralAsset', {
-                  required: 'collateralAsset is required',
+                  required: 'collateralAsset is required'
                 })}
                 cursor="pointer"
                 isDisabled={!isEditableAdmin}
@@ -325,9 +325,9 @@ export const DebtCeilings = ({
             rules={{
               min: {
                 message: `Debt ceiling must be at least ${DEBT_CEILING.MIN} ${selectedAsset.underlyingSymbol}`,
-                value: DEBT_CEILING.MIN,
+                value: DEBT_CEILING.MIN
               },
-              required: 'Debt ceiling is required',
+              required: 'Debt ceiling is required'
             }}
           />
           <FormErrorMessage marginBottom="-10px" maxWidth="200px">

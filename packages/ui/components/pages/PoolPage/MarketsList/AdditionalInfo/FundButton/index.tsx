@@ -1,5 +1,5 @@
 import { Box, Button, useDisclosure } from '@chakra-ui/react';
-import { FundOperationMode } from '@midas-capital/types';
+import { FundOperationMode } from '@ionicprotocol/types';
 import { useMemo } from 'react';
 
 import { BorrowModal } from '@ui/components/pages/PoolPage/MarketsList/AdditionalInfo/FundButton/BorrowModal';
@@ -16,7 +16,7 @@ export const FundButton = ({
   mode,
   isDisabled,
   poolChainId,
-  borrowBalanceFiat,
+  borrowBalanceFiat
 }: {
   asset: MarketData;
   assets: MarketData[];

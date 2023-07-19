@@ -3,15 +3,12 @@ import {
   bsc,
   chapel,
   ethereum,
-  evmos,
-  fantom,
   ganache,
   lineagoerli,
-  moonbeam,
-  neondevnet,
+  neon,
   polygon,
-} from '@midas-capital/chains';
-import type { FusePoolData } from '@midas-capital/types';
+} from '@ionicprotocol/chains';
+import type { FusePoolData } from '@ionicprotocol/types';
 
 import { config } from '@ui/config/index';
 
@@ -20,12 +17,11 @@ export const supportedChainIdToConfig: {
 } = {
   [bsc.chainId]: { enabled: config.isBscEnabled, supported: config.isBscEnabled },
   [polygon.chainId]: { enabled: config.isBscEnabled, supported: true },
-  [moonbeam.chainId]: { enabled: config.isMoonbeamEnabled, supported: config.isMoonbeamEnabled },
   [arbitrum.chainId]: {
     enabled: true,
     supported: config.isArbitrumEnabled,
   },
-  [neondevnet.chainId]: {
+  [neon.chainId]: {
     enabled: true,
     supported: config.isDevelopment || config.isTestnetEnabled,
   },
@@ -35,8 +31,6 @@ export const supportedChainIdToConfig: {
   },
   [chapel.chainId]: { enabled: true, supported: config.isDevelopment || config.isTestnetEnabled },
   [ganache.chainId]: { enabled: config.isDevelopment, supported: config.isDevelopment },
-  [fantom.chainId]: { enabled: true, supported: config.isFantomEnabled },
-  [evmos.chainId]: { enabled: true, supported: config.isEvmosEnabled },
   [ethereum.chainId]: { enabled: true, supported: config.isEthereumEnabled },
 };
 

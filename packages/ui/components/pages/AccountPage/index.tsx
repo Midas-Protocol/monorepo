@@ -12,26 +12,26 @@ import { Banner } from '@ui/components/shared/Banner';
 import { MidasBox } from '@ui/components/shared/Box';
 import PageTransitionLayout from '@ui/components/shared/PageTransitionLayout';
 import {
+  IONIC_LOCALSTORAGE_KEYS,
   LIQUIDITY,
   MARKET_COLUMNS,
   MARKET_LTV,
-  MIDAS_LOCALSTORAGE_KEYS,
   TOTAL_BORROW,
-  TOTAL_SUPPLY,
+  TOTAL_SUPPLY
 } from '@ui/constants/index';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useAllFundedInfo } from '@ui/hooks/useAllFundedInfo';
 import { shortAddress } from '@ui/utils/shortAddress';
 
 const AccountPage = memo(() => {
-  const { setGlobalLoading, address } = useMultiMidas();
+  const { setGlobalLoading, address } = useMultiIonic();
   const router = useRouter();
   const [initSorting, setInitSorting] = useState<SortingState | undefined>();
   const [initColumnVisibility, setInitColumnVisibility] = useState<VisibilityState | undefined>();
   const { data: info } = useAllFundedInfo();
 
   useEffect(() => {
-    const oldData = localStorage.getItem(MIDAS_LOCALSTORAGE_KEYS);
+    const oldData = localStorage.getItem(IONIC_LOCALSTORAGE_KEYS);
 
     if (
       oldData &&
@@ -156,12 +156,12 @@ const AccountPage = memo(() => {
                 height: '2xs',
                 justifyContent: 'center',
                 status: 'warning',
-                textAlign: 'center',
+                textAlign: 'center'
               }}
               descriptions={[
                 {
-                  text: `Please connect your wallet.`,
-                },
+                  text: `Please connect your wallet.`
+                }
               ]}
               title="Wallet not detected!"
             />

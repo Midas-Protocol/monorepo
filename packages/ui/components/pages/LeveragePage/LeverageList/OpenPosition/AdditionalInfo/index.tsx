@@ -1,5 +1,5 @@
 import { Box, Button, Flex, Grid, GridItem } from '@chakra-ui/react';
-import type { OpenPosition, PositionInfo } from '@midas-capital/types';
+import type { OpenPosition, PositionInfo } from '@ionicprotocol/types';
 import { useChainModal, useConnectModal } from '@rainbow-me/rainbowkit';
 import type { Row } from '@tanstack/react-table';
 import { useMemo } from 'react';
@@ -12,7 +12,7 @@ import { PositionDetails } from '@ui/components/pages/LeveragePage/LeverageList/
 import { RemovePositionButton } from '@ui/components/pages/LeveragePage/LeverageList/OpenPosition/AdditionalInfo/RemovePositionButton/index';
 import { ReopenPositionButton } from '@ui/components/pages/LeveragePage/LeverageList/OpenPosition/AdditionalInfo/ReopenPositionButton/index';
 import type { OpenPositionRowData } from '@ui/components/pages/LeveragePage/LeverageList/OpenPosition/index';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { getChainConfig } from '@ui/utils/networkData';
 
 export interface ComptrollerToPool {
@@ -21,7 +21,7 @@ export interface ComptrollerToPool {
 
 export const AdditionalInfo = ({
   positionInfo,
-  row,
+  row
 }: {
   positionInfo: PositionInfo | null;
   row: Row<OpenPositionRowData>;
@@ -31,7 +31,7 @@ export const AdditionalInfo = ({
   const chainId = Number(position.chainId);
   const [chainConfig] = useMemo(() => [getChainConfig(chainId)], [chainId]);
 
-  const { currentChain } = useMultiMidas();
+  const { currentChain } = useMultiIonic();
   const { openConnectModal } = useConnectModal();
   const { openChainModal } = useChainModal();
   const { switchNetworkAsync } = useSwitchNetwork();
@@ -83,7 +83,7 @@ export const AdditionalInfo = ({
         mt={4}
         templateColumns={{
           base: 'repeat(1, 1fr)',
-          lg: 'repeat(1, 1fr)',
+          lg: 'repeat(1, 1fr)'
         }}
         w="100%"
       >

@@ -1,33 +1,33 @@
 import { BigNumber } from "ethers";
 
-import { MidasSdk } from "../../MidasSdk";
+import { IonicSdk } from "../../IonicSdk";
 
 import { ChainLiquidationConfig } from "./config";
 import {
   EncodedLiquidationTx,
   ErroredPool,
-  FusePoolUserStruct,
-  FusePoolUserWithAssets,
   LiquidatablePool,
-  PublicPoolUserWithData,
+  PoolUserStruct,
+  PoolUserWithAssets,
+  PublicPoolUserWithData
 } from "./utils";
 
 import { getPotentialLiquidation } from "./index";
 
 async function getLiquidatableUsers(
-  sdk: MidasSdk,
-  poolUsers: FusePoolUserStruct[],
+  sdk: IonicSdk,
+  poolUsers: PoolUserStruct[],
   pool: PublicPoolUserWithData,
   chainLiquidationConfig: ChainLiquidationConfig
 ): Promise<Array<EncodedLiquidationTx>> {
   const users: Array<EncodedLiquidationTx> = [];
   for (const user of poolUsers) {
-    const userAssets = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsByUser(pool.comptroller, user.account);
-    const userWithAssets: FusePoolUserWithAssets = {
+    const userAssets = await sdk.contracts.PoolLens.callStatic.getPoolAssetsByUser(pool.comptroller, user.account);
+    const userWithAssets: PoolUserWithAssets = {
       ...user,
       debt: [],
       collateral: [],
-      assets: userAssets,
+      assets: userAssets
     };
 
     const encodedLiquidationTX = await getPotentialLiquidation(
@@ -43,7 +43,7 @@ async function getLiquidatableUsers(
 }
 
 export default async function gatherLiquidations(
-  sdk: MidasSdk,
+  sdk: IonicSdk,
   pools: Array<PublicPoolUserWithData>,
   chainLiquidationConfig: ChainLiquidationConfig
 ): Promise<[Array<LiquidatablePool>, Array<ErroredPool>]> {
@@ -63,14 +63,14 @@ export default async function gatherLiquidations(
       if (liquidatableUsers.length > 0) {
         liquidations.push({
           comptroller: pool.comptroller,
-          liquidations: liquidatableUsers,
+          liquidations: liquidatableUsers
         });
       }
     } catch (e) {
       erroredPools.push({
         msg: "Error while fetching liquidatable users " + (e as Error).stack,
         comptroller: pool.comptroller,
-        error: e,
+        error: e
       });
     }
   }

@@ -1,7 +1,7 @@
 import { InfoOutlineIcon } from '@chakra-ui/icons';
 import { Box, HStack, Image, Text } from '@chakra-ui/react';
-import type { FlywheelReward, Reward, SupportedChains } from '@midas-capital/types';
-import { isFlywheelReward } from '@midas-capital/types';
+import type { FlywheelReward, Reward, SupportedChains } from '@ionicprotocol/types';
+import { isFlywheelReward } from '@ionicprotocol/types';
 import { useEffect, useMemo, useState } from 'react';
 
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
@@ -85,7 +85,7 @@ export const RewardsInfo = ({ reward, chainId, assetCToken }: RewardsInfoProps) 
               hour: '2-digit',
               minute: '2-digit',
               month: 'numeric',
-              year: 'numeric',
+              year: 'numeric'
             })}`}
             {')'}
           </Text>

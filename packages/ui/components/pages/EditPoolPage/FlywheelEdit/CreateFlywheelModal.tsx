@@ -8,17 +8,17 @@ import {
   InputGroup,
   InputRightElement,
   Text,
-  VStack,
+  VStack
 } from '@chakra-ui/react';
-// import { FlywheelStaticRewards } from '@midas-capital/sdk/dist/cjs/typechain/FlywheelStaticRewards';
-// import { MidasFlywheel } from '@midas-capital/sdk/dist/cjs/typechain/MidasFlywheel';
+// import { FlywheelStaticRewards } from '@ionicprotocol/sdk/dist/cjs/typechain/FlywheelStaticRewards';
+// import { IonicFlywheel } from '@ionicprotocol/sdk/dist/cjs/typechain/IonicFlywheel';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
 import { Center } from '@ui/components/shared/Flex';
 import { MidasModal } from '@ui/components/shared/Modal';
 import TransactionStepper from '@ui/components/shared/TransactionStepper';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useErrorToast, useSuccessToast } from '@ui/hooks/useToast';
 import { useTokenData } from '@ui/hooks/useTokenData';
 import SmallWhiteCircle from '@ui/images/small-white-circle.png';
@@ -28,28 +28,28 @@ const steps = [
   {
     desc: 'Deploying Flywheel Core',
     done: false,
-    title: 'Deploying Flywheel Core',
+    title: 'Deploying Flywheel Core'
   },
   {
     desc: 'Deploying Flywheel Rewards',
     done: false,
-    title: 'Deploying Flywheel Rewards',
+    title: 'Deploying Flywheel Rewards'
   },
   {
     desc: 'Adding Rewards to Flywheel',
     done: false,
-    title: 'Adding Rewards to Flywheel',
+    title: 'Adding Rewards to Flywheel'
   },
   {
     desc: 'Adding Flywheel to Pool',
     done: false,
-    title: 'Adding Flywheel to Pool',
-  },
+    title: 'Adding Flywheel to Pool'
+  }
 ];
 
 // const CreateFlywheel = ({ comptrollerAddress, onSuccess }: CreateFlywheelProps) => {
 const CreateFlywheel = ({ onSuccess }: CreateFlywheelProps) => {
-  const { currentSdk } = useMultiMidas();
+  const { currentSdk } = useMultiIonic();
 
   const successToast = useSuccessToast();
   const errorToast = useErrorToast();
@@ -62,7 +62,7 @@ const CreateFlywheel = ({ onSuccess }: CreateFlywheelProps) => {
   const {
     data: rewardTokenData,
     error,
-    isLoading,
+    isLoading
   } = useTokenData(rewardToken, currentSdk?.chainId);
 
   // const readyToDeploy = useMemo(() => {
@@ -81,7 +81,7 @@ const CreateFlywheel = ({ onSuccess }: CreateFlywheelProps) => {
       setFailedStep(0);
       if (!rewardTokenData) throw new Error('No Token Data');
       setIsDeploying(true);
-      // let fwCore: MidasFlywheel;
+      // let fwCore: IonicFlywheel;
 
       try {
         setActiveStep(1);
@@ -89,7 +89,7 @@ const CreateFlywheel = ({ onSuccess }: CreateFlywheelProps) => {
         // fwCore = await currentSdk.deployFlywheelCore(rewardTokenData.address);
         successToast({
           description: 'Flywheel Core Deployed',
-          id: 'Flywheel core deployed - ' + Math.random().toString(),
+          id: 'Flywheel core deployed - ' + Math.random().toString()
         });
       } catch (error) {
         setFailedStep(1);
@@ -104,7 +104,7 @@ const CreateFlywheel = ({ onSuccess }: CreateFlywheelProps) => {
         // await fwStaticRewards.deployTransaction.wait();
         successToast({
           description: 'Flywheel Rewards Deployed',
-          id: 'Flywheel rewards deployed - ' + Math.random().toString(),
+          id: 'Flywheel rewards deployed - ' + Math.random().toString()
         });
       } catch (error) {
         setFailedStep(2);
@@ -118,7 +118,7 @@ const CreateFlywheel = ({ onSuccess }: CreateFlywheelProps) => {
         // await tx.wait();
         successToast({
           description: 'Rewards Added to Flywheel',
-          id: 'Rewards added - ' + Math.random().toString(),
+          id: 'Rewards added - ' + Math.random().toString()
         });
       } catch (error) {
         setFailedStep(3);
@@ -135,7 +135,7 @@ const CreateFlywheel = ({ onSuccess }: CreateFlywheelProps) => {
         // await tx.wait();
         successToast({
           description: 'Flywheel added to Pool',
-          id: 'Flywheel added - ' + Math.random().toString(),
+          id: 'Flywheel added - ' + Math.random().toString()
         });
       } catch (error) {
         setFailedStep(4);
@@ -152,7 +152,7 @@ const CreateFlywheel = ({ onSuccess }: CreateFlywheelProps) => {
       setIsDeploying(false);
       errorToast({
         description: JSON.stringify(error),
-        id: 'Adding flywheel - ' + Math.random().toString(),
+        id: 'Adding flywheel - ' + Math.random().toString()
       });
       return;
     }

@@ -1,6 +1,6 @@
-import { IrmTypes } from "@midas-capital/types";
+import { IrmTypes } from "@ionicprotocol/types";
 
-const baseIrms = [IrmTypes.WhitePaperInterestRateModel, IrmTypes.JumpRateModel];
+const baseIrms = [IrmTypes.JumpRateModel];
 
 const irms: IrmTypes[] = [
   ...baseIrms,
@@ -10,7 +10,7 @@ const irms: IrmTypes[] = [
   IrmTypes.AdjustableJumpRateModel_TRANSFERO_BRZ,
   IrmTypes.AdjustableJumpRateModel_TRANSFERO_BTCB_ETH_MAI_WBNB,
   IrmTypes.AdjustableJumpRateModel_STADER_WBNB,
-  IrmTypes.AdjustableJumpRateModel_JARVIS_jBRL,
+  IrmTypes.AdjustableJumpRateModel_JARVIS_jBRL
 ];
 
 export default irms;

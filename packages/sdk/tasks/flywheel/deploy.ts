@@ -10,14 +10,14 @@ task("flywheel:deploy-static-rewards-fw", "Deploy static rewards flywheel for LM
   .setAction(async ({ signer, name, rewardToken, strategies, pool, booster }, { ethers, deployments, run }) => {
     const deployer = await ethers.getNamedSigner(signer);
 
-    const midasSdkModule = await import("../midasSdk");
-    const sdk = await midasSdkModule.getOrCreateMidas(deployer);
+    const ionicSdkModule = await import("../ionicSdk");
+    const sdk = await ionicSdkModule.getOrCreateIonic(deployer);
 
     const flywheelBooster = await ethers.getContract(booster, deployer);
 
     console.log({ signer, name, rewardToken, strategies, pool });
-    const flywheel = await deployments.deploy(`MidasFlywheel_${name}`, {
-      contract: "MidasFlywheel",
+    const flywheel = await deployments.deploy(`IonicFlywheel_${name}`, {
+      contract: "IonicFlywheel",
       from: deployer.address,
       log: true,
       proxy: {
@@ -25,12 +25,12 @@ task("flywheel:deploy-static-rewards-fw", "Deploy static rewards flywheel for LM
         execute: {
           init: {
             methodName: "initialize",
-            args: [rewardToken, ethers.constants.AddressZero, flywheelBooster.address, deployer.address],
-          },
+            args: [rewardToken, ethers.constants.AddressZero, flywheelBooster.address, deployer.address]
+          }
         },
-        owner: deployer.address,
+        owner: deployer.address
       },
-      waitConfirmations: 1,
+      waitConfirmations: 1
     });
 
     console.log(`Deployed flywheel: ${flywheel.address}`);
@@ -63,13 +63,13 @@ task("flywheel:deploy-static-rewards", "Deploy static rewards flywheel for LM re
       args: [
         flywheel, // flywheel
         deployer.address, // owner
-        ethers.constants.AddressZero, // Authority
+        ethers.constants.AddressZero // Authority
       ],
-      waitConfirmations: 1,
+      waitConfirmations: 1
     });
 
-    const midasSdkModule = await import("../midasSdk");
-    const sdk = await midasSdkModule.getOrCreateMidas(deployer);
+    const ionicSdkModule = await import("../ionicSdk");
+    const sdk = await ionicSdkModule.getOrCreateIonic(deployer);
 
     const tx = await sdk.setFlywheelRewards(flywheel, rewards.address);
     await tx.wait();
@@ -97,8 +97,8 @@ task("flywheel:add-strategy-for-rewards", "Create pool if does not exist")
       throw `Invalid 'strategy': ${taskArgs.strategy}`;
     }
 
-    const midasSdkModule = await import("..//midasSdk");
-    const sdk = await midasSdkModule.getOrCreateMidas(deployer);
+    const ionicSdkModule = await import("../ionicSdk");
+    const sdk = await ionicSdkModule.getOrCreateIonic(deployer);
 
     const addTx = await sdk.addStrategyForRewardsToFlywheelCore(flywheelAddress, strategyAddress);
     const receipt = await addTx.wait();
@@ -125,8 +125,8 @@ task("flywheel:add-to-pool", "Create pool if does not exist")
       throw `Invalid 'pool': ${taskArgs.pool}`;
     }
 
-    const midasSdkModule = await import("../midasSdk");
-    const sdk = await midasSdkModule.getOrCreateMidas(deployer);
+    const ionicSdkModule = await import("../ionicSdk");
+    const sdk = await ionicSdkModule.getOrCreateIonic(deployer);
 
     const addTx = await sdk.addFlywheelCoreToComptroller(flywheelAddress, poolAddress);
     console.log({ addTx });

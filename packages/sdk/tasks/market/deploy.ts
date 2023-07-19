@@ -6,8 +6,8 @@ task("market:deploy", "deploy market")
   .addParam("comptroller", "Comptroller address", undefined, types.string)
   .setAction(async (taskArgs, { ethers }) => {
     const signer = await ethers.getNamedSigner(taskArgs.signer);
-    const midasSdkModule = await import("../midasSdk");
-    const sdk = await midasSdkModule.getOrCreateMidas(signer);
+    const ionicSdkModule = await import("../ionicSdk");
+    const sdk = await ionicSdkModule.getOrCreateIonic(signer);
     const comptroller = sdk.createComptroller(taskArgs.comptroller, signer);
 
     const constructorData =
@@ -25,7 +25,7 @@ task("market:deploy", "deploy market")
       // max:         7920027
       gasLimit: 20020027,
       maxFeePerGas: ethers.utils.parseUnits("240", "gwei"),
-      maxPriorityFeePerGas: ethers.utils.parseUnits("50", "gwei"),
+      maxPriorityFeePerGas: ethers.utils.parseUnits("50", "gwei")
     });
     console.log("tx", tx.hash, tx.nonce);
 

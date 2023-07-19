@@ -1,4 +1,4 @@
-import { ChainParams } from "@midas-capital/types";
+import { ChainParams } from "@ionicprotocol/types";
 import { BigNumber } from "ethers";
 
 import { WBNB } from "./assets";
@@ -14,11 +14,11 @@ const specificParams: ChainParams = {
     blockExplorerUrls: { default: { name: "BnbScan", url: "https://bscscan.com" } },
     rpcUrls: {
       default: { http: ["https://bsc-dataseed.binance.org/"] },
-      public: { http: ["https://bsc-dataseed.binance.org/"] },
+      public: { http: ["https://bsc-dataseed.binance.org/"] }
     },
     nativeCurrency: {
       symbol: "BNB",
-      name: "BNB",
+      name: "BNB"
     },
     wrappedNativeCurrency: {
       symbol: "WBNB",
@@ -27,9 +27,9 @@ const specificParams: ChainParams = {
       decimals: 18,
       color: "#627EEA",
       overlayTextColor: "#fff",
-      logoURL: "https://d1912tcoux65lj.cloudfront.net/network/bsc.jpg",
-    },
-  },
+      logoURL: "https://d1912tcoux65lj.cloudfront.net/network/bsc.jpg"
+    }
+  }
 };
 
 export default specificParams;

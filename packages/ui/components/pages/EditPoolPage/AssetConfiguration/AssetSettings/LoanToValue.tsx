@@ -8,10 +8,10 @@ import {
   FormLabel,
   HStack,
   Spacer,
-  Text,
+  Text
 } from '@chakra-ui/react';
-import type { NativePricedFuseAsset } from '@midas-capital/types';
-import { ComptrollerErrorCodes } from '@midas-capital/types';
+import type { NativePricedFuseAsset } from '@ionicprotocol/types';
+import { ComptrollerErrorCodes } from '@ionicprotocol/types';
 import { useQueryClient } from '@tanstack/react-query';
 import { utils } from 'ethers';
 import { useEffect, useState } from 'react';
@@ -21,7 +21,7 @@ import { Column } from '@ui/components/shared/Flex';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
 import { SliderWithLabel } from '@ui/components/shared/SliderWithLabel';
 import { LOAN_TO_VALUE, LOAN_TO_VALUE_TOOLTIP } from '@ui/constants/index';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useCTokenData } from '@ui/hooks/fuse/useCTokenData';
 import { useExtraPoolInfo } from '@ui/hooks/fuse/useExtraPoolInfo';
 import { useErrorToast, useSuccessToast } from '@ui/hooks/useToast';
@@ -36,10 +36,10 @@ interface LoanToValueProps {
 export const LoanToValue = ({
   comptrollerAddress,
   selectedAsset,
-  poolChainId,
+  poolChainId
 }: LoanToValueProps) => {
   const { cToken: cTokenAddress } = selectedAsset;
-  const { currentSdk, currentChain } = useMultiMidas();
+  const { currentSdk, currentChain } = useMultiIonic();
   const { data: cTokenData } = useCTokenData(comptrollerAddress, cTokenAddress, poolChainId);
   const errorToast = useErrorToast();
   const successToast = useSuccessToast();
@@ -53,11 +53,11 @@ export const LoanToValue = ({
     handleSubmit,
     setValue,
     watch,
-    formState: { errors },
+    formState: { errors }
   } = useForm({
     defaultValues: {
-      collateralFactor: LOAN_TO_VALUE.DEFAULT,
-    },
+      collateralFactor: LOAN_TO_VALUE.DEFAULT
+    }
   });
 
   const watchCollateralFactor = Number(watch('collateralFactor', LOAN_TO_VALUE.DEFAULT));
@@ -97,17 +97,17 @@ export const LoanToValue = ({
 
       successToast({
         description: 'Successfully updated loan-to-Value!',
-        id: 'Updated loan-to-value - ' + Math.random().toString(),
+        id: 'Updated loan-to-value - ' + Math.random().toString()
       });
     } catch (error) {
       const sentryProperties = {
         chainId: currentSdk.chainId,
         comptroller: comptrollerAddress,
-        token: cTokenAddress,
+        token: cTokenAddress
       };
       const sentryInfo = {
         contextName: 'Updating loan-to-value',
-        properties: sentryProperties,
+        properties: sentryProperties
       };
       handleGenericError({ error, sentryInfo, toast: errorToast });
     } finally {
@@ -183,13 +183,13 @@ export const LoanToValue = ({
                     rules={{
                       max: {
                         message: `Loan-to-Value must be no more than ${LOAN_TO_VALUE.MAX}%`,
-                        value: LOAN_TO_VALUE.MAX,
+                        value: LOAN_TO_VALUE.MAX
                       },
                       min: {
                         message: `Loan-to-Value must be at least ${LOAN_TO_VALUE.MIN}%`,
-                        value: LOAN_TO_VALUE.MIN,
+                        value: LOAN_TO_VALUE.MIN
                       },
-                      required: 'Loan-to-Value is required',
+                      required: 'Loan-to-Value is required'
                     }}
                   />
                   <FormErrorMessage marginBottom="-10px" maxWidth="270px">

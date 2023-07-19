@@ -1,7 +1,7 @@
 import { Button } from '@chakra-ui/react';
-import { WETHAbi } from '@midas-capital/sdk';
-import { getContract } from '@midas-capital/sdk/dist/cjs/src/MidasSdk/utils';
-import { FundOperationMode } from '@midas-capital/types';
+import { WETHAbi } from '@ionicprotocol/sdk';
+import { getContract } from '@ionicprotocol/sdk/dist/cjs/src/IonicSdk/utils';
+import { FundOperationMode } from '@ionicprotocol/types';
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit';
 import { useQueryClient } from '@tanstack/react-query';
 import type { BigNumber } from 'ethers';
@@ -17,7 +17,7 @@ import { SupplyError } from '@ui/components/pages/PoolPage/MarketsList/Additiona
 import { Banner } from '@ui/components/shared/Banner';
 import { Column } from '@ui/components/shared/Flex';
 import { SUPPLY_STEPS } from '@ui/constants/index';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useMaxSupplyAmount } from '@ui/hooks/useMaxSupplyAmount';
 import { useSupplyCap } from '@ui/hooks/useSupplyCap';
 import { useErrorToast, useSuccessToast } from '@ui/hooks/useToast';
@@ -32,7 +32,7 @@ export const SupplyTab = ({
   assets,
   comptrollerAddress,
   poolChainId,
-  setIsLoading,
+  setIsLoading
 }: {
   asset: MarketData;
   assets: MarketData[];
@@ -40,7 +40,7 @@ export const SupplyTab = ({
   poolChainId: number;
   setIsLoading: (value: boolean) => void;
 }) => {
-  const { currentSdk, address, currentChain } = useMultiMidas();
+  const { currentSdk, address, currentChain } = useMultiIonic();
   const addRecentTransaction = useAddRecentTransaction();
   if (!currentChain || !currentSdk) throw new Error("SDK doesn't exist");
 
@@ -72,7 +72,7 @@ export const SupplyTab = ({
     asset.underlyingToken,
     currentSdk.chainSpecificAddresses.W_TOKEN,
     myBalance,
-    myNativeBalance,
+    myNativeBalance
   ]);
 
   const optionToSwap = useMemo(() => {
@@ -86,13 +86,13 @@ export const SupplyTab = ({
     asset.underlyingToken,
     currentSdk?.chainSpecificAddresses.W_TOKEN,
     myBalance,
-    myNativeBalance,
+    myNativeBalance
   ]);
 
   const { data: supplyCap } = useSupplyCap({
     chainId: poolChainId,
     comptroller: comptrollerAddress,
-    market: asset,
+    market: asset
   });
 
   const { data: maxSupplyAmount, isLoading } = useMaxSupplyAmount(
@@ -132,7 +132,7 @@ export const SupplyTab = ({
     const sentryProperties = {
       chainId: currentSdk.chainId,
       comptroller: comptrollerAddress,
-      token: asset.cToken,
+      token: asset.cToken
     };
 
     setIsLoading(true);
@@ -156,23 +156,23 @@ export const SupplyTab = ({
 
           addRecentTransaction({
             description: `Wrap ${nativeSymbol}`,
-            hash: tx.hash,
+            hash: tx.hash
           });
           _steps[0] = {
             ..._steps[0],
-            txHash: tx.hash,
+            txHash: tx.hash
           };
           setConfirmedSteps([..._steps]);
           await tx.wait();
           _steps[0] = {
             ..._steps[0],
             done: true,
-            txHash: tx.hash,
+            txHash: tx.hash
           };
           setConfirmedSteps([..._steps]);
           successToast({
             description: 'Successfully Wrapped!',
-            id: 'Wrapped - ' + Math.random().toString(),
+            id: 'Wrapped - ' + Math.random().toString()
           });
         } catch (error) {
           setFailedStep(1);
@@ -192,11 +192,11 @@ export const SupplyTab = ({
 
           addRecentTransaction({
             description: `Approve ${asset.underlyingSymbol}`,
-            hash: tx.hash,
+            hash: tx.hash
           });
           _steps[optionToWrap ? 1 : 0] = {
             ..._steps[optionToWrap ? 1 : 0],
-            txHash: tx.hash,
+            txHash: tx.hash
           };
           setConfirmedSteps([..._steps]);
 
@@ -205,18 +205,18 @@ export const SupplyTab = ({
           _steps[optionToWrap ? 1 : 0] = {
             ..._steps[optionToWrap ? 1 : 0],
             done: true,
-            txHash: tx.hash,
+            txHash: tx.hash
           };
           setConfirmedSteps([..._steps]);
           successToast({
             description: 'Successfully Approved!',
-            id: 'Approved - ' + Math.random().toString(),
+            id: 'Approved - ' + Math.random().toString()
           });
         } else {
           _steps[optionToWrap ? 1 : 0] = {
             ..._steps[optionToWrap ? 1 : 0],
             desc: 'Already approved!',
-            done: true,
+            done: true
           };
           setConfirmedSteps([..._steps]);
         }
@@ -230,11 +230,11 @@ export const SupplyTab = ({
           const tx = await currentSdk.enterMarkets(asset.cToken, comptrollerAddress);
           addRecentTransaction({
             description: `Entered ${asset.underlyingSymbol} market`,
-            hash: tx.hash,
+            hash: tx.hash
           });
           _steps[optionToWrap ? 2 : 1] = {
             ..._steps[optionToWrap ? 2 : 1],
-            txHash: tx.hash,
+            txHash: tx.hash
           };
           setConfirmedSteps([..._steps]);
 
@@ -243,12 +243,12 @@ export const SupplyTab = ({
           _steps[optionToWrap ? 2 : 1] = {
             ..._steps[optionToWrap ? 2 : 1],
             done: true,
-            txHash: tx.hash,
+            txHash: tx.hash
           };
           setConfirmedSteps([..._steps]);
           successToast({
             description: 'Collateral enabled!',
-            id: 'Collateral enabled - ' + Math.random().toString(),
+            id: 'Collateral enabled - ' + Math.random().toString()
           });
         } catch (error) {
           setFailedStep(optionToWrap ? 3 : 2);
@@ -266,7 +266,7 @@ export const SupplyTab = ({
         } else {
           addRecentTransaction({
             description: `${asset.underlyingSymbol} Token Supply`,
-            hash: tx.hash,
+            hash: tx.hash
           });
           _steps[
             optionToWrap && enableAsCollateral ? 3 : optionToWrap || enableAsCollateral ? 2 : 1
@@ -274,7 +274,7 @@ export const SupplyTab = ({
             ..._steps[
               optionToWrap && enableAsCollateral ? 3 : optionToWrap || enableAsCollateral ? 2 : 1
             ],
-            txHash: tx.hash,
+            txHash: tx.hash
           };
           setConfirmedSteps([..._steps]);
 
@@ -294,12 +294,12 @@ export const SupplyTab = ({
               optionToWrap && enableAsCollateral ? 3 : optionToWrap || enableAsCollateral ? 2 : 1
             ],
             done: true,
-            txHash: tx.hash,
+            txHash: tx.hash
           };
           setConfirmedSteps([..._steps]);
           successToast({
             description: 'Successfully supplied!',
-            id: 'Supply - ' + Math.random().toString(),
+            id: 'Supply - ' + Math.random().toString()
           });
         }
       } catch (error) {
@@ -311,7 +311,7 @@ export const SupplyTab = ({
     } catch (error) {
       const sentryInfo = {
         contextName: 'Supply - Minting',
-        properties: sentryProperties,
+        properties: sentryProperties
       };
       handleGenericError({ error, sentryInfo, toast: errorToast });
     }
@@ -365,8 +365,8 @@ export const SupplyTab = ({
                 {
                   text: `You don't have enough ${
                     asset.originalSymbol ?? asset.underlyingSymbol
-                  } token in wallet, You might need to swap to get this token`,
-                },
+                  } token in wallet, You might need to swap to get this token`
+                }
               ]}
             />
           ) : null}
@@ -415,11 +415,11 @@ export const SupplyTab = ({
               text: `${smallFormatter(supplyCap.tokenCap)} ${
                 asset.underlyingSymbol
               } / ${smallFormatter(supplyCap.tokenCap)} ${asset.underlyingSymbol}`,
-              textProps: { display: 'block', fontWeight: 'bold' },
+              textProps: { display: 'block', fontWeight: 'bold' }
             },
             {
-              text: 'The maximum supply of assets for this asset has been reached. Once assets are withdrawn or the limit is increased you can again supply to this market.',
-            },
+              text: 'The maximum supply of assets for this asset has been reached. Once assets are withdrawn or the limit is increased you can again supply to this market.'
+            }
           ]}
         />
       )}
