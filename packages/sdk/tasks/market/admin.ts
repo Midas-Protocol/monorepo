@@ -4,8 +4,8 @@ import { task, types } from "hardhat/config";
 
 import { Comptroller } from "../../typechain/Comptroller";
 import { ComptrollerFirstExtension } from "../../typechain/ComptrollerFirstExtension";
-import { CToken } from "../../typechain/CToken";
-import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
+import { ICErc20 } from "../../typechain/ICErc20";
+import { PoolDirectory } from "../../typechain/PoolDirectory";
 
 export default task("market:unsupport", "Unsupport a market")
   .addParam("comptroller", "Comptroller Address", undefined, types.string)
@@ -13,8 +13,8 @@ export default task("market:unsupport", "Unsupport a market")
   .setAction(async (taskArgs, { ethers }) => {
     const signer = await ethers.getNamedSigner("deployer");
 
-    const midasSdkModule = await import("../midasSdk");
-    const sdk = await midasSdkModule.getOrCreateMidas();
+    const ionicSdkModule = await import("../ionicSdk");
+    const sdk = await ionicSdkModule.getOrCreateIonic();
 
     const comptroller = await sdk.createComptroller(taskArgs.comptroller, signer);
     const tx = await comptroller._unsupportMarket(taskArgs.ctoken);
@@ -28,7 +28,7 @@ task("market:set:ltv", "Set the LTV (loan to value / collateral factor) of a mar
   .setAction(async ({ marketAddress, ltv }, { ethers }) => {
     const signer = await ethers.getNamedSigner("deployer");
 
-    const market: CToken = (await ethers.getContractAt("CToken.sol:CToken", marketAddress)) as CToken;
+    const market = (await ethers.getContractAt("ICErc20", marketAddress)) as ICErc20;
     const poolAddress = await market.callStatic.comptroller();
     const pool = (await ethers.getContractAt("Comptroller.sol:Comptroller", poolAddress, signer)) as Comptroller;
 
@@ -53,7 +53,7 @@ task("market:mint-pause", "Pauses minting on a market")
 
     for (const marketAddress of markets) {
       console.log(`Operating on market: ${marketAddress}`);
-      const market: CToken = (await hre.ethers.getContractAt("CToken.sol:CToken", marketAddress, admin)) as CToken;
+      const market = (await hre.ethers.getContractAt("ICErc20", marketAddress, admin)) as ICErc20;
       const comptroller = await market.callStatic.comptroller();
       const pool = (await hre.ethers.getContractAt("Comptroller.sol:Comptroller", comptroller, admin)) as Comptroller;
       const poolExtension = (await hre.ethers.getContractAt(
@@ -99,7 +99,7 @@ task("markets:borrow-pause", "Pauses borrowing on a market")
 
     for (const marketAddress of markets) {
       console.log(`Operating on market: ${marketAddress}`);
-      const market: CToken = (await hre.ethers.getContractAt("CToken.sol:CToken", marketAddress, admin)) as CToken;
+      const market = (await hre.ethers.getContractAt("ICErc20", marketAddress, admin)) as ICErc20;
       const comptroller = await market.callStatic.comptroller();
       const pool = (await hre.ethers.getContractAt("Comptroller.sol:Comptroller", comptroller, admin)) as Comptroller;
       const poolExtension = (await hre.ethers.getContractAt(
@@ -140,7 +140,7 @@ task("markets:all:pause", "Pauses borrowing on a market")
   .setAction(async (taskArgs, hre) => {
     const admin = await hre.ethers.getNamedSigner(taskArgs.admin);
 
-    const fusePoolDirectory = (await hre.ethers.getContract("FusePoolDirectory")) as FusePoolDirectory;
+    const fusePoolDirectory = (await hre.ethers.getContract("PoolDirectory")) as PoolDirectory;
 
     const [, poolData] = await fusePoolDirectory.callStatic.getActivePools();
 
@@ -154,10 +154,10 @@ task("markets:all:pause", "Pauses borrowing on a market")
       const markets = await poolExtension.callStatic.getAllMarkets();
 
       await hre.run("markets:borrow-pause", {
-        markets: markets.join(","),
+        markets: markets.join(",")
       });
       await hre.run("market:mint-pause", {
-        markets: markets.join(","),
+        markets: markets.join(",")
       });
     }
   });

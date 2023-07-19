@@ -8,10 +8,10 @@ import {
   Link,
   Text,
   useColorModeValue,
-  VStack,
+  VStack
 } from '@chakra-ui/react';
-import { STRATEGY_HELP } from '@midas-capital/security';
-import type { Strategy, StrategyScore } from '@midas-capital/types';
+import { STRATEGY_HELP } from '@ionicprotocol/security';
+import type { Strategy, StrategyScore } from '@ionicprotocol/types';
 import { useMemo } from 'react';
 import { BsTriangleFill } from 'react-icons/bs';
 
@@ -25,7 +25,7 @@ import { deployedPlugins, getScanUrlByChainId } from '@ui/utils/networkData';
 export const StrategySafetyScore = ({
   asset,
   poolChainId,
-  strategyScore,
+  strategyScore
 }: {
   asset: MarketData;
   poolChainId: number;

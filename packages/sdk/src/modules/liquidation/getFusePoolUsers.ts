@@ -1,11 +1,11 @@
 import { BigNumber, ethers } from "ethers";
 
-import { FusePoolLens as FusePoolLensType } from "../../../typechain/FusePoolLens";
-import { MidasSdk } from "../../MidasSdk";
+import { PoolLens } from "../../../typechain/PoolLens";
+import { IonicSdk } from "../../IonicSdk";
 
-import { ErroredPool, FusePoolUserStruct, PublicPoolUserWithData } from "./utils";
+import { ErroredPool, PoolUserStruct, PublicPoolUserWithData } from "./utils";
 
-function getUserTotals(assets: FusePoolLensType.FusePoolAssetStructOutput[]): {
+function getUserTotals(assets: PoolLens.PoolAssetStructOutput[]): {
   totalBorrow: BigNumber;
   totalCollateral: BigNumber;
 } {
@@ -34,16 +34,16 @@ function getPositionHealth(totalBorrow: BigNumber, totalCollateral: BigNumber): 
 }
 
 async function getFusePoolUsers(
-  sdk: MidasSdk,
+  sdk: IonicSdk,
   comptroller: string,
   maxHealth: BigNumber
 ): Promise<PublicPoolUserWithData> {
-  const poolUsers: FusePoolUserStruct[] = [];
+  const poolUsers: PoolUserStruct[] = [];
   const comptrollerInstance = sdk.createComptroller(comptroller);
   const users = await comptrollerInstance.callStatic.getAllBorrowers();
   for (const user of users) {
-    const assets = await sdk.contracts.FusePoolLens.callStatic.getPoolAssetsWithData(comptrollerInstance.address, {
-      from: user,
+    const assets = await sdk.contracts.PoolLens.callStatic.getPoolAssetsWithData(comptrollerInstance.address, {
+      from: user
     });
 
     const { totalBorrow, totalCollateral } = getUserTotals(assets);
@@ -57,11 +57,11 @@ async function getFusePoolUsers(
     comptroller,
     users: poolUsers,
     closeFactor: await comptrollerInstance.callStatic.closeFactorMantissa(),
-    liquidationIncentive: await comptrollerInstance.callStatic.liquidationIncentiveMantissa(),
+    liquidationIncentive: await comptrollerInstance.callStatic.liquidationIncentiveMantissa()
   };
 }
 
-async function getPoolsWithShortfall(sdk: MidasSdk, comptroller: string) {
+async function getPoolsWithShortfall(sdk: IonicSdk, comptroller: string) {
   const comptrollerInstance = sdk.createComptroller(comptroller);
   const users = await comptrollerInstance.callStatic.getAllBorrowers();
   const promises = users.map((user) => {
@@ -83,11 +83,11 @@ async function getPoolsWithShortfall(sdk: MidasSdk, comptroller: string) {
 }
 
 export default async function getAllFusePoolUsers(
-  sdk: MidasSdk,
+  sdk: IonicSdk,
   maxHealth: BigNumber,
   excludedComptrollers: Array<string>
 ): Promise<[PublicPoolUserWithData[], Array<ErroredPool>]> {
-  const [, allPools] = await sdk.contracts.FusePoolDirectory.callStatic.getActivePools();
+  const [, allPools] = await sdk.contracts.PoolDirectory.callStatic.getActivePools();
   const fusePoolUsers: PublicPoolUserWithData[] = [];
   const erroredPools: Array<ErroredPool> = [];
   for (const pool of allPools) {

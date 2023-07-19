@@ -1,4 +1,4 @@
-import { OracleTypes } from "@midas-capital/types";
+import { OracleTypes } from "@ionicprotocol/types";
 
 const baseOracles = [OracleTypes.FixedNativePriceOracle, OracleTypes.MasterPriceOracle, OracleTypes.SimplePriceOracle];
 
@@ -8,7 +8,7 @@ const oracles: OracleTypes[] = [
   OracleTypes.CurveLpTokenPriceOracleNoRegistry,
   OracleTypes.UniswapLpTokenPriceOracle,
   OracleTypes.UniswapTwapPriceOracleV2,
-  OracleTypes.SaddleLpPriceOracle,
+  OracleTypes.SaddleLpPriceOracle
 ];
 
 export default oracles;

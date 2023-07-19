@@ -1,53 +1,50 @@
 import { Contract, ContractInterface } from "ethers";
 
-import { MidasBaseConstructor } from "..";
-import CErc20DelegateABI from "../../abis/CErc20Delegate";
-import CErc20PluginRewardsDelegateABI from "../../abis/CErc20PluginRewardsDelegate";
+import { IonicBaseConstructor } from "..";
 import CompoundMarketERC4626ABI from "../../abis/CompoundMarketERC4626";
 import ComptrollerABI from "../../abis/Comptroller";
 import ComptrollerFirstExtensionABI from "../../abis/ComptrollerFirstExtension";
-import CTokenFirstExtensionABI from "../../abis/CTokenFirstExtension";
 import FlywheelStaticRewardsABI from "../../abis/FlywheelStaticRewards";
-import FusePoolLensSecondaryABI from "../../abis/FusePoolLensSecondary";
+import ICErc20ABI from "../../abis/ICErc20";
+import ICErc20PluginRewardsABI from "../../abis/ICErc20PluginRewards";
 import ILeveredPositionFactoryABI from "../../abis/ILeveredPositionFactory";
 import ILiquidatorsRegistryABI from "../../abis/ILiquidatorsRegistry";
+import IonicFlywheelABI from "../../abis/IonicFlywheel";
+import IonicFlywheelLensRouterABI from "../../abis/IonicFlywheelLensRouter";
 import JumpRateModelABI from "../../abis/JumpRateModel";
 import LeveredPositionABI from "../../abis/LeveredPosition";
 import LeveredPositionsLensABI from "../../abis/LeveredPositionsLens";
 import MasterPriceOracleABI from "../../abis/MasterPriceOracle";
-import MidasFlywheelABI from "../../abis/MidasFlywheel";
-import MidasFlywheelLensRouterABI from "../../abis/MidasFlywheelLensRouter";
 import OptimizedAPRVaultFirstExtensionABI from "../../abis/OptimizedAPRVaultFirstExtension";
 import OptimizedAPRVaultSecondExtensionABI from "../../abis/OptimizedAPRVaultSecondExtension";
 import OptimizedVaultsRegistryABI from "../../abis/OptimizedVaultsRegistry";
+import PoolLensSecondaryABI from "../../abis/PoolLensSecondary";
 import UnitrollerABI from "../../abis/Unitroller";
-import { CErc20Delegate } from "../../typechain/CErc20Delegate";
-import { CErc20PluginRewardsDelegate } from "../../typechain/CErc20PluginRewardsDelegate";
 import { CompoundMarketERC4626 } from "../../typechain/CompoundMarketERC4626";
 import { Comptroller } from "../../typechain/Comptroller";
 import { ComptrollerFirstExtension } from "../../typechain/ComptrollerFirstExtension";
-import { CTokenFirstExtension } from "../../typechain/CTokenFirstExtension";
 import { FlywheelStaticRewards } from "../../typechain/FlywheelStaticRewards";
-import { FusePoolLensSecondary } from "../../typechain/FusePoolLensSecondary";
+import { ICErc20 } from "../../typechain/ICErc20";
+import { ICErc20PluginRewards } from "../../typechain/ICErc20PluginRewards";
 import { ILeveredPositionFactory } from "../../typechain/ILeveredPositionFactory";
 import { ILiquidatorsRegistry } from "../../typechain/ILiquidatorsRegistry";
+import { IonicFlywheel } from "../../typechain/IonicFlywheel";
+import { IonicFlywheelLensRouter } from "../../typechain/IonicFlywheelLensRouter";
 import { JumpRateModel } from "../../typechain/JumpRateModel";
 import { LeveredPosition } from "../../typechain/LeveredPosition";
 import { LeveredPositionsLens } from "../../typechain/LeveredPositionsLens";
 import { MasterPriceOracle } from "../../typechain/MasterPriceOracle";
-import { MidasFlywheel } from "../../typechain/MidasFlywheel";
-import { MidasFlywheelLensRouter } from "../../typechain/MidasFlywheelLensRouter";
 import { OptimizedAPRVaultFirstExtension } from "../../typechain/OptimizedAPRVaultFirstExtension";
 import { OptimizedAPRVaultSecondExtension } from "../../typechain/OptimizedAPRVaultSecondExtension";
 import { OptimizedVaultsRegistry } from "../../typechain/OptimizedVaultsRegistry";
+import { PoolLensSecondary } from "../../typechain/PoolLensSecondary";
 import { Unitroller } from "../../typechain/Unitroller";
-import { SignerOrProvider } from "../MidasSdk";
+import { SignerOrProvider } from "../IonicSdk";
 
 type ComptrollerWithExtensions = Comptroller & ComptrollerFirstExtension;
-type CTokenWithExtensions = CErc20Delegate & CTokenFirstExtension;
 type OptimizedAPRVaultWithExtensions = OptimizedAPRVaultFirstExtension & OptimizedAPRVaultSecondExtension;
 
-export function withCreateContracts<TBase extends MidasBaseConstructor>(Base: TBase) {
+export function withCreateContracts<TBase extends IonicBaseConstructor>(Base: TBase) {
   return class CreateContracts extends Base {
     createContractInstance<T extends Contract>(abi: ContractInterface) {
       return (address: string, signerOrProvider: SignerOrProvider = this.signer) =>
@@ -55,7 +52,7 @@ export function withCreateContracts<TBase extends MidasBaseConstructor>(Base: TB
     }
 
     createUnitroller = this.createContractInstance<Unitroller>(UnitrollerABI);
-    createMidasFlywheel = this.createContractInstance<MidasFlywheel>(MidasFlywheelABI);
+    createIonicFlywheel = this.createContractInstance<IonicFlywheel>(IonicFlywheelABI);
     createFlywheelStaticRewards = this.createContractInstance<FlywheelStaticRewards>(FlywheelStaticRewardsABI);
     createJumpRateModel = this.createContractInstance<JumpRateModel>(JumpRateModelABI);
 
@@ -71,24 +68,12 @@ export function withCreateContracts<TBase extends MidasBaseConstructor>(Base: TB
       return new Contract(comptrollerAddress, ComptrollerABI, signerOrProvider) as ComptrollerWithExtensions;
     }
 
-    createCTokenWithExtensions(address: string, signerOrProvider: SignerOrProvider = this.provider) {
-      if (this.chainDeployment.CTokenFirstExtension) {
-        return new Contract(
-          address,
-          [...CErc20DelegateABI, ...CTokenFirstExtensionABI],
-          signerOrProvider
-        ) as CTokenWithExtensions;
-      }
-
-      return new Contract(address, CErc20DelegateABI, signerOrProvider) as CTokenWithExtensions;
+    createICErc20(address: string, signerOrProvider: SignerOrProvider = this.provider) {
+      return new Contract(address, ICErc20ABI, signerOrProvider) as ICErc20;
     }
 
-    createCErc20PluginRewardsDelegate(cTokenAddress: string, signerOrProvider: SignerOrProvider = this.provider) {
-      return new Contract(
-        cTokenAddress,
-        CErc20PluginRewardsDelegateABI,
-        signerOrProvider
-      ) as CErc20PluginRewardsDelegate;
+    createICErc20PluginRewards(cTokenAddress: string, signerOrProvider: SignerOrProvider = this.provider) {
+      return new Contract(cTokenAddress, ICErc20PluginRewardsABI, signerOrProvider) as ICErc20PluginRewards;
     }
 
     createMasterPriceOracle(signerOrProvider: SignerOrProvider = this.provider) {
@@ -119,12 +104,12 @@ export function withCreateContracts<TBase extends MidasBaseConstructor>(Base: TB
       ) as OptimizedVaultsRegistry;
     }
 
-    createMidasFlywheelLensRouter(signerOrProvider: SignerOrProvider = this.provider) {
+    createIonicFlywheelLensRouter(signerOrProvider: SignerOrProvider = this.provider) {
       return new Contract(
-        this.chainDeployment.MidasFlywheelLensRouter.address,
-        MidasFlywheelLensRouterABI,
+        this.chainDeployment.IonicFlywheelLensRouter.address,
+        IonicFlywheelLensRouterABI,
         signerOrProvider
-      ) as MidasFlywheelLensRouter;
+      ) as IonicFlywheelLensRouter;
     }
 
     createLeveredPositionFactory(signerOrProvider: SignerOrProvider = this.provider) {
@@ -147,12 +132,12 @@ export function withCreateContracts<TBase extends MidasBaseConstructor>(Base: TB
       ) as LeveredPositionsLens;
     }
 
-    createFusePoolLensSecondary(signerOrProvider: SignerOrProvider = this.provider) {
+    createPoolLensSecondary(signerOrProvider: SignerOrProvider = this.provider) {
       return new Contract(
-        this.chainDeployment.FusePoolLensSecondary.address,
-        FusePoolLensSecondaryABI,
+        this.chainDeployment.PoolLensSecondary.address,
+        PoolLensSecondaryABI,
         signerOrProvider
-      ) as FusePoolLensSecondary;
+      ) as PoolLensSecondary;
     }
 
     createILiquidatorsRegistry(signerOrProvider: SignerOrProvider = this.provider) {
@@ -165,4 +150,4 @@ export function withCreateContracts<TBase extends MidasBaseConstructor>(Base: TB
   };
 }
 
-export type CreateContractsModule = ReturnType<typeof withCreateContracts<MidasBaseConstructor>>;
+export type CreateContractsModule = ReturnType<typeof withCreateContracts<IonicBaseConstructor>>;

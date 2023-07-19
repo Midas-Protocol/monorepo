@@ -1,15 +1,15 @@
 import { TransactionRequest } from "@ethersproject/providers";
-import { FuseAsset, LiquidationStrategy } from "@midas-capital/types";
+import { FuseAsset, LiquidationStrategy } from "@ionicprotocol/types";
 import { BigNumber, BigNumberish, utils } from "ethers";
 
-import { FusePoolLens } from "../../../typechain/FusePoolLens";
-import { MidasBase } from "../../MidasSdk";
+import { PoolLens } from "../../../typechain/PoolLens";
+import { IonicBase } from "../../IonicSdk";
 
 export const SCALE_FACTOR_ONE_18_WEI = BigNumber.from(10).pow(18);
 export const SCALE_FACTOR_UNDERLYING_DECIMALS = (asset: FuseAsset) =>
   BigNumber.from(10).pow(18 - asset.underlyingDecimals.toNumber());
 
-export type ExtendedFusePoolAssetStructOutput = FusePoolLens.FusePoolAssetStructOutput & {
+export type ExtendedPoolAssetStructOutput = PoolLens.PoolAssetStructOutput & {
   borrowBalanceWei?: BigNumber;
   supplyBalanceWei?: BigNumber;
 };
@@ -20,8 +20,8 @@ export type EncodedLiquidationTx = {
   value: BigNumber;
 };
 
-export type FusePoolUserWithAssets = {
-  assets: ExtendedFusePoolAssetStructOutput[];
+export type PoolUserWithAssets = {
+  assets: ExtendedPoolAssetStructOutput[];
   account: string;
   totalBorrow: BigNumberish;
   totalCollateral: BigNumberish;
@@ -41,7 +41,7 @@ export type ErroredPool = {
   error?: any;
 };
 
-export type FusePoolUserStruct = {
+export type PoolUserStruct = {
   account: string;
   totalBorrow: BigNumberish;
   totalCollateral: BigNumberish;
@@ -50,12 +50,12 @@ export type FusePoolUserStruct = {
 
 export type PublicPoolUserWithData = {
   comptroller: string;
-  users: FusePoolUserStruct[];
+  users: PoolUserStruct[];
   closeFactor: BigNumber;
   liquidationIncentive: BigNumber;
 };
 
-export async function fetchGasLimitForTransaction(sdk: MidasBase, method: string, tx: TransactionRequest) {
+export async function fetchGasLimitForTransaction(sdk: IonicBase, method: string, tx: TransactionRequest) {
   try {
     return (await sdk.provider.estimateGas(tx)).mul(11).div(10);
   } catch (error) {
@@ -64,8 +64,8 @@ export async function fetchGasLimitForTransaction(sdk: MidasBase, method: string
 }
 
 export const logLiquidation = (
-  sdk: MidasBase,
-  borrower: FusePoolUserWithAssets,
+  sdk: IonicBase,
+  borrower: PoolUserWithAssets,
   exchangeToTokenAddress: string,
   liquidationAmount: BigNumber,
   liquidationTokenSymbol: string,

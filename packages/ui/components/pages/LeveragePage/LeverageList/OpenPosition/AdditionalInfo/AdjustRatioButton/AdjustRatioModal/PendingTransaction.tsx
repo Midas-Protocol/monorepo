@@ -1,5 +1,5 @@
 import { Box, Button, Flex, Icon, Text, VStack } from '@chakra-ui/react';
-import type { LeveredCollateral } from '@midas-capital/types';
+import type { LeveredCollateral } from '@ionicprotocol/types';
 import { BsFillCheckCircleFill, BsFillXCircleFill } from 'react-icons/bs';
 
 import { Column } from '@ui/components/shared/Flex';
@@ -16,7 +16,7 @@ export const PendingTransaction = ({
   isAdjusting,
   chainId,
   collateralAsset,
-  leverageValue,
+  leverageValue
 }: {
   activeStep: number;
   chainId: number;
@@ -34,7 +34,7 @@ export const PendingTransaction = ({
     successToast,
     underlyingAddress: collateralAsset.underlyingToken,
     underlyingDecimals: Number(collateralAsset.underlyingDecimals),
-    underlyingSymbol: collateralAsset.symbol,
+    underlyingSymbol: collateralAsset.symbol
   });
 
   return (

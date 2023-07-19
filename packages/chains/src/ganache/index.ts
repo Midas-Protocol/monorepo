@@ -1,4 +1,4 @@
-import { ChainConfig, SupportedChains } from "@midas-capital/types";
+import { ChainConfig, SupportedChains } from "@ionicprotocol/types";
 
 import deployments from "../../deployments/ganache.json";
 
@@ -23,7 +23,7 @@ const chainConfig: ChainConfig = {
   deployedPlugins,
   redemptionStrategies,
   fundingStrategies,
-  chainDeployments: deployments.contracts,
+  chainDeployments: deployments.contracts
 };
 
 export default chainConfig;

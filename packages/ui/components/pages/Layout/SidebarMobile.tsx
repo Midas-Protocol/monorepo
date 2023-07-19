@@ -7,7 +7,7 @@ import {
   Link,
   Stack,
   Text,
-  useColorMode,
+  useColorMode
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -19,14 +19,14 @@ import { SiVault } from 'react-icons/si';
 import Footer from '@ui/components/pages/Layout/Footer';
 import { config } from '@ui/config/index';
 import { FEATURE_REQUESTS_URL } from '@ui/constants/index';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useColors } from '@ui/hooks/useColors';
 
 export const SidebarMobile = ({ onClose }: { onClose: () => void }) => {
   const router = useRouter();
   const { colorMode } = useColorMode();
   const { cCard, cSolidBtn } = useColors();
-  const { address, setGlobalLoading } = useMultiMidas();
+  const { address, setGlobalLoading } = useMultiIonic();
   const [isEnabledLeverageMenu, setIsEnabledLeverageMenu] = useState<boolean>(false);
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export const SidebarMobile = ({ onClose }: { onClose: () => void }) => {
           top={2}
         >
           <Image
-            alt="Midas Capital"
+            alt="Ionic Protocol"
             src={colorMode === 'light' ? '/images/midas-light.svg' : '/images/midas-dark.svg'}
             width={44}
           />
@@ -59,7 +59,7 @@ export const SidebarMobile = ({ onClose }: { onClose: () => void }) => {
       <Flex
         _hover={{
           bg: cCard.hoverBgColor,
-          color: cCard.txtColor,
+          color: cCard.txtColor
         }}
         align="center"
         bg={
@@ -85,7 +85,7 @@ export const SidebarMobile = ({ onClose }: { onClose: () => void }) => {
       <Flex
         _hover={{
           bg: cCard.hoverBgColor,
-          color: cCard.txtColor,
+          color: cCard.txtColor
         }}
         align="center"
         bg={router.pathname === '/vaults' ? cSolidBtn.primary.bgColor : undefined}
@@ -108,7 +108,7 @@ export const SidebarMobile = ({ onClose }: { onClose: () => void }) => {
         <Flex
           _hover={{
             bg: cCard.hoverBgColor,
-            color: cCard.txtColor,
+            color: cCard.txtColor
           }}
           align="center"
           bg={router.pathname === '/leverage' ? cSolidBtn.primary.bgColor : undefined}
@@ -132,7 +132,7 @@ export const SidebarMobile = ({ onClose }: { onClose: () => void }) => {
         <Flex
           _hover={{
             bg: cCard.hoverBgColor,
-            color: cCard.txtColor,
+            color: cCard.txtColor
           }}
           align="center"
           bg={router.pathname.includes('/account') ? cSolidBtn.primary.bgColor : undefined}
@@ -155,7 +155,7 @@ export const SidebarMobile = ({ onClose }: { onClose: () => void }) => {
       <Flex
         _hover={{
           bg: cCard.hoverBgColor,
-          color: cCard.txtColor,
+          color: cCard.txtColor
         }}
         align="center"
         bg={router.pathname === '/create-pool' ? cSolidBtn.primary.bgColor : undefined}
@@ -183,7 +183,7 @@ export const SidebarMobile = ({ onClose }: { onClose: () => void }) => {
         <Flex
           _hover={{
             bg: cCard.hoverBgColor,
-            color: cCard.txtColor,
+            color: cCard.txtColor
           }}
           align="center"
           borderRadius="lg"

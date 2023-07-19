@@ -1,21 +1,21 @@
-import { NativePricedFuseAsset, SupportedChains } from '@midas-capital/types';
+import { NativePricedFuseAsset, SupportedChains } from '@ionicprotocol/types';
 import { functionsAlert } from '../alert';
 import { environment, supabase } from '../config';
-import { MidasSdk, filterOnlyObjectProperties } from '@midas-capital/sdk';
+import { IonicSdk, filterOnlyObjectProperties } from '@ionicprotocol/sdk';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Handler } from '@netlify/functions';
-import { chainIdToConfig } from '@midas-capital/chains';
+import { chainIdToConfig } from '@ionicprotocol/chains';
 import { utils } from 'ethers';
 
 export const updateAssetTvl = async (chainId: SupportedChains) => {
   try {
     const config = chainIdToConfig[chainId];
-    const sdk = new MidasSdk(
+    const sdk = new IonicSdk(
       new JsonRpcProvider(config.specificParams.metadata.rpcUrls.default.http[0]),
       config
     );
 
-    const [poolIndexes, pools] = await sdk.contracts.FusePoolDirectory.callStatic.getActivePools();
+    const [poolIndexes, pools] = await sdk.contracts.PoolDirectory.callStatic.getActivePools();
 
     if (!pools.length || !poolIndexes.length) {
       throw `Error occurred during saving assets tvl to database: pools not found`;
@@ -32,9 +32,7 @@ export const updateAssetTvl = async (chainId: SupportedChains) => {
     await Promise.all(
       pools.map(async ({ comptroller }) => {
         const assets: NativePricedFuseAsset[] = (
-          await sdk.contracts.FusePoolLens.callStatic
-            .getPoolAssetsWithData(comptroller)
-            .catch(() => [])
+          await sdk.contracts.PoolLens.callStatic.getPoolAssetsWithData(comptroller).catch(() => [])
         ).map(filterOnlyObjectProperties);
 
         totalAssets.push(...assets);
@@ -44,7 +42,7 @@ export const updateAssetTvl = async (chainId: SupportedChains) => {
     await Promise.all(
       totalAssets.map(async (asset) => {
         try {
-          const cTokenContract = sdk.createCTokenWithExtensions(asset.cToken);
+          const cTokenContract = sdk.createICErc20(asset.cToken);
           const tvlUnderlyingBig = await cTokenContract.callStatic.getTotalUnderlyingSupplied();
           const tvlUnderlying = Number(
             utils.formatUnits(tvlUnderlyingBig, asset.underlyingDecimals)

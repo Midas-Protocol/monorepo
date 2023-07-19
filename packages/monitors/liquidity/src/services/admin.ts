@@ -1,5 +1,5 @@
-import { MidasSdk } from "@midas-capital/sdk";
-import { CErc20Delegate } from "@midas-capital/sdk/dist/cjs/typechain/CErc20Delegate";
+import { IonicSdk } from "@ionicprotocol/sdk";
+import { CErc20Delegate } from "@ionicprotocol/sdk/dist/cjs/typechain/CErc20Delegate";
 import { constants, Contract, logger, Signer } from "ethers";
 
 import { baseConfig } from "../config";
@@ -8,9 +8,9 @@ import { ComptrollerWithExtension } from "../types";
 export class AdminService {
   admin: Signer;
   adminAddress: string;
-  sdk: MidasSdk;
+  sdk: IonicSdk;
 
-  constructor(sdk: MidasSdk) {
+  constructor(sdk: IonicSdk) {
     this.adminAddress = baseConfig.adminAccount;
     this.admin = sdk.signer;
     this.sdk = sdk;
@@ -23,7 +23,7 @@ export class AdminService {
   async pauseAllPoolsWithUnderlying(pools: Array<ComptrollerWithExtension>, underlying: string) {
     for (const pool of pools) {
       const cTokenAddress = await pool.callStatic.cTokensByUnderlying(underlying);
-      const cToken = this.sdk.createCTokenWithExtensions(cTokenAddress, this.admin);
+      const cToken = this.sdk.createICErc20(cTokenAddress, this.admin);
       await this.pauseMarketActivity(pool, cToken);
     }
   }

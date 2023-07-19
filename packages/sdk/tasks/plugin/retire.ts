@@ -1,9 +1,8 @@
 import { constants } from "ethers";
 import { task, types } from "hardhat/config";
 
-import { CErc20PluginDelegate } from "../../typechain/CErc20PluginDelegate";
-import { FuseFeeDistributor } from "../../typechain/FuseFeeDistributor";
-import { MidasERC4626 } from "../../typechain/MidasERC4626";
+import { ICErc20Plugin } from "../../typechain/ICErc20Plugin";
+import { IonicERC4626 as IonicERC4626 } from "../../typechain/IonicERC4626";
 
 export default task("plugin:retire", "Retires a plugin from its market")
   .addParam("market", "The address of the market whose plugin to retire", undefined, types.string)
@@ -11,27 +10,12 @@ export default task("plugin:retire", "Retires a plugin from its market")
     let tx;
     const deployer = await ethers.getNamedSigner("deployer");
 
-    const pluginDelegate = await ethers.getContract("CErc20PluginDelegate");
     const simpleDelegate = await ethers.getContract("CErc20Delegate");
 
-    const ffd = (await ethers.getContract("FuseFeeDistributor")) as FuseFeeDistributor;
-
-    const downgradeWhitelisted = await ffd.callStatic.cErc20DelegateWhitelist(
-      pluginDelegate.address,
-      simpleDelegate.address,
-      false
-    );
-    if (!downgradeWhitelisted) {
-      tx = await ffd._editCErc20DelegateWhitelist([pluginDelegate.address], [simpleDelegate.address], [false], [true]);
-      console.log(`whitelisting the downgrade with tx ${tx.hash}`);
-      await tx.wait();
-      console.log(`whitelisted`);
-    }
-
-    const pluginMarket = (await ethers.getContractAt("CErc20PluginDelegate", market)) as CErc20PluginDelegate;
+    const pluginMarket = (await ethers.getContractAt("ICErc20Plugin", market)) as ICErc20Plugin;
     const pluginAddress = await pluginMarket.callStatic.plugin();
 
-    const plugin = (await ethers.getContractAt("MidasERC4626", pluginAddress, deployer)) as MidasERC4626;
+    const plugin = (await ethers.getContractAt("IonicERC4626", pluginAddress, deployer)) as IonicERC4626;
     tx = await plugin.emergencyWithdrawAndPause();
     console.log(`pausing the plugin with tx ${tx.hash}`);
     await tx.wait();
@@ -44,7 +28,7 @@ export default task("plugin:retire", "Retires a plugin from its market")
     const implBefore = await pluginMarket.callStatic.implementation();
 
     const becomeImplementationData = new ethers.utils.AbiCoder().encode(["address"], [constants.AddressZero]);
-    tx = await pluginMarket._setImplementationSafe(simpleDelegate.address, false, becomeImplementationData);
+    tx = await pluginMarket._setImplementationSafe(simpleDelegate.address, becomeImplementationData);
     console.log(`downgrading with tx ${tx.hash}`);
     await tx.wait();
 
@@ -73,7 +57,7 @@ task("plugins:beefy:retire", "Retires the Beefy plugin that are marked as EOL").
     for (let i = 0; i < markets.length; i++) {
       const market = markets[i];
       await run("retire:plugin", {
-        market,
+        market
       });
     }
   }

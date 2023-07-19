@@ -4,20 +4,20 @@ import { useState } from 'react';
 
 import { Center } from '@ui/components/shared/Flex';
 import { MidasModal } from '@ui/components/shared/Modal';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useErrorToast, useSuccessToast } from '@ui/hooks/useToast';
 import { handleGenericError } from '@ui/utils/errorHandling';
 
 const TransferOwnershipModal = ({
   isOpen,
   onClose,
-  comptrollerAddress,
+  comptrollerAddress
 }: {
   comptrollerAddress: string;
   isOpen: boolean;
   onClose: () => void;
 }) => {
-  const { currentSdk } = useMultiMidas();
+  const { currentSdk } = useMultiIonic();
   const successToast = useSuccessToast();
   const errorToast = useErrorToast();
   const [isTransferring, setIsTransferring] = useState<boolean>(false);
@@ -39,16 +39,16 @@ const TransferOwnershipModal = ({
 
       successToast({
         description: `${verifiedAddress} can now become the admin of this pool!`,
-        id: 'Transfer ownership - ' + Math.random().toString(),
+        id: 'Transfer ownership - ' + Math.random().toString()
       });
     } catch (error) {
       const sentryProperties = {
         chainId: currentSdk.chainId,
-        newAdmin: verifiedAddress,
+        newAdmin: verifiedAddress
       };
       const sentryInfo = {
         contextName: 'Transferring ownership',
-        properties: sentryProperties,
+        properties: sentryProperties
       };
       handleGenericError({ error, sentryInfo, toast: errorToast });
     } finally {

@@ -8,9 +8,9 @@ import {
   FormLabel,
   HStack,
   Spacer,
-  Text,
+  Text
 } from '@chakra-ui/react';
-import type { NativePricedFuseAsset } from '@midas-capital/types';
+import type { NativePricedFuseAsset } from '@ionicprotocol/types';
 import { useQueryClient } from '@tanstack/react-query';
 import type { ContractTransaction } from 'ethers';
 import { utils } from 'ethers';
@@ -22,7 +22,7 @@ import { Column } from '@ui/components/shared/Flex';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
 import { SliderWithLabel } from '@ui/components/shared/SliderWithLabel';
 import { ADMIN_FEE, ADMIN_FEE_TOOLTIP } from '@ui/constants/index';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useCTokenData } from '@ui/hooks/fuse/useCTokenData';
 import { useExtraPoolInfo } from '@ui/hooks/fuse/useExtraPoolInfo';
 import { useErrorToast, useSuccessToast } from '@ui/hooks/useToast';
@@ -36,7 +36,7 @@ interface AdminFeeProps {
 
 export const AdminFee = ({ comptrollerAddress, selectedAsset, poolChainId }: AdminFeeProps) => {
   const { cToken: cTokenAddress } = selectedAsset;
-  const { currentSdk, currentChain } = useMultiMidas();
+  const { currentSdk, currentChain } = useMultiIonic();
 
   const errorToast = useErrorToast();
   const successToast = useSuccessToast();
@@ -50,11 +50,11 @@ export const AdminFee = ({ comptrollerAddress, selectedAsset, poolChainId }: Adm
     handleSubmit,
     setValue,
     watch,
-    formState: { errors },
+    formState: { errors }
   } = useForm({
     defaultValues: {
-      adminFee: ADMIN_FEE.DEFAULT,
-    },
+      adminFee: ADMIN_FEE.DEFAULT
+    }
   });
 
   const watchAdminFee = Number(watch('adminFee', ADMIN_FEE.DEFAULT));
@@ -69,7 +69,7 @@ export const AdminFee = ({ comptrollerAddress, selectedAsset, poolChainId }: Adm
   const updateAdminFee = async ({ adminFee }: { adminFee: number }) => {
     if (!cTokenAddress || !currentSdk) return;
     setIsUpdating(true);
-    const cToken = currentSdk.createCTokenWithExtensions(cTokenAddress || '', currentSdk.signer);
+    const cToken = currentSdk.createICErc20(cTokenAddress || '', currentSdk.signer);
 
     // 5% -> 0.05 * 1e18
     const bigAdminFee = utils.parseUnits((adminFee / 100).toString());
@@ -87,17 +87,17 @@ export const AdminFee = ({ comptrollerAddress, selectedAsset, poolChainId }: Adm
 
       successToast({
         description: 'Successfully updated admin fee!',
-        id: 'Updated admin fee - ' + Math.random().toString(),
+        id: 'Updated admin fee - ' + Math.random().toString()
       });
     } catch (error) {
       const sentryProperties = {
         chainId: currentSdk.chainId,
         comptroller: comptrollerAddress,
-        token: cTokenAddress,
+        token: cTokenAddress
       };
       const sentryInfo = {
         contextName: 'Updating admin fee',
-        properties: sentryProperties,
+        properties: sentryProperties
       };
       handleGenericError({ error, sentryInfo, toast: errorToast });
     } finally {
@@ -168,13 +168,13 @@ export const AdminFee = ({ comptrollerAddress, selectedAsset, poolChainId }: Adm
                     rules={{
                       max: {
                         message: `Admin fee must be no more than ${ADMIN_FEE.MAX}%`,
-                        value: ADMIN_FEE.MAX,
+                        value: ADMIN_FEE.MAX
                       },
                       min: {
                         message: `Admin fee must be at least ${ADMIN_FEE.MIN}%`,
-                        value: ADMIN_FEE.MIN,
+                        value: ADMIN_FEE.MIN
                       },
-                      required: 'Admin fee is required',
+                      required: 'Admin fee is required'
                     }}
                   />
                   <FormErrorMessage marginBottom="-10px" maxWidth="270px">

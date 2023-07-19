@@ -7,7 +7,7 @@ import {
   HStack,
   Link,
   Text,
-  VStack,
+  VStack
 } from '@chakra-ui/react';
 import type { Row } from '@tanstack/react-table';
 import { useMemo } from 'react';
@@ -17,7 +17,7 @@ import ClaimPoolRewardsButton from '@ui/components/shared/ClaimPoolRewardsButton
 import { ClipboardValueIconButton } from '@ui/components/shared/ClipboardValue';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { usePoolDetails } from '@ui/hooks/fuse/usePoolDetails';
 import { useRewardTokensOfPool } from '@ui/hooks/rewards/useRewardTokensOfPool';
 import { useAllUsdPrices } from '@ui/hooks/useAllUsdPrices';
@@ -28,7 +28,7 @@ import { shortAddress } from '@ui/utils/shortAddress';
 
 export const AdditionalInfo = ({ row }: { row: Row<PoolRowData> }) => {
   const pool: PoolData = row.original.poolName;
-  const { getSdk, address } = useMultiMidas();
+  const { getSdk, address } = useMultiIonic();
   const { data: usdPrices } = useAllUsdPrices();
   const usdPrice = useMemo(() => {
     if (usdPrices && usdPrices[pool.chainId.toString()]) {
@@ -71,7 +71,7 @@ export const AdditionalInfo = ({ row }: { row: Row<PoolRowData> }) => {
         gap={4}
         templateColumns={{
           base: 'repeat(1, 1fr)',
-          lg: 'repeat(2, 1fr)',
+          lg: 'repeat(2, 1fr)'
         }}
         w="100%"
       >
@@ -81,7 +81,7 @@ export const AdditionalInfo = ({ row }: { row: Row<PoolRowData> }) => {
             gap={4}
             templateColumns={{
               base: 'repeat(1, 1fr)',
-              lg: 'repeat(2, 1fr)',
+              lg: 'repeat(2, 1fr)'
             }}
             w="100%"
           >
@@ -129,7 +129,7 @@ export const AdditionalInfo = ({ row }: { row: Row<PoolRowData> }) => {
             gap={4}
             templateColumns={{
               base: 'repeat(1, 1fr)',
-              lg: 'repeat(2, 1fr)',
+              lg: 'repeat(2, 1fr)'
             }}
             w="100%"
           >
@@ -153,7 +153,7 @@ export const AdditionalInfo = ({ row }: { row: Row<PoolRowData> }) => {
             gap={2}
             templateColumns={{
               base: 'repeat(13, 1fr)',
-              lg: 'repeat(13, 1fr)',
+              lg: 'repeat(13, 1fr)'
             }}
             w="100%"
           >
@@ -186,7 +186,7 @@ export const AdditionalInfo = ({ row }: { row: Row<PoolRowData> }) => {
             gap={2}
             templateColumns={{
               base: 'repeat(13, 1fr)',
-              lg: 'repeat(13, 1fr)',
+              lg: 'repeat(13, 1fr)'
             }}
             w="100%"
           >
@@ -217,7 +217,7 @@ export const AdditionalInfo = ({ row }: { row: Row<PoolRowData> }) => {
             gap={2}
             templateColumns={{
               base: 'repeat(13, 1fr)',
-              lg: 'repeat(13, 1fr)',
+              lg: 'repeat(13, 1fr)'
             }}
             w="100%"
           >
@@ -249,7 +249,7 @@ export const AdditionalInfo = ({ row }: { row: Row<PoolRowData> }) => {
             py={2}
             templateColumns={{
               base: 'repeat(13, 1fr)',
-              lg: 'repeat(13, 1fr)',
+              lg: 'repeat(13, 1fr)'
             }}
             w="100%"
           >

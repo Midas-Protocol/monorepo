@@ -1,16 +1,16 @@
-import { SupportedChains } from "@midas-capital/types";
+import { SupportedChains } from "@ionicprotocol/types";
 import axios from "axios";
 import { BigNumber, constants, ContractTransaction, utils } from "ethers";
 
-import CErc20DelegateABI from "../../abis/CErc20Delegate";
 import ComptrollerABI from "../../abis/Comptroller";
 import EIP20InterfaceABI from "../../abis/EIP20Interface";
-import { CErc20Delegate } from "../../typechain/CErc20Delegate";
+import ICErc20ABI from "../../abis/ICErc20";
 import { Comptroller } from "../../typechain/Comptroller";
-import { getContract } from "../MidasSdk/utils";
+import { ICErc20 } from "../../typechain/ICErc20";
+import { getContract } from "../IonicSdk/utils";
 
 import { CreateContractsModule } from "./CreateContracts";
-import { ChainSupportedAssets } from "./FusePools";
+import { ChainSupportedAssets } from "./Pools";
 
 export function withFundOperations<TBase extends CreateContractsModule = CreateContractsModule>(Base: TBase) {
   return class FundOperations extends Base {
@@ -20,7 +20,7 @@ export function withFundOperations<TBase extends CreateContractsModule = CreateC
           (
             await this.provider.estimateGas({
               from: address,
-              value: amount.div(BigNumber.from(2)),
+              value: amount.div(BigNumber.from(2))
             })
           ).toNumber() * 3.13
         ).toFixed(0)
@@ -48,7 +48,7 @@ export function withFundOperations<TBase extends CreateContractsModule = CreateC
     }
 
     async mint(cTokenAddress: string, amount: BigNumber) {
-      const cToken = getContract(cTokenAddress, CErc20DelegateABI, this.signer) as CErc20Delegate;
+      const cToken = getContract(cTokenAddress, ICErc20ABI, this.signer) as ICErc20;
       const address = await this.signer.getAddress();
       // add 10% to default estimated gas
       const gasLimit = (await cToken.estimateGas.mint(amount, { from: address })).mul(11).div(10);
@@ -65,7 +65,7 @@ export function withFundOperations<TBase extends CreateContractsModule = CreateC
 
     async repay(cTokenAddress: string, isRepayingMax: boolean, amount: BigNumber) {
       const max = BigNumber.from(2).pow(BigNumber.from(256)).sub(constants.One);
-      const cToken = getContract(cTokenAddress, CErc20DelegateABI, this.signer) as CErc20Delegate;
+      const cToken = getContract(cTokenAddress, ICErc20ABI, this.signer) as ICErc20;
 
       const response = (await cToken.callStatic.repayBorrow(isRepayingMax ? max : amount)) as BigNumber;
 
@@ -80,7 +80,7 @@ export function withFundOperations<TBase extends CreateContractsModule = CreateC
     }
 
     async borrow(cTokenAddress: string, amount: BigNumber) {
-      const cToken = getContract(cTokenAddress, CErc20DelegateABI, this.signer) as CErc20Delegate;
+      const cToken = getContract(cTokenAddress, ICErc20ABI, this.signer) as ICErc20;
 
       const address = await this.signer.getAddress();
       // add 20% to default estimated gas
@@ -97,7 +97,7 @@ export function withFundOperations<TBase extends CreateContractsModule = CreateC
     }
 
     async withdraw(cTokenAddress: string, amount: BigNumber) {
-      const cToken = getContract(cTokenAddress, CErc20DelegateABI, this.signer) as CErc20Delegate;
+      const cToken = getContract(cTokenAddress, ICErc20ABI, this.signer) as ICErc20;
 
       const response = (await cToken.callStatic.redeemUnderlying(amount)) as BigNumber;
 
@@ -134,7 +134,7 @@ export function withFundOperations<TBase extends CreateContractsModule = CreateC
         return {
           underlyingToken: token,
           underlyingSymbol: _asset?.originalSymbol ?? _asset?.symbol ?? token,
-          underlyingDecimals: _asset?.decimals ?? 18,
+          underlyingDecimals: _asset?.decimals ?? 18
         };
       });
     }
@@ -144,7 +144,7 @@ export function withFundOperations<TBase extends CreateContractsModule = CreateC
       const account = await this.signer.getAddress();
 
       return await iLiquidatorsRegistry.callStatic.amountOutAndSlippageOfSwap(inputToken, amount, outputToken, {
-        from: account,
+        from: account
       });
     }
   };

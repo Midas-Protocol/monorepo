@@ -1,13 +1,13 @@
 import { InfoOutlineIcon } from '@chakra-ui/icons';
 import { Flex, HStack, Spacer, Switch, Text } from '@chakra-ui/react';
-import type { NativePricedFuseAsset } from '@midas-capital/types';
+import type { NativePricedFuseAsset } from '@ionicprotocol/types';
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import { Column, Row } from '@ui/components/shared/Flex';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useCTokenData } from '@ui/hooks/fuse/useCTokenData';
 import { useIsEditableAdmin } from '@ui/hooks/fuse/useIsEditableAdmin';
 import { useErrorToast } from '@ui/hooks/useToast';
@@ -22,11 +22,11 @@ interface ToggleBorrowProps {
 export const ToggleBorrow = ({
   comptrollerAddress,
   selectedAsset,
-  poolChainId,
+  poolChainId
 }: ToggleBorrowProps) => {
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const { cToken: cTokenAddress, isBorrowPaused: isPaused } = selectedAsset;
-  const { currentSdk } = useMultiMidas();
+  const { currentSdk } = useMultiIonic();
   const { data: cTokenData } = useCTokenData(comptrollerAddress, cTokenAddress, poolChainId);
   const addRecentTransaction = useAddRecentTransaction();
   const errorToast = useErrorToast();
@@ -48,11 +48,11 @@ export const ToggleBorrow = ({
       const sentryProperties = {
         chainId: currentSdk.chainId,
         comptroller: comptrollerAddress,
-        token: cTokenAddress,
+        token: cTokenAddress
       };
       const sentryInfo = {
         contextName: 'Updating borrow status',
-        properties: sentryProperties,
+        properties: sentryProperties
       };
       handleGenericError({ error, sentryInfo, toast: errorToast });
     } finally {

@@ -12,14 +12,14 @@ export default task("market:set-plugin", "Set's the plugin of a market")
     const signer = await ethers.getNamedSigner(namedSigner);
     console.log(`signer is ${signer.address}`);
 
-    const midasSdkModule = await import("../midasSdk");
-    const sdk = await midasSdkModule.getOrCreateMidas();
+    const ionicSdkModule = await import("../ionicSdk");
+    const sdk = await ionicSdkModule.getOrCreateIonic();
 
     const comptroller = sdk.createComptroller(comptrollerAddress, signer);
 
     const allMarkets = await comptroller.callStatic.getAllMarkets();
 
-    const cTokenInstances = allMarkets.map((marketAddress) => sdk.createCErc20PluginRewardsDelegate(marketAddress));
+    const cTokenInstances = allMarkets.map((marketAddress) => sdk.createICErc20PluginRewards(marketAddress));
 
     const cTokenInstance = cTokenInstances.find(async (cToken) => {
       return (await cToken.callStatic.underlying()) == underlying;

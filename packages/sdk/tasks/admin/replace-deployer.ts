@@ -2,15 +2,15 @@ import { providers } from "ethers";
 import { task, types } from "hardhat/config";
 
 import { AddressesProvider } from "../../typechain/AddressesProvider";
-import { CErc20PluginDelegate } from "../../typechain/CErc20PluginDelegate";
 import { ComptrollerFirstExtension } from "../../typechain/ComptrollerFirstExtension";
 import { DiaPriceOracle } from "../../typechain/DiaPriceOracle";
-import { FusePoolDirectory } from "../../typechain/FusePoolDirectory";
+import { ICErc20Plugin } from "../../typechain/ICErc20Plugin";
+import { IonicERC4626 } from "../../typechain/IonicERC4626";
+import { IonicFlywheelCore } from "../../typechain/IonicFlywheelCore";
 import { MasterPriceOracle } from "../../typechain/MasterPriceOracle";
-import { MidasERC4626 } from "../../typechain/MidasERC4626";
-import { MidasFlywheelCore } from "../../typechain/MidasFlywheelCore";
 import { Ownable } from "../../typechain/Ownable";
 import { OwnableUpgradeable } from "../../typechain/OwnableUpgradeable";
+import { PoolDirectory } from "../../typechain/PoolDirectory";
 import { SafeOwnable } from "../../typechain/SafeOwnable";
 import { SafeOwnableUpgradeable } from "../../typechain/SafeOwnableUpgradeable";
 import { Unitroller } from "../../typechain/Unitroller";
@@ -84,12 +84,9 @@ async function ownable2StepAcceptOwnership(ethers, contractName, signer, newDepl
 }
 
 const safeOwnableUpgrContracts = [
-  "FuseFeeDistributor",
-  "FusePoolDirectory",
-  "JarvisSafeLiquidator",
-  "MidasSafeLiquidator",
+  "FeeDistributor",
+  "PoolDirectory",
   "OptimizedVaultsRegistry",
-
   "AnkrCertificateTokenPriceOracle",
   "BalancerLpLinearPoolPriceOracle",
   "BalancerLpStablePoolPriceOracle",
@@ -100,16 +97,14 @@ const safeOwnableUpgrContracts = [
   "CurveLpTokenPriceOracleNoRegistry",
   "CurveV2LpTokenPriceOracleNoRegistry",
   "CurveV2PriceOracle",
-  "DiaStDotPriceOracle",
   "ERC4626Oracle",
-  "FluxPriceOracle",
   "GammaPoolPriceOracle",
   "PythPriceOracle",
   "SimplePriceOracle",
   "SolidlyPriceOracle",
   "StkBNBPriceOracle",
   "WSTEthPriceOracle",
-  "NativeUSDPriceOracle",
+  "NativeUSDPriceOracle"
 ];
 
 const ownable2StepContracts = ["LiquidatorsRegistry", "LeveredPositionFactory", "OptimizedAPRVault"];
@@ -129,7 +124,7 @@ export default task("system:admin:change", "Changes the system admin to a new ad
     } else {
       {
         // OwnableUpgradeable - transferOwnership(newDeployer)
-        const fsl = (await ethers.getContract("FuseSafeLiquidator", deployer)) as OwnableUpgradeable;
+        const fsl = (await ethers.getContract("IonicLiquidator", deployer)) as OwnableUpgradeable;
         const currentOwnerFSL = await fsl.callStatic.owner();
         console.log(`current FSL owner ${currentOwnerFSL}`);
 
@@ -208,8 +203,8 @@ export default task("system:admin:change", "Changes the system admin to a new ad
         }
       }
 
-      const fusePoolDirectory = (await ethers.getContract("FusePoolDirectory", deployer)) as FusePoolDirectory;
-      const [, pools] = await fusePoolDirectory.callStatic.getActivePools();
+      const poolDirectory = (await ethers.getContract("PoolDirectory", deployer)) as PoolDirectory;
+      const [, pools] = await poolDirectory.callStatic.getActivePools();
       for (let i = 0; i < pools.length; i++) {
         const pool = pools[i];
         console.log("pool name", pool.name);
@@ -242,10 +237,10 @@ export default task("system:admin:change", "Changes the system admin to a new ad
           const flywheelAddress = flywheels[k];
           {
             const flywheelCore = (await ethers.getContractAt(
-              "MidasFlywheelCore",
+              "IonicFlywheelCore",
               flywheelAddress,
               deployer
-            )) as MidasFlywheelCore;
+            )) as IonicFlywheelCore;
 
             const currentOwner = await flywheelCore.callStatic.owner();
             console.log(`current owner ${currentOwner} of the flywheel at ${flywheelCore.address}`);
@@ -268,16 +263,12 @@ export default task("system:admin:change", "Changes the system admin to a new ad
         for (let j = 0; j < markets.length; j++) {
           const market = markets[j];
           console.log(`market ${market}`);
-          const cTokenInstance = (await ethers.getContractAt(
-            "CErc20PluginDelegate",
-            market,
-            deployer
-          )) as CErc20PluginDelegate;
+          const cTokenInstance = (await ethers.getContractAt("ICErc20Plugin", market, deployer)) as ICErc20Plugin;
 
           console.log("market", {
             cTokenName: await cTokenInstance.callStatic.name(),
             cTokenNameSymbol: await cTokenInstance.callStatic.symbol(),
-            implementation: await cTokenInstance.callStatic.implementation(),
+            implementation: await cTokenInstance.callStatic.implementation()
           });
 
           let pluginAddress;
@@ -288,7 +279,7 @@ export default task("system:admin:change", "Changes the system admin to a new ad
           }
           if (pluginAddress) {
             // Ownable - transferOwnership(address newOwner)
-            const midasERC4626 = (await ethers.getContractAt("MidasERC4626", pluginAddress, deployer)) as MidasERC4626;
+            const midasERC4626 = (await ethers.getContractAt("IonicERC4626", pluginAddress, deployer)) as IonicERC4626;
 
             let currentOwner;
             try {
@@ -321,14 +312,14 @@ export default task("system:admin:change", "Changes the system admin to a new ad
         const transaction: providers.TransactionRequest = {
           to: newDeployer,
           value: oldDeployerBalance,
-          gasLimit: 21000,
+          gasLimit: 21000
         };
 
         transaction.gasLimit = await ethers.provider.estimateGas(transaction);
 
         const feeData = await ethers.provider.getFeeData();
         const chainId = ethers.provider.network.chainId;
-        if (feeData.maxFeePerGas && feeData.maxPriorityFeePerGas && chainId != 137 && chainId != 250) {
+        if (feeData.maxFeePerGas && feeData.maxPriorityFeePerGas && chainId != 137 && chainId != 250 && chainId != 97) {
           transaction.maxFeePerGas = feeData.maxFeePerGas;
           transaction.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas; //.div(2);
         } else {
@@ -384,8 +375,8 @@ task("system:admin:accept", "Accepts the pending admin/owner roles as the new ad
       await ownable2StepAcceptOwnership(ethers, ownableContract, deployer, newDeployer);
     }
 
-    const fusePoolDirectory = (await ethers.getContract("FusePoolDirectory", deployer)) as FusePoolDirectory;
-    const [, pools] = await fusePoolDirectory.callStatic.getActivePools();
+    const poolDirectory = (await ethers.getContract("PoolDirectory", deployer)) as PoolDirectory;
+    const [, pools] = await poolDirectory.callStatic.getActivePools();
     for (let i = 0; i < pools.length; i++) {
       const pool = pools[i];
       console.log("pool name", pool.name);
@@ -410,7 +401,7 @@ task("system:admin:accept", "Accepts the pending admin/owner roles as the new ad
         }
       }
 
-      // MidasFlywheelCore - SafeOwnableUpgradeable - _setPendingOwner() / _acceptOwner()
+      // IonicFlywheelCore - SafeOwnableUpgradeable - _setPendingOwner() / _acceptOwner()
       {
         const comptroller = (await ethers.getContractAt(
           "ComptrollerFirstExtension",
@@ -422,10 +413,10 @@ task("system:admin:accept", "Accepts the pending admin/owner roles as the new ad
           const flywheelAddress = flywheels[k];
           {
             const flywheelCore = (await ethers.getContractAt(
-              "MidasFlywheelCore",
+              "IonicFlywheelCore",
               flywheelAddress,
               deployer
-            )) as MidasFlywheelCore;
+            )) as IonicFlywheelCore;
             const flywheelPendingOwner = await flywheelCore.callStatic.pendingOwner();
             if (flywheelPendingOwner == deployer.address) {
               console.log(`accepting the owner role for flywheel ${flywheelAddress}`);
@@ -448,11 +439,7 @@ task("system:admin:accept", "Accepts the pending admin/owner roles as the new ad
         for (let j = 0; j < markets.length; j++) {
           const market = markets[j];
           console.log(`market ${market}`);
-          const cTokenInstance = (await ethers.getContractAt(
-            "CErc20PluginDelegate",
-            market,
-            deployer
-          )) as CErc20PluginDelegate;
+          const cTokenInstance = (await ethers.getContractAt("ICErc20Plugin", market, deployer)) as ICErc20Plugin;
 
           let pluginAddress;
           try {
@@ -462,7 +449,7 @@ task("system:admin:accept", "Accepts the pending admin/owner roles as the new ad
           }
           if (pluginAddress) {
             // SafeOwnableUpgradeable - _setPendingOwner() / _acceptOwner()
-            const midasERC4626 = (await ethers.getContractAt("MidasERC4626", pluginAddress, deployer)) as MidasERC4626;
+            const midasERC4626 = (await ethers.getContractAt("IonicERC4626", pluginAddress, deployer)) as IonicERC4626;
 
             try {
               const pendingOwner = await midasERC4626.callStatic.pendingOwner();

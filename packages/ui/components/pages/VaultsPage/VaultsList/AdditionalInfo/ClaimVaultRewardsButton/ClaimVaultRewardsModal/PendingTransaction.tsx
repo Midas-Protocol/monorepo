@@ -1,5 +1,5 @@
 import { Box, Button, Flex, Icon, Text, VStack } from '@chakra-ui/react';
-import type { FlywheelRewardsInfoForVault, SupportedAsset } from '@midas-capital/types';
+import type { FlywheelRewardsInfoForVault, SupportedAsset } from '@ionicprotocol/types';
 import { BsFillCheckCircleFill, BsFillXCircleFill } from 'react-icons/bs';
 
 import { Column } from '@ui/components/shared/Flex';
@@ -15,7 +15,7 @@ export const PendingTransaction = ({
   steps,
   isClaiming,
   poolChainId,
-  reward,
+  reward
 }: {
   activeStep: number;
   failedStep: number;
@@ -45,7 +45,7 @@ export const PendingTransaction = ({
                     decimals: info.rewardTokenDecimals,
                     name: info.rewardTokenSymbol,
                     symbol: info.rewardTokenSymbol,
-                    underlying: info.rewardToken,
+                    underlying: info.rewardToken
                   }}
                   key={info.rewardToken}
                 />
@@ -94,7 +94,7 @@ const AddTokenToWalletButton = ({ asset }: { asset: SupportedAsset }) => {
     successToast,
     underlyingAddress: asset.underlying,
     underlyingDecimals: asset.decimals,
-    underlyingSymbol: asset.symbol,
+    underlyingSymbol: asset.symbol
   });
 
   return (

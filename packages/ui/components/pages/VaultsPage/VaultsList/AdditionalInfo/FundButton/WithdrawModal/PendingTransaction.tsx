@@ -1,5 +1,5 @@
 import { Box, Button, Flex, Icon, Text, VStack } from '@chakra-ui/react';
-import type { VaultData } from '@midas-capital/types';
+import type { VaultData } from '@ionicprotocol/types';
 import type { BigNumber } from 'ethers';
 import { utils } from 'ethers';
 import { BsFillCheckCircleFill, BsFillXCircleFill } from 'react-icons/bs';
@@ -17,7 +17,7 @@ export const PendingTransaction = ({
   steps,
   isWithdrawing,
   amount,
-  vault,
+  vault
 }: {
   activeStep: number;
   amount: BigNumber;
@@ -36,7 +36,7 @@ export const PendingTransaction = ({
     successToast,
     underlyingAddress: vault.asset,
     underlyingDecimals: vault.decimals,
-    underlyingSymbol: vault.symbol,
+    underlyingSymbol: vault.symbol
   });
 
   return (

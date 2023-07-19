@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useSdk } from '@ui/hooks/fuse/useSdk';
 
 export const useExtraPoolInfo = (comptrollerAddress?: string, poolChainId?: number) => {
-  const { address } = useMultiMidas();
+  const { address } = useMultiIonic();
   const sdk = useSdk(poolChainId);
 
   return useQuery(
@@ -26,7 +26,7 @@ export const useExtraPoolInfo = (comptrollerAddress?: string, poolChainId?: numb
           pendingAdmin,
           oracle,
         ] = await Promise.all([
-          sdk.contracts.FusePoolLensSecondary.callStatic.getPoolOwnership(comptrollerAddress),
+          sdk.contracts.PoolLensSecondary.callStatic.getPoolOwnership(comptrollerAddress),
           comptroller.callStatic.closeFactorMantissa(),
           comptroller.callStatic.liquidationIncentiveMantissa(),
           comptroller.callStatic

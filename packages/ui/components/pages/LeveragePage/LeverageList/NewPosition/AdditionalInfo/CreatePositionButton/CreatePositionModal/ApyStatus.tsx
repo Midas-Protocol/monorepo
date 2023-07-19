@@ -1,5 +1,5 @@
 import { Flex, HStack, Skeleton, Text, VStack } from '@chakra-ui/react';
-import type { LeveredBorrowable, LeveredCollateral, SupportedChains } from '@midas-capital/types';
+import type { LeveredBorrowable, LeveredCollateral, SupportedChains } from '@ionicprotocol/types';
 import type { BigNumber } from 'ethers';
 import { utils } from 'ethers';
 import { useEffect, useMemo, useState } from 'react';
@@ -20,7 +20,7 @@ export const ApyStatus = ({
   borrowAsset,
   chainId,
   collateralAsset,
-  leverageValue,
+  leverageValue
 }: {
   amount: BigNumber;
   borrowAsset: LeveredBorrowable;
@@ -35,17 +35,17 @@ export const ApyStatus = ({
     supplyRatePerBlock,
     plugin,
     totalSupplied,
-    underlyingToken: collateralUnderlying,
+    underlyingToken: collateralUnderlying
   } = collateralAsset;
   const { rate: borrowRatePerBlock, cToken: borrowCToken } = borrowAsset;
   const sdk = useSdk(chainId);
   const { data: allRewards } = useRewardsForMarket({
     asset: {
       cToken: collateralCToken,
-      plugin,
+      plugin
     },
     chainId: Number(chainId),
-    poolAddress,
+    poolAddress
   });
   const { data: assetInfos } = useAssets([chainId]);
   const { data: totalSupplyApyPerAsset } = useTotalSupplyAPYs(
@@ -54,8 +54,8 @@ export const ApyStatus = ({
         cToken: collateralCToken,
         supplyRatePerBlock,
         underlyingSymbol: collateralSymbol,
-        underlyingToken: collateralUnderlying,
-      },
+        underlyingToken: collateralUnderlying
+      }
     ],
     chainId,
     allRewards,

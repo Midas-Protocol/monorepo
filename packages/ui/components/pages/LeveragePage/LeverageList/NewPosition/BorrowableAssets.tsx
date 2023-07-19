@@ -1,5 +1,5 @@
 import { Button, HStack, Text, VStack } from '@chakra-ui/react';
-import type { LeveredBorrowable, NewPosition } from '@midas-capital/types';
+import type { LeveredBorrowable, NewPosition } from '@ionicprotocol/types';
 import { FaAngleDown } from 'react-icons/fa';
 
 import { EllipsisText } from '@ui/components/shared/EllipsisText';
@@ -11,7 +11,7 @@ import { useColors } from '@ui/hooks/useColors';
 export const BorrowableAssets = ({
   position,
   selectedBorrowableAssets,
-  setSelectedBorrowableAssets,
+  setSelectedBorrowableAssets
 }: {
   position: NewPosition;
   selectedBorrowableAssets?: {
@@ -36,7 +36,7 @@ export const BorrowableAssets = ({
     if (asset) {
       setSelectedBorrowableAssets({
         ...selectedBorrowableAssets,
-        [position.collateral.cToken]: asset,
+        [position.collateral.cToken]: asset
       });
     }
   };
@@ -53,7 +53,7 @@ export const BorrowableAssets = ({
                 return (
                   <HStack
                     _hover={{
-                      background: cCard.hoverBgColor,
+                      background: cCard.hoverBgColor
                     }}
                     cursor="pointer"
                     justifyContent="space-between"

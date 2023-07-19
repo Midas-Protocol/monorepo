@@ -13,15 +13,15 @@ import {
   Text,
   VStack,
   Wrap,
-  WrapItem,
+  WrapItem
 } from '@chakra-ui/react';
-import type { SupportedAsset } from '@midas-capital/types';
+import type { SupportedAsset } from '@ionicprotocol/types';
 import { useEffect, useMemo, useState } from 'react';
 
 import { AddAssetSettings } from '@ui/components/pages/EditPoolPage/AssetConfiguration/AddAssetModal/AddAssetSettings';
 import { MidasModal } from '@ui/components/shared/Modal';
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useColors } from '@ui/hooks/useColors';
 import { useFusePoolData } from '@ui/hooks/useFusePoolData';
 import { useTokenData } from '@ui/hooks/useTokenData';
@@ -40,9 +40,9 @@ const AddAsset = ({
   onSuccess,
   poolID,
   poolName,
-  poolChainId,
+  poolChainId
 }: AddAssetProps) => {
-  const { currentSdk } = useMultiMidas();
+  const { currentSdk } = useMultiIonic();
 
   const supportedAssets = useMemo(() => {
     if (currentSdk) {
@@ -145,18 +145,18 @@ const AddAsset = ({
                 '&::-webkit-scrollbar': {
                   display: 'block',
                   height: '4px',
-                  width: '4px',
+                  width: '4px'
                 },
                 '&::-webkit-scrollbar-corner': {
-                  display: 'none',
+                  display: 'none'
                 },
                 '&::-webkit-scrollbar-thumb': {
-                  background: cPage.primary.borderColor,
+                  background: cPage.primary.borderColor
                 },
                 '&::-webkit-scrollbar-track': {
                   height: '4px',
-                  width: '4px',
-                },
+                  width: '4px'
+                }
               }}
               justify="flex-start"
               maxHeight="200px"
@@ -200,18 +200,18 @@ const AddAsset = ({
                     '&::-webkit-scrollbar': {
                       display: 'block',
                       height: '4px',
-                      width: '4px',
+                      width: '4px'
                     },
                     '&::-webkit-scrollbar-corner': {
-                      display: 'none',
+                      display: 'none'
                     },
                     '&::-webkit-scrollbar-thumb': {
-                      background: cPage.primary.borderColor,
+                      background: cPage.primary.borderColor
                     },
                     '&::-webkit-scrollbar-track': {
                       height: '4px',
-                      width: '4px',
-                    },
+                      width: '4px'
+                    }
                   }}
                   direction="column"
                   maxHeight="400px"

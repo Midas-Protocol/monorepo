@@ -1,5 +1,5 @@
 import { Text } from '@chakra-ui/react';
-import type { OpenPosition, PositionInfo } from '@midas-capital/types';
+import type { OpenPosition, PositionInfo } from '@ionicprotocol/types';
 import { utils } from 'ethers';
 
 import { SupplyBalance as MarketSupplyBalance } from '@ui/components/pages/PoolPage/MarketsList/SupplyBalance';
@@ -7,7 +7,7 @@ import { useUsdPrice } from '@ui/hooks/useAllUsdPrices';
 
 export const PositionValue = ({
   info,
-  position,
+  position
 }: {
   info?: PositionInfo;
   position: OpenPosition;
@@ -20,7 +20,7 @@ export const PositionValue = ({
         supplyBalance: info.positionSupplyAmount,
         supplyBalanceFiat: Number(utils.formatUnits(info.positionValue)) * usdPrice,
         underlyingDecimals: position.collateral.underlyingDecimals,
-        underlyingToken: position.collateral.underlyingToken,
+        underlyingToken: position.collateral.underlyingToken
       }}
       poolChainId={position.chainId}
     />

@@ -1,4 +1,4 @@
-import type { AssetPrice } from '@midas-capital/types';
+import type { AssetPrice } from '@ionicprotocol/types';
 import { createClient } from '@supabase/supabase-js';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import * as yup from 'yup';
@@ -12,7 +12,7 @@ const querySchema = yup.object().shape({
   underlyingAddress: yup
     .string()
     .matches(VALID_ADDRESS_REGEX, 'Not a valid underlying address')
-    .required(),
+    .required()
 });
 type Query = yup.InferType<typeof querySchema>;
 

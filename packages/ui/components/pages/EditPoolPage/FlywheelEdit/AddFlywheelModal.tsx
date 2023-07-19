@@ -8,21 +8,21 @@ import {
   InputGroup,
   InputRightElement,
   Text,
-  VStack,
+  VStack
 } from '@chakra-ui/react';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import ClipboardValue from '@ui/components/shared/ClipboardValue';
 import { Center } from '@ui/components/shared/Flex';
 import { MidasModal } from '@ui/components/shared/Modal';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useFlywheel } from '@ui/hooks/rewards/useFlywheel';
 import { useErrorToast, useSuccessToast } from '@ui/hooks/useToast';
 import type { AddFlywheelModalProps, AddFlywheelProps } from '@ui/types/ComponentPropsType';
 import { shortAddress } from '@ui/utils/shortAddress';
 
 const AddFlywheel = ({ comptrollerAddress, onSuccess }: AddFlywheelProps) => {
-  const { currentSdk, address } = useMultiMidas();
+  const { currentSdk, address } = useMultiIonic();
 
   const successToast = useSuccessToast();
   const errorToast = useErrorToast();
@@ -43,19 +43,19 @@ const AddFlywheel = ({ comptrollerAddress, onSuccess }: AddFlywheelProps) => {
       setIsAdding(true);
       const comptroller = currentSdk.createComptroller(comptrollerAddress, currentSdk.signer);
       const tx = await comptroller.functions._addRewardsDistributor(flywheel?.address, {
-        from: address,
+        from: address
       });
       await tx.wait();
       successToast({
         description: 'Flywheel added to pool!',
-        id: 'Added flywheel - ' + Math.random().toString(),
+        id: 'Added flywheel - ' + Math.random().toString()
       });
       if (onSuccess) onSuccess();
     } catch (e) {
       console.error(e);
       errorToast({
         description: e as string,
-        id: 'Adding flywheel - ' + Math.random().toString(),
+        id: 'Adding flywheel - ' + Math.random().toString()
       });
     } finally {
       setIsAdding(false);

@@ -1,5 +1,5 @@
 import { Box, Button, Flex, Icon, Text, VStack } from '@chakra-ui/react';
-import type { LeveredCollateral } from '@midas-capital/types';
+import type { LeveredCollateral } from '@ionicprotocol/types';
 import type { BigNumber } from 'ethers';
 import { utils } from 'ethers';
 import { BsFillCheckCircleFill, BsFillXCircleFill } from 'react-icons/bs';
@@ -18,7 +18,7 @@ export const PendingTransaction = ({
   isCreating,
   chainId,
   amount,
-  collateralAsset,
+  collateralAsset
 }: {
   activeStep: number;
   amount: BigNumber;
@@ -38,7 +38,7 @@ export const PendingTransaction = ({
     successToast,
     underlyingAddress: collateralAsset.underlyingToken,
     underlyingDecimals: Number(collateralAsset.underlyingDecimals),
-    underlyingSymbol: collateralAsset.symbol,
+    underlyingSymbol: collateralAsset.symbol
   });
 
   return (

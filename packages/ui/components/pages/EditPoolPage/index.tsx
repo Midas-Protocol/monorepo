@@ -14,7 +14,7 @@ import { Banner } from '@ui/components/shared/Banner';
 import { MidasBox } from '@ui/components/shared/Box';
 import { Center, Column, RowOrColumn } from '@ui/components/shared/Flex';
 import PageTransitionLayout from '@ui/components/shared/PageTransitionLayout';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useIsComptrollerAdmin } from '@ui/hooks/fuse/useIsComptrollerAdmin';
 import { useIsEditableAdmin } from '@ui/hooks/fuse/useIsEditableAdmin';
 import { useAllUsdPrices } from '@ui/hooks/useAllUsdPrices';
@@ -28,10 +28,10 @@ const EditPoolPage = memo(() => {
   const {
     isOpen: isAddAssetModalOpen,
     onOpen: openAddAssetModal,
-    onClose: closeAddAssetModal,
+    onClose: closeAddAssetModal
   } = useDisclosure();
 
-  const { setGlobalLoading } = useMultiMidas();
+  const { setGlobalLoading } = useMultiIonic();
 
   const router = useRouter();
   const poolId = router.query.poolId as string;
@@ -108,8 +108,8 @@ const EditPoolPage = memo(() => {
                 alertProps={{ mt: 2, status: isAdmin ? 'info' : 'warning' }}
                 descriptions={[
                   {
-                    text: `You are ${isAdmin ? '' : 'not'} the admin of this Pool!`,
-                  },
+                    text: `You are ${isAdmin ? '' : 'not'} the admin of this Pool!`
+                  }
                 ]}
               />
             )}

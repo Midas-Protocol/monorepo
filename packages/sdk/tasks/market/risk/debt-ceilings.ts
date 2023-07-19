@@ -14,11 +14,11 @@ export default task("market:set-debt-ceiling", "Sets debt ceiling for market aga
   .setAction(async ({ admin, collat, borrow, maxDebt }, { ethers }) => {
     const signer = await ethers.getNamedSigner(admin);
 
-    const midasSdkModule = await import("../../midasSdk");
-    const sdk = await midasSdkModule.getOrCreateMidas(signer);
+    const ionicSdkModule = await import("../../ionicSdk");
+    const sdk = await ionicSdkModule.getOrCreateIonic(signer);
 
-    const collatCToken = sdk.createCTokenWithExtensions(collat, signer);
-    const borrowCToken = sdk.createCTokenWithExtensions(borrow, signer);
+    const collatCToken = sdk.createICErc20(collat, signer);
+    const borrowCToken = sdk.createICErc20(borrow, signer);
     const comptroller = await collatCToken.callStatic.comptroller();
     if (comptroller !== (await borrowCToken.callStatic.comptroller())) {
       throw new Error("Comptrollers do not match");
@@ -62,17 +62,17 @@ task("market:set-debt-ceiling-whitelist", "Whitelists an account for the borrowi
   .setAction(async ({ admin, collats, borrow, account, whitelist }, { ethers }) => {
     const signer = await ethers.getNamedSigner(admin);
 
-    const midasSdkModule = await import("../../midasSdk");
-    const sdk = await midasSdkModule.getOrCreateMidas(signer);
+    const ionicSdkModule = await import("../../ionicSdk");
+    const sdk = await ionicSdkModule.getOrCreateIonic(signer);
 
     const collaterals = collats.split(",");
 
-    const borrowCToken = sdk.createCTokenWithExtensions(borrow, signer);
+    const borrowCToken = sdk.createICErc20(borrow, signer);
 
     const comptroller = await borrowCToken.callStatic.comptroller();
 
     for (const collat of collaterals) {
-      const collatCToken = sdk.createCTokenWithExtensions(collat, signer);
+      const collatCToken = sdk.createICErc20(collat, signer);
       if (comptroller !== (await borrowCToken.callStatic.comptroller())) {
         throw new Error("Comptrollers do not match");
       }

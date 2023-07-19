@@ -17,6 +17,7 @@ import "./tasks/pool";
 import "./tasks/swap";
 import "./tasks/validate";
 import "./tasks/vaults";
+import "./tasks/auth";
 import "./tasks/liquidation";
 import "./tasks/leverage/configurePair";
 
@@ -31,7 +32,7 @@ console.info({
   OVERRIDE_RPC_URL,
   FORK_RPC_URL,
   FORK_CHAIN_ID,
-  FORK_BLOCK_NUMBER,
+  FORK_BLOCK_NUMBER
 });
 
 const mnemonic =
@@ -41,7 +42,7 @@ const mnemonic =
 
 const config: HardhatUserConfig = {
   mocha: {
-    timeout: 200_000,
+    timeout: 200_000
   },
   solidity: {
     compilers: [
@@ -50,26 +51,26 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200,
-          },
-        },
-      },
-    ],
+            runs: 200
+          }
+        }
+      }
+    ]
   },
   external: {
-    contracts: [{ artifacts: "./lib/contracts/out" }],
+    contracts: [{ artifacts: "./lib/contracts/out" }]
   },
   paths: {
     sources: "./none",
     tests: "./tests",
-    artifacts: "./lib/contracts/out",
+    artifacts: "./lib/contracts/out"
   },
 
   namedAccounts: {
     deployer: { default: 0 },
     alice: { default: 1 },
     bob: { default: 2 },
-    rando: { default: 3 },
+    rando: { default: 3 }
   },
   networks: {
     // This is the unchangeable default network which is started with `hardhat node`
@@ -82,9 +83,9 @@ const config: HardhatUserConfig = {
       forking: FORK_RPC_URL
         ? {
             url: FORK_RPC_URL,
-            blockNumber: FORK_BLOCK_NUMBER ? Number(FORK_BLOCK_NUMBER) : undefined,
+            blockNumber: FORK_BLOCK_NUMBER ? Number(FORK_BLOCK_NUMBER) : undefined
           }
-        : undefined,
+        : undefined
     },
     fork: {
       allowUnlimitedContractSize: true,
@@ -92,94 +93,79 @@ const config: HardhatUserConfig = {
       chainId: FORK_CHAIN_ID ? Number(FORK_CHAIN_ID) : 1337,
       gasPrice: 20e9,
       gas: 7500000,
-      url: "http://localhost:8545",
+      url: "http://localhost:8545"
     },
     localbsc: {
       accounts: { mnemonic },
       chainId: 56,
       gas: 25e6,
       gasPrice: 20e10,
-      url: "http://localhost:8545",
+      url: "http://localhost:8545"
     },
     localchapel: {
       accounts: { mnemonic },
       chainId: 97,
       gas: 25e6,
       gasPrice: 21e10,
-      url: "http://localhost:8547",
+      url: "http://localhost:8547"
     },
     localeth: {
       accounts: { mnemonic },
       chainId: 1,
       gasPrice: 21e9,
       initialBaseFeePerGas: 21e9,
-      url: "http://localhost:8545",
+      url: "http://localhost:8545"
     },
     localpolygon: {
       accounts: { mnemonic },
       chainId: 137,
       gas: 25e6,
       gasPrice: 20e10,
-      url: "http://localhost:8546",
+      url: "http://localhost:8546"
     },
     localarbitrum: {
       accounts: { mnemonic },
       chainId: 42161,
       gas: 25e6,
       gasPrice: 20e10,
-      url: "http://localhost:8548",
+      url: "http://localhost:8548"
     },
     bsc: {
       accounts: { mnemonic },
       chainId: 56,
-      url: OVERRIDE_RPC_URL || process.env.BSC_PROVIDER_URL || "https://bsc-dataseed.binance.org/",
+      url: OVERRIDE_RPC_URL || process.env.BSC_PROVIDER_URL || "https://bsc-dataseed.binance.org/"
     },
     chapel: {
       accounts: { mnemonic },
       chainId: 97,
-      url: OVERRIDE_RPC_URL || "https://data-seed-prebsc-1-s1.binance.org:8545/",
+      url: OVERRIDE_RPC_URL || "https://data-seed-prebsc-1-s1.binance.org:8545/"
     },
     ethereum: {
       accounts: { mnemonic },
       chainId: 1,
-      url: OVERRIDE_RPC_URL || "https://rpc.ankr.com/eth",
+      url: OVERRIDE_RPC_URL || "https://rpc.ankr.com/eth"
     },
-    evmos: {
+    neon: {
       accounts: { mnemonic },
-      chainId: 9001,
-      url: OVERRIDE_RPC_URL || "https://eth.bd.evmos.org:8545",
-    },
-    moonbeam: {
-      accounts: { mnemonic },
-      url: OVERRIDE_RPC_URL || `https://rpc.api.moonbeam.network`,
-      chainId: 1284,
-    },
-    neondevnet: {
-      accounts: { mnemonic },
-      url: OVERRIDE_RPC_URL || `https://proxy.devnet.neonlabs.org/solana`,
-      chainId: 245022926,
+      url: OVERRIDE_RPC_URL || `https://neon-proxy-mainnet.solana.p2p.org`,
+      chainId: 245022934
     },
     polygon: {
       url: OVERRIDE_RPC_URL || `https://polygon-mainnet.g.alchemy.com/v2/tldbE3dxJ4U5mH6aBYL3HhJAwwPWKVWw`,
       accounts: { mnemonic },
-      chainId: 137,
+      chainId: 137
     },
     arbitrum: {
       url: OVERRIDE_RPC_URL || `https://arb1.arbitrum.io/rpc`,
       accounts: { mnemonic },
-      chainId: 42161,
+      chainId: 42161
     },
-    fantom: {
-      url: OVERRIDE_RPC_URL || `https://rpcapi.fantom.network`,
+    linea: {
+      url: OVERRIDE_RPC_URL || `https://linea-mainnet.infura.io/v3/`,
       accounts: { mnemonic },
-      chainId: 250,
-    },
-    lineagoerli: {
-      url: OVERRIDE_RPC_URL || `https://rpc.goerli.linea.build`,
-      accounts: { mnemonic },
-      chainId: 59140,
-    },
-  },
+      chainId: 59144
+    }
+  }
 };
 
 export default config;

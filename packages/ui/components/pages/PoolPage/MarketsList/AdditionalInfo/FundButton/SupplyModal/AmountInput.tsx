@@ -7,7 +7,7 @@ import { MidasBox } from '@ui/components/shared/Box';
 import { EllipsisText } from '@ui/components/shared/EllipsisText';
 import { Row } from '@ui/components/shared/Flex';
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useMaxSupplyAmount } from '@ui/hooks/useMaxSupplyAmount';
 import { useErrorToast } from '@ui/hooks/useToast';
 import type { MarketData } from '@ui/types/TokensDataMap';
@@ -19,7 +19,7 @@ export const AmountInput = ({
   optionToWrap,
   poolChainId,
   setAmount,
-  comptrollerAddress,
+  comptrollerAddress
 }: {
   asset: MarketData;
   comptrollerAddress: string;
@@ -27,7 +27,7 @@ export const AmountInput = ({
   poolChainId: number;
   setAmount: (amount: BigNumber) => void;
 }) => {
-  const { currentSdk, address } = useMultiMidas();
+  const { currentSdk, address } = useMultiIonic();
   const [userEnteredAmount, setUserEnteredAmount] = useState('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const errorToast = useErrorToast();
@@ -77,11 +77,11 @@ export const AmountInput = ({
       const sentryProperties = {
         chainId: currentSdk.chainId,
         comptroller: comptrollerAddress,
-        token: asset.cToken,
+        token: asset.cToken
       };
       const sentryInfo = {
         contextName: 'Fetching max supply amount',
-        properties: sentryProperties,
+        properties: sentryProperties
       };
       handleGenericError({ error, sentryInfo, toast: errorToast });
     }

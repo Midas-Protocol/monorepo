@@ -1,5 +1,5 @@
 import { AvatarGroup, Box, HStack, Text, useDisclosure } from '@chakra-ui/react';
-import type { FlywheelRewardsInfoForVault, RewardsInfo } from '@midas-capital/types';
+import type { FlywheelRewardsInfoForVault, RewardsInfo } from '@ionicprotocol/types';
 
 import ClaimVaultRewardsModal from '@ui/components/pages/VaultsPage/VaultsList/AdditionalInfo/ClaimVaultRewardsButton/ClaimVaultRewardsModal/index';
 import { GradientButton } from '@ui/components/shared/GradientButton';
@@ -9,7 +9,7 @@ import { useColors } from '@ui/hooks/useColors';
 const ClaimVaultRewardsButton = ({
   chainId,
   reward,
-  refetch,
+  refetch
 }: {
   chainId: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -19,7 +19,7 @@ const ClaimVaultRewardsButton = ({
   const {
     isOpen: isClaimModalOpen,
     onOpen: openClaimModal,
-    onClose: closeClaimModal,
+    onClose: closeClaimModal
   } = useDisclosure();
   const { cPage } = useColors();
 

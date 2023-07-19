@@ -1,5 +1,5 @@
 import { Box, Icon, Text, VStack } from '@chakra-ui/react';
-import type { LeveredCollateral } from '@midas-capital/types';
+import type { LeveredCollateral } from '@ionicprotocol/types';
 import { BsFillCheckCircleFill, BsFillXCircleFill } from 'react-icons/bs';
 
 import { Column } from '@ui/components/shared/Flex';
@@ -13,7 +13,7 @@ export const PendingTransaction = ({
   steps,
   isClosing,
   chainId,
-  collateralAsset,
+  collateralAsset
 }: {
   activeStep: number;
   chainId: number;

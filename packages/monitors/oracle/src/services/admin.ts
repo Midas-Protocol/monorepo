@@ -1,16 +1,16 @@
-import { MidasSdk } from "@midas-capital/sdk";
-import { Comptroller } from "@midas-capital/sdk/dist/cjs/typechain/Comptroller";
-import { ComptrollerFirstExtension } from "@midas-capital/sdk/dist/cjs/typechain/ComptrollerFirstExtension";
-import { SupportedAsset } from "@midas-capital/types";
+import { IonicSdk } from "@ionicprotocol/sdk";
+import { Comptroller } from "@ionicprotocol/sdk/dist/cjs/typechain/Comptroller";
+import { ComptrollerFirstExtension } from "@ionicprotocol/sdk/dist/cjs/typechain/ComptrollerFirstExtension";
+import { SupportedAsset } from "@ionicprotocol/types";
 import { constants, Contract, logger, Signer } from "ethers";
 
 export class AdminService {
   admin: Signer;
   adminAddress: string;
-  sdk: MidasSdk;
+  sdk: IonicSdk;
   asset: SupportedAsset;
 
-  constructor(sdk: MidasSdk, asset: SupportedAsset) {
+  constructor(sdk: IonicSdk, asset: SupportedAsset) {
     this.asset = asset;
     this.admin = sdk.signer;
     this.sdk = sdk;
@@ -24,7 +24,7 @@ export class AdminService {
     for (const pool of pools) {
       const cTokenAddress = await pool.callStatic.cTokensByUnderlying(this.asset.underlying);
       const poolExtension = this.sdk.createComptroller(pool.address, this.sdk.signer);
-      const cToken = this.sdk.createCTokenWithExtensions(cTokenAddress, this.admin);
+      const cToken = this.sdk.createICErc20(cTokenAddress, this.admin);
       await this.pauseMarketActivity(pool, poolExtension, cToken);
     }
   }

@@ -9,9 +9,9 @@ import {
   HStack,
   Select,
   Spacer,
-  Text,
+  Text
 } from '@chakra-ui/react';
-import type { NativePricedFuseAsset } from '@midas-capital/types';
+import type { NativePricedFuseAsset } from '@ionicprotocol/types';
 import { useQueryClient } from '@tanstack/react-query';
 import type { ContractTransaction } from 'ethers';
 import { utils } from 'ethers';
@@ -24,7 +24,7 @@ import { testForCTokenErrorAndSend } from '.';
 import { ConfigRow } from '@ui/components/shared/ConfigRow';
 import { Column } from '@ui/components/shared/Flex';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useCTokenData } from '@ui/hooks/fuse/useCTokenData';
 import { useIsEditableAdmin } from '@ui/hooks/fuse/useIsEditableAdmin';
 import { useSdk } from '@ui/hooks/fuse/useSdk';
@@ -35,7 +35,7 @@ import { handleGenericError } from '@ui/utils/errorHandling';
 const IRMChart = dynamic(
   () => import('@ui/components/pages/EditPoolPage/AssetConfiguration/IRMChart'),
   {
-    ssr: false,
+    ssr: false
   }
 );
 
@@ -48,10 +48,10 @@ interface InterestRateModelProps {
 export const InterestRateModel = ({
   comptrollerAddress,
   selectedAsset,
-  poolChainId,
+  poolChainId
 }: InterestRateModelProps) => {
   const { cToken: cTokenAddress } = selectedAsset;
-  const { currentSdk } = useMultiMidas();
+  const { currentSdk } = useMultiIonic();
   const sdk = useSdk(poolChainId);
 
   const errorToast = useErrorToast();
@@ -66,11 +66,11 @@ export const InterestRateModel = ({
     setValue,
     register,
     watch,
-    formState: { errors },
+    formState: { errors }
   } = useForm({
     defaultValues: {
-      interestRateModel: sdk ? sdk.chainDeployment.JumpRateModel.address : '',
-    },
+      interestRateModel: sdk ? sdk.chainDeployment.JumpRateModel.address : ''
+    }
   });
 
   const watchInterestRateModel = watch(
@@ -89,7 +89,7 @@ export const InterestRateModel = ({
   const updateInterestRateModel = async ({ interestRateModel }: { interestRateModel: string }) => {
     if (!cTokenAddress || !currentSdk) return;
     setIsUpdating(true);
-    const cToken = currentSdk.createCTokenWithExtensions(cTokenAddress || '', currentSdk.signer);
+    const cToken = currentSdk.createICErc20(cTokenAddress || '', currentSdk.signer);
 
     try {
       const tx: ContractTransaction = await testForCTokenErrorAndSend(
@@ -103,18 +103,18 @@ export const InterestRateModel = ({
 
       successToast({
         description: 'Successfully updated interest rate model!',
-        id: 'Updated interest rate model - ' + Math.random().toString(),
+        id: 'Updated interest rate model - ' + Math.random().toString()
       });
     } catch (error) {
       const sentryProperties = {
         chainId: currentSdk.chainId,
         comptroller: comptrollerAddress,
         interestRateModel,
-        token: cTokenAddress,
+        token: cTokenAddress
       };
       const sentryInfo = {
         contextName: 'Updating interest rate model',
-        properties: sentryProperties,
+        properties: sentryProperties
       };
       handleGenericError({ error, sentryInfo, toast: errorToast });
     } finally {
@@ -169,7 +169,7 @@ export const InterestRateModel = ({
                     <Select
                       id="interestRateModel"
                       {...register('interestRateModel', {
-                        required: 'interestRateModel is required',
+                        required: 'interestRateModel is required'
                       })}
                       cursor="pointer"
                       isDisabled={!isEditableAdmin}

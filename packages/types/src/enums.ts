@@ -3,13 +3,10 @@ export enum SupportedChains {
   bsc = 56,
   chapel = 97,
   ganache = 1337,
-  evmos = 9001,
-  moonbeam = 1284,
-  neon_devnet = 245022926,
+  neon = 245022934,
   polygon = 137,
   arbitrum = 42161,
-  fantom = 250,
-  lineagoerli = 59140,
+  linea = 59144
 }
 
 export const SupportedChainsArray = Object.entries(SupportedChains)
@@ -37,20 +34,20 @@ export enum RedemptionStrategyContract {
   SolidlyLpTokenLiquidator = "SolidlyLpTokenLiquidator",
   SolidlyLpTokenWrapper = "SolidlyLpTokenWrapper",
   SolidlySwapLiquidator = "SolidlySwapLiquidator",
-  AaveTokenLiquidator = "AaveTokenLiquidator",
+  AaveTokenLiquidator = "AaveTokenLiquidator"
 }
 
 export enum FundingStrategyContract {
   JarvisLiquidatorFunder = "JarvisLiquidatorFunder",
   XBombLiquidatorFunder = "XBombLiquidatorFunder",
   UniswapV3LiquidatorFunder = "UniswapV3LiquidatorFunder",
-  CurveSwapLiquidatorFunder = "CurveSwapLiquidatorFunder",
+  CurveSwapLiquidatorFunder = "CurveSwapLiquidatorFunder"
 }
 
 export enum DelegateContractName {
   CErc20Delegate = "CErc20Delegate",
   CErc20PluginDelegate = "CErc20PluginDelegate",
-  CErc20PluginRewardsDelegate = "CErc20PluginRewardsDelegate",
+  CErc20PluginRewardsDelegate = "CErc20PluginRewardsDelegate"
 }
 
 export enum OracleTypes {
@@ -60,7 +57,6 @@ export enum OracleTypes {
   CurveV2LpTokenPriceOracleNoRegistry = "CurveV2LpTokenPriceOracleNoRegistry",
   DiaPriceOracle = "DiaPriceOracle",
   FixedNativePriceOracle = "FixedNativePriceOracle",
-  FluxPriceOracle = "FluxPriceOracle",
   UmbrellaPriceOracle = "UmbrellaPriceOracle",
   MasterPriceOracle = "MasterPriceOracle",
   SimplePriceOracle = "SimplePriceOracle",
@@ -71,7 +67,6 @@ export enum OracleTypes {
   AnkrCertificateTokenPriceOracle = "AnkrCertificateTokenPriceOracle",
   GammaPoolPriceOracle = "GammaPoolPriceOracle",
   GelatoGUniPriceOracle = "GelatoGUniPriceOracle",
-  DiaStDotPriceOracle = "DiaStDotPriceOracle",
   BalancerLpTokenPriceOracle = "BalancerLpTokenPriceOracle",
   BalancerLpStablePoolPriceOracle = "BalancerLpStablePoolPriceOracle",
   BalancerRateProviderOracle = "BalancerRateProviderOracle",
@@ -79,17 +74,14 @@ export enum OracleTypes {
   BalancerLpTokenPriceOracleNTokens = "BalancerLpTokenPriceOracleNTokens",
   StkBNBPriceOracle = "StkBNBPriceOracle",
   WombatLpTokenPriceOracle = "WombatLpTokenPriceOracle",
-  AdrastiaPriceOracle = "AdrastiaPriceOracle",
-  NativeUSDPriceOracle = "NativeUSDPriceOracle",
   SaddleLpPriceOracle = "SaddleLpPriceOracle",
   SolidlyLpTokenPriceOracle = "SolidlyLpTokenPriceOracle",
   WSTEthPriceOracle = "WSTEthPriceOracle",
-  ERC4626Oracle = "ERC4626Oracle",
+  ERC4626Oracle = "ERC4626Oracle"
 }
 
 export enum IrmTypes {
   JumpRateModel = "JumpRateModel",
-  WhitePaperInterestRateModel = "WhitePaperInterestRateModel",
   AnkrFTMInterestRateModel = "AnkrFTMInterestRateModel",
   AnkrBNBInterestRateModel = "AnkrBNBInterestRateModel",
   AdjustableAnkrBNBIrm = "AdjustableAnkrBNBIrm",
@@ -100,12 +92,12 @@ export enum IrmTypes {
   AdjustableJumpRateModel_STADER_WBNB = "AdjustableJumpRateModel_STADER_WBNB",
   AdjustableJumpRateModel_MIXBYTES_USDC = "AdjustableJumpRateModel_MIXBYTES_USDC",
   AdjustableJumpRateModel_JARVIS_jBRL = "AdjustableJumpRateModel_JARVIS_jBRL",
-  AdjustableJumpRateModel_JARVIS_jEUR = "AdjustableJumpRateModel_JARVIS_jEUR",
+  AdjustableJumpRateModel_JARVIS_jEUR = "AdjustableJumpRateModel_JARVIS_jEUR"
 }
 
 export enum LiquidationStrategy {
   DEFAULT = "DEFAULT",
-  UNISWAP = "UNISWAP",
+  UNISWAP = "UNISWAP"
 }
 
 export enum ComptrollerErrorCodes {
@@ -129,7 +121,7 @@ export enum ComptrollerErrorCodes {
   TOO_MUCH_REPAY,
   SUPPLIER_NOT_WHITELISTED,
   BORROW_BELOW_MIN,
-  SUPPLY_ABOVE_MAX,
+  SUPPLY_ABOVE_MAX
 }
 
 export enum CTokenErrorCodes {
@@ -150,14 +142,14 @@ export enum CTokenErrorCodes {
   TOKEN_INSUFFICIENT_CASH,
   TOKEN_TRANSFER_IN_FAILED,
   TOKEN_TRANSFER_OUT_FAILED,
-  UTILIZATION_ABOVE_MAX,
+  UTILIZATION_ABOVE_MAX
 }
 
 export enum FundOperationMode {
   SUPPLY,
   WITHDRAW,
   BORROW,
-  REPAY,
+  REPAY
 }
 
 export enum assetOriginalSymbols {
@@ -171,7 +163,7 @@ export enum assetOriginalSymbols {
   "WMATIC_MATICX_STABLE_BLP" = "WMATIC-MATICX Balancer Stable LP",
   "sAMM-USDC/USDR" = "USDC/USDR Pearl Stable LP",
   "vAMM-wUSDR/USDR" = "wUSDR/USDR Pearl Variable LP",
-  "vAMM-stMATIC/USDR" = "stMATIC/USDR Pearl Variable LP",
+  "vAMM-stMATIC/USDR" = "stMATIC/USDR Pearl Variable LP"
 }
 
 export enum assetSymbols {
@@ -281,80 +273,6 @@ export enum assetSymbols {
   aANKRBNB_THE_N = "aANKRBNB-THE-N",
 
   "WOMBATLP-WBNB" = "WOMBATLP-WBNB",
-
-  // evmos
-  kinesisUSDC = "kinesisUSDC",
-  kinesisUSDT = "kinesisUSDT",
-  saddleOptFraxUSD = "saddleOptFraxUSD",
-  saddleOptUSD = "saddleOptUSD",
-  WEVMOS = "WEVMOS",
-  ATOM = "ATOM",
-  OSMO = "OSMO",
-  JUNO = "JUNO",
-  // USD X
-  gUSDC = "gUSDC",
-  axlUSDC = "axlUSDC",
-  ceUSDC = "ceUSDC",
-  gUSDT = "gUSDT",
-  axlUSDT = "axlUSDT",
-  ceUSDT = "ceUSDT",
-  gDAI = "gDAI",
-  // WETH / BTC
-  ceWETH = "ceWETH",
-  axlWETH = "axlWETH",
-  gWBTC = "gWBTC",
-  gWETH = "gWETH",
-  axlWBTC = "axlWBTC",
-
-  DIFF = "DIFF",
-  GRAV = "GRAV",
-  "WEVMOS-JUNO" = "WEVMOS-JUNO",
-  "WEVMOS-gUSDC" = "WEVMOS-gUSDC",
-  "WEVMOS-ceUSDC" = "WEVMOS-ceUSDC",
-  "WEVMOS-gWETH" = "WEVMOS-gWETH",
-  "ceUSDC-ceUSDT" = "ceUSDC-ceUSDT",
-
-  // moonbeam
-  GLMR = "GLMR",
-  WGLMR = "WGLMR",
-  GLINT = "GLINT",
-  // Stella
-  "USDC.wh-GLMR" = "USDC.wh-GLMR",
-  "DOT.xc-GLMR" = "DOT.xc-GLMR",
-  "WETH.wh-GLMR" = "WETH.wh-GLMR",
-  "WBTC.wh-GLMR" = "WBTC.wh-GLMR",
-  "STELLA-GLMR" = "STELLA-GLMR",
-  "CELR-GLMR" = "CELR-GLMR",
-  "ATOM-GLMR" = "ATOM-GLMR",
-  STELLA = "STELLA",
-  CELR = "CELR",
-  LDO = "LDO",
-  "LDO-GLMR" = "LDO-GLMR",
-  "wstDOT-DOT.xc" = "wstDOT-DOT.xc",
-  "base4pool" = "base4pool",
-
-  // BeamSwap
-  "GLMR-USDC" = "GLMR-USDC",
-  "GLMR-GLINT" = "GLMR-GLINT",
-  "WGLMR-xcDOT" = "WGLMR-xcDOT",
-
-  DOT = "DOT",
-  xcDOT = "xcDOT",
-  stDOT = "stDOT",
-  wstDOT = "wstDOT",
-  xcKSM = "xcKSM",
-  stKSM = "stKSM",
-  multiWBTC = "multiWBTC",
-  WBTC_wh = "WBTC.wh",
-  WETH_wh = "WETH.wh",
-  multiUSDC = "multiUSDC",
-  USDC_wh = "USDC.wh",
-  multiUSDT = "multiUSDT",
-  multiDAI = "multiDAI",
-  USDT_xc = "USDT.xc",
-  BUSD_wh = "BUSD.wh",
-  "3pool" = "3pool",
-  "xcDOT-stDOT" = "xcDOT-stDOT",
 
   // local
   TOUCH = "TOUCH",
@@ -470,13 +388,7 @@ export enum assetSymbols {
   saddleFraxUsdtBP = "saddleFraxUsdtBP",
   USDs = "USDs",
 
-  // Fantom
-  WFTM = "WFTM",
-  multiBTC = "multiBTC",
-  multiETH = "multiETH",
-  aFTMc = "aFTMc",
   PAR_USDC_CURVE = "PAR_USDC CURVE",
-  fUSDT = "fUSDT",
   triCrypto = "triCrypto",
 
   // Mainnet
@@ -505,5 +417,5 @@ export enum assetSymbols {
   AAVE_LINEAR_USDT = "AAVE-LINEAR-USDT",
   AAVE_LINEAR_WETH = "AAVE-LINEAR-WETH",
 
-  TDAI = "TDAI",
+  TDAI = "TDAI"
 }

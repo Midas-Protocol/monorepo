@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import type { CTokensUnderlyingMap } from '@ui/types/ComponentPropsType';
 
 export const useCTokensUnderlying = (cTokenAddresses: string[]): CTokensUnderlyingMap => {
-  const { currentSdk } = useMultiMidas();
+  const { currentSdk } = useMultiIonic();
 
   const { data: cTokensUnderlying } = useQuery(
     ['useCTokensUnderlying', cTokenAddresses?.sort().join(','), currentSdk?.chainId],
@@ -13,7 +13,7 @@ export const useCTokensUnderlying = (cTokenAddresses: string[]): CTokensUnderlyi
       if (cTokenAddresses && cTokenAddresses.length && currentSdk) {
         await Promise.all(
           cTokenAddresses.map(async (cTokenAddress) => {
-            const cTokenInstance = currentSdk.createCTokenWithExtensions(cTokenAddress);
+            const cTokenInstance = currentSdk.createICErc20(cTokenAddress);
             _map[cTokenAddress] = await cTokenInstance.callStatic.underlying().catch((e) => {
               console.warn(`Getting underlying of cToken error: `, { cTokenAddress }, e);
 

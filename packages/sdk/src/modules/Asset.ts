@@ -1,9 +1,9 @@
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
-import { FundOperationMode, MarketConfig, NativePricedFuseAsset } from "@midas-capital/types";
+import { FundOperationMode, MarketConfig, NativePricedFuseAsset } from "@ionicprotocol/types";
 import { BigNumber, constants, ethers, utils } from "ethers";
 
 import CErc20DelegatorArtifact from "../../artifacts/CErc20Delegator.json";
-import { COMPTROLLER_ERROR_CODES } from "../MidasSdk/config";
+import { COMPTROLLER_ERROR_CODES } from "../IonicSdk/config";
 
 import { withCreateContracts } from "./CreateContracts";
 import { withFlywheel } from "./Flywheel";
@@ -49,7 +49,7 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
       // If reserveFactor or adminFee is greater than zero, we get fuse fee.
       // Sum of reserveFactor and adminFee should not be greater than fuse fee. ? i think
       if (reserveFactorBN.gt(constants.Zero) || adminFeeBN.gt(constants.Zero)) {
-        const fuseFee = await this.contracts.FuseFeeDistributor.interestFeeRate();
+        const fuseFee = await this.contracts.FeeDistributor.interestFeeRate();
         if (reserveFactorBN.add(adminFeeBN).add(BigNumber.from(fuseFee)).gt(constants.WeiPerEther))
           throw Error(
             "Sum of reserve factor and admin fee should range from 0 to " + (1 - fuseFee.div(1e18).toNumber()) + "."
@@ -68,6 +68,7 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
 
       // Use Default CErc20Delegate
       const implementationAddress = this.chainDeployment.CErc20Delegate.address;
+      const delegateType = 1; // regular delegate = CErc20Delegate
       const implementationData = "0x00";
 
       // Prepare Transaction Data
@@ -81,7 +82,7 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
         implementationAddress,
         implementationData,
         reserveFactorBN,
-        adminFeeBN,
+        adminFeeBN
       ];
 
       const constructorData = abiCoder.encode(
@@ -90,15 +91,21 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
       );
 
       // Test Transaction
-      const errorCode = await comptroller.callStatic._deployMarket(false, constructorData, collateralFactorBN);
+      const errorCode = await comptroller.callStatic._deployMarket(
+        delegateType,
+        constructorData,
+        implementationData,
+        collateralFactorBN
+      );
       if (errorCode.toNumber() !== 0) {
         throw `Unable to _deployMarket: ${this.COMPTROLLER_ERROR_CODES[errorCode.toNumber()]}`;
       }
 
       // Make actual Transaction
       const tx: ethers.providers.TransactionResponse = await comptroller._deployMarket(
-        false,
+        delegateType,
         constructorData,
+        implementationData,
         collateralFactorBN
       );
 
@@ -107,7 +114,7 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
       if (receipt.status != constants.One.toNumber()) {
         throw "Failed to deploy market ";
       }
-      const marketCounter = await this.contracts.FuseFeeDistributor.callStatic.marketsCounter();
+      const marketCounter = await this.contracts.FeeDistributor.callStatic.marketsCounter();
 
       const saltsHash = utils.solidityKeccak256(
         ["address", "address", "uint"],
@@ -115,7 +122,7 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
       );
       const byteCodeHash = utils.keccak256(CErc20DelegatorArtifact.bytecode.object + constructorData.substring(2));
       const cErc20DelegatorAddress = utils.getCreate2Address(
-        this.chainDeployment.FuseFeeDistributor.address,
+        this.chainDeployment.FeeDistributor.address,
         saltsHash,
         byteCodeHash
       );
@@ -144,7 +151,7 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
             totalSupply.gt(constants.Zero)
               ? assetToBeUpdated.totalBorrow.mul(constants.WeiPerEther).div(totalSupply)
               : constants.Zero
-          ),
+          )
         };
       } else if (mode === FundOperationMode.WITHDRAW) {
         const supplyBalance = assetToBeUpdated.supplyBalance.sub(amount);
@@ -160,7 +167,7 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
             totalSupply.gt(constants.Zero)
               ? assetToBeUpdated.totalBorrow.mul(constants.WeiPerEther).div(totalSupply)
               : constants.Zero
-          ),
+          )
         };
       } else if (mode === FundOperationMode.BORROW) {
         const borrowBalance = assetToBeUpdated.borrowBalance.add(amount);
@@ -176,7 +183,7 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
             assetToBeUpdated.totalSupply.gt(constants.Zero)
               ? totalBorrow.mul(constants.WeiPerEther).div(assetToBeUpdated.totalSupply)
               : constants.Zero
-          ),
+          )
         };
       } else if (mode === FundOperationMode.REPAY) {
         const borrowBalance = assetToBeUpdated.borrowBalance.sub(amount);
@@ -194,7 +201,7 @@ export function withAsset<TBase extends FuseBaseConstructorWithModules>(Base: TB
           borrowBalanceNative:
             Number(utils.formatUnits(borrowBalance, assetToBeUpdated.underlyingDecimals)) *
             Number(utils.formatUnits(assetToBeUpdated.underlyingPrice, 18)),
-          borrowRatePerBlock,
+          borrowRatePerBlock
         };
       }
 

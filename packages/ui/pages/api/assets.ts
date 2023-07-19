@@ -1,4 +1,4 @@
-import type { AssetReward } from '@midas-capital/types';
+import type { AssetReward } from '@ionicprotocol/types';
 import { createClient } from '@supabase/supabase-js';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import * as yup from 'yup';
@@ -14,7 +14,7 @@ const querySchema = yup.object().shape({
   chainIds: yup
     .array()
     .of(yup.string().matches(SUPPORTED_NETWORKS_REGEX, 'Not a supported Network').required())
-    .required(),
+    .required()
 });
 type Query = yup.InferType<typeof querySchema>;
 

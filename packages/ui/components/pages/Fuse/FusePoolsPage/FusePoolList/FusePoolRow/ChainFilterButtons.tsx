@@ -1,6 +1,6 @@
 import type { ButtonGroupProps } from '@chakra-ui/react';
 import { ButtonGroup, HStack, Img, Spinner, Text } from '@chakra-ui/react';
-import type { SupportedChains } from '@midas-capital/types';
+import type { SupportedChains } from '@ionicprotocol/types';
 
 import { CButton } from '@ui/components/shared/Button';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
@@ -12,7 +12,7 @@ export const ChainFilterButtons = ({
   isLoading,
   loadingStatusPerChain,
   onFilter,
-  props,
+  props
 }: {
   globalFilter: (SupportedChains | string)[];
   isLoading: boolean;
@@ -63,7 +63,7 @@ const ChainFilterButton = ({
   chainId,
   onFilter,
   globalFilter,
-  isLoading,
+  isLoading
 }: {
   chainId: SupportedChains;
   globalFilter: (SupportedChains | string)[];

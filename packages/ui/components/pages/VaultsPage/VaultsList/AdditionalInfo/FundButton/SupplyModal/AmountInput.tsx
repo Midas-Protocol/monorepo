@@ -1,5 +1,5 @@
 import { Box, Button, Input } from '@chakra-ui/react';
-import type { VaultData } from '@midas-capital/types';
+import type { VaultData } from '@ionicprotocol/types';
 import type { BigNumber } from 'ethers';
 import { constants, utils } from 'ethers';
 import { useState } from 'react';
@@ -8,7 +8,7 @@ import { MidasBox } from '@ui/components/shared/Box';
 import { EllipsisText } from '@ui/components/shared/EllipsisText';
 import { Row } from '@ui/components/shared/Flex';
 import { TokenIcon } from '@ui/components/shared/TokenIcon';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useMaxDepositVault } from '@ui/hooks/useMaxDepositVault';
 import { useErrorToast } from '@ui/hooks/useToast';
 import { useTokenBalance } from '@ui/hooks/useTokenBalance';
@@ -18,13 +18,13 @@ import { toFixedNoRound } from '@ui/utils/formatNumber';
 export const AmountInput = ({
   optionToWrap,
   setAmount,
-  vault,
+  vault
 }: {
   optionToWrap?: boolean;
   setAmount: (amount: BigNumber) => void;
   vault: VaultData;
 }) => {
-  const { currentSdk, address } = useMultiMidas();
+  const { currentSdk, address } = useMultiIonic();
   const [userEnteredAmount, setUserEnteredAmount] = useState('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const errorToast = useErrorToast();
@@ -77,11 +77,11 @@ export const AmountInput = ({
       const sentryProperties = {
         asset: vault.asset,
         chainId: vault.chainId,
-        vault: vault.vault,
+        vault: vault.vault
       };
       const sentryInfo = {
         contextName: 'Fetching max supply vault',
-        properties: sentryProperties,
+        properties: sentryProperties
       };
       handleGenericError({ error, sentryInfo, toast: errorToast });
     }

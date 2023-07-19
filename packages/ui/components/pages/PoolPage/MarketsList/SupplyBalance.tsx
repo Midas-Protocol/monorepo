@@ -2,13 +2,13 @@ import { Text, VStack } from '@chakra-ui/react';
 
 import { BalanceCell } from '@ui/components/shared/BalanceCell';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useTokenData } from '@ui/hooks/useTokenData';
 import type { MarketData } from '@ui/types/TokensDataMap';
 
 export const SupplyBalance = ({
   asset,
-  poolChainId,
+  poolChainId
 }: {
   asset: Pick<
     MarketData,
@@ -18,7 +18,7 @@ export const SupplyBalance = ({
 }) => {
   const { data: tokenData } = useTokenData(asset.underlyingToken, poolChainId);
 
-  const { address } = useMultiMidas();
+  const { address } = useMultiIonic();
 
   return (
     <>
@@ -33,12 +33,12 @@ export const SupplyBalance = ({
       ) : (
         <BalanceCell
           primary={{
-            value: asset.supplyBalanceFiat,
+            value: asset.supplyBalanceFiat
           }}
           secondary={{
             decimals: asset.underlyingDecimals.toNumber(),
             symbol: tokenData?.symbol || '',
-            value: asset.supplyBalance,
+            value: asset.supplyBalance
           }}
         />
       )}

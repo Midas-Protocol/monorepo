@@ -1,40 +1,25 @@
-import { chainIdToConfig } from "@midas-capital/chains";
-import { DeployedPlugins } from "@midas-capital/types";
+import { chainIdToConfig } from "@ionicprotocol/chains";
+import { DeployedPlugins } from "@ionicprotocol/types";
 import { task, types } from "hardhat/config";
 
 import { CErc20PluginRewardsDelegate } from "../../typechain/CErc20PluginRewardsDelegate";
 import { Comptroller } from "../../typechain/Comptroller";
-import { FuseFeeDistributor } from "../../typechain/FuseFeeDistributor";
-import { MidasERC4626 } from "../../typechain/MidasERC4626";
+import { IonicERC4626 } from "../../typechain/IonicERC4626";
 
 task("plugins:deploy:upgradable", "Deploys the upgradable plugins from a config list").setAction(
   async ({}, { ethers, getChainId, deployments }) => {
     const deployer = await ethers.getNamedSigner("deployer");
 
     console.log({ deployer: deployer.address });
-    const ffd = (await ethers.getContract("FuseFeeDistributor", deployer)) as FuseFeeDistributor;
 
     const chainid = parseInt(await getChainId());
     const pluginConfigs: DeployedPlugins = chainIdToConfig[chainid].deployedPlugins;
-
-    const oldImplementations = [];
-    const newImplementations = [];
-    const arrayOfTrue = [];
 
     const pluginAddresses = Object.keys(pluginConfigs);
 
     for (const pluginAddress of pluginAddresses) {
       const conf = pluginConfigs[pluginAddress];
       console.log({ conf });
-
-      const market = (await ethers.getContractAt(
-        "CErc20PluginRewardsDelegate",
-        conf.market
-      )) as CErc20PluginRewardsDelegate;
-
-      const currentPlugin = await market.callStatic.plugin();
-      if (currentPlugin != pluginAddress) throw new Error(`wrong plugin address/config for market ${conf.market}`);
-      oldImplementations.push(currentPlugin);
 
       let deployArgs;
       if (conf.otherParams) {
@@ -56,24 +41,17 @@ task("plugins:deploy:upgradable", "Deploys the upgradable plugins from a config 
           execute: {
             init: {
               methodName: "initialize",
-              args: deployArgs,
-            },
+              args: deployArgs
+            }
           },
-          owner: deployer.address,
+          owner: deployer.address
         },
-        log: true,
+        log: true
       });
 
       if (deployment.transactionHash) await ethers.provider.waitForTransaction(deployment.transactionHash);
       console.log("ERC4626 Strategy: ", deployment.address);
-
-      newImplementations.push(deployment.address);
-      arrayOfTrue.push(true);
     }
-
-    const tx = await ffd._editPluginImplementationWhitelist(oldImplementations, newImplementations, arrayOfTrue);
-    await tx.wait();
-    console.log("_editPluginImplementationWhitelist: ", tx.hash);
 
     for (const pluginAddress in pluginConfigs) {
       const conf = pluginConfigs[pluginAddress];
@@ -143,7 +121,7 @@ task("plugin:set-fee-recipient")
   .setAction(async ({ pluginAddress, feeRecipient }, { ethers }) => {
     const deployer = await ethers.getNamedSigner("deployer");
 
-    const plugin = (await ethers.getContractAt("MidasERC4626", pluginAddress, deployer)) as MidasERC4626;
+    const plugin = (await ethers.getContractAt("IonicERC4626", pluginAddress, deployer)) as IonicERC4626;
 
     const currentFee = await plugin.callStatic.performanceFee();
     const currentFr = await plugin.callStatic.feeRecipient();

@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useMultiIonic } from '@ui/context/MultiIonicContext';
 import { useSdk } from '@ui/hooks/fuse/useSdk';
 import { useAllUsdPrices } from '@ui/hooks/useAllUsdPrices';
 import type { MarketData, PoolData } from '@ui/types/TokensDataMap';
 
 export const useFusePoolData = (poolId: string, poolChainId: number) => {
-  const { address } = useMultiMidas();
+  const { address } = useMultiIonic();
   const sdk = useSdk(poolChainId);
   const { data: usdPrices } = useAllUsdPrices();
   const usdPrice = useMemo(() => {
@@ -22,7 +22,7 @@ export const useFusePoolData = (poolId: string, poolChainId: number) => {
     ['useFusePoolData', poolId, address, sdk?.chainId, usdPrice],
     async () => {
       if (usdPrice && sdk?.chainId && poolId) {
-        const response = await sdk.fetchFusePoolData(poolId, { from: address }).catch((e) => {
+        const response = await sdk.fetchPoolData(poolId, { from: address }).catch((e) => {
           console.warn(`Getting fuse pool data error: `, { address, poolChainId, poolId }, e);
 
           return null;
