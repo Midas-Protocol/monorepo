@@ -79,6 +79,11 @@ export type ChainlinkAsset = {
   feedBaseCurrency: ChainlinkFeedBaseCurrency;
 };
 
+export type PythAsset = {
+  symbol: string;
+  feed: string;
+};
+
 export type DiaAsset = {
   symbol: string;
   underlying: string;
@@ -176,6 +181,12 @@ export type IrmDeployFnParams = ChainDeployFnParams & {
 export type ChainlinkDeployFnParams = ChainDeployFnParams & {
   assets: SupportedAsset[];
   chainlinkAssets: ChainlinkAsset[];
+  deployConfig: ChainDeployConfig;
+};
+
+export type PythDeployFnParams = ChainDeployFnParams & {
+  assets: SupportedAsset[];
+  pythAssets: PythAsset[];
   deployConfig: ChainDeployConfig;
 };
 
