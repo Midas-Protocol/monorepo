@@ -10,6 +10,7 @@ import type { QueryObserverResult } from '@tanstack/react-query';
 import type { BigNumber } from 'ethers';
 import type { ReactNode } from 'react';
 
+import type { ExtraTokenType } from '@ui/hooks/fuse/useCrossTokens';
 import type { PoolData, TokensDataMap } from '@ui/types/TokensDataMap';
 
 export type FusePageLayoutProps = {
@@ -251,6 +252,14 @@ export type APYResponse = {
 export type PoolsPerChainStatus = {
   [chainId: string]: {
     data?: PoolData[] | null | undefined;
+    error: Error | undefined;
+    isLoading: boolean;
+  };
+};
+
+export type TokensPerChainStatus = {
+  [chainId: string]: {
+    data?: ExtraTokenType[] | null | undefined;
     error: Error | undefined;
     isLoading: boolean;
   };

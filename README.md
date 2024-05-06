@@ -23,8 +23,7 @@ If you already pulled using just `git clone`, you can use below command to updat
 From fresh clone:
 
 - `yarn`
-- `yarn workspace @midas-capital/sdk forge install`
-- `yarn workspace @midas-capital/sdk build`
+- `yarn build:sdk`
 
 ## Tips
 

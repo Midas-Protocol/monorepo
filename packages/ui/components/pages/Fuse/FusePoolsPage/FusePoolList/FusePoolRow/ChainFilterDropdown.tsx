@@ -16,22 +16,23 @@ import type { SupportedChains } from '@midas-capital/types';
 import { PopoverTooltip } from '@ui/components/shared/PopoverTooltip';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
 import { ALL, SEARCH } from '@ui/constants/index';
-import { useChainConfig, useEnabledChains } from '@ui/hooks/useChainConfig';
+import { useChainConfig } from '@ui/hooks/useChainConfig';
 
 export const ChainFilterDropdown = ({
+  enabledChains,
   globalFilter,
   isLoading,
   loadingStatusPerChain,
   onFilter,
   props,
 }: {
+  enabledChains: SupportedChains[];
   globalFilter: (SupportedChains | string)[];
   isLoading: boolean;
   loadingStatusPerChain: { [chainId: string]: boolean };
   onFilter: (filter: SupportedChains | string) => void;
   props: ButtonProps;
 }) => {
-  const enabledChains = useEnabledChains();
   const chainFilter = globalFilter.filter((f) => f !== SEARCH && f !== ALL) as SupportedChains[];
 
   return (

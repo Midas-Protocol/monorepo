@@ -12,6 +12,7 @@ import { SupplyAPY } from '@ui/components/pages/PoolPage/MarketsList/AdditionalI
 import { MidasBox } from '@ui/components/shared/Box';
 import { Column } from '@ui/components/shared/Flex';
 import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useSdk } from '@ui/hooks/fuse/useSdk';
 import useUpdatedUserAssets from '@ui/hooks/fuse/useUpdatedUserAssets';
 import { useBorrowLimitMarket } from '@ui/hooks/useBorrowLimitMarket';
 import { useBorrowLimitTotal } from '@ui/hooks/useBorrowLimitTotal';
@@ -48,7 +49,8 @@ export const StatsColumn = ({
 
   const updatedAsset = updatedAssets ? updatedAssets[index] : undefined;
 
-  const { currentSdk, currentChain } = useMultiMidas();
+  const { currentChain } = useMultiMidas();
+  const currentSdk = useSdk(poolChainId);
   if (!currentSdk || !currentChain) throw new Error("SDK doesn't exist!");
 
   const {

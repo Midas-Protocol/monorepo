@@ -131,6 +131,7 @@ export const LeverageList = () => {
           width="100%"
         >
           <ChainFilterButtons
+            enabledChains={enabledChains}
             globalFilter={globalFilter}
             isLoading={isLoading}
             loadingStatusPerChain={loadingStatusPerChain}
@@ -138,6 +139,7 @@ export const LeverageList = () => {
             props={{ display: { base: 'none', lg: 'inline-flex' } }}
           />
           <ChainFilterDropdown
+            enabledChains={enabledChains}
             globalFilter={globalFilter}
             isLoading={isLoading}
             loadingStatusPerChain={loadingStatusPerChain}

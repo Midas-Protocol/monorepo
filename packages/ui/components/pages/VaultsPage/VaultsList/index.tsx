@@ -382,6 +382,7 @@ export const VaultsList = ({
           width="100%"
         >
           <ChainFilterButtons
+            enabledChains={enabledChains}
             globalFilter={globalFilter}
             isLoading={isLoading}
             loadingStatusPerChain={loadingStatusPerChain}
@@ -389,6 +390,7 @@ export const VaultsList = ({
             props={{ display: { base: 'none', lg: 'inline-flex' } }}
           />
           <ChainFilterDropdown
+            enabledChains={enabledChains}
             globalFilter={globalFilter}
             isLoading={isLoading}
             loadingStatusPerChain={loadingStatusPerChain}

@@ -28,7 +28,6 @@ export const fetchTokenBalance = async (
       e
     );
   }
-
   return balance;
 };
 

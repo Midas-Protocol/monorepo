@@ -3,7 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import type { BigNumber } from 'ethers';
 import { useMemo } from 'react';
 
-import { useMultiMidas } from '@ui/context/MultiMidasContext';
+import { useSdk } from './useSdk';
+
 import { useAllUsdPrices } from '@ui/hooks/useAllUsdPrices';
 import type { MarketData } from '@ui/types/TokensDataMap';
 
@@ -22,7 +23,8 @@ const useUpdatedUserAssets = <T extends MarketData>({
   amount,
   poolChainId,
 }: UseUpdatedUserAssetsResult<T>) => {
-  const { currentSdk, currentChain } = useMultiMidas();
+  const currentSdk = useSdk(poolChainId);
+
   const { data: usdPrices } = useAllUsdPrices();
   const usdPrice = useMemo(() => {
     if (usdPrices && usdPrices[poolChainId.toString()]) {
@@ -35,7 +37,7 @@ const useUpdatedUserAssets = <T extends MarketData>({
   return useQuery(
     [
       'useUpdatedUserAssets',
-      currentChain?.id,
+      poolChainId,
       mode,
       index,
       assets?.map((a) => a.cToken).sort(),

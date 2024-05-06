@@ -5,23 +5,23 @@ import type { SupportedChains } from '@midas-capital/types';
 import { CButton } from '@ui/components/shared/Button';
 import { SimpleTooltip } from '@ui/components/shared/SimpleTooltip';
 import { ALL } from '@ui/constants/index';
-import { useChainConfig, useEnabledChains } from '@ui/hooks/useChainConfig';
+import { useChainConfig } from '@ui/hooks/useChainConfig';
 
 export const ChainFilterButtons = ({
+  enabledChains,
   globalFilter,
   isLoading,
   loadingStatusPerChain,
   onFilter,
   props,
 }: {
+  enabledChains: SupportedChains[];
   globalFilter: (SupportedChains | string)[];
   isLoading: boolean;
   loadingStatusPerChain: { [chainId: string]: boolean };
   onFilter: (filter: SupportedChains | string) => void;
   props?: ButtonGroupProps;
 }) => {
-  const enabledChains = useEnabledChains();
-
   return (
     <ButtonGroup
       flexFlow={'row wrap'}
